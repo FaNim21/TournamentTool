@@ -217,7 +217,7 @@ public class MainViewModel : BaseViewModel
             MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
         }*/
 
-        bool isConnected = await Client.ConnectAsync(true, CurrentChosen!.Password, "localhost", CurrentChosen.Port);
+        bool isConnected = await Client.ConnectAsync(true, CurrentChosen!.Password, "localhost", CurrentChosen.Port, EventSubscriptions.All | EventSubscriptions.SceneItemTransformChanged);
         Client.ConnectionClosed += OnConnectionClosed;
         if (isConnected)
         {
