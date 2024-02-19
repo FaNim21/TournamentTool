@@ -62,7 +62,7 @@
                             Width="426"
                             Height="240"
                             AllowDrop="True">
-                        <ItemsControl ItemsSource="{Binding MainViewModel.CurrentChosen.POVs}">
+                        <ItemsControl ItemsSource="{Binding POVs}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <Canvas />

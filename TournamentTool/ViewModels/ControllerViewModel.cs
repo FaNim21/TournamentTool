@@ -50,6 +50,9 @@ public class ControllerViewModel : BaseViewModel
     private const int canvasWidth = 426;
     private const int canvasHeight = 240;
 
+    private float xAxisRatio;
+    private float yAxisRatio;
+
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
@@ -69,11 +72,11 @@ public class ControllerViewModel : BaseViewModel
 
         try
         {
-            Application.Current.Dispatcher.Invoke(MainViewModel.CurrentChosen.POVs.Clear);
+            //Application.Current.Dispatcher.Invoke(MainViewModel.CurrentChosen.POVs.Clear);
 
             var settings = await MainViewModel.Client.GetVideoSettings();
-            float xAxisRatio = settings.BaseWidth / canvasWidth;
-            float yAxisRatio = settings.BaseHeight / canvasHeight;
+            xAxisRatio = settings.BaseWidth / canvasWidth;
+            yAxisRatio = settings.BaseHeight / canvasHeight;
 
             SceneItem[] sceneItems = await MainViewModel.Client.GetSceneItemList(MainViewModel.CurrentChosen.Scene);
             foreach (var item in sceneItems)
@@ -94,7 +97,7 @@ public class ControllerViewModel : BaseViewModel
 
                     pov.Text = item.SourceName;
 
-                    Application.Current.Dispatcher.Invoke(delegate { MainViewModel.AddPOV(pov); });
+                    AddPov(pov);
                 }
             }
 
@@ -211,16 +214,59 @@ public class ControllerViewModel : BaseViewModel
 
     public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
     {
+        if (!args.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase)) return;
+        //TODO: 0 zbierac informacje czy pov jest typem browser
 
+
+        //var info = MainViewModel.Client!.GetInputSettings(args.SourceName);
+
+        PointOfView pov = new();
+        pov.SceneName = args.SceneName;
+        pov.SceneItemName = args.SourceName;
+
+        SceneItemTransform transform = MainViewModel.Client.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
+
+        pov.X = (int)(transform.PositionX / xAxisRatio);
+        pov.Y = (int)(transform.PositionY / yAxisRatio);
+
+        pov.Width = (int)(transform.Width / xAxisRatio);
+        pov.Height = (int)(transform.Height / yAxisRatio);
+
+        pov.Text = args.SourceName;
+        AddPov(pov);
+        OnPropertyChanged(nameof(POVs));
     }
 
     public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs args)
     {
+        if (!args.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase)) return;
+        //TODO: 0 zbierac informacje czy pov jest typem browser
 
+        PointOfView pov = null;
+        for (int i = 0; i < POVs.Count; i++)
+        {
+            if (POVs[i].SceneItemName == args.SourceName)
+            {
+                pov = POVs[i];
+                break;
+            }
+        }
+
+        if (pov == null) return;
+        RemovePov(pov);
     }
 
     public void OnSceneItemTransformChanged(object? parametr, SceneItemTransformChangedEventArgs args)
     {
-        
+
+    }
+
+    private void AddPov(PointOfView pov)
+    {
+        Application.Current.Dispatcher.Invoke(delegate { POVs.Add(pov); });
+    }
+    private void RemovePov(PointOfView pov)
+    {
+        Application.Current.Dispatcher.Invoke(delegate { POVs.Remove(pov); });
     }
 }
