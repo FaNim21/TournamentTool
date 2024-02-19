@@ -7,6 +7,7 @@ public class PointOfView : BaseViewModel
 {
     public string? SceneName { get; set; }
     public string? SceneItemName { get; set; }
+    public int ID { get; set; }
 
     public int Width { get; set; }
     public int Height { get; set; }
@@ -23,5 +24,14 @@ public class PointOfView : BaseViewModel
     public void Update()
     {
         OnPropertyChanged(nameof(DisplayedPlayer));
+    }
+
+    public void UpdateTransform()
+    {
+        OnPropertyChanged(nameof(X));
+        OnPropertyChanged(nameof(Y));
+
+        OnPropertyChanged(nameof(Width));
+        OnPropertyChanged(nameof(Height));
     }
 }

@@ -3,8 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
-namespace TournamentTool.Views;
 
+namespace TournamentTool.Views;
 
 /*[StructLayout(LayoutKind.Sequential)]
 public struct POINT
@@ -44,7 +44,7 @@ public partial class ControllerView : UserControl
 
         //adornerLayer.Remove(dragAdorner);
     }
-    
+
     private void Border_MouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
@@ -73,7 +73,13 @@ public partial class ControllerView : UserControl
 
         pov.DisplayedPlayer = droppedPlayer.Name!;
         pov.Update();
-        controller.MainViewModel.SetBrowserURL(pov.SceneItemName!, droppedPlayer.TwitchName!);
+        controller.SetBrowserURL(pov.SceneItemName!, droppedPlayer.TwitchName!);
+    }
+
+    private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (DataContext is not ControllerViewModel viewModel) return;
+        viewModel.ResizeCanvas();
     }
 
     /*protected override void OnPreviewGiveFeedback(GiveFeedbackEventArgs e)
