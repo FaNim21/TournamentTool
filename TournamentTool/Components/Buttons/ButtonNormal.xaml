@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="TournamentTool.Components.Buttons.ButtonNormal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             x:Name="NormalButton"
+             d:DesignHeight="25"
+             d:DesignWidth="100">
+    <Button Name="button"
+            Click="ButtonClick"
+            FontWeight="Medium"
+            Foreground="White"
+            Content="{Binding ContentText, ElementName=NormalButton}"
+            Command="{Binding OnCommand, ElementName=NormalButton}"
+            CommandParameter="{Binding OnCommandParameter, ElementName=NormalButton}">
+        <Button.Style>
+            <Style TargetType="Button">
+                <Setter Property="Background"
+                        Value="#17191A" />
+                <Setter Property="Cursor"
+                        Value="Hand" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver"
+                             Value="True">
+                        <Setter Property="Background"
+                                Value="#1b1d1f" />
+                    </Trigger>
+                    <Trigger Property="IsPressed"
+                             Value="True">
+                        <Setter Property="Background"
+                                Value="#27292B" />
+                    </Trigger>
+                    <Trigger Property="IsEnabled"
+                             Value="False">
+                        <Setter Property="Background"
+                                Value="#4a4747" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+
+        <Button.Template>
+            <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}"
+                        BorderThickness="0.75"
+                        BorderBrush="Gray"
+                        CornerRadius="2">
+                    <ContentPresenter VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"
+                                      Margin="{Binding ContentMargin, ElementName=NormalButton}" />
+                </Border>
+            </ControlTemplate>
+        </Button.Template>
+    </Button>
+</UserControl>
