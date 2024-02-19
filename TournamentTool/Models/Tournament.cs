@@ -11,17 +11,18 @@ public class Tournament : BaseViewModel, IRenameItem
 {
     public string Name { get; set; } = string.Empty;
 
+    public ObservableCollection<PointOfView> POVs { get; set; } = [];
+    public ObservableCollection<Player> Players { get; set; } = [];
+
+    [JsonIgnore]
+    public MainViewModel? MainViewModel;
+
     public int Port { get; set; } = 4455;
     public string Password { get; set; }
     public string SceneCollection { get; set; }
     public string Scene { get; set; }
 
-    public ObservableCollection<PointOfView> POVs { get; set; } = [];
-    public ObservableCollection<Player> Players { get; set; } = [];
-
-    [JsonIgnore]
-    public MainViewModel MainViewModel;
-
+    public string? FilterNameAtStartForSceneItems { get; set; } = "pov";
     public bool IsUsingPaceMan { get; set; }
 
 

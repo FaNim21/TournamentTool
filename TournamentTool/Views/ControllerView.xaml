@@ -29,7 +29,7 @@
                 <Run Foreground="DarkGray"
                      Text="Connected: " />
                 <Run Foreground="White"
-                     Text="{Binding MainViewModel.IsConnectedToWebSocket, Mode=OneWay}" />
+                     Text="{Binding IsConnectedToWebSocket, Mode=OneWay}" />
             </TextBlock>
 
             <TextBlock Text="Search: "
@@ -37,7 +37,6 @@
                        HorizontalAlignment="Right"
                        Foreground="DarkGray"
                        Margin="0 0 207 0" />
-
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Width="200"
                      Height="18"
@@ -59,9 +58,11 @@
 
                 <Grid Grid.Row="0">
                     <Canvas Background="LightGray"
-                            Width="426"
-                            Height="240"
-                            AllowDrop="True">
+                            Width="{Binding CanvasWidth}"
+                            Height="{Binding CanvasHeight}"
+                            SizeChanged="Canvas_SizeChanged"
+                            AllowDrop="True"
+                            ClipToBounds="True">
                         <ItemsControl ItemsSource="{Binding POVs}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -100,11 +101,77 @@
                 </Grid>
 
                 <Grid Grid.Row="1">
+                    <WrapPanel Orientation="Vertical"
+                               Margin="10 5 5 5">
+                        <TextBlock Text="Canvas:"
+                                   FontSize="16"
+                                   Foreground="White" />
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Width: " />
+                            <Run Text="{Binding CanvasWidth, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Height: " />
+                            <Run Text="{Binding CanvasHeight, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Height: " />
+                            <Run Text="{Binding CanvasAspectRatio, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="x axis ratio: " />
+                            <Run Text="{Binding XAxisRatio, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="y axis ratio: " />
+                            <Run Text="{Binding YAxisRatio, Mode=OneWay}" />
+                        </TextBlock>
+
+                        <TextBlock Text="OBS Settings:"
+                                   FontSize="16"
+                                   Foreground="White"
+                                   Margin="0 10 0 0" />
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Base Width: " />
+                            <Run Text="{Binding OBSVideoSettings.BaseWidth, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Base Height: " />
+                            <Run Text="{Binding OBSVideoSettings.BaseHeight, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Output Height: " />
+                            <Run Text="{Binding OBSVideoSettings.OutputWidth, Mode=OneWay}" />
+                        </TextBlock>
+
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Output Height: " />
+                            <Run Text="{Binding OBSVideoSettings.OutputHeight, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock FontSize="12"
+                                   Foreground="White">
+                            <Run Text="Aspect ratio: " />
+                            <Run Text="{Binding OBSVideoSettings.AspectRatio, Mode=OneWay}" />
+                        </TextBlock>
+                    </WrapPanel>
+
+
+                    <!--
                     <TextBlock Text="MORE CONTROLS IN FUTURE"
                                FontSize="48"
                                TextWrapping="Wrap"
                                TextAlignment="Center"
                                VerticalAlignment="Center" />
+                    -->
                 </Grid>
             </Grid>
 

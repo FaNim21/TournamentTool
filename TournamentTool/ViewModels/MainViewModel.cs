@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using OBSStudioClient;
+﻿using OBSStudioClient;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Enums;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -20,8 +18,6 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    public ObsClient? Client { get; set; } = new();
-    //public OBSWebsocket client;
     public ObservableCollection<Tournament> Presets { get; set; } = [];
 
 
@@ -40,17 +36,6 @@ public class MainViewModel : BaseViewModel
 
             IsPresetOpened = _currentChosen != null;
             OnPropertyChanged(nameof(CurrentChosen));
-        }
-    }
-
-    private bool _isConnectedToWebSocket;
-    public bool IsConnectedToWebSocket
-    {
-        get => _isConnectedToWebSocket;
-        set
-        {
-            _isConnectedToWebSocket = value;
-            OnPropertyChanged(nameof(IsConnectedToWebSocket));
         }
     }
 
@@ -76,14 +61,10 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    public ICommand ConnectToOBSCommand { get; set; }
-    public ICommand DisconnectOBSCommand { get; set; }
-
     public ICommand AddNewPresetCommand { get; set; }
     public ICommand SavePresetCommand { get; set; }
     public ICommand OnItemListClickCommand { get; set; }
 
-    public ICommand OpenSceneManagerCommand { get; set; }
     public ICommand OpenPlayerManagerCommand { get; set; }
     public ICommand OpenCommand { get; set; }
 
@@ -102,9 +83,6 @@ public class MainViewModel : BaseViewModel
 
         LoadAllPresets();
 
-        ConnectToOBSCommand = new RelayCommand(ConnectToWebSocket);
-        DisconnectOBSCommand = new RelayCommand(Disconnect);
-
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new SavePresetCommand(this);
         OnItemListClickCommand = new OnItemListClickCommand(this);
@@ -115,7 +93,6 @@ public class MainViewModel : BaseViewModel
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
 
         OpenCommand = new RelayCommand(OpenPresetControlPanel);
-        OpenSceneManagerCommand = new RelayCommand(OpenSceneManagerWindow);
         OpenPlayerManagerCommand = new RelayCommand(OpenPlayerManagerWindow);
 
         LoadCurrentPreset();
@@ -168,18 +145,6 @@ public class MainViewModel : BaseViewModel
         Application.Current.MainWindow.Hide();
     }
 
-    private void OpenSceneManagerWindow()
-    {
-        SceneManagerWindow window = new()
-        {
-            Owner = Application.Current.MainWindow,
-            DataContext = new SceneManagerViewModel(this),
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        };
-        window.Show();
-        Application.Current.MainWindow.Hide();
-    }
-
     private void OpenPlayerManagerWindow()
     {
         PlayerManagerWindow window = new()
@@ -190,117 +155,6 @@ public class MainViewModel : BaseViewModel
         };
         window.Show();
         Application.Current.MainWindow.Hide();
-    }
-
-    public void ConnectToWebSocket()
-    {
-        Task.Run(ConnectToWebSocketAsync);
-    }
-    private async Task ConnectToWebSocketAsync()
-    {
-        if (IsConnectedToWebSocket || Client == null) return;
-
-        /*client = new();
-        client.ConnectAsync("ws://localhost:4455", CurrentChosen!.Password);
-        client.Disconnected += (x, args) => { MessageBox.Show("Lost connection"); IsConnectedToWebSocket = false; };
-
-        await Task.Delay(2000);
-        try
-        {
-            client.SetCurrentSceneCollection(CurrentChosen.SceneCollection);
-            client.SetCurrentProgramScene(CurrentChosen.Scene);
-
-            MessageBox.Show("Connected to obs succesfully");
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
-        }*/
-
-        bool isConnected = await Client.ConnectAsync(true, CurrentChosen!.Password, "localhost", CurrentChosen.Port, EventSubscriptions.All | EventSubscriptions.SceneItemTransformChanged);
-        Client.ConnectionClosed += OnConnectionClosed;
-        if (isConnected)
-        {
-            IsConnectedToWebSocket = true;
-            try
-            {
-                while (Client.ConnectionState != ConnectionState.Connected)
-                    await Task.Delay(100);
-
-                await Client.SetCurrentSceneCollection(CurrentChosen.SceneCollection);
-                await Client.SetCurrentProgramScene(CurrentChosen.Scene);
-
-                MessageBox.Show("Connected to obs succesfully");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
-                Disconnect();
-                return;
-            }
-        }
-    }
-
-    public void Disconnect()
-    {
-        if (Client == null || !IsConnectedToWebSocket) return;
-
-        Client.Disconnect();
-        Client.Dispose();
-
-        Task.Run(async () =>
-        {
-            while (Client.ConnectionState != ConnectionState.Disconnected)
-                await Task.Delay(100);
-
-            Client.ConnectionClosed -= OnConnectionClosed;
-        });
-    }
-
-    /*public void SetBrowserURL(string sceneItemName, string player)
-    {
-        if (client == null || !client.IsConnected) return;
-
-        Dictionary<string, object> input = new() { { "url", $"https://player.twitch.tv/?channel={player}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0" }, };
-        JObject jsonSettings = JObject.FromObject(input);
-
-        client.SetInputSettings(sceneItemName, jsonSettings);
-    }*/
-
-    public void SetBrowserURL(string sceneItemName, string player)
-    {
-        if (Client == null || !IsConnectedToWebSocket) return;
-
-        Dictionary<string, object> input = new() { { "url", $"https://player.twitch.tv/?channel={player}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0" }, };
-        Client.SetInputSettings(sceneItemName, input);
-    }
-
-    private async Task SetupSceneItem(string sceneName, string sceneItemName, int x, int y, int width, int height)
-    {
-        if (Client == null || Client.ConnectionState == ConnectionState.Disconnected) return;
-
-        //await SetupSceneItem("Screen", "POV1", 150, 215, 800, 600);
-
-        Dictionary<string, object> input = new()
-        {
-            { "url", $"https://player.twitch.tv/?channel=zylenox&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0" },
-            { "width", width},
-            { "height", height},
-        };
-        await Client.SetInputSettings("POV1", input);
-
-        SceneItemTransform transform = new(0, 0, 1, Bounds.OBS_BOUNDS_NONE, 1, 0, 0, 0, 0, 0, width / 2 + x, height / 2 + y, 0, 1, 1, 0, 0, 0);
-        int id = await Client.GetSceneItemId(sceneName, sceneItemName);
-        await Client.SetSceneItemTransform(sceneName, id, transform);
-    }
-
-    private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
-    {
-        if (Client == null || Client.ConnectionState == ConnectionState.Disconnected) return;
-
-
-        Input input = new(inputKind, newSceneItemName, inputKind);
-        await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
     }
 
     public bool IsPresetNameUnique(string name)
@@ -318,21 +172,8 @@ public class MainViewModel : BaseViewModel
         Presets.Add(item);
     }
 
-    public void AddPOV(PointOfView pov)
-    {
-        if (CurrentChosen == null) return;
-
-        CurrentChosen.POVs.Add(pov);
-    }
-
     public void SetPresetAsNotSaved()
     {
         IsCurrentPresetSaved = false;
-    }
-
-    public void OnConnectionClosed(object? parametr, EventArgs args)
-    {
-        MessageBox.Show("Lost connection");
-        IsConnectedToWebSocket = false;
     }
 }

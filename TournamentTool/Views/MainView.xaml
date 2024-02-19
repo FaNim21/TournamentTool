@@ -61,8 +61,7 @@
                 <WrapPanel Orientation="Vertical"
                            Margin="20 20 20 20"
                            HorizontalAlignment="Right"
-                           VerticalAlignment="Top"
-                           Height="200">
+                           VerticalAlignment="Top">
                     <Label  Content="OBS Connection"
                             Foreground="White"
                             FontSize="24" />
@@ -132,6 +131,7 @@
                                Margin="5 0 0 3" />
                     </WrapPanel>
 
+                    <!--
                     <WrapPanel Orientation="Horizontal">
                         <components:ButtonNormal ContentText="Connect"
                                                  Width="100"
@@ -143,6 +143,33 @@
                                                  Height="25"
                                                  OnCommand="{Binding DisconnectOBSCommand}"
                                                  Margin="10 0 0 0" />
+                    </WrapPanel>
+                    -->
+
+                    <Label  Content="General"
+                            Foreground="White"
+                            FontSize="24" />
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding CurrentChosen.FilterNameAtStartForSceneItems}"
+                                 Background="#9E9E9E"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top" />
+                        <Label Content="POV filter name"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
+                        <CheckBox IsChecked="{Binding CurrentChosen.IsUsingPaceMan}"
+                                  Content="Use PaceMan"
+                                  Foreground="White" />
                     </WrapPanel>
                 </WrapPanel>
 
@@ -156,13 +183,6 @@
                                              FontSize="32"
                                              OnCommand="{Binding OpenPlayerManagerCommand}"
                                              Margin="30 0 0 0" />
-                    <components:ButtonNormal ContentText="Scene Manager"
-                                             IsEnabled="False"
-                                             Width="250"
-                                             Height="50"
-                                             FontSize="32"
-                                             OnCommand="{Binding OpenSceneManagerCommand}"
-                                             Margin="35 0 0 0" />
                 </WrapPanel>
             </Grid>
         </Grid>
