@@ -16,7 +16,7 @@
         ResizeMode="NoResize"
         MinWidth="800"
         MinHeight="450"
-        Background="#383A3C">
+        Background="#383A3f">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModels:MainViewModel}">
             <views:MainView OnListItemClickCommand="{Binding OnItemListClickCommand}" />
@@ -62,6 +62,7 @@
                                      FontSize="20"
                                      HorizontalAlignment="Right"
                                      Margin="0 0 30 0"
+                                     ColorBrush="#5a5d65"
                                      ContentText="-"
                                      Click="MinimizeButtonsClick" />
                 <local:ButtonTaskbar x:Name="ExitButton"
@@ -69,6 +70,7 @@
                                      Height="25"
                                      FontSize="20"
                                      HorizontalAlignment="Right"
+                                     ColorBrush="#ff000f"
                                      ContentText="X"
                                      Click="ExitButtonClick" />
             </Grid>

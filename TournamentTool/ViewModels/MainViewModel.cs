@@ -1,8 +1,4 @@
-﻿using OBSStudioClient;
-using OBSStudioClient.Classes;
-using OBSStudioClient.Enums;
-using OBSStudioClient.Messages;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
