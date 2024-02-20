@@ -13,7 +13,7 @@
         Title="Controller"
         ResizeMode="NoResize"
         AllowsTransparency="True"
-        MinWidth="1024"
+        MinWidth="1030"
         MinHeight="601"
         Background="#383A3C">
     <Window.Resources>

@@ -45,22 +45,20 @@
                     <Run Foreground="White"
                          Text="{Binding CurrentChosen.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
+
+                <Line X1="0"
+                      X2="600"
+                      Y1="50"
+                      Y2="50"
+                      Stroke="#000D14"
+                      StrokeThickness="5" />
             </Grid>
 
             <Grid Grid.Row="1"
                   Visibility="{Binding IsPresetOpened, Converter={StaticResource BoolToVisibilityConverter}}">
-                <components:ButtonNormal ContentText="OPEN"
-                                         Width="150"
-                                         Height="50"
-                                         FontSize="32"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top"
-                                         OnCommand="{Binding OpenCommand}"
-                                         Margin="50 50 0 0" />
-
                 <WrapPanel Orientation="Vertical"
                            Margin="20 20 20 20"
-                           HorizontalAlignment="Right"
+                           HorizontalAlignment="Left"
                            VerticalAlignment="Top">
                     <Label  Content="OBS Connection"
                             Foreground="White"
@@ -131,21 +129,6 @@
                                Margin="5 0 0 3" />
                     </WrapPanel>
 
-                    <!--
-                    <WrapPanel Orientation="Horizontal">
-                        <components:ButtonNormal ContentText="Connect"
-                                                 Width="100"
-                                                 Height="25"
-                                                 OnCommand="{Binding ConnectToOBSCommand}"
-                                                 Margin="20 0 0 0" />
-                        <components:ButtonNormal ContentText="Disconnect"
-                                                 Width="100"
-                                                 Height="25"
-                                                 OnCommand="{Binding DisconnectOBSCommand}"
-                                                 Margin="10 0 0 0" />
-                    </WrapPanel>
-                    -->
-
                     <Label  Content="General"
                             Foreground="White"
                             FontSize="24" />
@@ -171,18 +154,44 @@
                                   Content="Use PaceMan"
                                   Foreground="White" />
                     </WrapPanel>
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
+                                 Background="#9E9E9E"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top" />
+                        <Label Content="PaceMan refresh(ms)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                    </WrapPanel>
                 </WrapPanel>
 
-                <WrapPanel Orientation="Horizontal"
-                           VerticalAlignment="Bottom"
-                           Margin="0 0 0 20">
+                <WrapPanel Orientation="Vertical"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Right"
+                           Margin="0 35 20 20">
+
+                    <components:ButtonNormal ContentText="OPEN"
+                                             Width="150"
+                                             Height="50"
+                                             FontSize="32"
+                                             HorizontalAlignment="Center"
+                                             OnCommand="{Binding OpenCommand}"
+                                             Margin="0 0 0 0" />
 
                     <components:ButtonNormal ContentText="Player Manager"
                                              Width="250"
                                              Height="50"
                                              FontSize="32"
+                                             HorizontalAlignment="Center"
                                              OnCommand="{Binding OpenPlayerManagerCommand}"
-                                             Margin="30 0 0 0" />
+                                             Margin="0 25 0 0" />
                 </WrapPanel>
             </Grid>
         </Grid>
@@ -219,7 +228,7 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Width="120"
+                        <Grid Width="190"
                               Height="20"
                               HorizontalAlignment="Center">
                             <local2:EditableTextBlock Text="{Binding Name}"
@@ -238,8 +247,7 @@
                 <components:ButtonPresets HorizontalAlignment="Left"
                                           ButtonText="+"
                                           OnConsoleCommand="{Binding AddNewPresetCommand}"
-                                          Margin="5 0 0 0">
-                </components:ButtonPresets>
+                                          Margin="5 0 0 0" />
 
                 <components:ButtonNormal Width="80"
                                          Height="30"

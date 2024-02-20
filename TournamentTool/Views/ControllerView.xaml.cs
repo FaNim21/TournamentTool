@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
@@ -66,15 +67,26 @@ public partial class ControllerView : UserControl
 
     private void Border_Drop(object sender, DragEventArgs e)
     {
-        if (!e.Data.GetDataPresent(typeof(Player))) return;
-        if (e.Data.GetData(typeof(Player)) is not Player droppedPlayer) return;
+        //if (!e.Data.GetDataPresent(typeof(Player))) return;
+        //if (e.Data.GetData(typeof(Player)) is not Player droppedPlayer) return;
         if (sender is not Border droppedBorder) return;
-        if (droppedBorder!.DataContext is not PointOfView pov) return;
         if (DataContext is not ControllerViewModel controller) return;
+        if (droppedBorder!.DataContext is not PointOfView pov) return;
 
-        pov.DisplayedPlayer = droppedPlayer.Name!;
-        pov.Update();
-        controller.SetBrowserURL(pov.SceneItemName!, droppedPlayer.TwitchName!);
+        Player droppedPlayer = e.Data.GetData(typeof(Player)) as Player;
+        PaceMan player = e.Data.GetData(typeof(PaceMan)) as PaceMan;
+        if (droppedPlayer != null)
+        {
+            pov.DisplayedPlayer = droppedPlayer.Name!;
+            pov.Update();
+            controller.SetBrowserURL(pov.SceneItemName!, droppedPlayer.TwitchName!);
+        }
+        else if (player != null)
+        {
+            pov.DisplayedPlayer = player.Nickname;
+            pov.Update();
+            controller.SetBrowserURL(pov.SceneItemName!, player.User.TwitchName!);
+        }
     }
 
     private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)

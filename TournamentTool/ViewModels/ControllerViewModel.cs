@@ -4,7 +4,11 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json;
 using System.Windows;
+using System.Windows.Input;
+using TournamentTool.Commands;
 using TournamentTool.Models;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Channels.ModifyChannelInformation;
@@ -15,19 +19,31 @@ namespace TournamentTool.ViewModels;
 public class ControllerViewModel : BaseViewModel
 {
     //TODO: 0 JAK BEDE DAWAC NA GITHUBA TO ZEBY TO UKRYC
+    public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
     public const string ClientID = "u10jjhgs6z6d7zi03pvt0d7vere72x";
     private const float AspectRatio = 16.0f / 9.0f;
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
 
-    private ObservableCollection<Player>? _filteredPlayers;
-    public ObservableCollection<Player>? FilteredPlayers
+    private ObservableCollection<Player> _filteredPlayers = [];
+    public ObservableCollection<Player> FilteredPlayers
     {
         get => _filteredPlayers;
         set
         {
             _filteredPlayers = value;
             OnPropertyChanged(nameof(FilteredPlayers));
+        }
+    }
+
+    private ObservableCollection<PaceMan> _paceManPlayers = [];
+    public ObservableCollection<PaceMan> PaceManPlayers
+    {
+        get => _paceManPlayers;
+        set
+        {
+            _paceManPlayers = value;
+            OnPropertyChanged(nameof(PaceManPlayers));
         }
     }
 
@@ -93,13 +109,15 @@ public class ControllerViewModel : BaseViewModel
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
 
+    public ICommand RefreshPaceCommand { get; set; }
 
-    //https://paceman.gg/api/ars/liveruns
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
-        FilteredPlayers = MainViewModel.CurrentChosen!.Players;
+        FilteredPlayers = new(MainViewModel.CurrentChosen!.Players);
+
+        RefreshPaceCommand = new RelayCommand(RefreshPaceMan);
 
         Task.Run(async () =>
         {
@@ -124,8 +142,6 @@ public class ControllerViewModel : BaseViewModel
 
                 await Client.SetCurrentSceneCollection(MainViewModel.CurrentChosen.SceneCollection!);
                 await Client.SetCurrentProgramScene(MainViewModel.CurrentChosen.Scene!);
-
-                //MessageBox.Show("Connected to obs succesfully");
             }
             catch (Exception ex)
             {
@@ -133,6 +149,18 @@ public class ControllerViewModel : BaseViewModel
                 await Disconnect();
                 return;
             }
+        }
+
+        try
+        {
+            string result = await MakeRequest(PaceManAPI);
+            List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
+
+            if (paceMan != null) PaceManPlayers = new(paceMan.Where(x => x.User.TwitchName != null));
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show($"Error: {e.Message} = {e.StackTrace}", "Error");
         }
 
         try
@@ -327,9 +355,9 @@ public class ControllerViewModel : BaseViewModel
         if (MainViewModel.CurrentChosen == null) return;
 
         if (string.IsNullOrWhiteSpace(SearchText))
-            FilteredPlayers = MainViewModel.CurrentChosen.Players;
+            FilteredPlayers = new(MainViewModel.CurrentChosen.Players);
         else
-            FilteredPlayers = new ObservableCollection<Player>(MainViewModel.CurrentChosen.Players.Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)));
+            FilteredPlayers = new(MainViewModel.CurrentChosen.Players.Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)));
     }
 
     public void ControllerExit()
@@ -337,6 +365,8 @@ public class ControllerViewModel : BaseViewModel
         if (Client == null) return;
 
         POVs.Clear();
+        PaceManPlayers.Clear();
+        FilteredPlayers!.Clear();
         Task.Run(Disconnect);
     }
 
@@ -425,5 +455,28 @@ public class ControllerViewModel : BaseViewModel
     {
         //MessageBox.Show("Lost connection");
         IsConnectedToWebSocket = false;
+    }
+
+    private async Task<string> MakeRequest(string ApiUrl)
+    {
+        using HttpClient client = new();
+        HttpResponseMessage response = await client.GetAsync(ApiUrl);
+
+        if (response.IsSuccessStatusCode)
+            return await response.Content.ReadAsStringAsync();
+        else
+            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
+    }
+
+    private void RefreshPaceMan()
+    {
+        Task.Run(RefreshPaceManAsync);
+    }
+    private async Task RefreshPaceManAsync()
+    {
+        string result = await MakeRequest(PaceManAPI);
+        List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
+
+        if (paceMan != null) PaceManPlayers = new(paceMan.Where(x => x.User.TwitchName != null));
     }
 }

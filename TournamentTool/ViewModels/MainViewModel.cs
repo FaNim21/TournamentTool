@@ -16,7 +16,6 @@ public class MainViewModel : BaseViewModel
 {
     public ObservableCollection<Tournament> Presets { get; set; } = [];
 
-
     private Tournament? _currentChosen;
     public Tournament? CurrentChosen
     {
@@ -138,6 +137,7 @@ public class MainViewModel : BaseViewModel
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
         };
         window.Show();
+        //TODO: Polaczyc cala apke w jedno okno
         Application.Current.MainWindow.Hide();
     }
 
