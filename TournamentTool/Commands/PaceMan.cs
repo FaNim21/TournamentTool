@@ -4,13 +4,11 @@ namespace TournamentTool.Commands;
 
 public class PaceMan
 {
-    //public
-
     [JsonPropertyName("user")]
-    public object? User { get; set; }
+    public PaceManUser User { get; set; } = new();
 
     [JsonPropertyName("nickname")]
-    public object? Nickname { get; set; }
+    public string Nickname { get; set; } = string.Empty;
 
     [JsonPropertyName("eventLists")]
     public List<PaceEventList> Splits { get; set; } = [];
@@ -26,4 +24,13 @@ public class PaceEventList
 
     [JsonPropertyName("igt")]
     public long IGT { get; set; }
+}
+
+public class PaceManUser
+{
+    [JsonPropertyName("uuid")]
+    public string UUID { get; set; }
+
+    [JsonPropertyName("liveAccount")]
+    public string TwitchName { get; set; }
 }

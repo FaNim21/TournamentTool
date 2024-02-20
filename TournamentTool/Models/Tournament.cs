@@ -18,12 +18,13 @@ public class Tournament : BaseViewModel, IRenameItem
     public MainViewModel? MainViewModel;
 
     public int Port { get; set; } = 4455;
-    public string Password { get; set; }
-    public string SceneCollection { get; set; }
-    public string Scene { get; set; }
+    public string Password { get; set; } = string.Empty;
+    public string SceneCollection { get; set; } = string.Empty;
+    public string Scene { get; set; } = string.Empty;
 
     public string? FilterNameAtStartForSceneItems { get; set; } = "pov";
-    public bool IsUsingPaceMan { get; set; }
+    public bool IsUsingPaceMan { get; set; } = false;
+    public int PaceManRefreshRateMiliseconds { get; set; } = 2000;
 
 
     [JsonConstructor]
