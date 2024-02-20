@@ -12,6 +12,7 @@
         WindowStyle="None"
         Title="Controller"
         ResizeMode="NoResize"
+        AllowsTransparency="True"
         MinWidth="1024"
         MinHeight="601"
         Background="#383A3C">
@@ -19,6 +20,22 @@
         <DataTemplate DataType="{x:Type viewModels:ControllerViewModel}">
             <views:ControllerView />
         </DataTemplate>
+
+        <Style x:Key="RectBorderStyle"
+               TargetType="Rectangle">
+            <Setter Property="Focusable"
+                    Value="False" />
+            <Setter Property="Fill"
+                    Value="Transparent" />
+            <Setter Property="Tag"
+                    Value="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
+            <EventSetter Event="MouseLeftButtonDown"
+                         Handler="Resize_Init" />
+            <EventSetter Event="MouseLeftButtonUp"
+                         Handler="Resize_End" />
+            <EventSetter Event="MouseMove"
+                         Handler="Resizeing_Form" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -45,21 +62,32 @@
                        Margin="190 2 0 0"
                        Foreground="LightCyan" />
 
-                <local:ButtonTaskbar x:Name="MinimizeButtons"
-                                     Width="30"
-                                     Height="25"
-                                     FontSize="20"
-                                     HorizontalAlignment="Right"
-                                     Margin="0 0 30 0"
-                                     ContentText="-"
-                                     Click="MinimizeButtonsClick" />
-                <local:ButtonTaskbar x:Name="ExitButton"
-                                     Width="30"
-                                     Height="25"
-                                     FontSize="20"
-                                     HorizontalAlignment="Right"
-                                     ContentText="X"
-                                     Click="ExitButtonClick" />
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+
+                    <local:ButtonTaskbar Width="30"
+                                         Height="25"
+                                         FontSize="20"
+                                         HorizontalAlignment="Right"
+                                         ColorBrush="#5a5d65"
+                                         ContentText="-"
+                                         Click="MinimizeButtonsClick" />
+                    <local:ButtonTaskbar x:Name="MaximizeButton"
+                                         Width="30"
+                                         Height="25"
+                                         FontSize="20"
+                                         HorizontalAlignment="Right"
+                                         ColorBrush="#5a5d65"
+                                         ContentText="🗖"
+                                         Click="ChangeWindowMaximizeStateClick" />
+                    <local:ButtonTaskbar Width="30"
+                                         Height="25"
+                                         FontSize="20"
+                                         HorizontalAlignment="Right"
+                                         ColorBrush="#ff000f"
+                                         ContentText="X"
+                                         Click="ExitButtonClick" />
+                </StackPanel>
             </Grid>
 
         </Grid>
@@ -67,5 +95,59 @@
         <!--BODY-->
         <ContentControl Grid.Row="1"
                         Content="{Binding .}" />
+
+        <!--RESIZE-->
+        <Grid x:Name="ResizableRects"
+              Grid.RowSpan="2">
+            <Rectangle x:Name="leftSizeGrip"
+                       Width="5"
+                       HorizontalAlignment="Left"
+                       Cursor="SizeWE"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle x:Name="rightSizeGrip"
+                       Width="5"
+                       HorizontalAlignment="Right"
+                       Cursor="SizeWE"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle x:Name="topSizeGrip"
+                       Height="5"
+                       VerticalAlignment="Top"
+                       Cursor="SizeNS"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle x:Name="bottomSizeGrip"
+                       Height="5"
+                       VerticalAlignment="Bottom"
+                       Cursor="SizeNS"
+                       Style="{StaticResource RectBorderStyle}" />
+            <!--  Corners  -->
+            <Rectangle Name="topLeftSizeGrip"
+                       Width="5"
+                       Height="5"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Cursor="SizeNWSE"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle Name="bottomRightSizeGrip"
+                       Width="5"
+                       Height="5"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Bottom"
+                       Cursor="SizeNWSE"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle Name="topRightSizeGrip"
+                       Width="5"
+                       Height="5"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Top"
+                       Cursor="SizeNESW"
+                       Style="{StaticResource RectBorderStyle}" />
+            <Rectangle Name="bottomLeftSizeGrip"
+                       Width="5"
+                       Height="5"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Bottom"
+                       Cursor="SizeNESW"
+                       Style="{StaticResource RectBorderStyle}" />
+        </Grid>
     </Grid>
 </Window>

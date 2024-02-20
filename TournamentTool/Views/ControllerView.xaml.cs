@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
@@ -80,6 +81,17 @@ public partial class ControllerView : UserControl
     {
         if (DataContext is not ControllerViewModel viewModel) return;
         viewModel.ResizeCanvas();
+    }
+
+    private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        /*double availableWidth = grid.ActualWidth; // Assuming 'grid' is the parent Grid
+        int desiredColumns = (int)(availableWidth / 120); // 120 is the desired column width
+
+        // Ensure a minimum number of columns
+        int desiredColumns = Math.Max(desiredColumns, 1);
+        unifo 
+        uniformGrid.Columns = desiredColumns;*/
     }
 
     /*protected override void OnPreviewGiveFeedback(GiveFeedbackEventArgs e)

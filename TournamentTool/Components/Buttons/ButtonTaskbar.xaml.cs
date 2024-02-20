@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 
 namespace TournamentTool.Components.Buttons
@@ -8,18 +9,17 @@ namespace TournamentTool.Components.Buttons
     {
         public string ContentText
         {
-            get
-            {
-                return (string)GetValue(ContextTextProperty);
-            }
-            set
-            {
-                SetValue(ContextTextProperty, value);
-            }
+            get => (string)GetValue(ContextTextProperty);
+            set { SetValue(ContextTextProperty, value); }
         }
-
-        //NIE DZIALA TO
         public static readonly DependencyProperty ContextTextProperty = DependencyProperty.Register("ContentText", typeof(string), typeof(ButtonTaskbar), new PropertyMetadata(""));
+
+        public Brush ColorBrush
+        {
+            get => (Brush)GetValue(ColorBrushProperty);
+            set { SetValue(ColorBrushProperty, value); }
+        }
+        public static readonly DependencyProperty ColorBrushProperty = DependencyProperty.Register("ColorBrush", typeof(Brush), typeof(ButtonTaskbar), new PropertyMetadata(new SolidColorBrush(Colors.Black)));
 
         public event RoutedEventHandler? Click;
 

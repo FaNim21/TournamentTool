@@ -178,11 +178,13 @@
             <Grid Grid.Column="1">
                 <ListView ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                          Background="Transparent"
+                          Background="Red"
                           BorderThickness="0"
                           VerticalAlignment="Top"
                           HorizontalAlignment="Left"
-                          Width="598"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          SizeChanged="Grid_SizeChanged"
                           AllowDrop="True"
                           ItemsSource="{Binding FilteredPlayers}">
                     <ListView.ItemTemplate>
