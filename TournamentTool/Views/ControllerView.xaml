@@ -179,13 +179,12 @@
             <Grid Grid.Column="1">
                 <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         Background="Red"
+                         Background="Transparent"
                          BorderThickness="0"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
-                         SizeChanged="Grid_SizeChanged"
                          AllowDrop="True"
                          ItemsSource="{Binding FilteredPlayers}">
                     <ListBox.ItemTemplate>
@@ -227,13 +226,12 @@
             <Grid Grid.Column="2">
                 <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         Background="Red"
+                         Background="Transparent"
                          BorderThickness="0"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
-                         SizeChanged="Grid_SizeChanged"
                          AllowDrop="True"
                          ItemsSource="{Binding PaceManPlayers}">
                     <ListBox.ItemTemplate>
@@ -241,18 +239,53 @@
                             <Border BorderBrush="Black"
                                     BorderThickness="1"
                                     Width="110"
-                                    Height="45"
+                                    Height="65"
                                     PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
                                     MouseMove="Border_MouseMove">
-                                <StackPanel Margin="0 5 0 0">
+                                <Grid Margin="0 5 0 0">
                                     <TextBlock Text="{Binding Nickname}"
+                                               Background="Transparent"
                                                Width="100"
+                                               FontSize="12"
+                                               Height="17"
+                                               VerticalAlignment="Top"
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center"
                                                Foreground="White"
-                                               FontWeight="Bold" />
-                                    <TextBlock Text="{Binding User.TwitchName}"
-                                               Width="100"
-                                               Foreground="White" />
-                                </StackPanel>
+                                               FontWeight="Bold"
+                                               Margin="0 -2 0 0" />
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SplitName}"
+                                                   Foreground="Wheat"
+                                                   FontSize="14"
+                                                   Background="Transparent"
+                                                   Width="64"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Top"
+                                                   TextAlignment="Center"
+                                                   Margin="0 15 0 0">
+                                            <!--
+                                            <Run Text="{Binding SplitName}" FontSize="11"/>
+                                            <Run Text="{Binding CurrentSplitTime}" FontSize="11"/>
+                                            -->
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding CurrentSplitTime}"
+                                                   Foreground="Wheat"
+                                                   Background="Transparent"
+                                                   FontSize="12"
+                                                   Width="64"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Top"
+                                                   TextAlignment="Center"
+                                                   Margin="0 2 0 0" />
+                                    </StackPanel>
+                                    <Image Width="30"
+                                           Height="30"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0 0 6 6"
+                                           Source="{Binding Image}" />
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -266,7 +299,7 @@
                             <Setter Property="Width"
                                     Value="120" />
                             <Setter Property="Height"
-                                    Value="55" />
+                                    Value="75" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>

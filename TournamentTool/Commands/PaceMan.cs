@@ -1,8 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using System.Windows.Media.Imaging;
+using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands;
 
-public class PaceMan
+public class PaceMan : BaseViewModel
 {
     [JsonPropertyName("user")]
     public PaceManUser User { get; set; } = new();
@@ -10,8 +12,44 @@ public class PaceMan
     [JsonPropertyName("nickname")]
     public string Nickname { get; set; } = string.Empty;
 
-    [JsonPropertyName("eventLists")]
+    [JsonPropertyName("eventList")]
     public List<PaceEventList> Splits { get; set; } = [];
+
+    public BitmapImage? Image { get; set; }
+
+    public string? SplitName { get; set; }
+
+    private long _currentSplitTimeMiliseconds;
+    public long CurrentSplitTimeMiliseconds
+    {
+        get => _currentSplitTimeMiliseconds;
+        set
+        {
+            _currentSplitTimeMiliseconds = value;
+            TimeSpan time = TimeSpan.FromMilliseconds(CurrentSplitTimeMiliseconds);
+            CurrentSplitTime = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            OnPropertyChanged(nameof(CurrentSplitTime));
+        }
+    }
+    public string CurrentSplitTime { get; set; } = "00:00";
+
+    public long IGTTimeMiliseconds { get; set; }
+
+
+    public void UpdateImage(BitmapImage image)
+    {
+        Image = image;
+        OnPropertyChanged(nameof(Image));
+    }
+    public void UpdateTime(string splitName)
+    {
+        SplitName = splitName;
+        OnPropertyChanged(nameof(SplitName));
+        PaceEventList? currentPace = Splits.LastOrDefault();
+        if (currentPace == null) return;
+
+        CurrentSplitTimeMiliseconds = currentPace.IGT;
+    }
 }
 
 public class PaceEventList
