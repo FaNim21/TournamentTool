@@ -4,10 +4,15 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TwitchLib.Api;
@@ -18,6 +23,18 @@ namespace TournamentTool.ViewModels;
 
 public class ControllerViewModel : BaseViewModel
 {
+    private readonly Dictionary<string, string> splits = new()
+    {
+        { "rsg.enter_nether", "Nether"},
+        { "rsg.enter_bastion", "Bastion"},
+        { "rsg.enter_fortress", "Fort"},
+        { "rsg.first_portal", "FPortal"},
+        { "rsg.second_portal", "SPortal"},
+        { "rsg.enter_stronghold", "SH"},
+        { "rsg.enter_end", "End"},
+        { "rsg.credits", "Finish"},
+    };
+
     //TODO: 0 JAK BEDE DAWAC NA GITHUBA TO ZEBY TO UKRYC
     public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
     public const string ClientID = "u10jjhgs6z6d7zi03pvt0d7vere72x";
@@ -153,10 +170,7 @@ public class ControllerViewModel : BaseViewModel
 
         try
         {
-            string result = await MakeRequest(PaceManAPI);
-            List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
-
-            if (paceMan != null) PaceManPlayers = new(paceMan.Where(x => x.User.TwitchName != null));
+            await RefreshPaceManAsync();
         }
         catch (Exception e)
         {
@@ -370,6 +384,11 @@ public class ControllerViewModel : BaseViewModel
         Task.Run(Disconnect);
     }
 
+    public void OnConnectionClosed(object? parametr, EventArgs args)
+    {
+        //MessageBox.Show("Lost connection");
+        IsConnectedToWebSocket = false;
+    }
     public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
     {
         if (!args.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase)) return;
@@ -451,19 +470,23 @@ public class ControllerViewModel : BaseViewModel
             CanvasHeight = calculatedHeight;
     }
 
-    public void OnConnectionClosed(object? parametr, EventArgs args)
-    {
-        //MessageBox.Show("Lost connection");
-        IsConnectedToWebSocket = false;
-    }
-
-    private async Task<string> MakeRequest(string ApiUrl)
+    private async Task<string> MakeRequestAsString(string ApiUrl)
     {
         using HttpClient client = new();
         HttpResponseMessage response = await client.GetAsync(ApiUrl);
 
         if (response.IsSuccessStatusCode)
             return await response.Content.ReadAsStringAsync();
+        else
+            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
+    }
+    private async Task<Stream> MakeRequestAsStream(string ApiUrl)
+    {
+        using HttpClient client = new();
+        HttpResponseMessage response = await client.GetAsync(ApiUrl);
+
+        if (response.IsSuccessStatusCode)
+            return await response.Content.ReadAsStreamAsync();
         else
             throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
     }
@@ -474,9 +497,39 @@ public class ControllerViewModel : BaseViewModel
     }
     private async Task RefreshPaceManAsync()
     {
-        string result = await MakeRequest(PaceManAPI);
+        string result = await MakeRequestAsString(PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
 
-        if (paceMan != null) PaceManPlayers = new(paceMan.Where(x => x.User.TwitchName != null));
+        if (paceMan != null) PaceManPlayers = new(paceMan/*.Where(x => x.User.TwitchName == null)*/);
+
+        //TODO: 0 aktualizowanie ikonek zrobic jako aktualizacja glow dla paceow ktore maja pusty image
+
+        for (int i = 0; i < PaceManPlayers.Count; i++)
+        {
+            try
+            {
+                var current = PaceManPlayers[i];
+                splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
+                current.UpdateTime(name!);
+
+                //TODO: 0 Zrobic to w momencie wczytania danych o graczach zeby zrobic to raz porzadnie
+                string head = await MakeRequestAsString($"https://api.mineatar.io/face/{current.User.UUID}");
+                //BitmapImage image = LoadImageFromBytes(head);
+                //current.UpdateImage(image);
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message + " - " + ex.StackTrace); }
+        }
     }
+
+    public BitmapImage LoadImageFromBytes(Stream imageData)
+    {
+        var image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad;
+        image.StreamSource = imageData;
+        image.EndInit();
+        image.Freeze();
+        return image;
+    }
+
 }

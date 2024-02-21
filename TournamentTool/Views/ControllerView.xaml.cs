@@ -73,15 +73,13 @@ public partial class ControllerView : UserControl
         if (DataContext is not ControllerViewModel controller) return;
         if (droppedBorder!.DataContext is not PointOfView pov) return;
 
-        Player droppedPlayer = e.Data.GetData(typeof(Player)) as Player;
-        PaceMan player = e.Data.GetData(typeof(PaceMan)) as PaceMan;
-        if (droppedPlayer != null)
+        if (e.Data.GetData(typeof(Player)) is Player droppedPlayer)
         {
             pov.DisplayedPlayer = droppedPlayer.Name!;
             pov.Update();
             controller.SetBrowserURL(pov.SceneItemName!, droppedPlayer.TwitchName!);
         }
-        else if (player != null)
+        else if (e.Data.GetData(typeof(PaceMan)) is PaceMan player)
         {
             pov.DisplayedPlayer = player.Nickname;
             pov.Update();
@@ -93,17 +91,6 @@ public partial class ControllerView : UserControl
     {
         if (DataContext is not ControllerViewModel viewModel) return;
         viewModel.ResizeCanvas();
-    }
-
-    private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        /*double availableWidth = grid.ActualWidth; // Assuming 'grid' is the parent Grid
-        int desiredColumns = (int)(availableWidth / 120); // 120 is the desired column width
-
-        // Ensure a minimum number of columns
-        int desiredColumns = Math.Max(desiredColumns, 1);
-        unifo 
-        uniformGrid.Columns = desiredColumns;*/
     }
 
     /*protected override void OnPreviewGiveFeedback(GiveFeedbackEventArgs e)
