@@ -23,13 +23,26 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="350" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0"
+              Background="Transparent">
+            <TextBlock Text="WHITELIST"
+                       FontSize="38"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       Height="50"
+                       Width="280"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Top"
+                       TextAlignment="Center"
+                       Margin="0 10 0 0" />
             <StackPanel Orientation="Vertical"
-                        Margin="50 50 50 50">
+                        Background="Transparent"
+                        HorizontalAlignment="Center"
+                        Margin="0 70 0 0">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type StackPanel}">
                         <Setter Property="Margin"
@@ -63,6 +76,20 @@
                              Background="#9E9E9E" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
+                    <Label Content="    IGN: "
+                           Foreground="White"
+                           Height="18"
+                           FontSize="16"
+                           Padding="0"
+                           Margin="5 0 0 3" />
+                    <TextBox TextWrapping="Wrap"
+                             Width="120"
+                             Height="20"
+                             Text="{Binding Player.InGameName, Mode=TwoWay}"
+                             Padding="0 2 0 0"
+                             Background="#9E9E9E" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
                     <Label Content="Twitch: "
                            Foreground="White"
                            Height="18"
@@ -77,7 +104,7 @@
                              Background="#9E9E9E" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="PB:       "
+                    <Label Content="      PB: "
                            Foreground="White"
                            Height="18"
                            FontSize="16"
@@ -93,29 +120,54 @@
                 <components:ButtonNormal ContentText="Save"
                                          Width="150"
                                          Height="25"
-                                         HorizontalAlignment="Left"
+                                         HorizontalAlignment="Center"
                                          OnCommand="{Binding SavePlayerCommand}"
                                          Margin="5 15 0 0" />
             </StackPanel>
         </Grid>
 
         <Grid Grid.Column="1">
-            <ListView ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      PreviewMouseRightButtonDown="List_PreviewMouseRightButtonDown"
-                      VerticalAlignment="Top"
-                      HorizontalAlignment="Left"
-                      Width="400"
-                      ItemsSource="{Binding Tournament.Players}">
-                <ListView.ItemTemplate>
+            <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     PreviewMouseRightButtonDown="List_PreviewMouseRightButtonDown"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     ItemsSource="{Binding Tournament.Players}">
+                <ListBox.ItemTemplate>
                     <DataTemplate DataType="models:Player">
                         <Border BorderBrush="Black"
                                 BorderThickness="1"
                                 Width="110"
-                                Height="45">
-                            <StackPanel Margin="0 5 0 0">
+                                Height="65">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"
+                                               Foreground="Wheat"
+                                               Background="Transparent"
+                                               FontSize="14"
+                                               Width="100"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               TextAlignment="Center"
+                                               Margin="0 4 0 0">
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding PersonalBest}"
+                                               Foreground="White"
+                                               Background="Transparent"
+                                               FontSize="21"
+                                               Width="64"
+                                               Height="30"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Margin="5 5 0 0" />
+                                </StackPanel>
+                                <!--
+                                <StackPanel Margin="0 5 0 0">
                                 <TextBlock Text="{Binding Name}"
                                            Width="100"
                                            Foreground="White"
@@ -123,24 +175,32 @@
                                 <TextBlock Text="{Binding PersonalBest}"
                                            Width="100"
                                            Foreground="White" />
-                            </StackPanel>
+                                </StackPanel>
+                                -->
+                                <Image Width="30"
+                                       Height="30"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0 0 6 6"
+                                       Source="{Binding Image}" />
+                            </Grid>
                         </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-                <ListView.ItemsPanel>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="3" />
+                        <WrapPanel />
                     </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
                         <Setter Property="Width"
                                 Value="120" />
                         <Setter Property="Height"
-                                Value="55" />
+                                Value="75" />
                     </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
     </Grid>
 </UserControl>

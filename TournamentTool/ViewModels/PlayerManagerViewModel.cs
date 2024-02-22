@@ -53,6 +53,9 @@ public class PlayerManagerViewModel : BaseViewModel
         Tournament = tournament;
         Player = new();
 
+        foreach (var player in MainViewModel.CurrentChosen!.Players)
+            player.Update();
+
         SavePlayerCommand = new RelayCommand(SavePlayer);
 
         EditPlayerCommand = new EditPlayerCommand(this);
@@ -72,6 +75,7 @@ public class PlayerManagerViewModel : BaseViewModel
                 if (current.Id.Equals(Player.Id))
                 {
                     current.Name = Player.Name;
+                    current.InGameName = Player.InGameName;
                     current.TwitchName = Player.TwitchName;
                     current.PersonalBest = Player.PersonalBest;
                     current.Update();
