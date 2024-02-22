@@ -1,5 +1,4 @@
-﻿
-using System.IO;
+﻿using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -14,20 +13,40 @@ public struct ResponseApiID
     [JsonPropertyName("id")]
     public string ID { get; set; }
 }
+public struct ResponseApiName
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+}
 
 public class Player : BaseViewModel
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [JsonIgnore] //trzeba to zapisywac w stringu zeby czytac wartosc
-    public BitmapImage? Image { get; set; }
+    public string? UUID { get; set; }
 
+    [JsonIgnore]
+    private BitmapImage? _image;
+    [JsonIgnore]
+    public BitmapImage? Image
+    {
+        get => _image;
+        set
+        {
+            if(value == null)
+            {
+
+            }
+            _image = value;
+            OnPropertyChanged(nameof(Image));
+        }
+    }
     public byte[]? ImageStream { get; set; }
 
     public string? Name { get; set; }
     public string? InGameName { get; set; }
-    public string? TwitchName { get; set; }
-    public string? PersonalBest { get; set; }
+    public string? TwitchName { get; set; } = "";
+    public string PersonalBest { get; set; }
 
 
     public Player(string name = "")
@@ -44,20 +63,34 @@ public class Player : BaseViewModel
         if (ImageStream != null)
         {
             Image = Helper.LoadImageFromStream(ImageStream);
-            OnPropertyChanged(nameof(Image));
             return;
         }
 
         Task.Run(LoadImage);
     }
-    public async Task LoadImage()
+
+    public async Task CompleteData()
+    {
+        try
+        {
+            string result = await Helper.MakeRequestAsString($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
+            ResponseApiName name = JsonSerializer.Deserialize<ResponseApiName>(result);
+            InGameName = name.Name;
+            Update();
+            TwitchName = Name;
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.Message + " - " + ex.StackTrace);
+        }
+    }
+
+    private async Task LoadImage()
     {
         if (string.IsNullOrEmpty(InGameName) || Image != null) return;
 
         Image = await RequestHeadImage();
-        OnPropertyChanged(nameof(Image));
     }
-
     private async Task<BitmapImage?> RequestHeadImage()
     {
         using HttpClient client = new();

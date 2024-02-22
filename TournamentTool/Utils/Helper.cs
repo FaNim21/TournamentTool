@@ -3,6 +3,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Net.Http;
 
 namespace TournamentTool.Utils;
 
@@ -25,7 +26,7 @@ public static class Helper
     public static T? FindChild<T>(DependencyObject parent) where T : DependencyObject
     {
         if (parent == null) return null;
-        if(parent is T _child) return _child;
+        if (parent is T _child) return _child;
 
         int childCount = VisualTreeHelper.GetChildrenCount(parent);
         for (int i = 0; i < childCount; i++)
@@ -111,5 +112,16 @@ public static class Helper
         image.EndInit();
         image.Freeze();
         return image;
+    }
+
+    public static async Task<string> MakeRequestAsString(string ApiUrl)
+    {
+        using HttpClient client = new();
+        HttpResponseMessage response = await client.GetAsync(ApiUrl);
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
+
+        return await response.Content.ReadAsStringAsync();
     }
 }
