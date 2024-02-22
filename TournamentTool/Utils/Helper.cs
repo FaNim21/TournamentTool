@@ -2,6 +2,7 @@
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace TournamentTool.Utils;
 
@@ -98,5 +99,17 @@ public static class Helper
         var attributes = memberInfo[0].GetCustomAttributes(typeof(TAttribute), false);
 
         return attributes.Length > 0 ? (TAttribute)attributes[0] : null;
+    }
+
+    public static BitmapImage LoadImageFromStream(byte[] imageData)
+    {
+        using var ms = new MemoryStream(imageData);
+        var image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad;
+        image.StreamSource = ms;
+        image.EndInit();
+        image.Freeze();
+        return image;
     }
 }

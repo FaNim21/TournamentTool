@@ -7,13 +7,13 @@
         xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
         xmlns:views="clr-namespace:TournamentTool.Views"
         mc:Ignorable="d"
-        Width="800"
-        Height="450"
+        Width="970"
+        Height="550"
         WindowStyle="None"
         Title="Player Controller"
         ResizeMode="NoResize"
-        MinWidth="800"
-        MinHeight="450"
+        MinWidth="970"
+        MinHeight="550"
         Background="#383A3C">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModels:PlayerManagerViewModel}">
@@ -63,7 +63,7 @@
             </Grid>
 
         </Grid>
-        
+
         <!--BODY-->
         <ContentControl Grid.Row="1"
                         Content="{Binding .}" />

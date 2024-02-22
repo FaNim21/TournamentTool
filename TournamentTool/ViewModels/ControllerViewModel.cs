@@ -480,16 +480,6 @@ public class ControllerViewModel : BaseViewModel
         else
             throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
     }
-    private async Task<Stream> MakeRequestAsStream(string ApiUrl)
-    {
-        using HttpClient client = new();
-        HttpResponseMessage response = await client.GetAsync(ApiUrl);
-
-        if (response.IsSuccessStatusCode)
-            return await response.Content.ReadAsStreamAsync();
-        else
-            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
-    }
 
     private void RefreshPaceMan()
     {
@@ -500,11 +490,26 @@ public class ControllerViewModel : BaseViewModel
         string result = await MakeRequestAsString(PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
 
+        if (paceMan == null) return;
+        for (int i = 0; i < paceMan.Count; i++)
+        {
+            var current = paceMan[i];
+            if (current.User.TwitchName == null) continue;
+            try
+            {
+                current.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == current.User.TwitchName).First();
+            }
+            catch { continue; }
+            if (current.Player == null) continue;
+            splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
+            current.UpdateTime(name!);
+            PaceManPlayers.Add(current);
+        }
         if (paceMan != null) PaceManPlayers = new(paceMan/*.Where(x => x.User.TwitchName == null)*/);
 
         //TODO: 0 aktualizowanie ikonek zrobic jako aktualizacja glow dla paceow ktore maja pusty image
 
-        for (int i = 0; i < PaceManPlayers.Count; i++)
+        /*for (int i = 0; i < PaceManPlayers.Count; i++)
         {
             try
             {
@@ -513,23 +518,11 @@ public class ControllerViewModel : BaseViewModel
                 current.UpdateTime(name!);
 
                 //TODO: 0 Zrobic to w momencie wczytania danych o graczach zeby zrobic to raz porzadnie
-                string head = await MakeRequestAsString($"https://api.mineatar.io/face/{current.User.UUID}");
+                //string head = await MakeRequestAsString($"https://api.mineatar.io/face/{current.User.UUID}");
                 //BitmapImage image = LoadImageFromBytes(head);
                 //current.UpdateImage(image);
             }
             catch (Exception ex) { MessageBox.Show(ex.Message + " - " + ex.StackTrace); }
-        }
+        }*/
     }
-
-    public BitmapImage LoadImageFromBytes(Stream imageData)
-    {
-        var image = new BitmapImage();
-        image.BeginInit();
-        image.CacheOption = BitmapCacheOption.OnLoad;
-        image.StreamSource = imageData;
-        image.EndInit();
-        image.Freeze();
-        return image;
-    }
-
 }

@@ -284,7 +284,7 @@
                                            HorizontalAlignment="Right"
                                            VerticalAlignment="Bottom"
                                            Margin="0 0 6 6"
-                                           Source="{Binding Image}" />
+                                           Source="{Binding Player.Image}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

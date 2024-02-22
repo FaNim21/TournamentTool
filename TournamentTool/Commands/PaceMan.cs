@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
+using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands;
@@ -15,7 +16,8 @@ public class PaceMan : BaseViewModel
     [JsonPropertyName("eventList")]
     public List<PaceEventList> Splits { get; set; } = [];
 
-    public BitmapImage? Image { get; set; }
+    [JsonIgnore]
+    public Player? Player { get; set; }
 
     public string? SplitName { get; set; }
 
@@ -36,11 +38,6 @@ public class PaceMan : BaseViewModel
     public long IGTTimeMiliseconds { get; set; }
 
 
-    public void UpdateImage(BitmapImage image)
-    {
-        Image = image;
-        OnPropertyChanged(nameof(Image));
-    }
     public void UpdateTime(string splitName)
     {
         SplitName = splitName;

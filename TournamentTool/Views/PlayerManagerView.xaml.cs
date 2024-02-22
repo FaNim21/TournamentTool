@@ -23,7 +23,7 @@ public partial class PlayerManagerView : UserControl
 
     private void List_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        ListViewItem? listViewItem = GetViewItemFromMousePosition<ListViewItem, ListView>(sender as ListView, e.GetPosition(sender as IInputElement));
+        ListBoxItem? listViewItem = GetViewItemFromMousePosition<ListBoxItem, ListBox>(sender as ListBox, e.GetPosition(sender as IInputElement));
         if (listViewItem == null) return;
 
         var contextMenu = (ContextMenu)FindResource("ListViewContextMenu");
