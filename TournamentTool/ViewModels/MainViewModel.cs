@@ -25,6 +25,7 @@ public class MainViewModel : BaseViewModel
             _currentChosen = value;
             if (_currentChosen != null)
             {
+                _currentChosen.UpdatePlayers();
                 Settings.Default.LastOpenedPresetName = _currentChosen!.Name;
                 Settings.Default.Save();
             }

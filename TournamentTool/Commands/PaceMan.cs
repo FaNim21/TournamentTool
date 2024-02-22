@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
@@ -14,7 +15,10 @@ public class PaceMan : BaseViewModel
     public string Nickname { get; set; } = string.Empty;
 
     [JsonPropertyName("eventList")]
-    public List<PaceEventList> Splits { get; set; } = [];
+    public List<PaceSplitsList> Splits { get; set; } = [];
+
+    [JsonPropertyName("lastUpdated")]
+    public long LastUpdate { get; set; }
 
     [JsonIgnore]
     public Player? Player { get; set; }
@@ -42,14 +46,17 @@ public class PaceMan : BaseViewModel
     {
         SplitName = splitName;
         OnPropertyChanged(nameof(SplitName));
-        PaceEventList? currentPace = Splits.LastOrDefault();
+        PaceSplitsList? currentPace = Splits.LastOrDefault();
         if (currentPace == null) return;
 
+        //TODO: 0 zrobic aktualizowanie IGT, a potem juz update'owac pacemana
+        /*TimeSpan now = ;
+        TimeSpan last = TimeSpan.FromMilliseconds(timeMiliseconds);*/
         CurrentSplitTimeMiliseconds = currentPace.IGT;
     }
 }
 
-public class PaceEventList
+public class PaceSplitsList
 {
     [JsonPropertyName("eventId")]
     public string? SplitName { get; set; }

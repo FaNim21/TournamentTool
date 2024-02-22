@@ -10,8 +10,8 @@
              xmlns:models="clr-namespace:TournamentTool.Models"
              d:DataContext="{d:DesignInstance Type=viewmodels:PlayerManagerViewModel}"
              mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="800"
+             d:DesignHeight="550"
+             d:DesignWidth="970"
              Background="#383A3C">
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
@@ -40,9 +40,12 @@
                        TextAlignment="Center"
                        Margin="0 10 0 0" />
             <StackPanel Orientation="Vertical"
-                        Background="Transparent"
+                        Background="#4b4e51"
+                        Width="230"
+                        Height="225"
                         HorizontalAlignment="Center"
-                        Margin="0 70 0 0">
+                        VerticalAlignment="Top"
+                        Margin="0 80 10 0">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type StackPanel}">
                         <Setter Property="Margin"
@@ -51,9 +54,10 @@
                 </StackPanel.Resources>
                 <TextBlock FontSize="18"
                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
-                           Margin="10 10 0 0"
+                           Margin="0 10 0 0"
+                           TextAlignment="Center"
+                           Width="230"
                            Height="30"
-                           Width="280"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top">
                     <Run Foreground="DarkGray"
@@ -61,8 +65,9 @@
                     <Run Foreground="White"
                          Text="{Binding Player.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Name:  "
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <Label Content=" Name: "
                            Foreground="White"
                            Height="18"
                            FontSize="16"
@@ -75,7 +80,8 @@
                              Padding="0 2 0 0"
                              Background="#9E9E9E" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
                     <Label Content="    IGN: "
                            Foreground="White"
                            Height="18"
@@ -89,7 +95,8 @@
                              Padding="0 2 0 0"
                              Background="#9E9E9E" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
                     <Label Content="Twitch: "
                            Foreground="White"
                            Height="18"
@@ -103,7 +110,8 @@
                              Padding="0 2 0 0"
                              Background="#9E9E9E" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
                     <Label Content="      PB: "
                            Foreground="White"
                            Height="18"
@@ -117,17 +125,51 @@
                              Padding="0 2 0 0"
                              Background="#9E9E9E" />
                 </StackPanel>
-                <components:ButtonNormal ContentText="Save"
+                <components:ButtonNormal ContentText="{Binding SaveButtonText}"
                                          Width="150"
                                          Height="25"
                                          HorizontalAlignment="Center"
                                          OnCommand="{Binding SavePlayerCommand}"
-                                         Margin="5 15 0 0" />
+                                         Margin="15 15 0 0" />
             </StackPanel>
+
+            <Grid Background="#4b4e51"
+                  Width="350"
+                  Height="180"
+                  VerticalAlignment="Bottom">
+                <ComboBox x:Name="typeOptionComboBox"
+                          Style="{StaticResource ComboBoxTest2}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Bottom"
+                          DisplayMemberPath="Name"
+                          ItemsSource="{Binding PaceManEvents, Mode=OneWay}"
+                          SelectedValue="{Binding Path=ChoosenEvent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Width="120"
+                          Height="20"
+                          Margin="32 0 0 50">
+                </ComboBox>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Margin="5 0 0 0">
+                    <components:ButtonNormal ContentText="Load PaceMan event"
+                                             FontSize="14"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding LoadFromPaceManCommand}" />
+                    <components:ButtonNormal ContentText="Load from CSV"
+                                             FontSize="14"
+                                             Width="150"
+                                             Height="30"
+                                             Margin="10 "
+                                             OnCommand="{Binding }" />
+                </StackPanel>
+            </Grid>
         </Grid>
 
         <Grid Grid.Column="1">
-            <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+            <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      Background="Transparent"
                      BorderThickness="0"
@@ -166,17 +208,6 @@
                                                TextAlignment="Center"
                                                Margin="5 5 0 0" />
                                 </StackPanel>
-                                <!--
-                                <StackPanel Margin="0 5 0 0">
-                                <TextBlock Text="{Binding Name}"
-                                           Width="100"
-                                           Foreground="White"
-                                           FontWeight="Bold" />
-                                <TextBlock Text="{Binding PersonalBest}"
-                                           Width="100"
-                                           Foreground="White" />
-                                </StackPanel>
-                                -->
                                 <Image Width="30"
                                        Height="30"
                                        HorizontalAlignment="Right"

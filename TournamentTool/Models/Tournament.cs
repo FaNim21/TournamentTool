@@ -24,7 +24,20 @@ public class Tournament : BaseViewModel, IRenameItem
 
     public string? FilterNameAtStartForSceneItems { get; set; } = "pov";
     public bool IsUsingPaceMan { get; set; } = false;
-    public int PaceManRefreshRateMiliseconds { get; set; } = 2000;
+
+    private int _paceManRefreshRateMiliseconds = 10000;
+    public int PaceManRefreshRateMiliseconds
+    {
+        get => _paceManRefreshRateMiliseconds;
+        set
+        {
+            if (value < 5000)
+                _paceManRefreshRateMiliseconds = 5000;
+            else
+                _paceManRefreshRateMiliseconds = value;
+            OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
+        }
+    }
 
 
     [JsonConstructor]
@@ -36,6 +49,14 @@ public class Tournament : BaseViewModel, IRenameItem
     {
         MainViewModel = mainViewModel;
         Name = name;
+    }
+
+    public void UpdatePlayers()
+    {
+        for (int i = 0; i < Players.Count; i++)
+        {
+            Players[i].Update();
+        }
     }
 
     public void ChangeName(string name)

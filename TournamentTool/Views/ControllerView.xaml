@@ -47,8 +47,9 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="426" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="242" />
+                <ColumnDefinition Width="379*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition MinWidth="265" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
@@ -192,18 +193,39 @@
                             <Border BorderBrush="Black"
                                     BorderThickness="1"
                                     Width="110"
-                                    Height="45"
+                                    Height="65"
                                     PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
                                     MouseMove="Border_MouseMove">
-                                <StackPanel Margin="0 5 0 0">
-                                    <TextBlock Text="{Binding Name}"
-                                               Width="100"
-                                               Foreground="White"
-                                               FontWeight="Bold" />
-                                    <TextBlock Text="{Binding PersonalBest}"
-                                               Width="100"
-                                               Foreground="White" />
-                                </StackPanel>
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="Wheat"
+                                                   Background="Transparent"
+                                                   FontSize="14"
+                                                   Width="100"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Top"
+                                                   TextAlignment="Center"
+                                                   Margin="0 4 0 0">
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding PersonalBest}"
+                                                   Foreground="White"
+                                                   Background="Transparent"
+                                                   FontSize="21"
+                                                   Width="64"
+                                                   Height="30"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   Margin="5 5 0 0" />
+                                    </StackPanel>
+                                    <Image Width="30"
+                                           Height="30"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0 0 6 6"
+                                           Source="{Binding Image}" />
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -217,17 +239,25 @@
                             <Setter Property="Width"
                                     Value="120" />
                             <Setter Property="Height"
-                                    Value="55" />
+                                    Value="75" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
 
-            <Grid Grid.Column="2">
+            <GridSplitter Grid.Column="2"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="#000D14"
+                          ShowsPreview="True"
+                          Width="5" />
+
+            <Grid Grid.Column="3">
                 <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          Background="Transparent"
                          BorderThickness="0"
+                         MinWidth="265"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
                          VirtualizingPanel.IsVirtualizing="True"
@@ -255,8 +285,7 @@
                                                FontWeight="Bold"
                                                Margin="0 -2 0 0" />
                                     <StackPanel>
-                                        <TextBlock Text="{Binding SplitName}"
-                                                   Foreground="Wheat"
+                                        <TextBlock Foreground="Wheat"
                                                    FontSize="14"
                                                    Background="Transparent"
                                                    Width="64"
@@ -265,9 +294,13 @@
                                                    TextAlignment="Center"
                                                    Margin="0 15 0 0">
                                             <!--
-                                            <Run Text="{Binding SplitName}" FontSize="11"/>
-                                            <Run Text="{Binding CurrentSplitTime}" FontSize="11"/>
                                             -->
+                                            <Run Text="{Binding SplitName}"
+                                                 BaselineAlignment="Center"
+                                                 FontSize="11" />
+                                            <Run Text="{Binding CurrentSplitTime}"
+                                                 BaselineAlignment="Center"
+                                                 FontSize="11" />
                                         </TextBlock>
                                         <TextBlock Text="{Binding CurrentSplitTime}"
                                                    Foreground="Wheat"

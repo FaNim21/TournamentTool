@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Utils;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Channels.ModifyChannelInformation;
 using TwitchLib.Communication.Interfaces;
@@ -25,14 +26,14 @@ public class ControllerViewModel : BaseViewModel
 {
     private readonly Dictionary<string, string> splits = new()
     {
-        { "rsg.enter_nether", "Nether"},
-        { "rsg.enter_bastion", "Bastion"},
-        { "rsg.enter_fortress", "Fort"},
-        { "rsg.first_portal", "FPortal"},
-        { "rsg.second_portal", "SPortal"},
+        { "rsg.enter_nether", "EN"},
+        { "rsg.enter_bastion", "EB"},
+        { "rsg.enter_fortress", "EF"},
+        { "rsg.first_portal", "FP"},
+        { "rsg.second_portal", "SP"},
         { "rsg.enter_stronghold", "SH"},
-        { "rsg.enter_end", "End"},
-        { "rsg.credits", "Finish"},
+        { "rsg.enter_end", "EE"},
+        { "rsg.credits", "FIN"},
     };
 
     //TODO: 0 JAK BEDE DAWAC NA GITHUBA TO ZEBY TO UKRYC
@@ -470,59 +471,31 @@ public class ControllerViewModel : BaseViewModel
             CanvasHeight = calculatedHeight;
     }
 
-    private async Task<string> MakeRequestAsString(string ApiUrl)
-    {
-        using HttpClient client = new();
-        HttpResponseMessage response = await client.GetAsync(ApiUrl);
-
-        if (response.IsSuccessStatusCode)
-            return await response.Content.ReadAsStringAsync();
-        else
-            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
-    }
-
     private void RefreshPaceMan()
     {
         Task.Run(RefreshPaceManAsync);
     }
     private async Task RefreshPaceManAsync()
     {
-        string result = await MakeRequestAsString(PaceManAPI);
+        //TODO: 0 nie trzeba czyscyic mozna poprostu aktualizowac
+        Application.Current.Dispatcher.Invoke(PaceManPlayers.Clear);
+        string result = await Helper.MakeRequestAsString(PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
 
         if (paceMan == null) return;
         for (int i = 0; i < paceMan.Count; i++)
         {
             var current = paceMan[i];
-            if (current.User.TwitchName == null) continue;
+            /*if (current.User.TwitchName == null) continue;
             try
             {
-                current.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == current.User.TwitchName).First();
-            }
-            catch { continue; }
-            if (current.Player == null) continue;
-            splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
-            current.UpdateTime(name!);
-            PaceManPlayers.Add(current);
-        }
-        if (paceMan != null) PaceManPlayers = new(paceMan/*.Where(x => x.User.TwitchName == null)*/);
-
-        //TODO: 0 aktualizowanie ikonek zrobic jako aktualizacja glow dla paceow ktore maja pusty image
-
-        /*for (int i = 0; i < PaceManPlayers.Count; i++)
-        {
-            try
-            {
-                var current = PaceManPlayers[i];
-                splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
-                current.UpdateTime(name!);
-
-                //TODO: 0 Zrobic to w momencie wczytania danych o graczach zeby zrobic to raz porzadnie
-                //string head = await MakeRequestAsString($"https://api.mineatar.io/face/{current.User.UUID}");
-                //BitmapImage image = LoadImageFromBytes(head);
-                //current.UpdateImage(image);
+                current.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == current.User.TwitchName).FirstOrDefault();
             }
             catch (Exception ex) { MessageBox.Show(ex.Message + " - " + ex.StackTrace); }
-        }*/
+            if (current.Player == null) continue;*/
+            splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
+            current.UpdateTime(name!);
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(current); });
+        }
     }
 }
