@@ -156,6 +156,12 @@
                     </WrapPanel>
                     <WrapPanel Orientation="Horizontal"
                                Margin="0 0 0 5">
+                        <CheckBox IsChecked="{Binding CurrentChosen.IsUsingWhitelistOnPaceMan}"
+                                  Content="Use Whitelist on paceman"
+                                  Foreground="White" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"

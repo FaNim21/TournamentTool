@@ -151,6 +151,7 @@ public class MainViewModel : BaseViewModel
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
         };
         window.Show();
+        SavePresetCommand.Execute(null);
         Application.Current.MainWindow.Hide();
     }
 

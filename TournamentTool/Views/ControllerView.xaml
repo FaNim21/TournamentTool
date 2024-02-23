@@ -286,31 +286,33 @@
                                                Margin="0 -2 0 0" />
                                     <StackPanel>
                                         <TextBlock Foreground="Wheat"
-                                                   FontSize="14"
                                                    Background="Transparent"
                                                    Width="64"
                                                    HorizontalAlignment="Left"
                                                    VerticalAlignment="Top"
                                                    TextAlignment="Center"
                                                    Margin="0 15 0 0">
-                                            <!--
-                                            -->
                                             <Run Text="{Binding SplitName}"
                                                  BaselineAlignment="Center"
-                                                 FontSize="11" />
+                                                 FontSize="13" />
                                             <Run Text="{Binding CurrentSplitTime}"
                                                  BaselineAlignment="Center"
-                                                 FontSize="11" />
+                                                 FontSize="13" />
                                         </TextBlock>
-                                        <TextBlock Text="{Binding CurrentSplitTime}"
-                                                   Foreground="Wheat"
+                                        <TextBlock Foreground="FloralWhite"
                                                    Background="Transparent"
-                                                   FontSize="12"
                                                    Width="64"
                                                    HorizontalAlignment="Left"
                                                    VerticalAlignment="Top"
                                                    TextAlignment="Center"
-                                                   Margin="0 2 0 0" />
+                                                   Margin="0 3 0 0">
+                                            <Run Text="IGT:"
+                                                 BaselineAlignment="Center"
+                                                 FontSize="10" />
+                                            <Run Text="{Binding IGTTime}"
+                                                 BaselineAlignment="Center"
+                                                 FontSize="10" />
+                                        </TextBlock>
                                     </StackPanel>
                                     <Image Width="30"
                                            Height="30"
@@ -336,11 +338,6 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
-
-                <components:ButtonNormal ContentText="Refresh"
-                                         Width="150"
-                                         Height="25"
-                                         OnCommand="{Binding RefreshPaceCommand}" />
             </Grid>
         </Grid>
     </Grid>

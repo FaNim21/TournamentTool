@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Windows;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
@@ -11,7 +12,6 @@ public class Tournament : BaseViewModel, IRenameItem
 {
     public string Name { get; set; } = string.Empty;
 
-    public ObservableCollection<PointOfView> POVs { get; set; } = [];
     public ObservableCollection<Player> Players { get; set; } = [];
 
     [JsonIgnore]
@@ -22,8 +22,9 @@ public class Tournament : BaseViewModel, IRenameItem
     public string SceneCollection { get; set; } = string.Empty;
     public string Scene { get; set; } = string.Empty;
 
-    public string? FilterNameAtStartForSceneItems { get; set; } = "pov";
-    public bool IsUsingPaceMan { get; set; } = false;
+    public string FilterNameAtStartForSceneItems { get; set; } = "pov";
+    public bool IsUsingPaceMan { get; set; } = true;
+    public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
 
     private int _paceManRefreshRateMiliseconds = 10000;
     public int PaceManRefreshRateMiliseconds
@@ -31,8 +32,8 @@ public class Tournament : BaseViewModel, IRenameItem
         get => _paceManRefreshRateMiliseconds;
         set
         {
-            if (value < 5000)
-                _paceManRefreshRateMiliseconds = 5000;
+            if (value < 10000)
+                _paceManRefreshRateMiliseconds = 10000;
             else
                 _paceManRefreshRateMiliseconds = value;
             OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
@@ -55,7 +56,7 @@ public class Tournament : BaseViewModel, IRenameItem
     {
         for (int i = 0; i < Players.Count; i++)
         {
-            Players[i].Update();
+            Players[i].LoadHead();
         }
     }
 
@@ -78,6 +79,20 @@ public class Tournament : BaseViewModel, IRenameItem
         return Path.Combine(Consts.PresetsPath, Name + ".json");
     }
 
+    public void AddPlayer(Player player)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Players.Add(player);
+        });
+    }
+
+    public bool IsNameDuplicate(string? twitchName)
+    {
+        if (string.IsNullOrEmpty(twitchName)) return false;
+        return Players.Any(player => player.TwitchName!.Equals(twitchName, StringComparison.OrdinalIgnoreCase));
+    }
+
     public void Clear()
     {
         Port = 4455;
@@ -85,7 +100,9 @@ public class Tournament : BaseViewModel, IRenameItem
         SceneCollection = string.Empty;
         Scene = string.Empty;
 
-        POVs = [];
         Players = [];
+        FilterNameAtStartForSceneItems = "pov";
+        IsUsingPaceMan = true;
+        PaceManRefreshRateMiliseconds = 10000;
     }
 }

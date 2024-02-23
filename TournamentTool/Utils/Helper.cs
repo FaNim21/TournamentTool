@@ -9,6 +9,23 @@ namespace TournamentTool.Utils;
 
 public static class Helper
 {
+    private static readonly Dictionary<string, string> splits = new()
+    {
+        { "rsg.enter_nether", "NE"},
+        { "rsg.enter_bastion", "BA"},
+        { "rsg.enter_fortress", "FT"},
+        { "rsg.first_portal", "1P"},
+        { "rsg.second_portal", "2P"},
+        { "rsg.enter_stronghold", "SH"},
+        { "rsg.enter_end", "EE"},
+        { "rsg.credits", "FIN"},
+    };
+    public static string GetSplitShortcut(string splitName)
+    {
+        _ = splits.TryGetValue(splitName, out var name);
+        return name!;
+    }
+
     /// <summary>
     /// Removing Json as extension from end of string
     /// </summary>

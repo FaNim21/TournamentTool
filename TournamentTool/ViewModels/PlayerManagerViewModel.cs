@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Models;
@@ -80,6 +79,9 @@ public class PlayerManagerViewModel : BaseViewModel
     public ICommand LoadFromPaceManCommand { get; set; }
     public ICommand LoadFromCSVCommand { get; set; }
 
+    public ICommand RemoveAllPlayerCommand { get; set; }
+    public ICommand FixPlayersHeadsCommand { get; set; }
+
 
     public PlayerManagerViewModel(MainViewModel mainViewModel, Tournament tournament)
     {
@@ -94,6 +96,9 @@ public class PlayerManagerViewModel : BaseViewModel
 
         LoadFromPaceManCommand = new RelayCommand(LoadDataFromPaceMan);
         LoadFromCSVCommand = new GetCSVPlayersDataCommand(this);
+
+        RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
+        FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
 
         Task.Run(async () =>
         {
@@ -122,7 +127,7 @@ public class PlayerManagerViewModel : BaseViewModel
                     current.InGameName = Player.InGameName;
                     current.TwitchName = Player.TwitchName;
                     current.PersonalBest = Player.PersonalBest;
-                    current.Update();
+                    Task.Run(current.UpdateHeadImage);
                 }
             }
 
@@ -137,8 +142,8 @@ public class PlayerManagerViewModel : BaseViewModel
                 TwitchName = Player.TwitchName,
                 PersonalBest = Player.PersonalBest,
             };
-            newPlayer.Update();
-            Tournament?.Players.Add(newPlayer);
+            Task.Run(newPlayer.UpdateHeadImage);
+            Tournament!.AddPlayer(newPlayer);
         }
         Player = new();
         MainViewModel.SavePresetCommand.Execute(null);
@@ -173,6 +178,16 @@ public class PlayerManagerViewModel : BaseViewModel
         List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent)!.Where(x => !string.IsNullOrEmpty(x.liveAccount)).ToList();
         if (twitchNames == null) return;
 
+        for (int i = 0; i < twitchNames.Count; i++)
+        {
+            var current = twitchNames[i];
+            if (Tournament!.IsNameDuplicate(current.liveAccount))
+            {
+                twitchNames.RemoveAt(i);
+                i--;
+            }
+        }
+
         for (int i = 0; i < eventPlayers.Count; i++)
         {
             var player = eventPlayers[i];
@@ -185,10 +200,36 @@ public class PlayerManagerViewModel : BaseViewModel
                     player.Name = twitch.liveAccount;
                     player.PersonalBest = "Unk";
                     await player.CompleteData();
-                    Application.Current.Dispatcher.Invoke(() => { Tournament!.Players.Add(player); });
+                    Tournament!.AddPlayer(player);
                     break;
                 }
             }
         }
+
+        MessageBox.Show($"Done loading data from paceman event");
+    }
+
+    private void RemoveAllPlayers()
+    {
+        MessageBoxResult result = MessageBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result == MessageBoxResult.Yes)
+            Tournament!.Players.Clear();
+    }
+
+    private void FixPlayersHeads()
+    {
+        Task.Run(async () =>
+        {
+            for (int i = 0; i < Tournament!.Players.Count; i++)
+            {
+                var current = Tournament!.Players[i];
+                if (current.Image != null) continue;
+                if (current.ImageStream != null)
+                    current.LoadHead();
+                else
+                    await current.UpdateHeadImage();
+            }
+
+        });
     }
 }

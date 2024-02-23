@@ -15,8 +15,8 @@ public class PointOfView : BaseViewModel
     public int X { get; set; }
     public int Y { get; set; }
 
-    public string Text { get; set; }
-    [JsonIgnore] public string DisplayedPlayer { get; set; }
+    public string Text { get; set; } = string.Empty;
+    [JsonIgnore] public string DisplayedPlayer { get; set; } = string.Empty;
 
 
     public PointOfView() { }
