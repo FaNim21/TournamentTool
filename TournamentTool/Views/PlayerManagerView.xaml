@@ -137,6 +137,29 @@
                   Width="350"
                   Height="180"
                   VerticalAlignment="Bottom">
+                <StackPanel Margin="10 10 10 90"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Center">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type components:ButtonNormal}">
+                            <Setter Property="Margin"
+                                    Value="10" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <components:ButtonNormal ContentText="Remove all players"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding RemoveAllPlayerCommand}" />
+
+                    <components:ButtonNormal ContentText="Fix players heads"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding FixPlayersHeadsCommand}" />
+                </StackPanel>
+
                 <ComboBox x:Name="typeOptionComboBox"
                           Style="{StaticResource ComboBoxTest2}"
                           HorizontalAlignment="Left"
@@ -151,8 +174,13 @@
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Bottom"
-                            Margin="5 0 0 0">
+                            VerticalAlignment="Bottom">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type components:ButtonNormal}">
+                            <Setter Property="Margin"
+                                    Value="10" />
+                        </Style>
+                    </StackPanel.Resources>
                     <components:ButtonNormal ContentText="Load PaceMan event"
                                              FontSize="14"
                                              Width="150"
@@ -162,8 +190,7 @@
                                              FontSize="14"
                                              Width="150"
                                              Height="30"
-                                             Margin="10 "
-                                             OnCommand="{Binding }" />
+                                             OnCommand="{Binding LoadFromCSVCommand}" />
                 </StackPanel>
             </Grid>
         </Grid>

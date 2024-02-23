@@ -33,7 +33,7 @@ public class Player : BaseViewModel
         get => _image;
         set
         {
-            if(value == null)
+            if (value == null)
             {
 
             }
@@ -43,10 +43,49 @@ public class Player : BaseViewModel
     }
     public byte[]? ImageStream { get; set; }
 
-    public string? Name { get; set; }
-    public string? InGameName { get; set; }
-    public string? TwitchName { get; set; } = "";
-    public string PersonalBest { get; set; }
+    private string? _name;
+    public string? Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            OnPropertyChanged(nameof(Name));
+        }
+    }
+
+    private string? _inGameName;
+    public string? InGameName
+    {
+        get => _inGameName;
+        set
+        {
+            _inGameName = value;
+            OnPropertyChanged(nameof(InGameName));
+        }
+    }
+
+    private string? _twitchName = "";
+    public string? TwitchName
+    {
+        get => _twitchName;
+        set
+        {
+            _twitchName = value;
+            OnPropertyChanged(nameof(TwitchName));
+        }
+    }
+
+    private string? _personalBest;
+    public string? PersonalBest
+    {
+        get => _personalBest;
+        set
+        {
+            _personalBest = value;
+            OnPropertyChanged(nameof(PersonalBest));
+        }
+    }
 
 
     public Player(string name = "")
@@ -54,21 +93,16 @@ public class Player : BaseViewModel
         Name = name;
     }
 
-    public void Update()
+    public void LoadHead()
     {
-        OnPropertyChanged(nameof(Name));
-        OnPropertyChanged(nameof(InGameName));
-        OnPropertyChanged(nameof(TwitchName));
-        OnPropertyChanged(nameof(PersonalBest));
-        if (ImageStream != null)
-        {
-            Image = Helper.LoadImageFromStream(ImageStream);
-            return;
-        }
-
-        Task.Run(LoadImage);
+        if (ImageStream == null) return;
+        Image = Helper.LoadImageFromStream(ImageStream);
     }
-
+    public async Task UpdateHeadImage()
+    {
+        if (string.IsNullOrEmpty(InGameName) || Image != null) return;
+        Image = await RequestHeadImage();
+    }
     public async Task CompleteData()
     {
         try
@@ -76,7 +110,7 @@ public class Player : BaseViewModel
             string result = await Helper.MakeRequestAsString($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
             ResponseApiName name = JsonSerializer.Deserialize<ResponseApiName>(result);
             InGameName = name.Name;
-            Update();
+            await UpdateHeadImage();
             TwitchName = Name;
         }
         catch (Exception ex)
@@ -85,12 +119,6 @@ public class Player : BaseViewModel
         }
     }
 
-    private async Task LoadImage()
-    {
-        if (string.IsNullOrEmpty(InGameName) || Image != null) return;
-
-        Image = await RequestHeadImage();
-    }
     private async Task<BitmapImage?> RequestHeadImage()
     {
         using HttpClient client = new();
@@ -106,7 +134,7 @@ public class Player : BaseViewModel
         return Helper.LoadImageFromStream(stream);
     }
 
-    internal void Clear()
+    public void Clear()
     {
         Name = string.Empty;
         TwitchName = string.Empty;

@@ -4,6 +4,7 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -13,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
@@ -24,22 +26,12 @@ namespace TournamentTool.ViewModels;
 
 public class ControllerViewModel : BaseViewModel
 {
-    private readonly Dictionary<string, string> splits = new()
-    {
-        { "rsg.enter_nether", "EN"},
-        { "rsg.enter_bastion", "EB"},
-        { "rsg.enter_fortress", "EF"},
-        { "rsg.first_portal", "FP"},
-        { "rsg.second_portal", "SP"},
-        { "rsg.enter_stronghold", "SH"},
-        { "rsg.enter_end", "EE"},
-        { "rsg.credits", "FIN"},
-    };
-
     //TODO: 0 JAK BEDE DAWAC NA GITHUBA TO ZEBY TO UKRYC
     public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
     public const string ClientID = "u10jjhgs6z6d7zi03pvt0d7vere72x";
     private const float AspectRatio = 16.0f / 9.0f;
+
+    private readonly BackgroundWorker? worker;
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
 
@@ -127,15 +119,18 @@ public class ControllerViewModel : BaseViewModel
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
 
-    public ICommand RefreshPaceCommand { get; set; }
-
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
         FilteredPlayers = new(MainViewModel.CurrentChosen!.Players);
 
-        RefreshPaceCommand = new RelayCommand(RefreshPaceMan);
+        if (MainViewModel.CurrentChosen.IsUsingPaceMan)
+        {
+            worker = new() { WorkerSupportsCancellation = true };
+            worker.DoWork += WorkerUpdate;
+            worker.RunWorkerAsync();
+        }
 
         Task.Run(async () =>
         {
@@ -171,15 +166,6 @@ public class ControllerViewModel : BaseViewModel
 
         try
         {
-            await RefreshPaceManAsync();
-        }
-        catch (Exception e)
-        {
-            MessageBox.Show($"Error: {e.Message} = {e.StackTrace}", "Error");
-        }
-
-        try
-        {
             CanvasWidth = 426;
             CanvasHeight = 240;
 
@@ -201,7 +187,7 @@ public class ControllerViewModel : BaseViewModel
             SceneItem[] sceneItems = await Client.GetSceneItemList(MainViewModel.CurrentChosen.Scene);
             foreach (var item in sceneItems)
             {
-                if (item.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase))
+                if (item.SourceName.StartsWith(MainViewModel.CurrentChosen.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
                 {
                     PointOfView pov = new();
                     SceneItemTransform transform = await Client.GetSceneItemTransform(MainViewModel.CurrentChosen.Scene, item.SceneItemId);
@@ -375,13 +361,25 @@ public class ControllerViewModel : BaseViewModel
             FilteredPlayers = new(MainViewModel.CurrentChosen.Players.Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)));
     }
 
+    private async void WorkerUpdate(object? sender, DoWorkEventArgs e)
+    {
+        while (!worker.CancellationPending)
+        {
+            await RefreshPaceManAsync();
+            await Task.Delay(TimeSpan.FromMilliseconds(MainViewModel.CurrentChosen!.PaceManRefreshRateMiliseconds));
+        }
+    }
+
     public void ControllerExit()
     {
-        if (Client == null) return;
+        worker?.CancelAsync();
+        worker?.Dispose();
 
         POVs.Clear();
         PaceManPlayers.Clear();
         FilteredPlayers!.Clear();
+
+        if (Client == null) return;
         Task.Run(Disconnect);
     }
 
@@ -471,31 +469,50 @@ public class ControllerViewModel : BaseViewModel
             CanvasHeight = calculatedHeight;
     }
 
-    private void RefreshPaceMan()
-    {
-        Task.Run(RefreshPaceManAsync);
-    }
     private async Task RefreshPaceManAsync()
     {
-        //TODO: 0 nie trzeba czyscyic mozna poprostu aktualizowac
-        Application.Current.Dispatcher.Invoke(PaceManPlayers.Clear);
         string result = await Helper.MakeRequestAsString(PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
-
         if (paceMan == null) return;
+
+        List<PaceMan> notFoundPaceMans = new(PaceManPlayers);
+
         for (int i = 0; i < paceMan.Count; i++)
         {
-            var current = paceMan[i];
-            /*if (current.User.TwitchName == null) continue;
+            var resultPaceman = paceMan[i];
+            bool foundPlayer = false;
+
+            for (int j = 0; j < notFoundPaceMans.Count; j++)
+            {
+                var player = notFoundPaceMans[j];
+                if (resultPaceman.Nickname.Equals(player.Nickname, StringComparison.OrdinalIgnoreCase))
+                {
+                    foundPlayer = true;
+                    player.Update(resultPaceman);
+                    notFoundPaceMans.Remove(player);
+                    break;
+                }
+            }
+
+            if (foundPlayer) continue;
+
+            if (resultPaceman.User.TwitchName == null) continue;
             try
             {
-                current.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == current.User.TwitchName).FirstOrDefault();
+                resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == resultPaceman.User.TwitchName).FirstOrDefault();
             }
             catch (Exception ex) { MessageBox.Show(ex.Message + " - " + ex.StackTrace); }
-            if (current.Player == null) continue;*/
-            splits.TryGetValue(current.Splits.Last().SplitName!, out string? name);
-            current.UpdateTime(name!);
-            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(current); });
+
+            if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
+            string name = Helper.GetSplitShortcut(resultPaceman.Splits.Last().SplitName);
+            resultPaceman.UpdateTime(name);
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(resultPaceman); });
+        }
+
+        for (int i = 0; i < notFoundPaceMans.Count; i++)
+        {
+            var current = notFoundPaceMans[i];
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
         }
     }
 }

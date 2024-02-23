@@ -1,4 +1,8 @@
-﻿using TournamentTool.ViewModels;
+﻿using Microsoft.VisualBasic.FileIO;
+using Microsoft.Win32;
+using System.Windows;
+using TournamentTool.Models;
+using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -15,7 +19,38 @@ public class GetCSVPlayersDataCommand : BaseCommand
     {
         if (PlayerManagerViewModel == null) return;
 
-        //TODO: Czytac plik csv
+        OpenFileDialog openFileDialog = new() { Filter = "All Files (*.csv)|*.csv", };
+        string path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
 
+        Task.Run(() => LoadFile(path));
+    }
+
+    private async Task LoadFile(string path)
+    {
+        List<Player> dataList = [];
+        using TextFieldParser parser = new(path);
+        parser.HasFieldsEnclosedInQuotes = true;
+        parser.SetDelimiters(",");
+        parser.ReadLine();
+
+        while (!parser.EndOfData)
+        {
+            string[]? fields = parser.ReadFields();
+            if (fields == null) continue;
+
+            Player data = new()
+            {
+                Name = fields[1],
+                UUID = fields[2],
+                PersonalBest = fields[3],
+                TwitchName = fields[4]
+            };
+            if (string.IsNullOrEmpty(data.TwitchName)) continue;
+            if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.TwitchName)) continue;
+            await data.CompleteData();
+            PlayerManagerViewModel.Tournament!.AddPlayer(data);
+        }
+
+        MessageBox.Show($"Done loading data from .csv file");
     }
 }
