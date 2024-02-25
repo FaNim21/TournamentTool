@@ -6,32 +6,26 @@ using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TwitchLib.Api;
-using TwitchLib.Api.Helix.Models.Channels.ModifyChannelInformation;
-using TwitchLib.Communication.Interfaces;
 
 namespace TournamentTool.ViewModels;
 
 public class ControllerViewModel : BaseViewModel
 {
-    //TODO: 0 JAK BEDE DAWAC NA GITHUBA TO ZEBY TO UKRYC
+    public const string RedirectURL = "http://localhost:8080/redirect/";
     public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
-    public const string ClientID = "u10jjhgs6z6d7zi03pvt0d7vere72x";
+
     private const float AspectRatio = 16.0f / 9.0f;
 
-    private readonly BackgroundWorker? worker;
+    private readonly BackgroundWorker? paceManWorker;
+    private BackgroundWorker twitchWorker = new();
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
 
@@ -59,7 +53,8 @@ public class ControllerViewModel : BaseViewModel
 
     public ObsClient? Client { get; set; } = new();
     public MainViewModel MainViewModel { get; set; }
-    public TwitchAPI Api { get; set; } = new();
+    public TwitchAPI? TwitchAPI { get; set; }
+    public HttpClient? WebServer { get; set; }
 
     public OBSVideoSettings OBSVideoSettings { get; set; } = new();
 
@@ -119,17 +114,24 @@ public class ControllerViewModel : BaseViewModel
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
 
+    public ICommand? ClipCommand { get; set; } = null;
+
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
+        TwitchAPI = new();
+        TwitchAPI.Settings.ClientId = Consts.ClientID;
+
+        ClipCommand = new RelayCommand(MakeClip);
+
         MainViewModel = mainViewModel;
         FilteredPlayers = new(MainViewModel.CurrentChosen!.Players);
 
         if (MainViewModel.CurrentChosen.IsUsingPaceMan)
         {
-            worker = new() { WorkerSupportsCancellation = true };
-            worker.DoWork += WorkerUpdate;
-            worker.RunWorkerAsync();
+            paceManWorker = new() { WorkerSupportsCancellation = true };
+            paceManWorker.DoWork += PaceManUpdate;
+            paceManWorker.RunWorkerAsync();
         }
 
         Task.Run(async () =>
@@ -273,82 +275,103 @@ public class ControllerViewModel : BaseViewModel
 
     private async Task TwitchApi()
     {
-        //Gets a list of all the subscritions of the specified channel.
-        //var allSubscriptions = await Api.Helix.Subscriptions.GetBroadcasterSubscriptionsAsync("broadcasterID", null, 100, "accesstoken");
+        if (TwitchAPI == null) return;
 
-        //Get channels a specified user follows.
-        //var userFollows = await Api.Helix.Users.GetUsersFollowsAsync("user_id");
-        //var users = await Api.Helix.Users.getusers();
-        //var user = users.Users;
-        //await Api.Helix.Channels.GetChannelInformationAsync();
+        var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
+        string auth = TwitchAPI.Auth.GetAuthorizationCodeUrl(RedirectURL, authScopes, true, null, Consts.ClientID);
 
-        //await Api.Helix.Streams.getstream
-
-        //Get Specified Channel Follows
-        //var channelFollowers = await Api.Helix.Users.GetUsersFollowsAsync(fromId: "channel_id");
-
-        //Returns a stream object if online, if channel is offline it will be null/empty.
-        //var streams = await Api.Helix.Streams.GetStreamsAsync(userIds: userIdsList); // Alternative: userLogins: userLoginsList
-
-        //Update Channel Title/Game/Language/Delay - Only require 1 option here.
-        //var request = new ModifyChannelInformationRequest() { GameId = "New_Game_Id", Title = "New stream title", BroadcasterLanguage = "New_Language", Delay = New_Delay };
-        //await Api.Helix.Channels.ModifyChannelInformationAsync("broadcaster_Id", request, "AccessToken");
-
-
-        /*string username = "lazy_boyenn";
-        if (username != null)
+        try
         {
-            string apiUrl = $"https://api.twitch.tv/helix/users?login={username}";
+            var server = new WebServer(RedirectURL);
 
-            using (HttpClient client = new HttpClient())
+            Process.Start(new ProcessStartInfo
             {
-                client.DefaultRequestHeaders.Add("Client-ID", ClientID);
+                FileName = auth,
+                UseShellExecute = true
+            });
 
-                HttpResponseMessage response = await client.GetAsync(apiUrl);
+            var auth2 = await server.Listen();
+            var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, RedirectURL, Consts.ClientID);
+            TwitchAPI.Settings.AccessToken = resp.AccessToken;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+        }
 
-                if (response.IsSuccessStatusCode)
+        twitchWorker = new() { WorkerSupportsCancellation = true };
+        twitchWorker.DoWork += TwitchUpdate;
+        twitchWorker.RunWorkerAsync();
+    }
+    private async Task UpdateTwitchInformations()
+    {
+        if (TwitchAPI == null) return;
+
+        List<string> logins = [];
+        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
+        {
+            var current = MainViewModel.CurrentChosen.Players[i];
+            logins.Add(current.TwitchName!);
+        }
+
+        var response = await TwitchAPI.Helix.Streams.GetStreamsAsync(userLogins: logins);
+        List<TwitchStreamData> notLivePlayers = [];
+        foreach (var player in MainViewModel.CurrentChosen.Players)
+            notLivePlayers.Add(player.TwitchStreamData);
+
+        for (int i = 0; i < response.Streams.Length; i++)
+        {
+            var current = response.Streams[i];
+            if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase)) continue;
+
+            for (int j = 0; j < notLivePlayers.Count; j++)
+            {
+                var twitch = notLivePlayers[j];
+                if (!current.UserLogin.Equals(twitch.UserLogin, StringComparison.OrdinalIgnoreCase)) continue;
+
+                TwitchStreamData stream = new()
                 {
-                    string responseData = await response.Content.ReadAsStringAsync();
-                    JObject json = JObject.Parse(responseData);
-                    JToken user = json["data"]?.FirstOrDefault();
+                    ID = current.Id,
+                    BroadcasterID = current.UserId,
+                    UserLogin = current.UserName,
+                    GameName = current.GameName,
+                    StartedAt = current.StartedAt,
+                    Language = current.Language,
+                    UserName = current.UserName,
+                    Title = current.Title,
+                    ThumbnailUrl = current.ThumbnailUrl,
+                    ViewerCount = current.ViewerCount,
+                    Status = current.Type,
+                };
 
-                    if (user != null)
-                    {
-                        string userId = user["id"]?.ToString();
-                        if (!string.IsNullOrEmpty(userId))
-                        {
-                            // Now you can use the user ID to get stream information
-                            string streamInfoUrl = $"https://api.twitch.tv/helix/streams?user_id={userId}";
-                            HttpResponseMessage streamInfoResponse = await client.GetAsync(streamInfoUrl);
-
-                            if (streamInfoResponse.IsSuccessStatusCode)
-                            {
-                                string streamInfoData = await streamInfoResponse.Content.ReadAsStringAsync();
-                                JObject streamJson = JObject.Parse(streamInfoData);
-                                JToken stream = streamJson["data"]?.FirstOrDefault();
-
-                                if (stream != null)
-                                {
-                                    string title = stream["title"]?.ToString();
-                                    int viewerCount = stream["viewer_count"]?.ToObject<int>() ?? 0;
-
-                                    Trace.WriteLine($"Stream Title: {title}");
-                                    Trace.WriteLine($"Viewer Count: {viewerCount}");
-                                }
-                                else
-                                {
-                                    Trace.WriteLine("User is not currently streaming.");
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Trace.WriteLine("User not found.");
-                    }
-                }
+                twitch.Update(stream);
+                notLivePlayers.Remove(twitch);
             }
-        }*/
+        }
+
+        for (int i = 0; i < notLivePlayers.Count; i++)
+        {
+            var twitch = notLivePlayers[i];
+            twitch.Clear();
+        }
+        notLivePlayers.Clear();
+    }
+
+    public void MakeClip()
+    {
+        if (TwitchAPI == null) return;
+
+        Task.Run(Clip);
+    }
+    private async Task Clip()
+    {
+        try
+        {
+            var response = await TwitchAPI!.Helix.Clips.CreateClipAsync(MainViewModel.CurrentChosen!.Players[0].TwitchStreamData.BroadcasterID);
+            string url = response.CreatedClips[0].EditUrl;
+            Trace.WriteLine(url);
+        }
+        catch (Exception ex) { MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}"); }
     }
 
     private void FilterItems()
@@ -361,19 +384,30 @@ public class ControllerViewModel : BaseViewModel
             FilteredPlayers = new(MainViewModel.CurrentChosen.Players.Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase)));
     }
 
-    private async void WorkerUpdate(object? sender, DoWorkEventArgs e)
+    private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
     {
-        while (!worker.CancellationPending)
+        while (!paceManWorker.CancellationPending)
         {
             await RefreshPaceManAsync();
             await Task.Delay(TimeSpan.FromMilliseconds(MainViewModel.CurrentChosen!.PaceManRefreshRateMiliseconds));
         }
     }
+    private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
+    {
+        while (!twitchWorker.CancellationPending)
+        {
+            await UpdateTwitchInformations();
+            await Task.Delay(TimeSpan.FromMilliseconds(15000));
+        }
+    }
 
     public void ControllerExit()
     {
-        worker?.CancelAsync();
-        worker?.Dispose();
+        paceManWorker?.CancelAsync();
+        paceManWorker?.Dispose();
+
+        twitchWorker.CancelAsync();
+        twitchWorker.Dispose();
 
         POVs.Clear();
         PaceManPlayers.Clear();

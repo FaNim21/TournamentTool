@@ -125,7 +125,7 @@ public class PlayerManagerViewModel : BaseViewModel
                 {
                     current.Name = Player.Name;
                     current.InGameName = Player.InGameName;
-                    current.TwitchName = Player.TwitchName;
+                    current.TwitchName = Player.TwitchName.ToLower();
                     current.PersonalBest = Player.PersonalBest;
                     Task.Run(current.UpdateHeadImage);
                 }

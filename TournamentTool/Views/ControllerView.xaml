@@ -166,7 +166,13 @@
                         </TextBlock>
                     </WrapPanel>
 
-
+                    <!--
+                    <components:ButtonNormal ContentText="clip first stream xd"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding ClipCommand}" />
+                    -->
                     <!--
                     <TextBlock Text="MORE CONTROLS IN FUTURE"
                                FontSize="48"
@@ -193,7 +199,7 @@
                             <Border BorderBrush="Black"
                                     BorderThickness="1"
                                     Width="110"
-                                    Height="65"
+                                    Height="80"
                                     PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
                                     MouseMove="Border_MouseMove">
                                 <Grid>
@@ -206,7 +212,7 @@
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Top"
                                                    TextAlignment="Center"
-                                                   Margin="0 4 0 0">
+                                                   Margin="0 2 0 0">
                                         </TextBlock>
                                         <TextBlock Text="{Binding PersonalBest}"
                                                    Foreground="White"
@@ -223,8 +229,16 @@
                                            Height="30"
                                            HorizontalAlignment="Right"
                                            VerticalAlignment="Bottom"
-                                           Margin="0 0 6 6"
+                                           Margin="0 0 6 23"
                                            Source="{Binding Image}" />
+                                    <TextBlock FontSize="14"
+                                               Margin="2"
+                                               VerticalAlignment="Bottom"
+                                               TextAlignment="Center">
+                                        <Run Text="Status:" />
+                                        <Run Text="{Binding TwitchStreamData.Status}"
+                                             Foreground="{Binding TwitchStreamData.StatusLabelColor}" />
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -239,7 +253,7 @@
                             <Setter Property="Width"
                                     Value="120" />
                             <Setter Property="Height"
-                                    Value="75" />
+                                    Value="90" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
