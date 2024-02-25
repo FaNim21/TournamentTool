@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -19,11 +22,84 @@ public struct ResponseApiName
     public string Name { get; set; }
 }
 
+public class TwitchStreamData : BaseViewModel
+{
+    public string ID { get; set; } = string.Empty;
+    public string BroadcasterID { get; set; } = string.Empty;
+    public string UserLogin { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string GameName { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int ViewerCount { get; set; }
+    public DateTime StartedAt { get; set; }
+    public string Language { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
+
+    public Brush? StatusLabelColor { get; set; }
+    public string Status { get; set; } = "offline";
+
+
+    public void Update(TwitchStreamData data)
+    {
+        ID = data.ID;
+        BroadcasterID = data.BroadcasterID;
+        UserName = data.UserName;
+        GameName = data.GameName;
+        Title = data.Title;
+        ViewerCount = data.ViewerCount;
+        StartedAt = data.StartedAt;
+        Language = data.Language;
+        ThumbnailUrl = data.ThumbnailUrl;
+
+        Status = data.Status;
+        if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
+            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(51, 204, 51)); });
+        else
+            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(125, 38, 37)); });
+
+        Update();
+    }
+    private void Update()
+    {
+        OnPropertyChanged(nameof(ID));
+        OnPropertyChanged(nameof(BroadcasterID));
+        OnPropertyChanged(nameof(UserLogin));
+        OnPropertyChanged(nameof(UserName));
+        OnPropertyChanged(nameof(GameName));
+        OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(ViewerCount));
+        OnPropertyChanged(nameof(StartedAt));
+        OnPropertyChanged(nameof(Language));
+        OnPropertyChanged(nameof(ThumbnailUrl));
+        OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(StatusLabelColor));
+    }
+
+    public void Clear()
+    {
+        ID = string.Empty;
+        BroadcasterID = string.Empty;
+        UserName = string.Empty;
+        GameName = string.Empty;
+        Title = string.Empty;
+        ViewerCount = 0;
+        StartedAt = DateTime.MinValue;
+        Language = string.Empty;
+        ThumbnailUrl = string.Empty;
+        Status = "offline";
+        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(125, 38, 37)); });
+        Update();
+    }
+}
+
 public class Player : BaseViewModel
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public string? UUID { get; set; }
+
+    [JsonIgnore]
+    public TwitchStreamData TwitchStreamData { get; set; } = new();
 
     [JsonIgnore]
     private BitmapImage? _image;
@@ -71,7 +147,9 @@ public class Player : BaseViewModel
         get => _twitchName;
         set
         {
+            if (string.IsNullOrEmpty(value)) return;
             _twitchName = value;
+            TwitchStreamData.UserLogin = value;
             OnPropertyChanged(nameof(TwitchName));
         }
     }
