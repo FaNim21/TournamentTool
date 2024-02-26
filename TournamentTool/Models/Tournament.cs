@@ -24,6 +24,7 @@ public class Tournament : BaseViewModel, IRenameItem
 
     public string FilterNameAtStartForSceneItems { get; set; } = "pov";
     public bool IsUsingPaceMan { get; set; } = true;
+    public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
 
     private int _paceManRefreshRateMiliseconds = 10000;
@@ -103,6 +104,8 @@ public class Tournament : BaseViewModel, IRenameItem
         Players = [];
         FilterNameAtStartForSceneItems = "pov";
         IsUsingPaceMan = true;
+        IsUsingTwitchAPI = true;
+        IsUsingWhitelistOnPaceMan = true;
         PaceManRefreshRateMiliseconds = 10000;
     }
 }

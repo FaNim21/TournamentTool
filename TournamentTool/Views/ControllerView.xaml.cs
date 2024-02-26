@@ -1,9 +1,12 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Views;
@@ -34,17 +37,14 @@ public partial class ControllerView : UserControl
 
         DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
 
-        //dragAdorner = new DragAdorner(border);
+        /*dragAdorner = new DragAdorner(border);
+        var adornerLayer = AdornerLayer.GetAdornerLayer(this);
+        adornerLayer.Add(dragAdorner);
 
-        //var adornerLayer = AdornerLayer.GetAdornerLayer(this);
+        DataObject data = new(typeof(Player), border.DataContext);
+        DragDrop.DoDragDrop(border, data, DragDropEffects.Copy);
 
-        //adornerLayer.Add(dragAdorner);
-
-        // Start the drag operation with the adorner
-        //DataObject data = new(typeof(Player), border.DataContext);
-        //DragDrop.DoDragDrop(border, data, DragDropEffects.Copy);
-
-        //adornerLayer.Remove(dragAdorner);
+        adornerLayer.Remove(dragAdorner);*/
     }
 
     private void Border_MouseMove(object sender, MouseEventArgs e)
@@ -54,15 +54,14 @@ public partial class ControllerView : UserControl
 
         DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
 
-        //dragAdorner = new(border);
-        //var adornerLayer = AdornerLayer.GetAdornerLayer(this);
-        //adornerLayer.Add(dragAdorner);
+        /*dragAdorner = new(border);
+        var adornerLayer = AdornerLayer.GetAdornerLayer(this);
+        adornerLayer.Add(dragAdorner);
 
-        // Start the drag operation with the adorner
-        //DataObject data = new(typeof(Player), border.DataContext);
-        //DragDrop.DoDragDrop(border, data, DragDropEffects.Copy);
+        DataObject data = new(typeof(Player), border.DataContext);
+        DragDrop.DoDragDrop(border, data, DragDropEffects.Copy);
 
-        //adornerLayer.Remove(dragAdorner);
+        adornerLayer.Remove(dragAdorner);*/
     }
 
     private void Border_Drop(object sender, DragEventArgs e)
@@ -98,14 +97,14 @@ public partial class ControllerView : UserControl
         if (!GetCursorPos(out POINT cursorPos)) return;
         if (dragAdorner == null) return;
 
-        Point pointRef = new Point(cursorPos.X, cursorPos.Y);
+        Point pointRef = new(cursorPos.X, cursorPos.Y);
         Point relPos = PointFromScreen(pointRef);
 
-        dragAdorner.CenterOffset = new Point(relPos.X - ActualWidth / 2, relPos.Y - ActualHeight / 2);
+        dragAdorner.CenterOffset = new Point(relPos.X - (ActualWidth / 2), relPos.Y - (ActualHeight / 2));
 
         Point position;
-        position.X = relPos.X - startPoint.X;
-        position.Y = relPos.Y - startPoint.Y;
+        position.X = relPos.X - (ActualWidth / 2) + (dragAdorner.DesiredSize.Width / 2);
+        position.Y = relPos.Y - (ActualHeight / 2) + (dragAdorner.DesiredSize.Height / 2);
 
         dragAdorner.Arrange(new Rect(position, dragAdorner.DesiredSize));
     }*/

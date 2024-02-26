@@ -275,7 +275,8 @@ public class ControllerViewModel : BaseViewModel
 
     private async Task TwitchApi()
     {
-        if (TwitchAPI == null) return;
+        twitchWorker = new() { WorkerSupportsCancellation = true };
+        if (TwitchAPI == null || !MainViewModel.CurrentChosen!.IsUsingTwitchAPI) return;
 
         var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
         string auth = TwitchAPI.Auth.GetAuthorizationCodeUrl(RedirectURL, authScopes, true, null, Consts.ClientID);
@@ -299,7 +300,6 @@ public class ControllerViewModel : BaseViewModel
             MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
         }
 
-        twitchWorker = new() { WorkerSupportsCancellation = true };
         twitchWorker.DoWork += TwitchUpdate;
         twitchWorker.RunWorkerAsync();
     }
@@ -346,6 +346,7 @@ public class ControllerViewModel : BaseViewModel
 
                 twitch.Update(stream);
                 notLivePlayers.Remove(twitch);
+                j--;
             }
         }
 
@@ -406,8 +407,14 @@ public class ControllerViewModel : BaseViewModel
         paceManWorker?.CancelAsync();
         paceManWorker?.Dispose();
 
-        twitchWorker.CancelAsync();
-        twitchWorker.Dispose();
+        twitchWorker?.CancelAsync();
+        twitchWorker?.Dispose();
+
+        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
+        {
+            var current = MainViewModel.CurrentChosen.Players[i];
+            current.TwitchStreamData.StatusLabelColor = null;
+        }
 
         POVs.Clear();
         PaceManPlayers.Clear();
