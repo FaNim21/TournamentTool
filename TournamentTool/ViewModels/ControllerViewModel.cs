@@ -210,6 +210,7 @@ public class ControllerViewModel : BaseViewModel
                     pov.Text = item.SourceName;
 
                     AddPov(pov);
+                    SetBrowserURL(pov.SceneItemName);
                 }
             }
 
@@ -241,11 +242,13 @@ public class ControllerViewModel : BaseViewModel
         Client.SceneItemTransformChanged -= OnSceneItemTransformChanged;
     }
 
-    public void SetBrowserURL(string sceneItemName, string player)
+    public void SetBrowserURL(string sceneItemName, string? player = null)
     {
         if (Client == null || !IsConnectedToWebSocket) return;
 
-        Dictionary<string, object> input = new() { { "url", $"https://player.twitch.tv/?channel={player}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0" }, };
+        string url = $"https://player.twitch.tv/?channel={player}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0";
+        if (string.IsNullOrEmpty(player)) url = "";
+        Dictionary<string, object> input = new() { { "url", url }, };
         Client.SetInputSettings(sceneItemName, input);
     }
 
