@@ -141,6 +141,9 @@ public class Player : BaseViewModel
         }
     }
 
+    //TODO: 0 Zamiast jednego TwitchName to zrobic TwitchStreamData w tablicy i uwzgledniac alty
+    //i ewentualnie mozna zostawic twitch name albo dla podobienstwa zrobic wyciaganie aktywnego twitch streamdata
+    //dla nazwy streama
     private string? _twitchName = "";
     public string? TwitchName
     {
@@ -151,6 +154,19 @@ public class Player : BaseViewModel
             _twitchName = value;
             TwitchStreamData.UserLogin = value;
             OnPropertyChanged(nameof(TwitchName));
+        }
+    }
+
+    private string? _twitchNameAlt = "";
+    public string? TwitchNameAlt
+    {
+        get => _twitchNameAlt;
+        set
+        {
+            if (string.IsNullOrEmpty(value)) return;
+            _twitchNameAlt = value;
+            //TwitchStreamData.UserLogin = value;
+            OnPropertyChanged(nameof(TwitchNameAlt));
         }
     }
 

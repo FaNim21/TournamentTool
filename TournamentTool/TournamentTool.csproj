@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.67.0.3343" />
     <PackageReference Include="OBSClient" Version="2.0.2" />
     <PackageReference Include="TwitchLib" Version="3.5.3" />
   </ItemGroup>

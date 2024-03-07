@@ -91,7 +91,9 @@
                                             BorderBrush="Black"
                                             BorderThickness="1"
                                             CornerRadius="5"
-                                            Drop="Border_Drop">
+                                            Drop="Border_Drop"
+                                            PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
+                                            MouseMove="Border_MouseMove">
                                         <TextBlock Text="{Binding DisplayedPlayer}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />

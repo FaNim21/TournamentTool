@@ -124,6 +124,9 @@ public class ControllerViewModel : BaseViewModel
 
         ClipCommand = new RelayCommand(MakeClip);
 
+        /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
+        Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
+
         MainViewModel = mainViewModel;
         FilteredPlayers = new(MainViewModel.CurrentChosen!.Players);
 
@@ -250,8 +253,6 @@ public class ControllerViewModel : BaseViewModel
     {
         if (Client == null || Client.ConnectionState == ConnectionState.Disconnected) return;
 
-        //await SetupSceneItem("Screen", "POV1", 150, 215, 800, 600);
-
         Dictionary<string, object> input = new()
         {
             { "url", $"https://player.twitch.tv/?channel=zylenox&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume=0" },
@@ -267,7 +268,6 @@ public class ControllerViewModel : BaseViewModel
     private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
     {
         if (Client == null || Client.ConnectionState == ConnectionState.Disconnected) return;
-
 
         Input input = new(inputKind, newSceneItemName, inputKind);
         await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
@@ -426,15 +426,11 @@ public class ControllerViewModel : BaseViewModel
 
     public void OnConnectionClosed(object? parametr, EventArgs args)
     {
-        //MessageBox.Show("Lost connection");
         IsConnectedToWebSocket = false;
     }
     public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
     {
-        if (!args.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase)) return;
-
-        //TODO: 0 zbierac informacje czy pov jest typem browser
-        //var info = MainViewModel.Client!.GetInputSettings(args.SourceName);
+        if (!args.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
         PointOfView pov = new()
@@ -453,8 +449,7 @@ public class ControllerViewModel : BaseViewModel
     }
     public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs args)
     {
-        if (!args.SourceName.StartsWith("pov", StringComparison.OrdinalIgnoreCase)) return;
-        //TODO: 0 zbierac informacje czy pov jest typem browser
+        if (!args.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         PointOfView? pov = null;
         for (int i = 0; i < POVs.Count; i++)
