@@ -92,8 +92,8 @@
                                             BorderThickness="1"
                                             CornerRadius="5"
                                             Drop="Border_Drop"
-                                            PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
-                                            MouseMove="Border_MouseMove">
+                                            MouseMove="CanvasBorder_MouseMove"
+                                            PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown">
                                         <TextBlock Text="{Binding DisplayedPlayer}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
@@ -195,15 +195,15 @@
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          AllowDrop="True"
-                         ItemsSource="{Binding FilteredPlayers}">
+                         ItemsSource="{Binding FilteredPlayers}"
+                         SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:Player">
                             <Border BorderBrush="Black"
                                     BorderThickness="1"
                                     Width="110"
                                     Height="80"
-                                    PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
-                                    MouseMove="Border_MouseMove">
+                                    MouseMove="ListBorder_MouseMove">
                                 <Grid>
                                     <StackPanel>
                                         <TextBlock Text="{Binding Name}"
@@ -279,15 +279,15 @@
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          AllowDrop="True"
-                         ItemsSource="{Binding PaceManPlayers}">
+                         ItemsSource="{Binding PaceManPlayers}"
+                         SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:PaceMan">
                             <Border BorderBrush="Black"
                                     BorderThickness="1"
                                     Width="110"
                                     Height="65"
-                                    PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
-                                    MouseMove="Border_MouseMove">
+                                    MouseMove="ListBorder_MouseMove">
                                 <Grid Margin="0 5 0 0">
                                     <TextBlock Text="{Binding Nickname}"
                                                Background="Transparent"

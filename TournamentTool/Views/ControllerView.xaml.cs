@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
@@ -14,18 +16,19 @@ public partial class ControllerView : UserControl
         InitializeComponent();
     }
 
-    private void Border_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is not Border border) return;
-
-        DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
-    }
-    private void Border_MouseMove(object sender, MouseEventArgs e)
+    private void CanvasBorder_MouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;
 
         DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
+    }
+    private void ListBorder_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (sender is not Border border) return;
+
+        DragDrop.DoDragDrop(border, new DataObject(typeof(ITwitchPovInformation), border.DataContext), DragDropEffects.Move);
     }
 
     private void Border_Drop(object sender, DragEventArgs e)
@@ -34,15 +37,10 @@ public partial class ControllerView : UserControl
         if (DataContext is not ControllerViewModel controller) return;
         if (droppedBorder!.DataContext is not PointOfView pov) return;
 
-        if (e.Data.GetData(typeof(Player)) is Player droppedPlayer)
+        if (e.Data.GetData(typeof(ITwitchPovInformation)) is ITwitchPovInformation info)
         {
-            pov.DisplayedPlayer = droppedPlayer.Name!;
-            pov.TwitchName = droppedPlayer.TwitchName!;
-        }
-        else if (e.Data.GetData(typeof(PaceMan)) is PaceMan player)
-        {
-            pov.DisplayedPlayer = player.Nickname;
-            pov.TwitchName = player.User.TwitchName;
+            pov.DisplayedPlayer = info.GetDisplayName();
+            pov.TwitchName = info.GetTwitchName();
         }
         else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {
@@ -50,6 +48,7 @@ public partial class ControllerView : UserControl
             controller.SetBrowserURL(dragPov.SceneItemName!, dragPov.TwitchName);
         }
 
+        if (string.IsNullOrEmpty(pov.TwitchName)) return;
         pov.Update();
         controller.SetBrowserURL(pov.SceneItemName!, pov.TwitchName);
     }
@@ -58,5 +57,19 @@ public partial class ControllerView : UserControl
     {
         if (DataContext is not ControllerViewModel viewModel) return;
         viewModel.ResizeCanvas();
+    }
+
+    private void CanvasBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not ControllerViewModel viewModel) return;
+        if (sender is not Border clickedBorder) return;
+        if (clickedBorder!.DataContext is not PointOfView pov) return;
+        if (viewModel.CurrentChosenPlayer == null) return;
+
+        pov.DisplayedPlayer = viewModel.CurrentChosenPlayer.GetDisplayName();
+        pov.TwitchName = viewModel.CurrentChosenPlayer.GetTwitchName();
+        pov.Update();
+        viewModel.SetBrowserURL(pov.SceneItemName!, pov.TwitchName);
+        viewModel.SelectedWhitelistPlayer = null;
     }
 }

@@ -58,6 +58,44 @@ public class ControllerViewModel : BaseViewModel
 
     public OBSVideoSettings OBSVideoSettings { get; set; } = new();
 
+    public ITwitchPovInformation? CurrentChosenPlayer { get; set; }
+
+    private Player? _selectedWhitelistPlayer;
+    public Player? SelectedWhitelistPlayer
+    {
+        get { return _selectedWhitelistPlayer; }
+        set
+        {
+            _selectedPaceManPlayer = null;
+            OnPropertyChanged(nameof(SelectedPaceManPlayer));
+
+            _selectedWhitelistPlayer = value;
+            OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+
+            CurrentChosenPlayer = value;
+            OnPropertyChanged(nameof(CurrentChosenPlayer));
+        }
+    }
+
+    private PaceMan? _selectedPaceManPlayer;
+    public PaceMan? SelectedPaceManPlayer
+    {
+        get { return _selectedPaceManPlayer; }
+        set
+        {
+            _selectedWhitelistPlayer = null;
+            OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+
+            _selectedPaceManPlayer = value;
+            OnPropertyChanged(nameof(SelectedPaceManPlayer));
+
+            CurrentChosenPlayer = _selectedPaceManPlayer;
+            OnPropertyChanged(nameof(CurrentChosenPlayer));
+        }
+    }
+
+    public PointOfView? CurrentChosenPOV { get; set; }
+
     private bool _isConnectedToWebSocket;
     public bool IsConnectedToWebSocket
     {
