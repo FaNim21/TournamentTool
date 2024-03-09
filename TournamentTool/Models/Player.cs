@@ -92,7 +92,7 @@ public class TwitchStreamData : BaseViewModel
     }
 }
 
-public class Player : BaseViewModel
+public class Player : BaseViewModel, ITwitchPovInformation
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -181,7 +181,6 @@ public class Player : BaseViewModel
         }
     }
 
-
     public Player(string name = "")
     {
         Name = name;
@@ -233,5 +232,14 @@ public class Player : BaseViewModel
         Name = string.Empty;
         TwitchName = string.Empty;
         PersonalBest = string.Empty;
+    }
+
+    public string GetDisplayName()
+    {
+        return Name!;
+    }
+    public string GetTwitchName()
+    {
+        return TwitchName!;
     }
 }

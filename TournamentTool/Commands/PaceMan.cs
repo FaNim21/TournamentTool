@@ -5,7 +5,7 @@ using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands;
 
-public class PaceMan : BaseViewModel
+public class PaceMan : BaseViewModel, ITwitchPovInformation
 {
     [JsonPropertyName("user")]
     public PaceManUser User { get; set; } = new();
@@ -70,6 +70,15 @@ public class PaceMan : BaseViewModel
 
         CurrentSplitTimeMiliseconds = currentPace.IGT;
         IGTTimeMiliseconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - LastUpdate) + currentPace.IGT;
+    }
+
+    public string GetDisplayName()
+    {
+        return Nickname;
+    }
+    public string GetTwitchName()
+    {
+        return User.TwitchName;
     }
 }
 
