@@ -1,4 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+using System.Windows;
+using System.Windows.Media;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
@@ -15,13 +17,18 @@ public class PointOfView : BaseViewModel
     public int X { get; set; }
     public int Y { get; set; }
 
+    public Brush? BackgroundColor { get; set; }
+
     public string Text { get; set; } = string.Empty;
     [JsonIgnore] public string DisplayedPlayer { get; set; } = string.Empty;
     [JsonIgnore] public string TwitchName { get; set; } = string.Empty;
 
 
 
-    public PointOfView() { }
+    public PointOfView()
+    {
+        UnFocus();
+    }
 
     public void Update()
     {
@@ -46,5 +53,16 @@ public class PointOfView : BaseViewModel
         DisplayedPlayer = tempDisplayedPlayer;
         TwitchName = tempTwitchName;
         Update();
+    }
+
+    public void Focus()
+    {
+        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(190, 239, 255)); });
+        OnPropertyChanged(nameof(BackgroundColor));
+    }
+    public void UnFocus()
+    {
+        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(162, 203, 217)); });
+        OnPropertyChanged(nameof(BackgroundColor));
     }
 }

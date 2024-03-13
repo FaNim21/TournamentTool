@@ -1,4 +1,5 @@
-﻿using OBSStudioClient;
+﻿using Google.Apis.Logging;
+using OBSStudioClient;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
@@ -9,6 +10,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
@@ -58,7 +60,16 @@ public class ControllerViewModel : BaseViewModel
 
     public OBSVideoSettings OBSVideoSettings { get; set; } = new();
 
-    public ITwitchPovInformation? CurrentChosenPlayer { get; set; }
+    private ITwitchPovInformation? _currentChosenPlayer;
+    public ITwitchPovInformation? CurrentChosenPlayer
+    {
+        get => _currentChosenPlayer;
+        set
+        {
+            _currentChosenPlayer = value;
+            OnPropertyChanged(nameof(CurrentChosenPlayer));
+        }
+    }
 
     private Player? _selectedWhitelistPlayer;
     public Player? SelectedWhitelistPlayer
@@ -73,7 +84,8 @@ public class ControllerViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedWhitelistPlayer));
 
             CurrentChosenPlayer = value;
-            OnPropertyChanged(nameof(CurrentChosenPlayer));
+
+            SetPovAfterClickedCanvas();
         }
     }
 
@@ -89,12 +101,24 @@ public class ControllerViewModel : BaseViewModel
             _selectedPaceManPlayer = value;
             OnPropertyChanged(nameof(SelectedPaceManPlayer));
 
-            CurrentChosenPlayer = _selectedPaceManPlayer;
-            OnPropertyChanged(nameof(CurrentChosenPlayer));
+            CurrentChosenPlayer = value;
+
+            SetPovAfterClickedCanvas();
         }
     }
 
-    public PointOfView? CurrentChosenPOV { get; set; }
+    private PointOfView? _currentChosenPOV;
+    public PointOfView? CurrentChosenPOV
+    {
+        get => _currentChosenPOV;
+        set
+        {
+            if (value == null)
+                _currentChosenPOV?.UnFocus();
+            _currentChosenPOV = value;
+            OnPropertyChanged(nameof(CurrentChosenPOV));
+        }
+    }
 
     private bool _isConnectedToWebSocket;
     public bool IsConnectedToWebSocket
@@ -591,5 +615,26 @@ public class ControllerViewModel : BaseViewModel
             var current = notFoundPaceMans[i];
             Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
         }
+    }
+
+    private void SetPovAfterClickedCanvas()
+    {
+        if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
+
+        CurrentChosenPOV.DisplayedPlayer = CurrentChosenPlayer!.GetDisplayName();
+        CurrentChosenPOV.TwitchName = CurrentChosenPlayer!.GetTwitchName();
+        CurrentChosenPOV.Update();
+        SetBrowserURL(CurrentChosenPOV.SceneItemName!, CurrentChosenPOV.TwitchName);
+        UnSelectItems();
+    }
+
+    public void UnSelectItems(bool ClearAll = false)
+    {
+        CurrentChosenPlayer = null;
+        _selectedPaceManPlayer = null;
+        OnPropertyChanged(nameof(SelectedPaceManPlayer));
+        _selectedWhitelistPlayer = null;
+        OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+        if (ClearAll) CurrentChosenPOV = null;
     }
 }
