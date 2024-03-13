@@ -11,7 +11,10 @@
              mc:Ignorable="d"
              d:DesignHeight="576"
              d:DesignWidth="1024"
-             Background="#383A3C">
+             Background="#383A3C"
+             Focusable="True"
+             KeyDown="Window_KeyDown"
+             PreviewKeyDown="UserControl_PreviewKeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
@@ -63,8 +66,10 @@
                             Width="{Binding CanvasWidth}"
                             Height="{Binding CanvasHeight}"
                             SizeChanged="Canvas_SizeChanged"
+                            PreviewKeyDown="Window_KeyDown"
                             AllowDrop="True"
-                            ClipToBounds="True">
+                            ClipToBounds="True"
+                            Focusable="True">
                         <ItemsControl ItemsSource="{Binding POVs}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -85,7 +90,7 @@
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="LightBlue"
+                                    <Border Background="{Binding BackgroundColor}"
                                             Width="{Binding Width}"
                                             Height="{Binding Height}"
                                             BorderBrush="Black"
@@ -93,7 +98,9 @@
                                             CornerRadius="5"
                                             Drop="Border_Drop"
                                             MouseMove="CanvasBorder_MouseMove"
-                                            PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown">
+                                            PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown"
+                                            MouseEnter="CanvasItem_MouseEnter"
+                                            MouseLeave="CanvasItem_MouseLeave">
                                         <TextBlock Text="{Binding DisplayedPlayer}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
@@ -186,7 +193,8 @@
             </Grid>
 
             <Grid Grid.Column="1">
-                <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+                <ListBox x:Name="WhiteList"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          Background="Transparent"
                          BorderThickness="0"
@@ -196,7 +204,9 @@
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          AllowDrop="True"
                          ItemsSource="{Binding FilteredPlayers}"
-                         SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}">
+                         SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
+                         SelectionChanged="List_SelectionChanged"
+                         PreviewKeyDown="List_PreviewKeyDown">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:Player">
                             <Border BorderBrush="Black"
@@ -269,7 +279,8 @@
                           Width="5" />
 
             <Grid Grid.Column="3">
-                <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+                <ListBox x:Name="PaceMan"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          Background="Transparent"
                          BorderThickness="0"
@@ -280,7 +291,9 @@
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          AllowDrop="True"
                          ItemsSource="{Binding PaceManPlayers}"
-                         SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}">
+                         SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}"
+                         SelectionChanged="List_SelectionChanged"
+                         PreviewKeyDown="List_PreviewKeyDown">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:PaceMan">
                             <Border BorderBrush="Black"
