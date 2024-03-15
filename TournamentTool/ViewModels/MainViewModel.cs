@@ -136,19 +136,22 @@ public class MainViewModel : BaseViewModel
             Owner = Application.Current.MainWindow,
             DataContext = new ControllerViewModel(this),
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Topmost = CurrentChosen.IsAlwaysOnTop
         };
         window.Show();
         //TODO: Polaczyc cala apke w jedno okno
         Application.Current.MainWindow.Hide();
     }
-
     private void OpenPlayerManagerWindow()
     {
+        if (CurrentChosen == null) return;
+
         PlayerManagerWindow window = new()
         {
             Owner = Application.Current.MainWindow,
             DataContext = new PlayerManagerViewModel(this, CurrentChosen!),
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Topmost = CurrentChosen.IsAlwaysOnTop
         };
         window.Show();
         SavePresetCommand.Execute(null);

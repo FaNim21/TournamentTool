@@ -41,6 +41,21 @@ public class Tournament : BaseViewModel, IRenameItem
         }
     }
 
+    private bool _isAlwaysOnTop = true;
+    public bool IsAlwaysOnTop
+    {
+        get => _isAlwaysOnTop;
+        set
+        {
+            _isAlwaysOnTop = value;
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                Application.Current.MainWindow.Topmost = value;
+            });
+            OnPropertyChanged(nameof(IsAlwaysOnTop));
+        }
+    }
+
 
     [JsonConstructor]
     public Tournament(string name = "")
@@ -107,5 +122,6 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
         PaceManRefreshRateMiliseconds = 10000;
+        IsAlwaysOnTop = true;
     }
 }

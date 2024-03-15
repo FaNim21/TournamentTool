@@ -182,6 +182,12 @@
                                Padding="0"
                                Margin="5 0 0 3" />
                     </WrapPanel>
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
+                        <CheckBox IsChecked="{Binding CurrentChosen.IsAlwaysOnTop}"
+                                  Content="Always On Top"
+                                  Foreground="White" />
+                    </WrapPanel>
                 </WrapPanel>
 
                 <WrapPanel Orientation="Vertical"

@@ -206,6 +206,7 @@ public class ControllerViewModel : BaseViewModel
         });
     }
 
+    //TODO: 0 zrob wszystkie message boxy uzywajac to: MessageBoxOptions.DefaultDesktopOnly albo dodaj swoj dialog box nawet wyjdzie lepiej z tym
     private async Task ConnectToOBS()
     {
         if (Client == null || MainViewModel.CurrentChosen == null) return;
@@ -357,6 +358,11 @@ public class ControllerViewModel : BaseViewModel
             });
 
             var auth2 = await server.Listen();
+            if (auth2 == null)
+            {
+                MessageBox.Show("Error with listening for twitch authentication");
+                return;
+            }
             var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, RedirectURL, Consts.ClientID);
             TwitchAPI.Settings.AccessToken = resp.AccessToken;
         }
@@ -462,7 +468,15 @@ public class ControllerViewModel : BaseViewModel
     {
         while (!twitchWorker.CancellationPending)
         {
-            await UpdateTwitchInformations();
+            try
+            {
+                await UpdateTwitchInformations();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+                return;
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(15000));
         }
     }
@@ -472,7 +486,11 @@ public class ControllerViewModel : BaseViewModel
         paceManWorker?.CancelAsync();
         paceManWorker?.Dispose();
 
-        twitchWorker?.CancelAsync();
+        try
+        {
+            twitchWorker?.CancelAsync();
+        }
+        catch { }
         twitchWorker?.Dispose();
 
         for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
