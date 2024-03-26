@@ -1,5 +1,4 @@
-﻿using Google.Apis.Logging;
-using OBSStudioClient;
+﻿using OBSStudioClient;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
@@ -9,8 +8,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
@@ -176,6 +175,8 @@ public class ControllerViewModel : BaseViewModel
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
 
+    public string CurrentSceneName { get; set; }
+
     public ICommand? ClipCommand { get; set; } = null;
 
 
@@ -222,7 +223,6 @@ public class ControllerViewModel : BaseViewModel
                     await Task.Delay(100);
 
                 await Client.SetCurrentSceneCollection(MainViewModel.CurrentChosen.SceneCollection!);
-                await Client.SetCurrentProgramScene(MainViewModel.CurrentChosen.Scene!);
             }
             catch (Exception ex)
             {
@@ -252,34 +252,14 @@ public class ControllerViewModel : BaseViewModel
             CanvasAspectRatio = (float)CanvasWidth / CanvasHeight;
             OnPropertyChanged(nameof(CanvasAspectRatio));
 
-            SceneItem[] sceneItems = await Client.GetSceneItemList(MainViewModel.CurrentChosen.Scene);
-            foreach (var item in sceneItems)
-            {
-                if (item.SourceName.StartsWith(MainViewModel.CurrentChosen.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
-                {
-                    PointOfView pov = new();
-                    SceneItemTransform transform = await Client.GetSceneItemTransform(MainViewModel.CurrentChosen.Scene, item.SceneItemId);
-
-                    pov.SceneName = MainViewModel.CurrentChosen.Scene;
-                    pov.SceneItemName = item.SourceName;
-                    pov.ID = item.SceneItemId;
-
-                    pov.X = (int)(transform.PositionX / XAxisRatio);
-                    pov.Y = (int)(transform.PositionY / YAxisRatio);
-
-                    pov.Width = (int)(transform.Width / XAxisRatio);
-                    pov.Height = (int)(transform.Height / YAxisRatio);
-
-                    pov.Text = item.SourceName;
-
-                    AddPov(pov);
-                    SetBrowserURL(pov.SceneItemName);
-                }
-            }
+            CurrentSceneName = await Client.GetCurrentProgramScene();
+            OnPropertyChanged(nameof(CurrentSceneName));
+            await GetCurrentSceneitems();
 
             Client.SceneItemCreated += OnSceneItemCreated;
             Client.SceneItemRemoved += OnSceneItemRemoved;
             Client.SceneItemTransformChanged += OnSceneItemTransformChanged;
+            Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
         }
         catch (Exception ex)
         {
@@ -303,9 +283,56 @@ public class ControllerViewModel : BaseViewModel
         Client.SceneItemCreated -= OnSceneItemCreated;
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.SceneItemTransformChanged -= OnSceneItemTransformChanged;
+        Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
     }
 
-    public void SetBrowserURL(string sceneItemName, string? player = null)
+    public async Task GetCurrentSceneitems()
+    {
+        if (Client == null || string.IsNullOrEmpty(CurrentSceneName)) return;
+
+        Application.Current.Dispatcher.Invoke(POVs.Clear);
+
+        await Task.Delay(50);
+
+        SceneItem[] sceneItems = await Client.GetSceneItemList(CurrentSceneName);
+        foreach (var item in sceneItems)
+        {
+            if (!item.InputKind!.Equals("game_capture") &&
+                !item.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PointOfView pov = new();
+            SceneItemTransform transform = await Client.GetSceneItemTransform(CurrentSceneName, item.SceneItemId);
+
+            pov.SceneName = CurrentSceneName;
+            pov.SceneItemName = item.SourceName;
+            pov.ID = item.SceneItemId;
+
+            pov.X = (int)(transform.PositionX / XAxisRatio);
+            pov.Y = (int)(transform.PositionY / YAxisRatio);
+
+            pov.Width = (int)(transform.Width / XAxisRatio);
+            pov.Height = (int)(transform.Height / YAxisRatio);
+
+            pov.Text = item.SourceName;
+
+            string? currentName = await GetBrowserURLTwitchName(pov.SceneItemName);
+            if (!string.IsNullOrEmpty(currentName))
+            {
+                Player? player = MainViewModel.CurrentChosen!.GetPlayerByTwitchName(currentName);
+                if (player != null)
+                {
+                    pov.TwitchName = currentName;
+                    pov.DisplayedPlayer = player.Name!;
+                    pov.Update();
+                }
+            }
+
+            AddPov(pov);
+        }
+    }
+
+    public void SetBrowserURL(string sceneItemName, string player)
     {
         if (Client == null || !IsConnectedToWebSocket) return;
 
@@ -313,6 +340,22 @@ public class ControllerViewModel : BaseViewModel
         if (string.IsNullOrEmpty(player)) url = "";
         Dictionary<string, object> input = new() { { "url", url }, };
         Client.SetInputSettings(sceneItemName, input);
+    }
+    public async Task<string> GetBrowserURLTwitchName(string sceneItemName)
+    {
+        if (Client == null || !IsConnectedToWebSocket) return string.Empty;
+
+        var setting = await Client.GetInputSettings(sceneItemName);
+        Dictionary<string, object> input = setting.InputSettings;
+
+        string pattern = @"channel=([^&]+)";
+        input.TryGetValue("url", out var address);
+        string url = address!.ToString()!;
+        if (string.IsNullOrEmpty(url)) return string.Empty;
+        Match match = Regex.Match(address!.ToString()!, pattern);
+        if (match.Success)
+            return match.Groups[1].Value;
+        return string.Empty;
     }
 
     private async Task SetupSceneItem(string sceneName, string sceneItemName, int x, int y, int width, int height)
@@ -562,6 +605,12 @@ public class ControllerViewModel : BaseViewModel
 
             current.UpdateTransform();
         }
+    }
+    private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
+    {
+        CurrentSceneName = e.SceneName;
+        OnPropertyChanged(nameof(CurrentSceneName));
+        Task.Run(GetCurrentSceneitems);
     }
 
     private void AddPov(PointOfView pov)
