@@ -112,7 +112,13 @@
                 </Grid>
 
                 <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
                     <WrapPanel Orientation="Vertical"
+                               Grid.Column="0"
                                Margin="10 5 5 5">
                         <TextBlock Text="Canvas:"
                                    FontSize="16"
@@ -174,6 +180,45 @@
                             <Run Text="{Binding OBSVideoSettings.AspectRatio, Mode=OneWay}" />
                         </TextBlock>
                     </WrapPanel>
+
+                    <Grid Grid.Column="1">
+                        <TextBlock Text="Current Scene: "
+                                   FontSize="16"
+                                   Foreground="White">
+                                <Run Text="{Binding CurrentSceneName}" />
+                        </TextBlock>
+                        <WrapPanel Orientation="Vertical"
+                                   Margin="00 25 5 5">
+                            <ScrollViewer>
+                                <ItemsControl Background="Transparent"
+                                              Focusable="False"
+                                              BorderThickness="0"
+                                              Width="210"
+                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                              VirtualizingPanel.IsVirtualizing="True"
+                                              VirtualizingPanel.VirtualizationMode="Recycling"
+                                              ItemsSource="{Binding POVs}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="models:PointOfView">
+                                            <StackPanel Margin="0 5 0 0">
+                                                <TextBlock Text="Item: "
+                                                           FontSize="12"
+                                                           Foreground="White">
+                                                    <Run Text="{Binding SceneItemName}" />
+                                                </TextBlock>
+                                                <TextBlock Text="Player: "
+                                                           FontSize="12"
+                                                           Foreground="White">
+                                                    <Run Text="{Binding DisplayedPlayer}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </WrapPanel>
+                    </Grid>
 
                     <!--
                     <components:ButtonNormal ContentText="clip first stream xd"

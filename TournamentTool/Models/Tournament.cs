@@ -20,7 +20,6 @@ public class Tournament : BaseViewModel, IRenameItem
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;
-    public string Scene { get; set; } = string.Empty;
 
     public string FilterNameAtStartForSceneItems { get; set; } = "pov";
     public bool IsUsingPaceMan { get; set; } = true;
@@ -114,7 +113,6 @@ public class Tournament : BaseViewModel, IRenameItem
         Port = 4455;
         Password = string.Empty;
         SceneCollection = string.Empty;
-        Scene = string.Empty;
 
         Players = [];
         FilterNameAtStartForSceneItems = "pov";
@@ -123,5 +121,17 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingWhitelistOnPaceMan = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
+    }
+
+    public Player? GetPlayerByTwitchName(string twitchName)
+    {
+        int n = Players.Count;
+        for (int i = 0; i < n; i++)
+        {
+            var current = Players[i];
+            if (current.TwitchName!.Equals(twitchName))
+                return current;
+        }
+        return null;
     }
 }
