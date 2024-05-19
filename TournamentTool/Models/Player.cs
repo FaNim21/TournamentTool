@@ -196,6 +196,12 @@ public class Player : BaseViewModel, ITwitchPovInformation
         if (string.IsNullOrEmpty(InGameName) || Image != null) return;
         Image = await RequestHeadImage();
     }
+    public async Task ForceUpdateHeadImage()
+    {
+        if (string.IsNullOrEmpty(InGameName)) return;
+        Image = await RequestHeadImage();
+    }
+
     public async Task CompleteData()
     {
         try

@@ -44,12 +44,12 @@ public partial class ControllerView : UserControl
         else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {
             dragPov.Swap(pov);
-            controller.SetBrowserURL(dragPov.SceneItemName!, dragPov.TwitchName);
+            controller.SetBrowserURL(dragPov!);
         }
 
         if (string.IsNullOrEmpty(pov.TwitchName)) return;
         pov.Update();
-        controller.SetBrowserURL(pov.SceneItemName!, pov.TwitchName);
+        controller.SetBrowserURL(pov);
     }
 
     private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -75,8 +75,8 @@ public partial class ControllerView : UserControl
             if (previousPOV == null) return;
 
             viewModel.CurrentChosenPOV.Swap(previousPOV);
-            viewModel.SetBrowserURL(viewModel.CurrentChosenPOV.SceneItemName!, viewModel.CurrentChosenPOV.TwitchName);
-            viewModel.SetBrowserURL(previousPOV.SceneItemName!, previousPOV.TwitchName);
+            viewModel.SetBrowserURL(viewModel.CurrentChosenPOV);
+            viewModel.SetBrowserURL(previousPOV!);
             previousPOV.Update();
             viewModel.CurrentChosenPOV = null;
             return;
@@ -85,9 +85,19 @@ public partial class ControllerView : UserControl
         pov.DisplayedPlayer = viewModel.CurrentChosenPlayer.GetDisplayName();
         pov.TwitchName = viewModel.CurrentChosenPlayer.GetTwitchName();
         pov.Update();
-        viewModel.SetBrowserURL(pov.SceneItemName!, pov.TwitchName);
+        viewModel.SetBrowserURL(pov!);
         viewModel.CurrentChosenPOV.UnFocus();
         viewModel.UnSelectItems(true);
+    }
+
+    private void CanvasItem_RightMouseButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not ControllerViewModel viewModel) return;
+        if (sender is not Border clickedBorder) return;
+        if (clickedBorder!.DataContext is not PointOfView pov) return;
+
+        pov.Clear();
+        viewModel.SetBrowserURL(pov);
     }
 
     private void CanvasItem_MouseEnter(object sender, MouseEventArgs e)

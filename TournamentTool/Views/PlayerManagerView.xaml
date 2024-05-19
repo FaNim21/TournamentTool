@@ -38,106 +38,112 @@
                        HorizontalAlignment="Center"
                        VerticalAlignment="Top"
                        TextAlignment="Center"
-                       Margin="0 10 0 0" />
-            <StackPanel Orientation="Vertical"
-                        Background="#4b4e51"
-                        Width="230"
-                        Height="225"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Top"
-                        Margin="0 80 10 0">
-                <StackPanel.Resources>
+                       Margin="0 0 0 0" />
+
+            <Grid Background="#4b4e51"
+                  Width="300"
+                  Height="290"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top"
+                  Margin="0 60 0 0">
+                <Grid.Resources>
                     <Style TargetType="{x:Type StackPanel}">
                         <Setter Property="Margin"
                                 Value="0 10 0 0" />
                     </Style>
-                </StackPanel.Resources>
+                </Grid.Resources>
+
                 <TextBlock FontSize="18"
                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
                            Margin="0 10 0 0"
                            TextAlignment="Center"
-                           Width="230"
+                           Width="300"
                            Height="30"
-                           HorizontalAlignment="Left"
+                           HorizontalAlignment="Center"
                            VerticalAlignment="Top">
                     <Run Foreground="DarkGray"
                          Text="Is Editing: " />
                     <Run Foreground="White"
                          Text="{Binding Player.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <Label Content=" Name: "
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="5 0 0 3" />
-                    <TextBox TextWrapping="Wrap"
-                             Width="120"
-                             Height="20"
-                             Text="{Binding Player.Name, Mode=TwoWay}"
-                             Padding="0 2 0 0"
-                             Background="#9E9E9E" />
+
+                <StackPanel Margin="0 30 15 0">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <Label Content=" Name: "
+                               Foreground="White"
+                               Height="18"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding Player.Name, Mode=TwoWay}"
+                                 Padding="0 2 0 0"
+                                 Background="#9E9E9E" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <Label Content="    IGN: "
+                               Foreground="White"
+                               Height="18"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding Player.InGameName, Mode=TwoWay}"
+                                 Padding="0 2 0 0"
+                                 Background="#9E9E9E" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <Label Content="      PB: "
+                               Foreground="White"
+                               Height="18"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding Player.PersonalBest, Mode=TwoWay}"
+                                 Padding="0 2 0 0"
+                                 Background="#9E9E9E" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <Label Content="Twitch: "
+                               Foreground="White"
+                               Height="18"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding Player.TwitchName, Mode=TwoWay}"
+                                 Padding="0 2 0 0"
+                                 Background="#9E9E9E" />
+                    </StackPanel>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <Label Content="    IGN: "
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="5 0 0 3" />
-                    <TextBox TextWrapping="Wrap"
-                             Width="120"
-                             Height="20"
-                             Text="{Binding Player.InGameName, Mode=TwoWay}"
-                             Padding="0 2 0 0"
-                             Background="#9E9E9E" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <Label Content="Twitch: "
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="5 0 0 3" />
-                    <TextBox TextWrapping="Wrap"
-                             Width="120"
-                             Height="20"
-                             Text="{Binding Player.TwitchName, Mode=TwoWay}"
-                             Padding="0 2 0 0"
-                             Background="#9E9E9E" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <Label Content="      PB: "
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="5 0 0 3" />
-                    <TextBox TextWrapping="Wrap"
-                             Width="120"
-                             Height="20"
-                             Text="{Binding Player.PersonalBest, Mode=TwoWay}"
-                             Padding="0 2 0 0"
-                             Background="#9E9E9E" />
-                </StackPanel>
+
                 <components:ButtonNormal ContentText="{Binding SaveButtonText}"
                                          Width="150"
                                          Height="25"
                                          HorizontalAlignment="Center"
+                                         VerticalAlignment="Bottom"
                                          OnCommand="{Binding SavePlayerCommand}"
-                                         Margin="15 15 0 0" />
-            </StackPanel>
+                                         Margin="0 0 0 10" />
+            </Grid>
 
             <Grid Background="#4b4e51"
                   Width="350"
-                  Height="180"
+                  Height="150"
                   VerticalAlignment="Bottom">
-                <StackPanel Margin="10 10 10 90"
+                <StackPanel Margin="10 5 10 90"
                             Orientation="Horizontal"
                             VerticalAlignment="Top"
                             HorizontalAlignment="Center">

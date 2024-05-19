@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Numerics;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 using TournamentTool.ViewModels;
@@ -19,9 +20,10 @@ public class PointOfView : BaseViewModel
 
     public Brush? BackgroundColor { get; set; }
 
-    public string Text { get; set; } = string.Empty;
+    [JsonIgnore] public string Text { get; set; } = string.Empty;
     [JsonIgnore] public string DisplayedPlayer { get; set; } = string.Empty;
     [JsonIgnore] public string TwitchName { get; set; } = string.Empty;
+    [JsonIgnore] public float Volume { get; set; } = 0;
 
 
 
@@ -33,6 +35,7 @@ public class PointOfView : BaseViewModel
     public void Update()
     {
         OnPropertyChanged(nameof(DisplayedPlayer));
+        OnPropertyChanged(nameof(Text));
     }
 
     public void UpdateTransform()
@@ -64,5 +67,26 @@ public class PointOfView : BaseViewModel
     {
         Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(162, 203, 217)); });
         OnPropertyChanged(nameof(BackgroundColor));
+    }
+
+    public void ChangeVolume(float volume)
+    {
+        Volume = Math.Clamp(volume, 0, 1);
+    }
+
+    public string GetURL()
+    {
+        if (string.IsNullOrEmpty(TwitchName)) return string.Empty;
+
+        return $"https://player.twitch.tv/?channel={TwitchName}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={Volume}";
+    }
+
+    public void Clear()
+    {
+        DisplayedPlayer = string.Empty;
+        Text = string.Empty;
+        TwitchName = string.Empty;
+
+        Update();
     }
 }
