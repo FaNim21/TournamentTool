@@ -99,6 +99,7 @@
                                             Drop="Border_Drop"
                                             MouseMove="CanvasBorder_MouseMove"
                                             PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown"
+                                            PreviewMouseRightButtonDown="CanvasItem_RightMouseButtonDown"
                                             MouseEnter="CanvasItem_MouseEnter"
                                             MouseLeave="CanvasItem_MouseLeave">
                                         <TextBlock Text="{Binding DisplayedPlayer}"
@@ -119,7 +120,9 @@
 
                     <WrapPanel Orientation="Vertical"
                                Grid.Column="0"
-                               Margin="10 5 5 5">
+                               Margin="10 5 5 5"
+                               VerticalAlignment="Top"
+                               Height="225">
                         <TextBlock Text="Canvas:"
                                    FontSize="16"
                                    Foreground="White" />
@@ -180,6 +183,19 @@
                             <Run Text="{Binding OBSVideoSettings.AspectRatio, Mode=OneWay}" />
                         </TextBlock>
                     </WrapPanel>
+
+                    <Grid Grid.Column="0"
+                          VerticalAlignment="Bottom"
+                          Height="75">
+                        <Slider Width="175"
+                                Height="20"
+                                Minimum="0"
+                                Maximum="1"
+                                Value="{Binding CurrentChosenPOV.Volume}"
+                                TickFrequency="0.01" 
+                                SmallChange="0.01"
+                                LargeChange="1"/>
+                    </Grid>
 
                     <Grid Grid.Column="1">
                         <TextBlock Text="Current Scene: "

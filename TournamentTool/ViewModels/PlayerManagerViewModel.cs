@@ -125,7 +125,7 @@ public class PlayerManagerViewModel : BaseViewModel
                 {
                     current.Name = Player.Name;
                     current.InGameName = Player.InGameName;
-                    current.TwitchName = Player.TwitchName.ToLower();
+                    current.TwitchName = Player.TwitchName.ToLower().Trim();
                     current.PersonalBest = Player.PersonalBest;
                     Task.Run(current.UpdateHeadImage);
                 }
@@ -139,7 +139,7 @@ public class PlayerManagerViewModel : BaseViewModel
             {
                 Name = Player.Name,
                 InGameName = Player.InGameName,
-                TwitchName = Player.TwitchName,
+                TwitchName = Player.TwitchName.ToLower().Trim(),
                 PersonalBest = Player.PersonalBest,
             };
             Task.Run(newPlayer.UpdateHeadImage);
@@ -225,9 +225,12 @@ public class PlayerManagerViewModel : BaseViewModel
                 var current = Tournament!.Players[i];
                 if (current.Image != null) continue;
                 if (current.ImageStream != null)
+                {
                     current.LoadHead();
-                else
-                    await current.UpdateHeadImage();
+                    continue;
+                }
+
+                await current.ForceUpdateHeadImage();
             }
 
         });
