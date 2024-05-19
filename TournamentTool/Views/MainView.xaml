@@ -152,6 +152,12 @@
                     </WrapPanel>
                     <WrapPanel Orientation="Horizontal"
                                Margin="0 0 0 5">
+                        <CheckBox IsChecked="{Binding CurrentChosen.SetPovNameInTextField}"
+                                  Content="Set POV names in text fields"
+                                  Foreground="White" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal"
+                               Margin="0 0 0 5">
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"

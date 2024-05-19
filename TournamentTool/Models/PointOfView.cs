@@ -1,13 +1,15 @@
-﻿using System.Numerics;
-using System.Text.Json.Serialization;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
+using TournamentTool.Commands;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
 
 public class PointOfView : BaseViewModel
 {
+    private readonly ControllerViewModel _controller;
+
     public string? SceneName { get; set; }
     public string? SceneItemName { get; set; }
     public int ID { get; set; }
@@ -18,24 +20,48 @@ public class PointOfView : BaseViewModel
     public int X { get; set; }
     public int Y { get; set; }
 
+    public string TextFieldItemName { get; set; }
+
     public Brush? BackgroundColor { get; set; }
 
-    [JsonIgnore] public string Text { get; set; } = string.Empty;
-    [JsonIgnore] public string DisplayedPlayer { get; set; } = string.Empty;
-    [JsonIgnore] public string TwitchName { get; set; } = string.Empty;
-    [JsonIgnore] public float Volume { get; set; } = 0;
+    public string Text { get; set; } = string.Empty;
+    public string DisplayedPlayer { get; set; } = string.Empty;
+    public string TwitchName { get; set; } = string.Empty;
 
+    public float Volume { get; set; } = 0;
+    public string TextVolume { get => $"{(int)(NewVolume * 100)}%"; }
 
-
-    public PointOfView()
+    private float _newVolume;
+    public float NewVolume
     {
+        get => _newVolume;
+        set
+        {
+            if (_newVolume != value)
+                _newVolume = value;
+            OnPropertyChanged(nameof(NewVolume));
+            OnPropertyChanged(nameof(TextVolume));
+        }
+    }
+
+    public ICommand ApplyVolumeCommand { get; set; }
+
+
+    public PointOfView(ControllerViewModel controller)
+    {
+        _controller = controller;
+
         UnFocus();
+
+        ApplyVolumeCommand = new RelayCommand(ApplyVolume);
     }
 
     public void Update()
     {
         OnPropertyChanged(nameof(DisplayedPlayer));
+        OnPropertyChanged(nameof(TextFieldItemName));
         OnPropertyChanged(nameof(Text));
+        OnPropertyChanged(nameof(Volume));
     }
 
     public void UpdateTransform()
@@ -72,13 +98,30 @@ public class PointOfView : BaseViewModel
     public void ChangeVolume(float volume)
     {
         Volume = Math.Clamp(volume, 0, 1);
+
+        if (NewVolume == volume) return;
+        NewVolume = Volume;
+    }
+    public void ApplyVolume()
+    {
+        Volume = NewVolume;
+        Update();
+
+        _controller.SetBrowserURL(this);
+    }
+
+    public void UpdateNameTextField()
+    {
+        if (string.IsNullOrEmpty(TextFieldItemName)) return;
+
+        _controller.SetTextField(TextFieldItemName, TwitchName);
     }
 
     public string GetURL()
     {
         if (string.IsNullOrEmpty(TwitchName)) return string.Empty;
 
-        return $"https://player.twitch.tv/?channel={TwitchName}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={Volume}";
+        return $"https://player.twitch.tv/?channel={TwitchName}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={Volume.ToString().Replace(',', '.')}";
     }
 
     public void Clear()

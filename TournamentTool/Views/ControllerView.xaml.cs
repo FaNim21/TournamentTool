@@ -50,6 +50,7 @@ public partial class ControllerView : UserControl
         if (string.IsNullOrEmpty(pov.TwitchName)) return;
         pov.Update();
         controller.SetBrowserURL(pov);
+        controller.UnSelectItems(true);
     }
 
     private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -149,5 +150,16 @@ public partial class ControllerView : UserControl
     private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         Trace.WriteLine(e.Key.ToString());
+    }
+
+    private void Slider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Slider slider) return;
+        Point position = e.GetPosition(slider);
+
+        double percentage = position.X / slider.ActualWidth;
+        double newValue = slider.Minimum + (percentage * (slider.Maximum - slider.Minimum));
+
+        slider.Value = newValue;
     }
 }
