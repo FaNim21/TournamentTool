@@ -102,9 +102,19 @@
                                             PreviewMouseRightButtonDown="CanvasItem_RightMouseButtonDown"
                                             MouseEnter="CanvasItem_MouseEnter"
                                             MouseLeave="CanvasItem_MouseLeave">
-                                        <TextBlock Text="{Binding DisplayedPlayer}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center" />
+                                        <Grid>
+                                            <TextBlock Text="{Binding SceneItemName}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Top"
+                                                       FontSize="10"
+                                                       Foreground="Black" />
+                                            <TextBlock Text="{Binding DisplayedPlayer}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="DarkViolet" />
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -115,14 +125,14 @@
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
-                        <ColumnDefinition />
+                        <ColumnDefinition Width="250" />
                     </Grid.ColumnDefinitions>
 
                     <WrapPanel Orientation="Vertical"
                                Grid.Column="0"
                                Margin="10 5 5 5"
                                VerticalAlignment="Top"
-                               Height="225">
+                               Height="250">
                         <TextBlock Text="Canvas:"
                                    FontSize="16"
                                    Foreground="White" />
@@ -184,28 +194,18 @@
                         </TextBlock>
                     </WrapPanel>
 
-                    <Grid Grid.Column="0"
-                          VerticalAlignment="Bottom"
-                          Height="75">
-                        <Slider Width="175"
-                                Height="20"
-                                Minimum="0"
-                                Maximum="1"
-                                Value="{Binding CurrentChosenPOV.Volume}"
-                                TickFrequency="0.01" 
-                                SmallChange="0.01"
-                                LargeChange="1"/>
-                    </Grid>
-
                     <Grid Grid.Column="1">
                         <TextBlock Text="Current Scene: "
-                                   FontSize="16"
-                                   Foreground="White">
+                                   FontSize="17"
+                                   Margin="0 5 0 0"
+                                   FontWeight="SemiBold"
+                                   Foreground="FloralWhite">
                                 <Run Text="{Binding CurrentSceneName}" />
                         </TextBlock>
                         <WrapPanel Orientation="Vertical"
-                                   Margin="00 25 5 5">
-                            <ScrollViewer>
+                                   Margin="0 15 0 1">
+                            <ScrollViewer Width="250"
+                                          Margin="0 10 0 0">
                                 <ItemsControl Background="Transparent"
                                               Focusable="False"
                                               BorderThickness="0"
@@ -214,20 +214,67 @@
                                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                               VirtualizingPanel.IsVirtualizing="True"
                                               VirtualizingPanel.VirtualizationMode="Recycling"
-                                              ItemsSource="{Binding POVs}">
+                                              ItemsSource="{Binding POVs}"
+                                              Margin="0 0 0 10">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="models:PointOfView">
-                                            <StackPanel Margin="0 5 0 0">
-                                                <TextBlock Text="Item: "
-                                                           FontSize="12"
-                                                           Foreground="White">
-                                                    <Run Text="{Binding SceneItemName}" />
+                                            <StackPanel Margin="-10 10 0 0">
+                                                <TextBlock>
+                                                    <Run Text="Item: "
+                                                         FontSize="12"
+                                                         Foreground="White" />
+                                                    <Run Text="{Binding SceneItemName}"
+                                                         Foreground="White"
+                                                         FontWeight="SemiBold" />
                                                 </TextBlock>
-                                                <TextBlock Text="Player: "
-                                                           FontSize="12"
-                                                           Foreground="White">
-                                                    <Run Text="{Binding DisplayedPlayer}" />
+                                                <TextBlock>
+                                                <Run Text="Text Item: "
+                                                     FontSize="12"
+                                                     Foreground="White" />
+                                                <Run Text="{Binding TextFieldItemName}"
+                                                     Foreground="White"
+                                                     FontWeight="SemiBold" />
                                                 </TextBlock>
+                                                <TextBlock>
+                                                    <Run Text="Player: "
+                                                         FontSize="12"
+                                                         Foreground="White" />
+                                                    <Run Text="{Binding DisplayedPlayer}"
+                                                         Foreground="Cyan" />
+                                                </TextBlock>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Margin="0 5 0 0">
+                                                    <components:ButtonNormal Width="45"
+                                                                             Height="25"
+                                                                             ContentText="Apply"
+                                                                             OnCommand="{Binding ApplyVolumeCommand}" />
+                                                    <Grid>
+                                                        <Slider Width="100"
+                                                                Height="20"
+                                                                Margin="5 5 0 0"
+                                                                Opacity="0.5"
+                                                                Minimum="0"
+                                                                Maximum="1"
+                                                                TickFrequency="0.01"
+                                                                Value="{Binding Volume}" />
+                                                        <Slider Width="100"
+                                                                Height="20"
+                                                                Minimum="0"
+                                                                Maximum="1"
+                                                                IsSnapToTickEnabled="True"
+                                                                Value="{Binding NewVolume}"
+                                                                PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                                                TickFrequency="0.01"
+                                                                SmallChange="0.01"
+                                                                LargeChange="0"
+                                                                Margin="5 5 0 0" />
+                                                    </Grid>
+                                                    <Label Content="{Binding TextVolume}"
+                                                           FontWeight="Bold"
+                                                           Foreground="Wheat"
+                                                           Padding="0"
+                                                           Margin="1 5 0 0" />
+                                                </StackPanel>
                                             </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

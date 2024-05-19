@@ -191,7 +191,7 @@ public class ControllerViewModel : BaseViewModel
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
 
-    public string CurrentSceneName { get; set; }
+    public string CurrentSceneName { get; set; } = "";
 
     public ICommand? ClipCommand { get; set; } = null;
 
@@ -307,17 +307,25 @@ public class ControllerViewModel : BaseViewModel
         if (Client == null || string.IsNullOrEmpty(CurrentSceneName)) return;
 
         Application.Current.Dispatcher.Invoke(POVs.Clear);
-
         await Task.Delay(50);
 
         SceneItem[] sceneItems = await Client.GetSceneItemList(CurrentSceneName);
+        List<SceneItem> texts = [];
+
         foreach (var item in sceneItems)
         {
-            if (!item.InputKind!.Equals("game_capture") &&
-                !item.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+            if (item.IsGroup == true || string.IsNullOrEmpty(item.InputKind)) continue;
+            if (item.InputKind.StartsWith("text"))
+            {
+                if (MainViewModel.CurrentChosen!.SetPovNameInTextField)
+                    texts.Add(item);
                 continue;
+            }
 
-            PointOfView pov = new();
+            if (!item.InputKind.Equals("game_capture") &&
+                !item.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) continue;
+
+            PointOfView pov = new(this);
             SceneItemTransform transform = await Client.GetSceneItemTransform(CurrentSceneName, item.SceneItemId);
 
             pov.SceneName = CurrentSceneName;
@@ -348,6 +356,20 @@ public class ControllerViewModel : BaseViewModel
 
             AddPov(pov);
         }
+
+        if (texts.Count == 0) return;
+        foreach (var pov in POVs)
+        {
+            foreach (var text in texts)
+            {
+                if (text.SourceName.StartsWith(pov.SceneItemName!))
+                {
+                    pov.TextFieldItemName = text.SourceName;
+                    pov.Update();
+                    break;
+                }
+            }
+        }
     }
 
     public void SetBrowserURL(PointOfView pov)
@@ -356,6 +378,7 @@ public class ControllerViewModel : BaseViewModel
 
         Dictionary<string, object> input = new() { { "url", pov.GetURL() }, };
         Client.SetInputSettings(pov.SceneItemName!, input);
+        pov.UpdateNameTextField();
     }
     public async Task<(string, float)> GetBrowserURLTwitchName(string sceneItemName)
     {
@@ -392,6 +415,14 @@ public class ControllerViewModel : BaseViewModel
         }
 
         return (name, volume);
+    }
+
+    public void SetTextField(string sceneItemName, string text)
+    {
+        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName) || string.IsNullOrEmpty(text)) return;
+
+        Dictionary<string, object> input = new() { { "text", text }, };
+        Client.SetInputSettings(sceneItemName, input);
     }
 
     private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
@@ -606,7 +637,7 @@ public class ControllerViewModel : BaseViewModel
         if (!args.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
-        PointOfView pov = new()
+        PointOfView pov = new(this)
         {
             SceneName = args.SceneName,
             SceneItemName = args.SourceName,

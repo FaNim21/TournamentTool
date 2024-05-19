@@ -25,6 +25,7 @@ public class Tournament : BaseViewModel, IRenameItem
     public bool IsUsingPaceMan { get; set; } = true;
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
+    public bool SetPovNameInTextField { get; set; } = false;
 
     private int _paceManRefreshRateMiliseconds = 10000;
     public int PaceManRefreshRateMiliseconds
@@ -119,6 +120,7 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingPaceMan = true;
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
+        SetPovNameInTextField = false;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
     }
