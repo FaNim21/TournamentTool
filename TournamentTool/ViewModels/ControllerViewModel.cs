@@ -3,7 +3,6 @@ using OBSStudioClient.Classes;
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,7 +12,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
@@ -207,6 +205,9 @@ public class ControllerViewModel : BaseViewModel
         Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
 
         MainViewModel = mainViewModel;
+
+        foreach (var player in MainViewModel.CurrentChosen!.Players)
+            player.ShowCategory(!MainViewModel.CurrentChosen!.ShowLiveOnlyForMinecraftCategory);
         FilterItems();
 
         if (MainViewModel.CurrentChosen!.IsUsingPaceMan)
@@ -228,16 +229,22 @@ public class ControllerViewModel : BaseViewModel
     {
         if (Client == null || MainViewModel.CurrentChosen == null) return;
 
+        int timeoutCount = 0;
+        int timeoutChecks = 35;
+
         bool isConnected = await Client.ConnectAsync(true, MainViewModel.CurrentChosen.Password!, "localhost", MainViewModel.CurrentChosen.Port, EventSubscriptions.All | EventSubscriptions.SceneItemTransformChanged);
         Client.ConnectionClosed += OnConnectionClosed;
         if (isConnected)
         {
-            IsConnectedToWebSocket = true;
             try
             {
-                while (Client.ConnectionState != ConnectionState.Connected)
+                while (Client.ConnectionState != ConnectionState.Connected && timeoutCount <= timeoutChecks)
+                {
                     await Task.Delay(100);
+                    timeoutCount++;
+                }
 
+                IsConnectedToWebSocket = true;
                 await Client.SetCurrentSceneCollection(MainViewModel.CurrentChosen.SceneCollection!);
             }
             catch (Exception ex)
@@ -419,7 +426,7 @@ public class ControllerViewModel : BaseViewModel
 
     public void SetTextField(string sceneItemName, string text)
     {
-        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName) || string.IsNullOrEmpty(text)) return;
+        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return;
 
         Dictionary<string, object> input = new() { { "text", text }, };
         Client.SetInputSettings(sceneItemName, input);
@@ -487,7 +494,7 @@ public class ControllerViewModel : BaseViewModel
         for (int i = 0; i < response.Streams.Length; i++)
         {
             var current = response.Streams[i];
-            //if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase)) continue;
+            if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && MainViewModel.CurrentChosen.ShowLiveOnlyForMinecraftCategory) continue;
 
             for (int j = 0; j < notLivePlayers.Count; j++)
             {
