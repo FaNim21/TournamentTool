@@ -21,11 +21,25 @@ public class Tournament : BaseViewModel, IRenameItem
     public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;
 
-    public string FilterNameAtStartForSceneItems { get; set; } = "pov";
+    private string _filterNameAtStartForSceneItems = "pov";
+    public string FilterNameAtStartForSceneItems
+    {
+        get => _filterNameAtStartForSceneItems;
+        set
+        {
+            if (!value.StartsWith("head", StringComparison.OrdinalIgnoreCase))
+                _filterNameAtStartForSceneItems = value;
+
+            OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
+        }
+    }
+
+
     public bool IsUsingPaceMan { get; set; } = true;
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
     public bool SetPovNameInTextField { get; set; } = false;
+    public bool SetPovHeadsInBrowser { get; set; } = false;
     public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
 
     private int _paceManRefreshRateMiliseconds = 10000;
@@ -122,6 +136,7 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
         SetPovNameInTextField = false;
+        SetPovHeadsInBrowser = false;
         ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;

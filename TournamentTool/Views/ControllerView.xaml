@@ -227,12 +227,20 @@
                                                          FontWeight="SemiBold" />
                                                 </TextBlock>
                                                 <TextBlock>
-                                                <Run Text="Text Item: "
-                                                     FontSize="12"
-                                                     Foreground="White" />
-                                                <Run Text="{Binding TextFieldItemName}"
-                                                     Foreground="White"
-                                                     FontWeight="SemiBold" />
+                                                    <Run Text="Text Item: "
+                                                         FontSize="12"
+                                                         Foreground="White" />
+                                                    <Run Text="{Binding TextFieldItemName}"
+                                                         Foreground="White"
+                                                         FontWeight="SemiBold" />
+                                                </TextBlock>
+                                                <TextBlock>
+                                                    <Run Text="Head Item: "
+                                                         FontSize="12"
+                                                         Foreground="White" />
+                                                    <Run Text="{Binding HeadItemName}"
+                                                         Foreground="White"
+                                                         FontWeight="SemiBold" />
                                                 </TextBlock>
                                                 <TextBlock>
                                                     <Run Text="Player: "

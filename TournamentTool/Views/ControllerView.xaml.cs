@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Models;
@@ -38,18 +37,14 @@ public partial class ControllerView : UserControl
 
         if (e.Data.GetData(typeof(ITwitchPovInformation)) is ITwitchPovInformation info)
         {
-            pov.DisplayedPlayer = info.GetDisplayName();
-            pov.TwitchName = info.GetTwitchName();
+            pov.SetPOV(info.GetDisplayName(), info.GetTwitchName(), info.GetHeadViewParametr());
         }
         else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {
             dragPov.Swap(pov);
-            controller.SetBrowserURL(dragPov!);
         }
 
         if (string.IsNullOrEmpty(pov.TwitchName)) return;
-        pov.Update();
-        controller.SetBrowserURL(pov);
         controller.UnSelectItems(true);
     }
 
@@ -61,7 +56,6 @@ public partial class ControllerView : UserControl
 
     private void CanvasBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        //TODO: 0 zrobic zeby klikajac w ten sam element drugi raz zeby go odkliknac i to samo dla listboxes i dla canvas
         if (DataContext is not ControllerViewModel viewModel) return;
         if (sender is not Border clickedBorder) return;
         if (clickedBorder!.DataContext is not PointOfView pov) return;
@@ -76,29 +70,23 @@ public partial class ControllerView : UserControl
             if (previousPOV == null) return;
 
             viewModel.CurrentChosenPOV.Swap(previousPOV);
-            viewModel.SetBrowserURL(viewModel.CurrentChosenPOV);
-            viewModel.SetBrowserURL(previousPOV!);
-            previousPOV.Update();
             viewModel.CurrentChosenPOV = null;
             return;
         }
 
-        pov.DisplayedPlayer = viewModel.CurrentChosenPlayer.GetDisplayName();
-        pov.TwitchName = viewModel.CurrentChosenPlayer.GetTwitchName();
-        pov.Update();
-        viewModel.SetBrowserURL(pov!);
+        pov.SetPOV(viewModel.CurrentChosenPlayer.GetDisplayName(), viewModel.CurrentChosenPlayer.GetTwitchName(), viewModel.CurrentChosenPlayer.GetHeadViewParametr());
+
         viewModel.CurrentChosenPOV.UnFocus();
         viewModel.UnSelectItems(true);
     }
 
     private void CanvasItem_RightMouseButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not ControllerViewModel viewModel) return;
+        if (DataContext is not ControllerViewModel) return;
         if (sender is not Border clickedBorder) return;
         if (clickedBorder!.DataContext is not PointOfView pov) return;
 
         pov.Clear();
-        viewModel.SetBrowserURL(pov);
     }
 
     private void CanvasItem_MouseEnter(object sender, MouseEventArgs e)
@@ -144,6 +132,8 @@ public partial class ControllerView : UserControl
 
     private void List_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        //TODO: 0 zrobic odklikiwanie pacemana i whitelisty
+
         e.Handled = true;
     }
 

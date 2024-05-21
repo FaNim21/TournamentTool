@@ -288,4 +288,8 @@ public class Player : BaseViewModel, ITwitchPovInformation
     {
         return TwitchName!;
     }
+    public string GetHeadViewParametr()
+    {
+        return InGameName!;
+    }
 }

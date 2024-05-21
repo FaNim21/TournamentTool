@@ -224,13 +224,6 @@ public class PlayerManagerViewModel : BaseViewModel
             for (int i = 0; i < Tournament!.Players.Count; i++)
             {
                 var current = Tournament!.Players[i];
-                if (current.Image != null) continue;
-                if (current.ImageStream != null)
-                {
-                    current.LoadHead();
-                    continue;
-                }
-
                 await current.ForceUpdateHeadImage();
             }
 
