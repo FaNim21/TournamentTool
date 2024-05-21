@@ -112,7 +112,7 @@ public partial class ControllerView : UserControl
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        Trace.WriteLine("Wcisniety guzik");
+        //Trace.WriteLine("Wcisniety guzik");
         //TODO: 0 PROBLEMY Z CZYSZCZENIEM NA WCISNIECIU ESCAPE MOZE LEPIEJ ZROBIC INPUT CONTROLLER
         //NIC NIE CHCE DZIALAC MOZE GLOBAL HOTKEY STAD?  https://blog.magnusmontin.net/2015/03/31/implementing-global-hot-keys-in-wpf/
         if (e.Key == Key.Escape)
@@ -145,11 +145,6 @@ public partial class ControllerView : UserControl
     private void List_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         e.Handled = true;
-    }
-
-    private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        Trace.WriteLine(e.Key.ToString());
     }
 
     private void Slider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -1,0 +1,128 @@
+﻿<Window x:Class="TournamentTool.Windows.DialogBoxWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
+        xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels.DialogBoxViewModels"
+        xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
+        xmlns:converters="clr-namespace:TournamentTool.Converters"
+        d:DataContext="{d:DesignInstance Type=viewmodels:DialogBaseViewModel}"
+        mc:Ignorable="d"
+        Title="DialogBoxWindow"
+        Width="325"
+        Height="150"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        ShowInTaskbar="False"
+        BorderThickness="1"
+        BorderBrush="#00090e"
+        WindowStartupLocation="CenterOwner"
+        Background="#383A3C"
+        PreviewKeyDown="WindowKeyDown">
+    <Window.Resources>
+        <converters:IconToBitmapSourceConverter x:Key="IconConverter" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+
+        <Grid Background="#000D14"
+              Grid.Row="0"
+              MouseDown="HeaderMouseDown">
+            <Label Content="{Binding Caption}"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Left"
+                   FontSize="10"
+                   Padding="4 3 0 0"
+                   Foreground="LightCyan" />
+            <local:ButtonTaskbar x:Name="ExitButton"
+                                 Width="18"
+                                 FontSize="12"
+                                 HorizontalAlignment="Right"
+                                 ContentText="X"
+                                 Click="ExitButtonClick" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="8*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Icon -->
+            <Grid Grid.Column="0">
+                <Image x:Name="Icon"
+                       Stretch="Uniform"
+                       Height="32">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Icon}"
+                                             Value="{x:Static MessageBoxImage.Warning}">
+                                    <Setter Property="Source"
+                                            Value="{Binding Source={x:Static drawing:SystemIcons.Warning}, Converter={StaticResource IconConverter}}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Icon}"
+                                             Value="{x:Static MessageBoxImage.Information}">
+                                    <Setter Property="Source"
+                                            Value="{Binding Source={x:Static drawing:SystemIcons.Information}, Converter={StaticResource IconConverter}}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Icon}"
+                                             Value="{x:Static MessageBoxImage.Error}">
+                                    <Setter Property="Source"
+                                            Value="{Binding Source={x:Static drawing:SystemIcons.Error}, Converter={StaticResource IconConverter}}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Icon}"
+                                             Value="{x:Static MessageBoxImage.None}">
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </Grid>
+
+            <Grid x:Name="TextGrid"
+                  Grid.Column="1">
+                <TextBox Text="{Binding Text}"
+                         TextWrapping="Wrap"
+                         FontSize="11"
+                         FontWeight="SemiBold"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         IsReadOnly="True"
+                         Foreground="White"
+                         VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Background="#5b5e62">
+            <ItemsControl ItemsSource="{Binding Buttons}"
+                          VerticalAlignment="Center"
+                          Focusable="False">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:ButtonNormal ContentText="{Binding Title}"
+                                            MinHeight="25"
+                                            MaxWidth="80"
+                                            OnCommand="{Binding DataContext.ButtonPress, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                            OnCommandParameter="{Binding Result}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </Grid>
+
+    </Grid>
+</Window>

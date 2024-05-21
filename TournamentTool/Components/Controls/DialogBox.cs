@@ -1,12 +1,8 @@
-﻿/*using Microsoft.Win32;
-using MultiOpener.Entities.Opened;
-using MultiOpener.ViewModels.DialogBox;
-using MultiOpener.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Win32;
 using System.Windows;
-using MultiOpener.ViewModels;*/
+using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.DialogBoxViewModels;
+using TournamentTool.Windows;
 
 namespace TournamentTool.Components.Controls;
 
@@ -14,7 +10,7 @@ public delegate bool ValidateInputFieldAccept(string name);
 
 public static class DialogBox
 {
-    /*public static MessageBoxResult Show(string text, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None)
+    public static MessageBoxResult Show(string text, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None)
     {
         var buttons = CreateButtons(button);
         DialogBoxViewModel model = new()
@@ -28,11 +24,6 @@ public static class DialogBox
         Create<DialogBoxWindow, DialogBoxViewModel>(model);
 
         return model.Result;
-    }
-
-    public static void ShowOpenedInformations(OpenedProcess opened)
-    {
-        Create<InformationOpenedWindow, OpenedProcess>(opened);
     }
 
     public static string ShowOpenFile()
@@ -61,7 +52,7 @@ public static class DialogBox
         }
         catch (Exception ex)
         {
-            StartViewModel.Log(ex.Message);
+            //StartViewModel.Log(ex.Message);
         }
     }
     private static IEnumerable<DialogBoxButton> CreateButtons(MessageBoxButton buttons, params string?[]? names)
@@ -107,5 +98,5 @@ public static class DialogBox
         window = Application.Current?.MainWindow;
         window ??= Application.Current?.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive);
         return window;
-    }*/
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
@@ -18,10 +19,10 @@ public class ClearPresetCommand : BaseCommand
         if (parameter == null) return;
         if (parameter is not Tournament tournament) return;
 
-        var result = MessageBox.Show($"Are you sure you want to clear: {tournament.Name}", "Clearing", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var result = DialogBox.Show($"Are you sure you want to clear: {tournament.Name}", "Clearing", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes) tournament.Clear();
 
-        if(tournament == MainViewModel.CurrentChosen)
+        if (tournament == MainViewModel.CurrentChosen)
             MainViewModel.CurrentChosen = tournament;
     }
 }

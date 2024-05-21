@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
-using System.Security.Cryptography;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using TournamentTool.Components.Controls;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
@@ -255,7 +254,7 @@ public class Player : BaseViewModel, ITwitchPovInformation
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message + " - " + ex.StackTrace);
+            DialogBox.Show("Error: " + ex.Message + " - " + ex.StackTrace, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

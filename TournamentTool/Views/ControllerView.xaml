@@ -13,8 +13,7 @@
              d:DesignWidth="1024"
              Background="#383A3C"
              Focusable="True"
-             KeyDown="Window_KeyDown"
-             PreviewKeyDown="UserControl_PreviewKeyDown">
+             KeyDown="Window_KeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />

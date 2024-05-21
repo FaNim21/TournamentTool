@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using TournamentTool.Components.Controls;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
@@ -23,7 +24,7 @@ public partial class PlayerManagerWindow : Window
     {
         if (DataContext is PlayerManagerViewModel playerView && playerView.IsEditing)
         {
-            MessageBox.Show("Finish editing before closing the window", "Editing");
+            DialogBox.Show("Finish editing before closing the window", "Editing");
             return;
         }
         Application.Current.MainWindow.Show();
