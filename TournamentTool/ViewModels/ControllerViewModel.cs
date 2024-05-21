@@ -5,6 +5,7 @@ using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
@@ -318,15 +319,23 @@ public class ControllerViewModel : BaseViewModel
         await Task.Delay(50);
 
         SceneItem[] sceneItems = await Client.GetSceneItemList(CurrentSceneName);
-        List<SceneItem> texts = [];
+        List<SceneItem> additionals = [];
 
         foreach (var item in sceneItems)
         {
             if (item.IsGroup == true || string.IsNullOrEmpty(item.InputKind)) continue;
+
+            if (item.InputKind.Equals("browser_source") && item.SourceName.StartsWith("head", StringComparison.OrdinalIgnoreCase))
+            {
+                if (MainViewModel.CurrentChosen!.SetPovHeadsInBrowser)
+                    additionals.Add(item);
+                continue;
+            }
+
             if (item.InputKind.StartsWith("text"))
             {
                 if (MainViewModel.CurrentChosen!.SetPovNameInTextField)
-                    texts.Add(item);
+                    additionals.Add(item);
                 continue;
             }
 
@@ -358,6 +367,7 @@ public class ControllerViewModel : BaseViewModel
                 {
                     pov.TwitchName = currentName;
                     pov.DisplayedPlayer = player.Name!;
+                    pov.HeadViewParametr = player.InGameName!;
                     pov.Update();
                 }
             }
@@ -365,16 +375,22 @@ public class ControllerViewModel : BaseViewModel
             AddPov(pov);
         }
 
-        if (texts.Count == 0) return;
+        if (additionals.Count == 0) return;
         foreach (var pov in POVs)
         {
-            foreach (var text in texts)
+            foreach (var additional in additionals)
             {
-                if (text.SourceName.StartsWith(pov.SceneItemName!))
+                if (additional.SourceName.StartsWith(pov.SceneItemName!, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    pov.TextFieldItemName = text.SourceName;
+                    pov.TextFieldItemName = additional.SourceName;
                     pov.Update();
-                    break;
+                    pov.UpdateNameTextField();
+                }
+                else if (additional.SourceName.StartsWith("head" + pov.SceneItemName!, StringComparison.OrdinalIgnoreCase))
+                {
+                    pov.HeadItemName = additional.SourceName;
+                    pov.Update();
+                    pov.SetHead();
                 }
             }
         }
@@ -382,12 +398,20 @@ public class ControllerViewModel : BaseViewModel
 
     public void SetBrowserURL(PointOfView pov)
     {
-        if (Client == null || pov == null || !IsConnectedToWebSocket) return;
+        if (pov == null) return;
+        if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
 
-        Dictionary<string, object> input = new() { { "url", pov.GetURL() }, };
-        Client.SetInputSettings(pov.SceneItemName!, input);
         pov.UpdateNameTextField();
     }
+    public bool SetBrowserURL(string sceneItemName, string path)
+    {
+        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return false;
+
+        Dictionary<string, object> input = new() { { "url", path }, };
+        Client.SetInputSettings(sceneItemName, input);
+        return true;
+    }
+
     public async Task<(string, float)> GetBrowserURLTwitchName(string sceneItemName)
     {
         if (Client == null || !IsConnectedToWebSocket) return (string.Empty, 0);

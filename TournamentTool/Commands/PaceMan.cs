@@ -80,6 +80,10 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
     {
         return User.TwitchName;
     }
+    public string GetHeadViewParametr()
+    {
+        return User.UUID;
+    }
 }
 
 public class PaceSplitsList

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
@@ -20,12 +21,14 @@ public class PointOfView : BaseViewModel
     public int X { get; set; }
     public int Y { get; set; }
 
-    public string TextFieldItemName { get; set; }
+    public string TextFieldItemName { get; set; } = string.Empty;
+    public string HeadItemName { get; set; } = string.Empty;
 
     public Brush? BackgroundColor { get; set; }
 
     public string Text { get; set; } = string.Empty;
     public string DisplayedPlayer { get; set; } = string.Empty;
+    public string HeadViewParametr { get; set; } = string.Empty;
     public string TwitchName { get; set; } = string.Empty;
 
     public float Volume { get; set; } = 0;
@@ -60,10 +63,10 @@ public class PointOfView : BaseViewModel
     {
         OnPropertyChanged(nameof(DisplayedPlayer));
         OnPropertyChanged(nameof(TextFieldItemName));
+        OnPropertyChanged(nameof(HeadItemName));
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(Volume));
     }
-
     public void UpdateTransform()
     {
         OnPropertyChanged(nameof(X));
@@ -73,15 +76,24 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
+    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr)
+    {
+        DisplayedPlayer = DisplayedName;
+        TwitchName = twitchName;
+        HeadViewParametr = headInfoParametr;
+
+        SetHead();
+        Update();
+        _controller.SetBrowserURL(this);
+    }
     public void Swap(PointOfView pov)
     {
         string tempDisplayedPlayer = pov.DisplayedPlayer;
         string tempTwitchName = pov.TwitchName;
-        pov.DisplayedPlayer = DisplayedPlayer;
-        pov.TwitchName = TwitchName;
-        DisplayedPlayer = tempDisplayedPlayer;
-        TwitchName = tempTwitchName;
-        Update();
+        string tempHeadViewParametr = pov.HeadViewParametr;
+
+        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr);
+        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr);
     }
 
     public void Focus()
@@ -110,6 +122,15 @@ public class PointOfView : BaseViewModel
         _controller.SetBrowserURL(this);
     }
 
+    public void SetHead()
+    {
+        Trace.WriteLine($"{HeadViewParametr} --");
+        if (string.IsNullOrEmpty(HeadViewParametr) || string.IsNullOrEmpty(HeadItemName)) return;
+
+        string path = $"minotar.net/helm/{HeadViewParametr}/180.png";
+        _controller.SetBrowserURL(HeadItemName, path);
+    }
+
     public void UpdateNameTextField()
     {
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
@@ -129,6 +150,10 @@ public class PointOfView : BaseViewModel
         DisplayedPlayer = string.Empty;
         Text = string.Empty;
         TwitchName = string.Empty;
+        HeadViewParametr = string.Empty;
+
+        _controller.SetBrowserURL(this);
+        _controller.SetBrowserURL(HeadItemName, string.Empty);
 
         Update();
     }
