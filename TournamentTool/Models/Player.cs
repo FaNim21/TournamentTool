@@ -28,7 +28,6 @@ public class TwitchStreamData : BaseViewModel
     public string BroadcasterID { get; set; } = string.Empty;
     public string UserLogin { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
-    public string GameName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public int ViewerCount { get; set; }
     public DateTime StartedAt { get; set; }
@@ -37,6 +36,9 @@ public class TwitchStreamData : BaseViewModel
 
     public Brush? StatusLabelColor { get; set; }
     public string Status { get; set; } = "offline";
+
+    public bool GameNameVisibility { get; set; } = false;
+    public string GameName { get; set; } = string.Empty;
 
 
     public void Update(TwitchStreamData data)
@@ -181,9 +183,48 @@ public class Player : BaseViewModel, ITwitchPovInformation
         }
     }
 
+    [JsonIgnore] private int _boxHeight = 80;
+    public int BoxHeight
+    {
+        get => _boxHeight;
+        set
+        {
+            _boxHeight = value;
+            OnPropertyChanged(nameof(BoxHeight));
+        }
+    }
+
+    [JsonIgnore] private int _boxHeightBorder = 90;
+    public int BoxHeightBorder
+    {
+        get => _boxHeightBorder;
+        set
+        {
+            _boxHeightBorder = value;
+            OnPropertyChanged(nameof(BoxHeightBorder));
+        }
+    }
+
+
+    [JsonConstructor]
     public Player(string name = "")
     {
         Name = name;
+    }
+
+    public void ShowCategory(bool option)
+    {
+        if (option)
+        {
+            BoxHeight = 90;
+            BoxHeightBorder = 100;
+            TwitchStreamData.GameNameVisibility = true;
+            return;
+        }
+
+        BoxHeight = 80;
+        BoxHeightBorder = 90;
+        TwitchStreamData.GameNameVisibility = false;
     }
 
     public void LoadHead()

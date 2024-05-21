@@ -26,6 +26,7 @@ public class Tournament : BaseViewModel, IRenameItem
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
     public bool SetPovNameInTextField { get; set; } = false;
+    public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
 
     private int _paceManRefreshRateMiliseconds = 10000;
     public int PaceManRefreshRateMiliseconds
@@ -121,6 +122,7 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
         SetPovNameInTextField = false;
+        ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
     }
