@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TwitchLib.Api;
@@ -131,8 +132,8 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
-    private string? _searchText;
-    public string? SearchText
+    private string _searchText = string.Empty;
+    public string SearchText
     {
         get => _searchText;
         set
@@ -208,6 +209,7 @@ public class ControllerViewModel : BaseViewModel
 
         foreach (var player in MainViewModel.CurrentChosen!.Players)
             player.ShowCategory(!MainViewModel.CurrentChosen!.ShowLiveOnlyForMinecraftCategory);
+
         FilterItems();
 
         if (MainViewModel.CurrentChosen!.IsUsingPaceMan)
@@ -224,7 +226,6 @@ public class ControllerViewModel : BaseViewModel
         });
     }
 
-    //TODO: 0 zrob wszystkie message boxy uzywajac to: MessageBoxOptions.DefaultDesktopOnly albo dodaj swoj dialog box nawet wyjdzie lepiej z tym
     private async Task ConnectToOBS()
     {
         if (Client == null || MainViewModel.CurrentChosen == null) return;
@@ -249,7 +250,7 @@ public class ControllerViewModel : BaseViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 await Disconnect();
                 return;
             }
@@ -285,7 +286,7 @@ public class ControllerViewModel : BaseViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 await Disconnect();
                 return;
             }
@@ -461,7 +462,7 @@ public class ControllerViewModel : BaseViewModel
             var auth2 = await server.Listen();
             if (auth2 == null)
             {
-                MessageBox.Show("Error with listening for twitch authentication");
+                DialogBox.Show($"Error with listening for twitch authentication", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, RedirectURL, Consts.ClientID);
@@ -469,7 +470,7 @@ public class ControllerViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         twitchWorker.DoWork += TwitchUpdate;
@@ -544,39 +545,23 @@ public class ControllerViewModel : BaseViewModel
             string url = response.CreatedClips[0].EditUrl;
             Trace.WriteLine(url);
         }
-        catch (Exception ex) { MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}"); }
+        catch (Exception ex)
+        {
+            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void FilterItems()
     {
+        //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         if (MainViewModel.CurrentChosen == null) return;
 
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
 
         IEnumerable<Player> playersToAdd = [];
 
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            playersToAdd = MainViewModel.CurrentChosen.Players;
-        }
-        else
-        {
-            playersToAdd = MainViewModel.CurrentChosen.Players
-                           .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        foreach (var player in playersToAdd)
-            Application.Current.Dispatcher.Invoke(() => FilteredPlayers.Add(player));
-    }
-    private void OrderItemsByTwitchStatus()
-    {
-        //TODO: 0 pozniej zoptymalizowac filtrowanie przez zrobienie sturktury klas do konkretnego typu filtra czy cos
-        if (MainViewModel.CurrentChosen == null || !string.IsNullOrWhiteSpace(SearchText)) return;
-
-        Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
-
-        IEnumerable<Player> playersToAdd = [];
         playersToAdd = MainViewModel.CurrentChosen.Players
+                       .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase))
                        .OrderByDescending(player => player.TwitchStreamData.Status.Equals("live"));
 
         foreach (var player in playersToAdd)
@@ -598,11 +583,11 @@ public class ControllerViewModel : BaseViewModel
             try
             {
                 await UpdateTwitchInformations();
-                OrderItemsByTwitchStatus();
+                FilterItems();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message} - {ex.StackTrace}");
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             await Task.Delay(TimeSpan.FromMilliseconds(15000));
@@ -748,13 +733,16 @@ public class ControllerViewModel : BaseViewModel
             }
 
             if (foundPlayer) continue;
-
             if (resultPaceman.User.TwitchName == null) continue;
+
             try
             {
                 resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == resultPaceman.User.TwitchName).FirstOrDefault();
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message + " - " + ex.StackTrace); }
+            catch (Exception ex)
+            {
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
             string name = Helper.GetSplitShortcut(resultPaceman.Splits.Last().SplitName);

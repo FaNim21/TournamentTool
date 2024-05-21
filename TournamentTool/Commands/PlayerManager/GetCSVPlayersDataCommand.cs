@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
-using System.Windows;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
@@ -51,6 +51,6 @@ public class GetCSVPlayersDataCommand : BaseCommand
             PlayerManagerViewModel.Tournament!.AddPlayer(data);
         }
 
-        MessageBox.Show($"Done loading data from .csv file");
+        DialogBox.Show("Done loading data from .csv file");
     }
 }

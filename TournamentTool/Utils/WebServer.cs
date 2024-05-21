@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net;
 using System.Windows;
+using TournamentTool.Components.Controls;
 
 namespace TournamentTool.Utils;
 
@@ -22,7 +23,7 @@ public class WebServer
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + " - " + ex.StackTrace);
+            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         return await OnRequest();
     }

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 
@@ -206,12 +207,12 @@ public class PlayerManagerViewModel : BaseViewModel
             }
         }
 
-        MessageBox.Show($"Done loading data from paceman event");
+        DialogBox.Show("Done loading data from paceman event");
     }
 
     private void RemoveAllPlayers()
     {
-        MessageBoxResult result = MessageBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        MessageBoxResult result = DialogBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
             Tournament!.Players.Clear();
     }
@@ -233,6 +234,7 @@ public class PlayerManagerViewModel : BaseViewModel
                 await current.ForceUpdateHeadImage();
             }
 
+            DialogBox.Show("Done fixing players head skins");
         });
     }
 }
