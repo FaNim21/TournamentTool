@@ -5,7 +5,6 @@ using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
@@ -13,13 +12,14 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TwitchLib.Api;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Controller;
 
 public class ControllerViewModel : BaseViewModel
 {
@@ -121,6 +121,8 @@ public class ControllerViewModel : BaseViewModel
             OnPropertyChanged(nameof(CurrentChosenPOV));
         }
     }
+
+    public Brush? IsConnectedColor { get; set; }
 
     private bool _isConnectedToWebSocket;
     public bool IsConnectedToWebSocket
@@ -235,7 +237,7 @@ public class ControllerViewModel : BaseViewModel
         int timeoutChecks = 35;
 
         bool isConnected = await Client.ConnectAsync(true, MainViewModel.CurrentChosen.Password!, "localhost", MainViewModel.CurrentChosen.Port, EventSubscriptions.All | EventSubscriptions.SceneItemTransformChanged);
-        Client.ConnectionClosed += OnConnectionClosed;
+        Client.PropertyChanged += OnPropertyChanged;
         if (isConnected)
         {
             try
@@ -246,7 +248,6 @@ public class ControllerViewModel : BaseViewModel
                     timeoutCount++;
                 }
 
-                IsConnectedToWebSocket = true;
                 await Client.SetCurrentSceneCollection(MainViewModel.CurrentChosen.SceneCollection!);
             }
             catch (Exception ex)
@@ -304,7 +305,7 @@ public class ControllerViewModel : BaseViewModel
         while (Client.ConnectionState != ConnectionState.Disconnected)
             await Task.Delay(100);
 
-        Client.ConnectionClosed -= OnConnectionClosed;
+        Client.PropertyChanged -= OnPropertyChanged;
         Client.SceneItemCreated -= OnSceneItemCreated;
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.SceneItemTransformChanged -= OnSceneItemTransformChanged;
@@ -644,9 +645,23 @@ public class ControllerViewModel : BaseViewModel
         Task.Run(Disconnect);
     }
 
-    public void OnConnectionClosed(object? parametr, EventArgs args)
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        IsConnectedToWebSocket = false;
+        if (e.PropertyName == "ConnectionState")
+        {
+            bool option = Client!.ConnectionState == ConnectionState.Connected;
+            if (!option)
+            {
+                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor); });
+            }
+            else
+            {
+                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.liveColor); });
+            }
+
+            IsConnectedToWebSocket = option;
+            OnPropertyChanged(nameof(IsConnectedColor));
+        }
     }
     public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
     {

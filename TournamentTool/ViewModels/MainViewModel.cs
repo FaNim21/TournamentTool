@@ -8,6 +8,7 @@ using TournamentTool.Commands.Main;
 using TournamentTool.Models;
 using TournamentTool.Properties;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Controller;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;

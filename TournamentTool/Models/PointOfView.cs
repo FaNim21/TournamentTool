@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.Models;
 
@@ -98,12 +98,12 @@ public class PointOfView : BaseViewModel
 
     public void Focus()
     {
-        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(190, 239, 255)); });
+        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(153, 224, 255)); });
         OnPropertyChanged(nameof(BackgroundColor));
     }
     public void UnFocus()
     {
-        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(162, 203, 217)); });
+        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(102, 179, 204)); });
         OnPropertyChanged(nameof(BackgroundColor));
     }
 
@@ -124,7 +124,6 @@ public class PointOfView : BaseViewModel
 
     public void SetHead()
     {
-        Trace.WriteLine($"{HeadViewParametr} --");
         if (string.IsNullOrEmpty(HeadViewParametr) || string.IsNullOrEmpty(HeadItemName)) return;
 
         string path = $"minotar.net/helm/{HeadViewParametr}/180.png";

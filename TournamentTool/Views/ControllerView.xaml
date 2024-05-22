@@ -7,11 +7,12 @@
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
-             d:DataContext="{d:DesignInstance Type=viewmodels:ControllerViewModel}"
+             xmlns:controller="clr-namespace:TournamentTool.ViewModels.Controller"
+             d:DataContext="{d:DesignInstance Type=controller:ControllerViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="576"
              d:DesignWidth="1024"
-             Background="#383A3C"
+             Background="#1E1E1E"
              Focusable="True"
              KeyDown="Window_KeyDown">
     <Grid>
@@ -22,46 +23,49 @@
 
         <Grid Grid.Row="0"
               Background="#000D14">
-            <TextBlock FontSize="16"
+            <TextBlock FontSize="15"
                        Height="25"
-                       Padding="0 1 0 0"
+                       Padding="0 3 0 0"
                        Margin="5 0 0 0"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top">
-                <Run Foreground="DarkGray"
+                <Run Foreground="#CCCCCC"
                      Text="Connected: " />
-                <Run Foreground="White"
+                <Run Foreground="{Binding IsConnectedColor, Mode=OneWay}"
                      Text="{Binding IsConnectedToWebSocket, Mode=OneWay}" />
             </TextBlock>
 
             <TextBlock Text="Search: "
                        FontSize="18"
                        HorizontalAlignment="Right"
-                       Foreground="DarkGray"
+                       Foreground="#CCCCCC"
                        Margin="0 0 207 0" />
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Width="200"
                      Height="18"
+                     Background="LightGray"
                      HorizontalAlignment="Right"
                      Margin="0 0 5 0" />
         </Grid>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="426" />
-                <ColumnDefinition Width="379*" />
+                <ColumnDefinition Width="428" />
+                <ColumnDefinition Width="400*" />
                 <ColumnDefinition Width="5" />
-                <ColumnDefinition MinWidth="265" />
+                <ColumnDefinition MinWidth="245" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="240" />
+                    <RowDefinition Height="242" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
-                    <Canvas Background="LightGray"
+                <Border Grid.Row="0"
+                        BorderBrush="Black"
+                        BorderThickness="1">
+                    <Canvas Background="#2C2C2C"
                             Width="{Binding CanvasWidth}"
                             Height="{Binding CanvasHeight}"
                             SizeChanged="Canvas_SizeChanged"
@@ -92,7 +96,7 @@
                                     <Border Background="{Binding BackgroundColor}"
                                             Width="{Binding Width}"
                                             Height="{Binding Height}"
-                                            BorderBrush="Black"
+                                            BorderBrush="#1E90FF"
                                             BorderThickness="1"
                                             CornerRadius="5"
                                             Drop="Border_Drop"
@@ -106,20 +110,20 @@
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Top"
                                                        FontSize="10"
-                                                       Foreground="Black" />
+                                                       Foreground="#E0E0E0" />
                                             <TextBlock Text="{Binding DisplayedPlayer}"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        FontSize="13"
                                                        FontWeight="SemiBold"
-                                                       Foreground="DarkViolet" />
+                                                       Foreground="#FFFFFF" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Canvas>
-                </Grid>
+                </Border>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -147,7 +151,7 @@
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
-                            <Run Text="Height: " />
+                            <Run Text="Aspect ratio: " />
                             <Run Text="{Binding CanvasAspectRatio, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
@@ -324,55 +328,68 @@
                          PreviewKeyDown="List_PreviewKeyDown">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:Player">
-                            <Border BorderBrush="Black"
+                            <Border BorderBrush="Gray"
                                     BorderThickness="1"
                                     Width="110"
                                     Height="{Binding BoxHeight}"
                                     MouseMove="ListBorder_MouseMove">
                                 <Grid>
-                                    <StackPanel>
+                                    <StackPanel Orientation="Vertical"
+                                                Width="100">
+                                        <!--Foreground="#FFD700"-->
                                         <TextBlock Text="{Binding Name}"
-                                                   Foreground="Wheat"
+                                                   Foreground="{Binding TwitchStreamData.StatusLabelColor}"
                                                    Background="Transparent"
                                                    FontSize="14"
+                                                   FontWeight="SemiBold"
                                                    Width="100"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Top"
                                                    TextAlignment="Center"
                                                    Margin="0 2 0 0">
                                         </TextBlock>
-                                        <TextBlock Text="{Binding PersonalBest}"
-                                                   Foreground="White"
-                                                   Background="Transparent"
-                                                   FontSize="21"
-                                                   Width="64"
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center"
+                                                    Margin="0 5 0 0">
+                                            <TextBlock Text="{Binding PersonalBest}"
+                                                       Foreground="White"
+                                                       Background="Transparent"
+                                                       FontSize="23"
+                                                       FontWeight="Light"
+                                                       Width="65"
+                                                       Height="30"
+                                                       VerticalAlignment="Center"
+                                                       TextAlignment="Center" />
+                                            <Image Width="30"
                                                    Height="30"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   Margin="5 5 0 0" />
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Top"
+                                                   Margin="0 0 5 0"
+                                                   Source="{Binding Image}" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <!--
+                                            <TextBlock FontSize="14"
+                                                       VerticalAlignment="Top"
+                                                       TextAlignment="Center"
+                                                       Margin="0 0 0 0">
+                                                <Run Text="Status:"
+                                                     Foreground="#A9A9A9" />
+                                                <Run Text="{Binding TwitchStreamData.Status}"
+                                                     Foreground="{Binding TwitchStreamData.StatusLabelColor}"
+                                                     FontWeight="SemiBold" />
+                                            </TextBlock>
+                                            -->
+                                            <TextBlock FontSize="12"
+                                                       Visibility="{Binding TwitchStreamData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                       VerticalAlignment="Bottom"
+                                                       Background="Transparent"
+                                                       TextAlignment="Center"
+                                                       Foreground="#A9A9A9 "
+                                                       Text="{Binding TwitchStreamData.GameName}"
+                                                       Margin="0 2 0 0" />
+                                        </StackPanel>
                                     </StackPanel>
-                                    <Image Width="30"
-                                           Height="30"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Top"
-                                           Margin="0 25 6 0"
-                                           Source="{Binding Image}" />
-                                    <TextBlock FontSize="14"
-                                               VerticalAlignment="Top"
-                                               TextAlignment="Center"
-                                               Margin="2 57 2  2">
-                                        <Run Text="Status:" />
-                                        <Run Text="{Binding TwitchStreamData.Status}"
-                                             Foreground="{Binding TwitchStreamData.StatusLabelColor}" />
-                                    </TextBlock>
-                                    <TextBlock FontSize="14"
-                                               Visibility="{Binding TwitchStreamData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
-                                               VerticalAlignment="Bottom"
-                                               TextAlignment="Center"
-                                               Foreground="Gray"
-                                               Text="{Binding TwitchStreamData.GameName}"
-                                               Margin="2 0 2 -1" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -382,14 +399,6 @@
                             <WrapPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Width"
-                                    Value="120" />
-                            <Setter Property="Height"
-                                    Value="{Binding BoxHeightBorder}" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
                 </ListBox>
             </Grid>
 
@@ -418,10 +427,11 @@
                          PreviewKeyDown="List_PreviewKeyDown">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:PaceMan">
-                            <Border BorderBrush="Black"
+                            <Border BorderBrush="Gray"
                                     BorderThickness="1"
                                     Width="110"
                                     Height="65"
+                                    Padding="0"
                                     MouseMove="ListBorder_MouseMove">
                                 <Grid Margin="0 5 0 0">
                                     <TextBlock Text="{Binding Nickname}"
