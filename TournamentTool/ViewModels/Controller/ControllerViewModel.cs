@@ -1,18 +1,10 @@
-﻿using OBSStudioClient;
-using OBSStudioClient.Classes;
-using OBSStudioClient.Enums;
-using OBSStudioClient.Events;
-using OBSStudioClient.Messages;
+﻿using OBSStudioClient.Enums;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
@@ -23,11 +15,6 @@ namespace TournamentTool.ViewModels.Controller;
 
 public class ControllerViewModel : BaseViewModel
 {
-    public const string RedirectURL = "http://localhost:8080/redirect/";
-    public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
-
-    private const float AspectRatio = 16.0f / 9.0f;
-
     private readonly BackgroundWorker? paceManWorker;
     private BackgroundWorker twitchWorker = new();
 
@@ -55,12 +42,13 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
-    public ObsClient? Client { get; set; } = new();
     public MainViewModel MainViewModel { get; set; }
+    public ObsController ObsController { get; set; }
+
+    public Tournament Configuration { get => MainViewModel.CurrentChosen!; }
+
     public TwitchAPI? TwitchAPI { get; set; }
     public HttpClient? WebServer { get; set; }
-
-    public OBSVideoSettings OBSVideoSettings { get; set; } = new();
 
     private ITwitchPovInformation? _currentChosenPlayer;
     public ITwitchPovInformation? CurrentChosenPlayer
@@ -122,19 +110,6 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
-    public Brush? IsConnectedColor { get; set; }
-
-    private bool _isConnectedToWebSocket;
-    public bool IsConnectedToWebSocket
-    {
-        get => _isConnectedToWebSocket;
-        set
-        {
-            _isConnectedToWebSocket = value;
-            OnPropertyChanged(nameof(IsConnectedToWebSocket));
-        }
-    }
-
     private string _searchText = string.Empty;
     public string SearchText
     {
@@ -151,7 +126,7 @@ public class ControllerViewModel : BaseViewModel
     public float CanvasWidth
     {
         get => _canvasWidth;
-        private set
+        set
         {
             if (_canvasWidth == value) return;
 
@@ -165,7 +140,7 @@ public class ControllerViewModel : BaseViewModel
     public float CanvasHeight
     {
         get => _canvasHeight;
-        private set
+        set
         {
             if (_canvasHeight == value) return;
 
@@ -175,35 +150,13 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
-    public float CurrentPovVolume
-    {
-        get => CurrentChosenPOV!.Volume;
-        set
-        {
-            if (CurrentChosenPOV!.Volume == value) return;
-            CurrentChosenPOV.ChangeVolume(value);
-            SetBrowserURL(CurrentChosenPOV);
-            OnPropertyChanged(nameof(CurrentChosenPOV.Volume));
-            OnPropertyChanged(nameof(CurrentChosenPOV));
-        }
-    }
-
-    public float CanvasAspectRatio { get; private set; }
-
-    public float XAxisRatio { get; private set; }
-    public float YAxisRatio { get; private set; }
-
-    public string CurrentSceneName { get; set; } = "";
-
-    public ICommand? ClipCommand { get; set; } = null;
-
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
         TwitchAPI = new();
-        TwitchAPI.Settings.ClientId = Consts.ClientID;
+        ObsController = new(this);
 
-        ClipCommand = new RelayCommand(MakeClip);
+        TwitchAPI.Settings.ClientId = Consts.ClientID;
 
         /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
         Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
@@ -224,246 +177,9 @@ public class ControllerViewModel : BaseViewModel
 
         Task.Run(async () =>
         {
-            await ConnectToOBS();
+            await ObsController.Connect(Configuration.Password!, Configuration.Port);
             await TwitchApi();
         });
-    }
-
-    private async Task ConnectToOBS()
-    {
-        if (Client == null || MainViewModel.CurrentChosen == null) return;
-
-        int timeoutCount = 0;
-        int timeoutChecks = 35;
-
-        bool isConnected = await Client.ConnectAsync(true, MainViewModel.CurrentChosen.Password!, "localhost", MainViewModel.CurrentChosen.Port, EventSubscriptions.All | EventSubscriptions.SceneItemTransformChanged);
-        Client.PropertyChanged += OnPropertyChanged;
-        if (isConnected)
-        {
-            try
-            {
-                while (Client.ConnectionState != ConnectionState.Connected && timeoutCount <= timeoutChecks)
-                {
-                    await Task.Delay(100);
-                    timeoutCount++;
-                }
-
-                await Client.SetCurrentSceneCollection(MainViewModel.CurrentChosen.SceneCollection!);
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                await Disconnect();
-                return;
-            }
-
-            try
-            {
-                CanvasWidth = 426;
-                CanvasHeight = 240;
-
-                var settings = await Client.GetVideoSettings();
-                OBSVideoSettings.BaseWidth = settings.BaseWidth;
-                OBSVideoSettings.BaseHeight = settings.BaseHeight;
-                OBSVideoSettings.OutputWidth = settings.OutputWidth;
-                OBSVideoSettings.OutputHeight = settings.OutputHeight;
-                OBSVideoSettings.AspectRatio = (float)settings.BaseWidth / settings.BaseHeight;
-
-                XAxisRatio = settings.BaseWidth / CanvasWidth;
-                OnPropertyChanged(nameof(XAxisRatio));
-                YAxisRatio = settings.BaseHeight / CanvasHeight;
-                OnPropertyChanged(nameof(YAxisRatio));
-
-                CanvasAspectRatio = (float)CanvasWidth / CanvasHeight;
-                OnPropertyChanged(nameof(CanvasAspectRatio));
-
-                CurrentSceneName = await Client.GetCurrentProgramScene();
-                OnPropertyChanged(nameof(CurrentSceneName));
-                await GetCurrentSceneitems();
-
-                Client.SceneItemCreated += OnSceneItemCreated;
-                Client.SceneItemRemoved += OnSceneItemRemoved;
-                Client.SceneItemTransformChanged += OnSceneItemTransformChanged;
-                Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                await Disconnect();
-                return;
-            }
-        }
-    }
-
-    public async Task Disconnect()
-    {
-        if (Client == null || !IsConnectedToWebSocket) return;
-
-        Client.Disconnect();
-        Client.Dispose();
-
-        while (Client.ConnectionState != ConnectionState.Disconnected)
-            await Task.Delay(100);
-
-        Client.PropertyChanged -= OnPropertyChanged;
-        Client.SceneItemCreated -= OnSceneItemCreated;
-        Client.SceneItemRemoved -= OnSceneItemRemoved;
-        Client.SceneItemTransformChanged -= OnSceneItemTransformChanged;
-        Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
-    }
-
-    public async Task GetCurrentSceneitems()
-    {
-        if (Client == null || string.IsNullOrEmpty(CurrentSceneName)) return;
-
-        Application.Current.Dispatcher.Invoke(POVs.Clear);
-        await Task.Delay(50);
-
-        SceneItem[] sceneItems = await Client.GetSceneItemList(CurrentSceneName);
-        List<SceneItem> additionals = [];
-
-        foreach (var item in sceneItems)
-        {
-            if (item.IsGroup == true || string.IsNullOrEmpty(item.InputKind)) continue;
-
-            if (item.InputKind.Equals("browser_source") && item.SourceName.StartsWith("head", StringComparison.OrdinalIgnoreCase))
-            {
-                if (MainViewModel.CurrentChosen!.SetPovHeadsInBrowser)
-                    additionals.Add(item);
-                continue;
-            }
-
-            if (item.InputKind.StartsWith("text"))
-            {
-                if (MainViewModel.CurrentChosen!.SetPovNameInTextField)
-                    additionals.Add(item);
-                continue;
-            }
-
-            if (!item.InputKind.Equals("game_capture") &&
-                !item.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) continue;
-
-            PointOfView pov = new(this);
-            SceneItemTransform transform = await Client.GetSceneItemTransform(CurrentSceneName, item.SceneItemId);
-
-            pov.SceneName = CurrentSceneName;
-            pov.SceneItemName = item.SourceName;
-            pov.ID = item.SceneItemId;
-
-            pov.X = (int)(transform.PositionX / XAxisRatio);
-            pov.Y = (int)(transform.PositionY / YAxisRatio);
-
-            pov.Width = (int)(transform.Width / XAxisRatio);
-            pov.Height = (int)(transform.Height / YAxisRatio);
-
-            pov.Text = item.SourceName;
-
-            (string? currentName, float volume) = await GetBrowserURLTwitchName(pov.SceneItemName);
-            pov.ChangeVolume(volume);
-
-            if (!string.IsNullOrEmpty(currentName))
-            {
-                Player? player = MainViewModel.CurrentChosen!.GetPlayerByTwitchName(currentName);
-                if (player != null)
-                {
-                    pov.TwitchName = currentName;
-                    pov.DisplayedPlayer = player.Name!;
-                    pov.HeadViewParametr = player.InGameName!;
-                    pov.Update();
-                }
-            }
-
-            AddPov(pov);
-        }
-
-        if (additionals.Count == 0) return;
-        foreach (var pov in POVs)
-        {
-            foreach (var additional in additionals)
-            {
-                if (additional.SourceName.StartsWith(pov.SceneItemName!, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    pov.TextFieldItemName = additional.SourceName;
-                    pov.Update();
-                    pov.UpdateNameTextField();
-                }
-                else if (additional.SourceName.StartsWith("head" + pov.SceneItemName!, StringComparison.OrdinalIgnoreCase))
-                {
-                    pov.HeadItemName = additional.SourceName;
-                    pov.Update();
-                    pov.SetHead();
-                }
-            }
-        }
-    }
-
-    public void SetBrowserURL(PointOfView pov)
-    {
-        if (pov == null) return;
-        if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
-
-        pov.UpdateNameTextField();
-    }
-    public bool SetBrowserURL(string sceneItemName, string path)
-    {
-        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return false;
-
-        Dictionary<string, object> input = new() { { "url", path }, };
-        Client.SetInputSettings(sceneItemName, input);
-        return true;
-    }
-
-    public async Task<(string, float)> GetBrowserURLTwitchName(string sceneItemName)
-    {
-        if (Client == null || !IsConnectedToWebSocket) return (string.Empty, 0);
-
-        var setting = await Client.GetInputSettings(sceneItemName);
-        Dictionary<string, object> input = setting.InputSettings;
-
-        string patternPlayerName = @"channel=([^&]+)";
-        string patternVolume = @"volume=(\d+(\.\d+)?)";
-
-        input.TryGetValue("url", out var address);
-        if (address == null) return (string.Empty, 0);
-
-        string url = address!.ToString()!;
-        if (string.IsNullOrEmpty(url)) return (string.Empty, 0);
-
-        string name = string.Empty;
-        float volume = 0;
-
-        Match matchName = Regex.Match(address!.ToString()!, patternPlayerName);
-        Match matchVolume = Regex.Match(address!.ToString()!, patternVolume);
-
-        if (matchName.Success)
-        {
-            name = matchName.Groups[1].Value;
-        }
-        if (matchVolume.Success)
-        {
-            if (float.TryParse(matchVolume.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out float volumeValue))
-            {
-                volume = volumeValue;
-            }
-        }
-
-        return (name, volume);
-    }
-
-    public void SetTextField(string sceneItemName, string text)
-    {
-        if (Client == null || !IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return;
-
-        Dictionary<string, object> input = new() { { "text", text }, };
-        Client.SetInputSettings(sceneItemName, input);
-    }
-
-    private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
-    {
-        if (Client == null || Client.ConnectionState == ConnectionState.Disconnected) return;
-
-        Input input = new(inputKind, newSceneItemName, inputKind);
-        await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
     }
 
     private async Task TwitchApi()
@@ -472,11 +188,11 @@ public class ControllerViewModel : BaseViewModel
         if (TwitchAPI == null || !MainViewModel.CurrentChosen!.IsUsingTwitchAPI) return;
 
         var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
-        string auth = TwitchAPI.Auth.GetAuthorizationCodeUrl(RedirectURL, authScopes, true, null, Consts.ClientID);
+        string auth = TwitchAPI.Auth.GetAuthorizationCodeUrl(Consts.RedirectURL, authScopes, true, null, Consts.ClientID);
 
         try
         {
-            var server = new WebServer(RedirectURL);
+            var server = new WebServer(Consts.RedirectURL);
 
             Process.Start(new ProcessStartInfo
             {
@@ -490,7 +206,7 @@ public class ControllerViewModel : BaseViewModel
                 DialogBox.Show($"Error with listening for twitch authentication", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, RedirectURL, Consts.ClientID);
+            var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, Consts.RedirectURL, Consts.ClientID);
             TwitchAPI.Settings.AccessToken = resp.AccessToken;
         }
         catch (Exception ex)
@@ -503,7 +219,7 @@ public class ControllerViewModel : BaseViewModel
     }
     private async Task UpdateTwitchInformations()
     {
-        if (TwitchAPI == null || Client == null || Client.ConnectionState != ConnectionState.Connected) return;
+        if (TwitchAPI == null || ObsController.Client == null || ObsController.Client.ConnectionState != ConnectionState.Connected) return;
 
         List<string> logins = [];
         for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
@@ -554,26 +270,6 @@ public class ControllerViewModel : BaseViewModel
             twitch.Clear();
         }
         notLivePlayers.Clear();
-    }
-
-    public void MakeClip()
-    {
-        if (TwitchAPI == null) return;
-
-        Task.Run(Clip);
-    }
-    private async Task Clip()
-    {
-        try
-        {
-            var response = await TwitchAPI!.Helix.Clips.CreateClipAsync(MainViewModel.CurrentChosen!.Players[0].TwitchStreamData.BroadcasterID);
-            string url = response.CreatedClips[0].EditUrl;
-            Trace.WriteLine(url);
-        }
-        catch (Exception ex)
-        {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
     }
 
     private void FilterItems()
@@ -641,102 +337,32 @@ public class ControllerViewModel : BaseViewModel
         PaceManPlayers.Clear();
         FilteredPlayers!.Clear();
 
-        if (Client == null) return;
-        Task.Run(Disconnect);
+        if (ObsController.Client == null) return;
+        Task.Run(ObsController.Disconnect);
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "ConnectionState")
-        {
-            bool option = Client!.ConnectionState == ConnectionState.Connected;
-            if (!option)
-            {
-                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor); });
-            }
-            else
-            {
-                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.liveColor); });
-            }
-
-            IsConnectedToWebSocket = option;
-            OnPropertyChanged(nameof(IsConnectedColor));
-        }
-    }
-    public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
-    {
-        if (!args.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
-
-        SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
-        PointOfView pov = new(this)
-        {
-            SceneName = args.SceneName,
-            SceneItemName = args.SourceName,
-            ID = args.SceneItemId,
-            X = (int)(transform.PositionX / XAxisRatio),
-            Y = (int)(transform.PositionY / YAxisRatio),
-            Width = (int)(transform.Width / XAxisRatio),
-            Height = (int)(transform.Height / YAxisRatio),
-            Text = args.SourceName
-        };
-        AddPov(pov);
-        OnPropertyChanged(nameof(POVs));
-    }
-    public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs args)
-    {
-        if (!args.SourceName.StartsWith(MainViewModel.CurrentChosen!.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
-
-        PointOfView? pov = null;
-        for (int i = 0; i < POVs.Count; i++)
-        {
-            if (POVs[i].SceneItemName == args.SourceName)
-            {
-                pov = POVs[i];
-                break;
-            }
-        }
-
-        if (pov == null) return;
-        RemovePov(pov);
-    }
-    public void OnSceneItemTransformChanged(object? parametr, SceneItemTransformChangedEventArgs args)
-    {
-        for (int i = 0; i < POVs.Count; i++)
-        {
-            var current = POVs[i];
-            if (current.ID != args.SceneItemId) continue;
-
-            current.X = (int)(args.SceneItemTransform.PositionX / XAxisRatio);
-            current.Y = (int)(args.SceneItemTransform.PositionY / YAxisRatio);
-
-            current.Width = (int)(args.SceneItemTransform.Width / XAxisRatio);
-            current.Height = (int)(args.SceneItemTransform.Height / YAxisRatio);
-
-            current.UpdateTransform();
-        }
-    }
-    private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
-    {
-        CurrentSceneName = e.SceneName;
-        OnPropertyChanged(nameof(CurrentSceneName));
-        Task.Run(GetCurrentSceneitems);
-    }
-
-    private void AddPov(PointOfView pov)
+    public void AddPov(PointOfView pov)
     {
         Application.Current.Dispatcher.Invoke(delegate { POVs.Add(pov); });
+        OnPropertyChanged(nameof(POVs));
     }
-    private void RemovePov(PointOfView pov)
+    public void RemovePov(PointOfView pov)
     {
         Application.Current.Dispatcher.Invoke(delegate { POVs.Remove(pov); });
+        OnPropertyChanged(nameof(POVs));
+    }
+
+    public void ClearPovs()
+    {
+        POVs.Clear();
     }
 
     public void ResizeCanvas()
     {
         if (CanvasWidth == 0 || CanvasHeight == 0) return;
 
-        float calculatedHeight = CanvasWidth / AspectRatio;
-        float calculatedWidth = CanvasHeight * AspectRatio;
+        float calculatedHeight = CanvasWidth / Consts.AspectRatio;
+        float calculatedWidth = CanvasHeight * Consts.AspectRatio;
 
         if (float.IsNaN(calculatedHeight) || float.IsInfinity(calculatedHeight) || float.IsNaN(calculatedWidth) || float.IsInfinity(calculatedWidth)) return;
 
@@ -748,7 +374,7 @@ public class ControllerViewModel : BaseViewModel
 
     private async Task RefreshPaceManAsync()
     {
-        string result = await Helper.MakeRequestAsString(PaceManAPI);
+        string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
         if (paceMan == null) return;
 
@@ -803,7 +429,7 @@ public class ControllerViewModel : BaseViewModel
         CurrentChosenPOV.DisplayedPlayer = CurrentChosenPlayer!.GetDisplayName();
         CurrentChosenPOV.TwitchName = CurrentChosenPlayer!.GetTwitchName();
         CurrentChosenPOV.Update();
-        SetBrowserURL(CurrentChosenPOV);
+        ObsController.SetBrowserURL(CurrentChosenPOV);
         UnSelectItems();
     }
 

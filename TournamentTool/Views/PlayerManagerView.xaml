@@ -12,7 +12,7 @@
              mc:Ignorable="d"
              d:DesignHeight="550"
              d:DesignWidth="970"
-             Background="#383A3C">
+             Background="#1E1E1E">
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Edit"
@@ -40,7 +40,7 @@
                        TextAlignment="Center"
                        Margin="0 0 0 0" />
 
-            <Grid Background="#4b4e51"
+            <Grid Background="#2d2d2d"
                   Width="300"
                   Height="290"
                   HorizontalAlignment="Center"
@@ -139,7 +139,7 @@
                                          Margin="0 0 0 10" />
             </Grid>
 
-            <Grid Background="#4b4e51"
+            <Grid Background="#2d2d2d"
                   Width="350"
                   Height="150"
                   VerticalAlignment="Bottom">
@@ -214,7 +214,7 @@
                      ItemsSource="{Binding Tournament.Players}">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="models:Player">
-                        <Border BorderBrush="Black"
+                        <Border BorderBrush="Gray"
                                 BorderThickness="1"
                                 Width="110"
                                 Height="65">
