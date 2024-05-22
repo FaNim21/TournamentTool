@@ -51,9 +51,8 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="428" />
-                <ColumnDefinition Width="400*" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition MinWidth="245" />
+                <ColumnDefinition MinWidth="350" />
+                <ColumnDefinition Width="291" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
@@ -311,182 +310,189 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Column="1">
-                <ListBox x:Name="WhiteList"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         VerticalAlignment="Top"
-                         HorizontalAlignment="Left"
-                         VirtualizingPanel.IsVirtualizing="True"
-                         VirtualizingPanel.VirtualizationMode="Recycling"
-                         AllowDrop="True"
-                         ItemsSource="{Binding FilteredPlayers}"
-                         SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
-                         SelectionChanged="List_SelectionChanged"
-                         PreviewKeyDown="List_PreviewKeyDown">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="models:Player">
-                            <Border BorderBrush="Gray"
-                                    BorderThickness="1"
-                                    Width="110"
-                                    Height="{Binding BoxHeight}"
-                                    MouseMove="ListBorder_MouseMove">
-                                <Grid>
-                                    <StackPanel Orientation="Vertical"
-                                                Width="100">
-                                        <TextBlock Text="{Binding Name}"
-                                                   Foreground="{Binding TwitchStreamData.StatusLabelColor}"
-                                                   Background="Transparent"
-                                                   FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   Width="100"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Top"
-                                                   TextAlignment="Center"
-                                                   Margin="0 2 0 0">
-                                        </TextBlock>
-                                        <StackPanel Orientation="Horizontal"
-                                                    HorizontalAlignment="Center"
-                                                    Margin="0 5 0 0">
-                                            <TextBlock Text="{Binding PersonalBest}"
-                                                       Foreground="White"
+            <Grid Grid.Column="1"
+                  Background="Transparent">
+                <ScrollViewer>
+                    <ListBox x:Name="WhiteList"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             VerticalAlignment="Top"
+                             HorizontalAlignment="Left"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             AllowDrop="True"
+                             ItemsSource="{Binding FilteredPlayers}"
+                             SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
+                             SelectionChanged="List_SelectionChanged"
+                             PreviewKeyDown="List_PreviewKeyDown"
+                             PreviewMouseWheel="ListBox_PreviewMouseWheel">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="models:Player">
+                                <Border BorderBrush="Gray"
+                                        BorderThickness="1"
+                                        Width="110"
+                                        Height="{Binding BoxHeight}"
+                                        MouseMove="ListBorder_MouseMove">
+                                    <Grid>
+                                        <StackPanel Orientation="Vertical"
+                                                    Width="100">
+                                            <TextBlock Text="{Binding Name}"
+                                                       Foreground="{Binding TwitchStreamData.StatusLabelColor}"
                                                        Background="Transparent"
-                                                       FontSize="23"
-                                                       FontWeight="Light"
-                                                       Width="65"
-                                                       Height="30"
-                                                       VerticalAlignment="Center"
-                                                       TextAlignment="Center" />
-                                            <Image Width="30"
-                                                   Height="30"
-                                                   HorizontalAlignment="Right"
-                                                   VerticalAlignment="Top"
-                                                   Margin="0 0 5 0"
-                                                   Source="{Binding Image}" />
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock FontSize="12"
-                                                       Visibility="{Binding TwitchStreamData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                       VerticalAlignment="Bottom"
-                                                       Background="Transparent"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Width="100"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Top"
                                                        TextAlignment="Center"
-                                                       Foreground="#A9A9A9 "
-                                                       Text="{Binding TwitchStreamData.GameName}"
-                                                       Margin="0 2 0 0" />
+                                                       Margin="0 2 0 0">
+                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0 5 0 0">
+                                                <TextBlock Text="{Binding PersonalBest}"
+                                                           Foreground="White"
+                                                           Background="Transparent"
+                                                           FontSize="23"
+                                                           FontWeight="Light"
+                                                           Width="65"
+                                                           Height="30"
+                                                           VerticalAlignment="Center"
+                                                           TextAlignment="Center" />
+                                                <Image Width="30"
+                                                       Height="30"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Top"
+                                                       Margin="0 0 5 0"
+                                                       Source="{Binding Image}" />
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock FontSize="12"
+                                                           Visibility="{Binding TwitchStreamData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                           VerticalAlignment="Bottom"
+                                                           Background="Transparent"
+                                                           TextAlignment="Center"
+                                                           Foreground="#A9A9A9 "
+                                                           Text="{Binding TwitchStreamData.GameName}"
+                                                           Margin="0 2 0 0" />
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Margin"
+                                        Value="0" />
+                                <Setter Property="Padding"
+                                        Value="0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </ScrollViewer>
             </Grid>
 
-            <GridSplitter Grid.Column="2"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch"
-                          Background="#000D14"
-                          ShowsPreview="True"
-                          Width="5" />
+            <Grid Grid.Column="2">
+                <ScrollViewer>
+                    <ListBox x:Name="PaceMan"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Width="273"
+                             VerticalAlignment="Top"
+                             HorizontalAlignment="Left"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             AllowDrop="True"
+                             ItemsSource="{Binding PaceManPlayers}"
+                             SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}"
+                             SelectionChanged="List_SelectionChanged"
+                             PreviewKeyDown="List_PreviewKeyDown"
+                             PreviewMouseWheel="ListBox_PreviewMouseWheel"
+                             Margin="3 0 0 0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="models:PaceMan">
+                                <Border BorderBrush="Gray"
+                                        BorderThickness="1"
+                                        Width="263"
+                                        Height="45"
+                                        MouseMove="ListBorder_MouseMove">
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="5 0 0 0">
+                                        <Image Source="{Binding Player.Image}"
+                                               Width="30"
+                                               Height="30" />
+                                        <TextBlock Text="{Binding Nickname}"
+                                                   Width="70"
+                                                   Height="16"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Left"
+                                                   Foreground="White"
+                                                   Padding="0"
+                                                   FontWeight="Bold"
+                                                   Margin="5 0 0 0" />
 
-            <Grid Grid.Column="3">
-                <ListBox x:Name="PaceMan"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         MinWidth="265"
-                         VerticalAlignment="Top"
-                         HorizontalAlignment="Left"
-                         VirtualizingPanel.IsVirtualizing="True"
-                         VirtualizingPanel.VirtualizationMode="Recycling"
-                         AllowDrop="True"
-                         ItemsSource="{Binding PaceManPlayers}"
-                         SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}"
-                         SelectionChanged="List_SelectionChanged"
-                         PreviewKeyDown="List_PreviewKeyDown">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="models:PaceMan">
-                            <Border BorderBrush="Gray"
-                                    BorderThickness="1"
-                                    Width="110"
-                                    Height="65"
-                                    Padding="0"
-                                    MouseMove="ListBorder_MouseMove">
-                                <Grid Margin="0 5 0 0">
-                                    <TextBlock Text="{Binding Nickname}"
-                                               Background="Transparent"
-                                               Width="100"
-                                               FontSize="12"
-                                               Height="17"
-                                               VerticalAlignment="Top"
-                                               HorizontalAlignment="Center"
-                                               TextAlignment="Center"
-                                               Foreground="White"
-                                               FontWeight="Bold"
-                                               Margin="0 -2 0 0" />
-                                    <StackPanel>
                                         <TextBlock Foreground="Wheat"
-                                                   Background="Transparent"
-                                                   Width="64"
+                                                   Width="70"
+                                                   Height="22"
                                                    HorizontalAlignment="Left"
-                                                   VerticalAlignment="Top"
-                                                   TextAlignment="Center"
-                                                   Margin="0 15 0 0">
-                                            <Run Text="{Binding SplitName}"
-                                                 BaselineAlignment="Center"
-                                                 FontSize="13" />
-                                            <Run Text="{Binding CurrentSplitTime}"
-                                                 BaselineAlignment="Center"
-                                                 FontSize="13" />
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Center">
+                                                <Run Text="{Binding SplitName}"
+                                                     FontSize="16" />
+                                                <Run Text="{Binding CurrentSplitTime}"
+                                                     FontSize="16" />
                                         </TextBlock>
                                         <TextBlock Foreground="FloralWhite"
-                                                   Background="Transparent"
-                                                   Width="64"
+                                                   Width="80"
+                                                   Height="22"
                                                    HorizontalAlignment="Left"
-                                                   VerticalAlignment="Top"
+                                                   VerticalAlignment="Center"
                                                    TextAlignment="Center"
-                                                   Margin="0 3 0 0">
-                                            <Run Text="IGT:"
-                                                 BaselineAlignment="Center"
-                                                 FontSize="10" />
-                                            <Run Text="{Binding IGTTime}"
-                                                 BaselineAlignment="Center"
-                                                 FontSize="10" />
+                                                   Margin="0 0 0 0">
+                                                <Run Text="IGT:"
+                                                     FontSize="16" />
+                                                <Run Text="{Binding IGTTime}"
+                                                     FontSize="16" />
                                         </TextBlock>
                                     </StackPanel>
-                                    <Image Width="30"
-                                           Height="30"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Bottom"
-                                           Margin="0 0 6 6"
-                                           Source="{Binding Player.Image}" />
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Width"
-                                    Value="120" />
-                            <Setter Property="Height"
-                                    Value="75" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Margin"
+                                        Value="0 -1 0 -1" />
+                                <Setter Property="Padding"
+                                        Value="0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </ScrollViewer>
             </Grid>
+
+            <Line Grid.Column="2"
+                  X1="2"
+                  X2="2"
+                  Y1="0"
+                  Y2="2000"
+                  Stroke="#000D14"
+                  StrokeThickness="4" />
         </Grid>
     </Grid>
 </UserControl>
