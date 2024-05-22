@@ -1,9 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.Windows;
 

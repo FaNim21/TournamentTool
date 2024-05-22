@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
+        xmlns:controller="clr-namespace:TournamentTool.ViewModels.Controller"
         xmlns:views="clr-namespace:TournamentTool.Views"
         mc:Ignorable="d"
         Width="800"
@@ -17,7 +18,7 @@
         MinHeight="601"
         Background="#383A3C">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type viewModels:ControllerViewModel}">
+        <DataTemplate DataType="{x:Type controller:ControllerViewModel}">
             <views:ControllerView />
         </DataTemplate>
 

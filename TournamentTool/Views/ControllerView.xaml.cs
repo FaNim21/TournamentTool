@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Models;
-using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.Views;
 
@@ -132,8 +132,6 @@ public partial class ControllerView : UserControl
 
     private void List_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        //TODO: 0 zrobic odklikiwanie pacemana i whitelisty
-
         e.Handled = true;
     }
 

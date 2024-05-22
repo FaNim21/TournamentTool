@@ -34,7 +34,6 @@ public class Tournament : BaseViewModel, IRenameItem
         }
     }
 
-
     public bool IsUsingPaceMan { get; set; } = true;
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
@@ -42,14 +41,14 @@ public class Tournament : BaseViewModel, IRenameItem
     public bool SetPovHeadsInBrowser { get; set; } = false;
     public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
 
-    private int _paceManRefreshRateMiliseconds = 10000;
+    private int _paceManRefreshRateMiliseconds = 3000;
     public int PaceManRefreshRateMiliseconds
     {
         get => _paceManRefreshRateMiliseconds;
         set
         {
-            if (value < 10000)
-                _paceManRefreshRateMiliseconds = 10000;
+            if (value < 3000)
+                _paceManRefreshRateMiliseconds = 3000;
             else
                 _paceManRefreshRateMiliseconds = value;
             OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));

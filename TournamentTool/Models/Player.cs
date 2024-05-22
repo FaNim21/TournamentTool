@@ -35,6 +35,8 @@ public class TwitchStreamData : BaseViewModel
 
     public Brush? StatusLabelColor { get; set; }
     public string Status { get; set; } = "offline";
+    public static Color liveColor = Color.FromRgb(0, 255, 127);
+    public static Color offlineColor = Color.FromRgb(201, 61, 59);
 
     public bool GameNameVisibility { get; set; } = false;
     public string GameName { get; set; } = string.Empty;
@@ -54,9 +56,9 @@ public class TwitchStreamData : BaseViewModel
 
         Status = data.Status;
         if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
-            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(51, 204, 51)); });
+            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(liveColor); });
         else
-            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(125, 38, 37)); });
+            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(offlineColor); });
 
         Update();
     }
@@ -88,7 +90,7 @@ public class TwitchStreamData : BaseViewModel
         Language = string.Empty;
         ThumbnailUrl = string.Empty;
         Status = "offline";
-        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(Color.FromRgb(125, 38, 37)); });
+        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(offlineColor); });
         Update();
     }
 }
@@ -209,20 +211,21 @@ public class Player : BaseViewModel, ITwitchPovInformation
     public Player(string name = "")
     {
         Name = name;
+        TwitchStreamData.Update(new TwitchStreamData());
     }
 
     public void ShowCategory(bool option)
     {
         if (option)
         {
-            BoxHeight = 90;
-            BoxHeightBorder = 100;
+            BoxHeight = 80;
+            BoxHeightBorder = 90;
             TwitchStreamData.GameNameVisibility = true;
             return;
         }
 
-        BoxHeight = 80;
-        BoxHeightBorder = 90;
+        BoxHeight = 65;
+        BoxHeightBorder = 75;
         TwitchStreamData.GameNameVisibility = false;
     }
 
