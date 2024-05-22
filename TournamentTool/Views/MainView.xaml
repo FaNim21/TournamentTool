@@ -11,7 +11,7 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
-             Background="#383A3C">
+             Background="#1E1E1E">
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Clear"
@@ -57,12 +57,14 @@
             <ScrollViewer Grid.Row="1">
                 <Grid Visibility="{Binding IsPresetOpened, Converter={StaticResource BoolToVisibilityConverter}}">
                     <WrapPanel Orientation="Vertical"
-                               Margin="20 20 20 20"
+                               Margin="20 10 20 20"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top">
                         <Label  Content="OBS Connection"
                                 Foreground="White"
-                                FontSize="24" />
+                                FontSize="24"
+                                Padding="0"
+                                Margin="0 0 0 5" />
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
@@ -115,7 +117,9 @@
 
                         <Label  Content="General"
                                 Foreground="White"
-                                FontSize="24" />
+                                FontSize="24"
+                                Padding="0"
+                                Margin="0 0 0 5" />
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
@@ -126,6 +130,22 @@
                                      HorizontalAlignment="Left"
                                      VerticalAlignment="Top" />
                             <Label Content="POV filter name"
+                                   Foreground="White"
+                                   Height="20"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 3" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="PaceMan refresh(ms)"
                                    Foreground="White"
                                    Height="20"
                                    FontSize="16"
@@ -147,42 +167,14 @@
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <CheckBox IsChecked="{Binding CurrentChosen.IsUsingWhitelistOnPaceMan}"
-                                      Content="Use Whitelist on paceman"
-                                      Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovNameInTextField}"
-                                      Content="Set POV names in text fields"
-                                      Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
-                                      Content="Set POV head in browser field"
+                                      Content="Use Whitelist on Paceman"
                                       Foreground="White" />
                         </WrapPanel>
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <CheckBox IsChecked="{Binding CurrentChosen.ShowLiveOnlyForMinecraftCategory}"
-                                      Content="Show LIVE only for Minecraft Category"
+                                      Content="Show LIVE only for Minecraft category"
                                       Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="120"
-                                     Height="20"
-                                     Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
-                                     Background="#9E9E9E"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top" />
-                            <Label Content="PaceMan refresh(ms)"
-                                   Foreground="White"
-                                   Height="20"
-                                   FontSize="16"
-                                   Padding="0"
-                                   Margin="5 0 0 3" />
                         </WrapPanel>
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
@@ -190,12 +182,30 @@
                                       Content="Always On Top"
                                       Foreground="White" />
                         </WrapPanel>
+
+                        <Label  Content="Pov management"
+                                Foreground="White"
+                                FontSize="24"
+                                Padding="0"
+                                Margin="0 0 0 5" />
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovNameInTextField}"
+                                      Content="Use twitch names"
+                                      Foreground="White" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
+                                      Content="Use skin heads"
+                                      Foreground="White" />
+                        </WrapPanel>
                     </WrapPanel>
 
                     <WrapPanel Orientation="Vertical"
                                VerticalAlignment="Top"
                                HorizontalAlignment="Right"
-                               Margin="0 35 70 20">
+                               Margin="0 50 70 20">
 
                         <components:ButtonNormal ContentText="OPEN"
                                                  Width="150"

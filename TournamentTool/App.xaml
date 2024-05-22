@@ -178,7 +178,7 @@
             <Setter Property="Stylus.IsFlicksEnabled"
                     Value="False" />
             <Setter Property="Foreground"
-                    Value="#1b1d1f" />
+                    Value="#3c4045" />
             <Setter Property="Background"
                     Value="Transparent" />
             <Setter Property="Width"

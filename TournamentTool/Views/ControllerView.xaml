@@ -31,8 +31,8 @@
                        VerticalAlignment="Top">
                 <Run Foreground="#CCCCCC"
                      Text="Connected: " />
-                <Run Foreground="{Binding IsConnectedColor, Mode=OneWay}"
-                     Text="{Binding IsConnectedToWebSocket, Mode=OneWay}" />
+                <Run Foreground="{Binding ObsController.IsConnectedColor, Mode=OneWay}"
+                     Text="{Binding ObsController.IsConnectedToWebSocket, Mode=OneWay}" />
             </TextBlock>
 
             <TextBlock Text="Search: "
@@ -152,17 +152,17 @@
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Aspect ratio: " />
-                            <Run Text="{Binding CanvasAspectRatio, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.CanvasAspectRatio, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="x axis ratio: " />
-                            <Run Text="{Binding XAxisRatio, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.XAxisRatio, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="y axis ratio: " />
-                            <Run Text="{Binding YAxisRatio, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.YAxisRatio, Mode=OneWay}" />
                         </TextBlock>
 
                         <TextBlock Text="OBS Settings:"
@@ -172,28 +172,28 @@
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Base Width: " />
-                            <Run Text="{Binding OBSVideoSettings.BaseWidth, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.OBSVideoSettings.BaseWidth, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Base Height: " />
-                            <Run Text="{Binding OBSVideoSettings.BaseHeight, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.OBSVideoSettings.BaseHeight, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Output Height: " />
-                            <Run Text="{Binding OBSVideoSettings.OutputWidth, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.OBSVideoSettings.OutputWidth, Mode=OneWay}" />
                         </TextBlock>
 
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Output Height: " />
-                            <Run Text="{Binding OBSVideoSettings.OutputHeight, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.OBSVideoSettings.OutputHeight, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock FontSize="12"
                                    Foreground="White">
                             <Run Text="Aspect ratio: " />
-                            <Run Text="{Binding OBSVideoSettings.AspectRatio, Mode=OneWay}" />
+                            <Run Text="{Binding ObsController.OBSVideoSettings.AspectRatio, Mode=OneWay}" />
                         </TextBlock>
                     </WrapPanel>
 
@@ -203,7 +203,7 @@
                                    Margin="0 5 0 0"
                                    FontWeight="SemiBold"
                                    Foreground="FloralWhite">
-                                <Run Text="{Binding CurrentSceneName}" />
+                                <Run Text="{Binding ObsController.CurrentSceneName}" />
                         </TextBlock>
                         <WrapPanel Orientation="Vertical"
                                    Margin="0 15 0 1">
@@ -336,7 +336,6 @@
                                 <Grid>
                                     <StackPanel Orientation="Vertical"
                                                 Width="100">
-                                        <!--Foreground="#FFD700"-->
                                         <TextBlock Text="{Binding Name}"
                                                    Foreground="{Binding TwitchStreamData.StatusLabelColor}"
                                                    Background="Transparent"
@@ -368,18 +367,6 @@
                                                    Source="{Binding Image}" />
                                         </StackPanel>
                                         <StackPanel>
-                                            <!--
-                                            <TextBlock FontSize="14"
-                                                       VerticalAlignment="Top"
-                                                       TextAlignment="Center"
-                                                       Margin="0 0 0 0">
-                                                <Run Text="Status:"
-                                                     Foreground="#A9A9A9" />
-                                                <Run Text="{Binding TwitchStreamData.Status}"
-                                                     Foreground="{Binding TwitchStreamData.StatusLabelColor}"
-                                                     FontWeight="SemiBold" />
-                                            </TextBlock>
-                                            -->
                                             <TextBlock FontSize="12"
                                                        Visibility="{Binding TwitchStreamData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
                                                        VerticalAlignment="Bottom"

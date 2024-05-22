@@ -9,7 +9,7 @@ namespace TournamentTool.Models;
 
 public class PointOfView : BaseViewModel
 {
-    private readonly ControllerViewModel _controller;
+    private readonly ObsController _obs;
 
     public string? SceneName { get; set; }
     public string? SceneItemName { get; set; }
@@ -50,9 +50,9 @@ public class PointOfView : BaseViewModel
     public ICommand ApplyVolumeCommand { get; set; }
 
 
-    public PointOfView(ControllerViewModel controller)
+    public PointOfView(ObsController obs)
     {
-        _controller = controller;
+        _obs = obs;
 
         UnFocus();
 
@@ -84,7 +84,7 @@ public class PointOfView : BaseViewModel
 
         SetHead();
         Update();
-        _controller.SetBrowserURL(this);
+        _obs.SetBrowserURL(this);
     }
     public void Swap(PointOfView pov)
     {
@@ -119,7 +119,7 @@ public class PointOfView : BaseViewModel
         Volume = NewVolume;
         Update();
 
-        _controller.SetBrowserURL(this);
+        _obs.SetBrowserURL(this);
     }
 
     public void SetHead()
@@ -127,14 +127,14 @@ public class PointOfView : BaseViewModel
         if (string.IsNullOrEmpty(HeadViewParametr) || string.IsNullOrEmpty(HeadItemName)) return;
 
         string path = $"minotar.net/helm/{HeadViewParametr}/180.png";
-        _controller.SetBrowserURL(HeadItemName, path);
+        _obs.SetBrowserURL(HeadItemName, path);
     }
 
     public void UpdateNameTextField()
     {
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
 
-        _controller.SetTextField(TextFieldItemName, TwitchName);
+        _obs.SetTextField(TextFieldItemName, TwitchName);
     }
 
     public string GetURL()
@@ -151,8 +151,8 @@ public class PointOfView : BaseViewModel
         TwitchName = string.Empty;
         HeadViewParametr = string.Empty;
 
-        _controller.SetBrowserURL(this);
-        _controller.SetBrowserURL(HeadItemName, string.Empty);
+        _obs.SetBrowserURL(this);
+        _obs.SetBrowserURL(HeadItemName, string.Empty);
 
         Update();
     }
