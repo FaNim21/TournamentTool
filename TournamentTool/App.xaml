@@ -15,6 +15,7 @@
         <converters:BoolReverseConverter x:Key="BoolReverseConverter" />
         <converters:EmptyStringConverter x:Key="EmptyStringConverter" />
         <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <converters:GroupHeaderConverter x:Key="GroupHeaderConverter" />
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Data;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
@@ -41,6 +42,8 @@ public class ControllerViewModel : BaseViewModel
             OnPropertyChanged(nameof(PaceManPlayers));
         }
     }
+
+    public ICollectionView? GroupedPaceManPlayers { get; set; }
 
     public MainViewModel MainViewModel { get; set; }
     public ObsController ObsController { get; set; }
@@ -167,6 +170,7 @@ public class ControllerViewModel : BaseViewModel
             player.ShowCategory(!MainViewModel.CurrentChosen!.ShowLiveOnlyForMinecraftCategory);
 
         FilterItems();
+        SetupPaceManGrouping();
 
         if (MainViewModel.CurrentChosen!.IsUsingPaceMan)
         {
@@ -180,6 +184,17 @@ public class ControllerViewModel : BaseViewModel
             await ObsController.Connect(Configuration.Password!, Configuration.Port);
             await TwitchApi();
         });
+    }
+
+    private void SetupPaceManGrouping()
+    {
+        var collectionViewSource = new CollectionViewSource { Source = PaceManPlayers };
+
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceMan.SplitName)));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+
+        GroupedPaceManPlayers = collectionViewSource.View;
     }
 
     private async Task TwitchApi()
@@ -398,11 +413,11 @@ public class ControllerViewModel : BaseViewModel
             }
 
             if (foundPlayer) continue;
-            if (resultPaceman.User.TwitchName == null) continue;
+            //if (resultPaceman.User.TwitchName == null) continue;
 
             try
             {
-                resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName == resultPaceman.User.TwitchName).FirstOrDefault();
+                resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -410,8 +425,8 @@ public class ControllerViewModel : BaseViewModel
             }
 
             if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
-            string name = Helper.GetSplitShortcut(resultPaceman.Splits.Last().SplitName);
-            resultPaceman.UpdateTime(name);
+
+            resultPaceman.Initialize(this, resultPaceman.Splits);
             Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(resultPaceman); });
         }
 
@@ -420,6 +435,9 @@ public class ControllerViewModel : BaseViewModel
             var current = notFoundPaceMans[i];
             Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
         }
+
+        OnPropertyChanged(nameof(PaceManPlayers));
+        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
     }
 
     private void SetPovAfterClickedCanvas()
