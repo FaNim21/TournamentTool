@@ -106,6 +106,7 @@ public class MainViewModel : BaseViewModel
             if (current.Name.Equals(lastOpened, StringComparison.OrdinalIgnoreCase))
             {
                 CurrentChosen = current;
+                CurrentChosen!.UpdateGoodPacesTexts();
                 return;
             }
         }

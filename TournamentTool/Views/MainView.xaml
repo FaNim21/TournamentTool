@@ -36,7 +36,8 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0"
+                  Background="#000d14">
                 <TextBlock FontSize="28"
                            Height="40"
                            HorizontalAlignment="Center">
@@ -138,36 +139,8 @@
                         </WrapPanel>
                         <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="120"
-                                     Height="20"
-                                     Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
-                                     Background="#9E9E9E"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top" />
-                            <Label Content="PaceMan refresh(ms)"
-                                   Foreground="White"
-                                   Height="20"
-                                   FontSize="16"
-                                   Padding="0"
-                                   Margin="5 0 0 3" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.IsUsingPaceMan}"
-                                      Content="Use PaceMan"
-                                      Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
                             <CheckBox IsChecked="{Binding CurrentChosen.IsUsingTwitchAPI}"
                                       Content="Use Twitch API"
-                                      Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.IsUsingWhitelistOnPaceMan}"
-                                      Content="Use Whitelist on Paceman"
                                       Foreground="White" />
                         </WrapPanel>
                         <WrapPanel Orientation="Horizontal"
@@ -199,6 +172,132 @@
                             <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
                                       Content="Use skin heads"
                                       Foreground="White" />
+                        </WrapPanel>
+
+                        <Label  Content="Paceman"
+                                Foreground="White"
+                                FontSize="24"
+                                Padding="0"
+                                Margin="0 0 0 5" />
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <CheckBox IsChecked="{Binding CurrentChosen.IsUsingPaceMan}"
+                                      Content="Use PaceMan"
+                                      Foreground="White" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <CheckBox IsChecked="{Binding CurrentChosen.IsUsingWhitelistOnPaceMan}"
+                                      Content="Use Whitelist on Paceman"
+                                      Foreground="White" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="PaceMan refresh (ms)"
+                                   Foreground="White"
+                                   Height="20"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 3" />
+                        </WrapPanel>
+
+                        <Label  Content="Good Pace Splits (ms)"
+                                Foreground="White"
+                                FontSize="24"
+                                Padding="0"
+                                Margin="0 0 0 5" />
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="{Binding CurrentChosen.Structure2ToText}"
+                                   Foreground="White"
+                                   Height="23"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 0" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="{Binding CurrentChosen.FirstPortalToText}"
+                                   Foreground="White"
+                                   Height="23"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 0" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="{Binding CurrentChosen.EnterStrongholdToText}"
+                                   Foreground="White"
+                                   Height="23"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 0" />
+
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="{Binding CurrentChosen.EnterEndToText}"
+                                   Foreground="White"
+                                   Height="23"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 0" />
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="120"
+                                     Height="20"
+                                     Text="{Binding CurrentChosen.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Background="#9E9E9E"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" />
+                            <Label Content="{Binding CurrentChosen.CreditsToText}"
+                                   Foreground="White"
+                                   Height="23"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 0" />
                         </WrapPanel>
                     </WrapPanel>
 

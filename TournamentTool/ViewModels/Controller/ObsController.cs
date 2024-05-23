@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
@@ -133,56 +134,23 @@ public class ObsController : BaseViewModel
 
         foreach (var item in sceneItems)
         {
-            if (item.IsGroup == true || string.IsNullOrEmpty(item.InputKind)) continue;
-
-            if (item.InputKind.Equals("browser_source") && item.SourceName.StartsWith("head", StringComparison.OrdinalIgnoreCase))
+            if (item.IsGroup == true)
             {
-                if (Controller.Configuration.SetPovHeadsInBrowser)
-                    additionals.Add(item);
-                continue;
-            }
-
-            if (item.InputKind.StartsWith("text"))
-            {
-                if (Controller.Configuration.SetPovNameInTextField)
-                    additionals.Add(item);
-                continue;
-            }
-
-            if (!item.InputKind.Equals("game_capture") &&
-                !item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) continue;
-
-            PointOfView pov = new(this);
-            SceneItemTransform transform = await Client.GetSceneItemTransform(CurrentSceneName, item.SceneItemId);
-
-            pov.SceneName = CurrentSceneName;
-            pov.SceneItemName = item.SourceName;
-            pov.ID = item.SceneItemId;
-
-            pov.X = (int)(transform.PositionX / XAxisRatio);
-            pov.Y = (int)(transform.PositionY / YAxisRatio);
-
-            pov.Width = (int)(transform.Width / XAxisRatio);
-            pov.Height = (int)(transform.Height / YAxisRatio);
-
-            pov.Text = item.SourceName;
-
-            (string? currentName, float volume) = await GetBrowserURLTwitchName(pov.SceneItemName);
-            pov.ChangeVolume(volume);
-
-            if (!string.IsNullOrEmpty(currentName))
-            {
-                Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
-                if (player != null)
+                SceneItem[] groupItems = await Client.GetGroupSceneItemList(item.SourceName);
+                foreach (var groupItem in groupItems)
                 {
-                    pov.TwitchName = currentName;
-                    pov.DisplayedPlayer = player.Name!;
-                    pov.HeadViewParametr = player.InGameName!;
-                    pov.Update();
+                    if (string.IsNullOrEmpty(groupItem.InputKind)) continue;
+
+                    CheckForAdditionals(additionals, groupItem);
+
+                    await SetupPovFromSceneItem(groupItem, item);
                 }
             }
 
-            Controller.AddPov(pov);
+            if (string.IsNullOrEmpty(item.InputKind)) continue;
+
+            CheckForAdditionals(additionals, item);
+            await SetupPovFromSceneItem(item);
         }
 
         if (additionals.Count == 0) return;
@@ -204,6 +172,66 @@ public class ObsController : BaseViewModel
                 }
             }
         }
+    }
+    private void CheckForAdditionals(List<SceneItem> additionals, SceneItem item)
+    {
+        if (item == null || string.IsNullOrEmpty(item.InputKind)) return;
+
+        if (item.InputKind.Equals("browser_source") && item.SourceName.StartsWith("head", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Controller.Configuration.SetPovHeadsInBrowser)
+                additionals.Add(item);
+        }
+        else if (item.InputKind.StartsWith("text"))
+        {
+            if (Controller.Configuration.SetPovNameInTextField)
+                additionals.Add(item);
+        }
+    }
+    private async Task SetupPovFromSceneItem(SceneItem item, SceneItem? group = null)
+    {
+        if (!item.InputKind!.Equals("game_capture") &&
+            !item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
+
+        PointOfView pov = new(this);
+
+        pov.SceneName = CurrentSceneName;
+        pov.SceneItemName = item.SourceName;
+        pov.ID = item.SceneItemId;
+
+        float positionX = item.SceneItemTransform.PositionX;
+        float positionY = item.SceneItemTransform.PositionY;
+
+        if (group != null)
+        {
+            positionX += group.SceneItemTransform.PositionX;
+            positionY += group.SceneItemTransform.PositionY;
+        }
+
+        pov.X = (int)(positionX / XAxisRatio);
+        pov.Y = (int)(positionY / YAxisRatio);
+
+        pov.Width = (int)(item.SceneItemTransform.Width / XAxisRatio);
+        pov.Height = (int)(item.SceneItemTransform.Height / YAxisRatio);
+
+        pov.Text = item.SourceName;
+
+        (string? currentName, float volume) = await GetBrowserURLTwitchName(pov.SceneItemName);
+        pov.ChangeVolume(volume);
+
+        if (!string.IsNullOrEmpty(currentName))
+        {
+            Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
+            if (player != null)
+            {
+                pov.TwitchName = currentName;
+                pov.DisplayedPlayer = player.Name!;
+                pov.HeadViewParametr = player.InGameName!;
+                pov.Update();
+            }
+        }
+
+        Controller.AddPov(pov);
     }
 
     public void SetBrowserURL(PointOfView pov)
@@ -336,8 +364,20 @@ public class ObsController : BaseViewModel
             var current = Controller.POVs[i];
             if (current.ID != args.SceneItemId) continue;
 
-            current.X = (int)(args.SceneItemTransform.PositionX / XAxisRatio);
-            current.Y = (int)(args.SceneItemTransform.PositionY / YAxisRatio);
+            float positionX = args.SceneItemTransform.PositionX;
+            float positionY = args.SceneItemTransform.PositionY;
+
+            //Client.ggrou
+
+            /*if()
+            if (group != null)
+            {
+                positionX += group.SceneItemTransform.PositionX;
+                positionY += group.SceneItemTransform.PositionY;
+            }*/
+
+            current.X = (int)(positionX / XAxisRatio);
+            current.Y = (int)(positionY / YAxisRatio);
 
             current.Width = (int)(args.SceneItemTransform.Width / XAxisRatio);
             current.Height = (int)(args.SceneItemTransform.Height / YAxisRatio);

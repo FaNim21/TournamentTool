@@ -1,4 +1,5 @@
 ﻿using MultiOpener.Entities.Interfaces;
+using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json.Serialization;
@@ -34,7 +35,17 @@ public class Tournament : BaseViewModel, IRenameItem
         }
     }
 
-    public bool IsUsingPaceMan { get; set; } = true;
+    private bool _isUsingPaceMan = true;
+    public bool IsUsingPaceMan
+    {
+        get => _isUsingPaceMan;
+        set
+        {
+            _isUsingPaceMan = value;
+            OnPropertyChanged(nameof(IsUsingPaceMan));
+        }
+    }
+
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
     public bool SetPovNameInTextField { get; set; } = false;
@@ -54,6 +65,91 @@ public class Tournament : BaseViewModel, IRenameItem
             OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
         }
     }
+
+    private int _structure2GoodPaceMiliseconds = 270000;
+    public int Structure2GoodPaceMiliseconds
+    {
+        get => _structure2GoodPaceMiliseconds;
+        set
+        {
+            _structure2GoodPaceMiliseconds = value;
+
+            string time = TimeSpan.FromMilliseconds(value).ToString(@"mm\:ss");
+            Structure2ToText = $"Structure 2 (sub {time})";
+            OnPropertyChanged(nameof(Structure2ToText));
+
+            OnPropertyChanged(nameof(Structure2GoodPaceMiliseconds));
+        }
+    }
+    public string? Structure2ToText { set; get; }
+
+    private int _firstPortalGoodPaceMiliseconds = 360000;
+    public int FirstPortalGoodPaceMiliseconds
+    {
+        get => _firstPortalGoodPaceMiliseconds;
+        set
+        {
+            _firstPortalGoodPaceMiliseconds = value;
+
+            string time = TimeSpan.FromMilliseconds(value).ToString(@"mm\:ss");
+            FirstPortalToText = $"First Portal (sub {time})";
+            OnPropertyChanged(nameof(FirstPortalToText));
+
+            OnPropertyChanged(nameof(FirstPortalGoodPaceMiliseconds));
+        }
+    }
+    public string? FirstPortalToText { set; get; }
+
+    private int _enterStrongholdGoodPaceMiliseconds = 450000;
+    public int EnterStrongholdGoodPaceMiliseconds
+    {
+        get => _enterStrongholdGoodPaceMiliseconds;
+        set
+        {
+            _enterStrongholdGoodPaceMiliseconds = value;
+
+            string time = TimeSpan.FromMilliseconds(value).ToString(@"mm\:ss");
+            EnterStrongholdToText = $"Enter Stronghold (sub {time})";
+            OnPropertyChanged(nameof(EnterStrongholdToText));
+
+            OnPropertyChanged(nameof(EnterStrongholdGoodPaceMiliseconds));
+        }
+    }
+    public string? EnterStrongholdToText { set; get; }
+
+    private int _enterEndGoodPaceMiliseconds = 480000;
+    public int EnterEndGoodPaceMiliseconds
+    {
+        get => _enterEndGoodPaceMiliseconds;
+        set
+        {
+            _enterEndGoodPaceMiliseconds = value;
+
+            string time = TimeSpan.FromMilliseconds(value).ToString(@"mm\:ss");
+            EnterEndToText = $"Enter End (sub {time})";
+            OnPropertyChanged(nameof(EnterEndToText));
+
+            OnPropertyChanged(nameof(EnterEndGoodPaceMiliseconds));
+        }
+    }
+    public string? EnterEndToText { set; get; }
+
+    private int _creditsGoodPaceMiliseconds = 600000;
+    public int CreditsGoodPaceMiliseconds
+    {
+        get => _creditsGoodPaceMiliseconds;
+        set
+        {
+            _creditsGoodPaceMiliseconds = value;
+
+            string time = TimeSpan.FromMilliseconds(value).ToString(@"mm\:ss");
+            CreditsToText = $"Finish (sub {time})";
+            OnPropertyChanged(nameof(CreditsToText));
+
+            OnPropertyChanged(nameof(CreditsGoodPaceMiliseconds));
+        }
+    }
+    public string? CreditsToText { set; get; }
 
     private bool _isAlwaysOnTop = true;
     public bool IsAlwaysOnTop
@@ -88,6 +184,24 @@ public class Tournament : BaseViewModel, IRenameItem
         {
             Players[i].LoadHead();
         }
+    }
+    public void UpdateGoodPacesTexts()
+    {
+        string time;
+        time = TimeSpan.FromMilliseconds(Structure2GoodPaceMiliseconds).ToString(@"mm\:ss");
+        Structure2ToText = $"Structure 2 (sub {time})";
+
+        time = TimeSpan.FromMilliseconds(FirstPortalGoodPaceMiliseconds).ToString(@"mm\:ss");
+        FirstPortalToText = $"First Portal (sub {time})";
+
+        time = TimeSpan.FromMilliseconds(EnterStrongholdGoodPaceMiliseconds).ToString(@"mm\:ss");
+        EnterStrongholdToText = $"Enter Stronghold (sub {time})";
+
+        time = TimeSpan.FromMilliseconds(EnterEndGoodPaceMiliseconds).ToString(@"mm\:ss");
+        EnterEndToText = $"Enter End (sub {time})";
+
+        time = TimeSpan.FromMilliseconds(CreditsGoodPaceMiliseconds).ToString(@"mm\:ss");
+        CreditsToText = $"Finish (sub {time})";
     }
 
     public void ChangeName(string name)
@@ -139,6 +253,12 @@ public class Tournament : BaseViewModel, IRenameItem
         ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
+
+        Structure2GoodPaceMiliseconds = 270000;
+        FirstPortalGoodPaceMiliseconds = 360000;
+        EnterStrongholdGoodPaceMiliseconds = 450000;
+        EnterEndGoodPaceMiliseconds = 480000;
+        CreditsGoodPaceMiliseconds = 600000;
     }
 
     public Player? GetPlayerByTwitchName(string twitchName)

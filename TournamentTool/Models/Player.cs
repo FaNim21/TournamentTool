@@ -185,6 +185,7 @@ public class Player : BaseViewModel, ITwitchPovInformation
     }
 
     [JsonIgnore] private int _boxHeight = 80;
+    [JsonIgnore]
     public int BoxHeight
     {
         get => _boxHeight;
@@ -196,6 +197,7 @@ public class Player : BaseViewModel, ITwitchPovInformation
     }
 
     [JsonIgnore] private int _boxHeightBorder = 90;
+    [JsonIgnore]
     public int BoxHeightBorder
     {
         get => _boxHeightBorder;
