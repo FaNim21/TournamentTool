@@ -1,10 +1,7 @@
 ﻿<Application x:Class="TournamentTool.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TournamentTool"
-             xmlns:converters="clr-namespace:TournamentTool.Converters"
-             xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
-             xmlns:views="clr-namespace:TournamentTool.Views">
+             xmlns:converters="clr-namespace:TournamentTool.Converters">
     <Application.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                               TrueValue="Visible"
@@ -16,6 +13,7 @@
         <converters:EmptyStringConverter x:Key="EmptyStringConverter" />
         <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
         <converters:GroupHeaderConverter x:Key="GroupHeaderConverter" />
+        <converters:EnumToBooleanConverter x:Key="EnumToBoolConverter" />
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">

@@ -11,6 +11,7 @@ public class PointOfView : BaseViewModel
 {
     private readonly ObsController _obs;
 
+    public string? GroupName { get; set; }
     public string? SceneName { get; set; }
     public string? SceneItemName { get; set; }
     public int ID { get; set; }
@@ -27,6 +28,9 @@ public class PointOfView : BaseViewModel
     public Brush? BackgroundColor { get; set; }
 
     public string Text { get; set; } = string.Empty;
+
+    public bool IsFromWhiteList { get; set; }
+
     public string DisplayedPlayer { get; set; } = string.Empty;
     public string HeadViewParametr { get; set; } = string.Empty;
     public string TwitchName { get; set; } = string.Empty;
@@ -50,13 +54,14 @@ public class PointOfView : BaseViewModel
     public ICommand ApplyVolumeCommand { get; set; }
 
 
-    public PointOfView(ObsController obs)
+    public PointOfView(ObsController obs, string? groupName = "")
     {
         _obs = obs;
 
         UnFocus();
 
         ApplyVolumeCommand = new RelayCommand(ApplyVolume);
+        GroupName = groupName;
     }
 
     public void Update()
@@ -76,11 +81,16 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
-    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr)
+    public void SetPOV(ITwitchPovInformation povInfo)
+    {
+        SetPOV(povInfo.GetDisplayName(), povInfo.GetTwitchName(), povInfo.GetHeadViewParametr(), povInfo.IsFromWhiteList());
+    }
+    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr, bool isFromWhiteList)
     {
         DisplayedPlayer = DisplayedName;
         TwitchName = twitchName;
         HeadViewParametr = headInfoParametr;
+        IsFromWhiteList = isFromWhiteList;
 
         SetHead();
         Update();
@@ -91,9 +101,10 @@ public class PointOfView : BaseViewModel
         string tempDisplayedPlayer = pov.DisplayedPlayer;
         string tempTwitchName = pov.TwitchName;
         string tempHeadViewParametr = pov.HeadViewParametr;
+        bool tempIsFromWhiteList = pov.IsFromWhiteList;
 
-        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr);
-        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr);
+        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, IsFromWhiteList);
+        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr, tempIsFromWhiteList);
     }
 
     public void Focus()
@@ -124,9 +135,12 @@ public class PointOfView : BaseViewModel
 
     public void SetHead()
     {
-        if (string.IsNullOrEmpty(HeadViewParametr) || string.IsNullOrEmpty(HeadItemName)) return;
+        if (string.IsNullOrEmpty(HeadItemName)) return;
 
         string path = $"minotar.net/helm/{HeadViewParametr}/180.png";
+        if (string.IsNullOrEmpty(HeadViewParametr))
+            path = string.Empty;
+
         _obs.SetBrowserURL(HeadItemName, path);
     }
 
@@ -134,7 +148,21 @@ public class PointOfView : BaseViewModel
     {
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
 
-        _obs.SetTextField(TextFieldItemName, TwitchName);
+        string name = string.Empty;
+        switch (_obs.Controller.Configuration.DisplayedNameType)
+        {
+            case DisplayedNameType.Twitch:
+                name = TwitchName;
+                break;
+            case DisplayedNameType.IGN:
+                name = IsFromWhiteList ? HeadViewParametr : TwitchName;
+                break;
+            case DisplayedNameType.WhiteList:
+                name = DisplayedPlayer;
+                break;
+        }
+
+        _obs.SetTextField(TextFieldItemName, name);
     }
 
     public string GetURL()

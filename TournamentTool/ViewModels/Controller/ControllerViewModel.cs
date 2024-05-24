@@ -234,7 +234,7 @@ public class ControllerViewModel : BaseViewModel
     }
     private async Task UpdateTwitchInformations()
     {
-        if (TwitchAPI == null || ObsController.Client == null || ObsController.Client.ConnectionState != ConnectionState.Connected) return;
+        if (TwitchAPI == null || ObsController.Client.ConnectionState != ConnectionState.Connected) return;
 
         List<string> logins = [];
         for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
@@ -352,7 +352,6 @@ public class ControllerViewModel : BaseViewModel
         PaceManPlayers.Clear();
         FilteredPlayers!.Clear();
 
-        if (ObsController.Client == null) return;
         Task.Run(ObsController.Disconnect);
     }
 
@@ -413,7 +412,7 @@ public class ControllerViewModel : BaseViewModel
             }
 
             if (foundPlayer) continue;
-            //if (resultPaceman.User.TwitchName == null) continue;
+            if (resultPaceman.User.TwitchName == null) continue;
 
             try
             {
@@ -444,10 +443,7 @@ public class ControllerViewModel : BaseViewModel
     {
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
-        CurrentChosenPOV.DisplayedPlayer = CurrentChosenPlayer!.GetDisplayName();
-        CurrentChosenPOV.TwitchName = CurrentChosenPlayer!.GetTwitchName();
-        CurrentChosenPOV.Update();
-        ObsController.SetBrowserURL(CurrentChosenPOV);
+        CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
         UnSelectItems();
     }
 

@@ -1,20 +1,19 @@
 ﻿using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 
 namespace TournamentTool.Converters;
 
-public class EmptyStringConverter : IValueConverter
+[ValueConversion(typeof(Enum), typeof(bool))]
+public class EnumToBooleanConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value == null || string.IsNullOrEmpty(value.ToString()))
-            return "empty";
-
-        return value.ToString()!;
+        return value.Equals(parameter);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        return (bool)value ? parameter : Binding.DoNothing;
     }
 }

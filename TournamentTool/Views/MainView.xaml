@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Views"
+             xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
@@ -64,6 +65,7 @@
                         <Label  Content="OBS Connection"
                                 Foreground="White"
                                 FontSize="24"
+                                FontWeight="SemiBold"
                                 Padding="0"
                                 Margin="0 0 0 5" />
                         <WrapPanel Orientation="Horizontal"
@@ -119,6 +121,7 @@
                         <Label  Content="General"
                                 Foreground="White"
                                 FontSize="24"
+                                FontWeight="SemiBold"
                                 Padding="0"
                                 Margin="0 0 0 5" />
                         <WrapPanel Orientation="Horizontal"
@@ -159,19 +162,36 @@
                         <Label  Content="Pov management"
                                 Foreground="White"
                                 FontSize="24"
+                                FontWeight="SemiBold"
                                 Padding="0"
                                 Margin="0 0 0 5" />
-                        <WrapPanel Orientation="Horizontal"
+                        <WrapPanel Orientation="Vertical"
                                    Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovNameInTextField}"
-                                      Content="Use twitch names"
-                                      Foreground="White" />
-                        </WrapPanel>
-                        <WrapPanel Orientation="Horizontal"
+                            <WrapPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
                                       Content="Use skin heads"
                                       Foreground="White" />
+                        </WrapPanel>
+                            <Label Content="Use names for povs"
+                                   Foreground="White"
+                                   Padding="0" />
+                            <RadioButton GroupName="DisplayedNames"
+                                         Foreground="White"
+                                         Content="None"
+                                         IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
+                            <RadioButton GroupName="DisplayedNames"
+                                         Foreground="White"
+                                         Content="Twitch"
+                                         IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
+                            <RadioButton GroupName="DisplayedNames"
+                                         Foreground="White"
+                                         Content="Ign"
+                                         IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
+                            <RadioButton GroupName="DisplayedNames"
+                                         Foreground="White"
+                                         Content="Whitelist"
+                                         IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                         </WrapPanel>
 
                         <Label  Content="Paceman"
