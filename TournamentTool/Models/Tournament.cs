@@ -57,6 +57,9 @@ public class Tournament : BaseViewModel, IRenameItem
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
 
+    public bool SetPovHeadsInBrowser { get; set; } = false;
+    public bool SetPovPBText { get; set; } = false;
+
     private DisplayedNameType _displayedNameType;
     public DisplayedNameType DisplayedNameType
     {
@@ -67,8 +70,6 @@ public class Tournament : BaseViewModel, IRenameItem
             OnPropertyChanged(nameof(DisplayedNameType));
         }
     }
-
-    public bool SetPovHeadsInBrowser { get; set; } = false;
 
     public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
 
@@ -269,8 +270,9 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
 
-        DisplayedNameType = DisplayedNameType.None;
         SetPovHeadsInBrowser = false;
+        SetPovPBText = false;
+        DisplayedNameType = DisplayedNameType.None;
 
         ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;

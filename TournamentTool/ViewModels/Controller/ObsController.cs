@@ -4,6 +4,7 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
+using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -170,6 +171,12 @@ public class ObsController : BaseViewModel
                     pov.Update();
                     pov.SetHead();
                 }
+                else if (additional.SourceName.StartsWith("personalbest" + pov.SceneItemName!, StringComparison.OrdinalIgnoreCase))
+                {
+                    pov.PersonalBestItemName = additional.SourceName;
+                    pov.Update();
+                    pov.UpdatePersonalBestTextField();
+                }
             }
         }
     }
@@ -187,7 +194,7 @@ public class ObsController : BaseViewModel
         }
         else if (item.InputKind.StartsWith("text"))
         {
-            if (Controller.Configuration.DisplayedNameType != DisplayedNameType.None)
+            if (Controller.Configuration.DisplayedNameType != DisplayedNameType.None || Controller.Configuration.SetPovPBText)
             {
                 additionals.Add(item);
                 return true;
@@ -237,7 +244,7 @@ public class ObsController : BaseViewModel
             if (player == null)
                 pov.Clear();
             else
-                pov.SetPOV(player.Name!, currentName, player.InGameName!, true);
+                pov.SetPOV(player.Name!, currentName, player.InGameName!, player.PersonalBest ?? "Unk", true);
         }
 
         Controller.AddPov(pov);
@@ -249,7 +256,9 @@ public class ObsController : BaseViewModel
         if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
 
         if (Controller.Configuration.DisplayedNameType == DisplayedNameType.None) return;
+        pov.SetHead();
         pov.UpdateNameTextField();
+        pov.UpdatePersonalBestTextField();
     }
     public bool SetBrowserURL(string sceneItemName, string path)
     {

@@ -173,7 +173,7 @@ public class Player : BaseViewModel, ITwitchPovInformation
         }
     }
 
-    private string? _personalBest;
+    private string? _personalBest = "";
     public string? PersonalBest
     {
         get => _personalBest;
@@ -289,6 +289,10 @@ public class Player : BaseViewModel, ITwitchPovInformation
     {
         return Name!;
     }
+    public string GetPersonalBest()
+    {
+        return PersonalBest ?? "Unk";
+    }
     public string GetTwitchName()
     {
         return TwitchName!;
@@ -301,4 +305,5 @@ public class Player : BaseViewModel, ITwitchPovInformation
     {
         return true;
     }
+
 }
