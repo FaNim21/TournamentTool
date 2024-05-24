@@ -162,7 +162,7 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
 
     public string GetDisplayName()
     {
-        return Nickname;
+        return Player == null ? Nickname : Player.GetDisplayName();
     }
     public string GetTwitchName()
     {
@@ -170,7 +170,11 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
     }
     public string GetHeadViewParametr()
     {
-        return User.UUID;
+        return Player == null ? User.UUID : Player.GetHeadViewParametr();
+    }
+    public bool IsFromWhiteList()
+    {
+        return Player != null;
     }
 
     private void CheckForGoodPace(PaceSplitsList lastSplit)

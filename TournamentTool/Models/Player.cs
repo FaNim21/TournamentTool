@@ -297,4 +297,8 @@ public class Player : BaseViewModel, ITwitchPovInformation
     {
         return InGameName!;
     }
+    public bool IsFromWhiteList()
+    {
+        return true;
+    }
 }

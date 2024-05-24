@@ -38,7 +38,7 @@ public partial class ControllerView : UserControl
 
         if (e.Data.GetData(typeof(ITwitchPovInformation)) is ITwitchPovInformation info)
         {
-            pov.SetPOV(info.GetDisplayName(), info.GetTwitchName(), info.GetHeadViewParametr());
+            pov.SetPOV(info);
         }
         else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {
@@ -75,7 +75,7 @@ public partial class ControllerView : UserControl
             return;
         }
 
-        pov.SetPOV(viewModel.CurrentChosenPlayer.GetDisplayName(), viewModel.CurrentChosenPlayer.GetTwitchName(), viewModel.CurrentChosenPlayer.GetHeadViewParametr());
+        pov.SetPOV(viewModel.CurrentChosenPlayer);
 
         viewModel.CurrentChosenPOV.UnFocus();
         viewModel.UnSelectItems(true);

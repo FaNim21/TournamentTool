@@ -1,5 +1,4 @@
 ﻿using MultiOpener.Entities.Interfaces;
-using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json.Serialization;
@@ -9,8 +8,17 @@ using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
 
+public enum DisplayedNameType
+{
+    None,
+    Twitch,
+    IGN,
+    WhiteList
+}
+
 public class Tournament : BaseViewModel, IRenameItem
 {
+
     public string Name { get; set; } = string.Empty;
 
     public ObservableCollection<Player> Players { get; set; } = [];
@@ -48,8 +56,20 @@ public class Tournament : BaseViewModel, IRenameItem
 
     public bool IsUsingTwitchAPI { get; set; } = true;
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
-    public bool SetPovNameInTextField { get; set; } = false;
+
+    private DisplayedNameType _displayedNameType;
+    public DisplayedNameType DisplayedNameType
+    {
+        get => _displayedNameType;
+        set
+        {
+            _displayedNameType = value;
+            OnPropertyChanged(nameof(DisplayedNameType));
+        }
+    }
+
     public bool SetPovHeadsInBrowser { get; set; } = false;
+
     public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
 
     private int _paceManRefreshRateMiliseconds = 3000;
@@ -248,8 +268,10 @@ public class Tournament : BaseViewModel, IRenameItem
         IsUsingPaceMan = true;
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
-        SetPovNameInTextField = false;
+
+        DisplayedNameType = DisplayedNameType.None;
         SetPovHeadsInBrowser = false;
+
         ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
