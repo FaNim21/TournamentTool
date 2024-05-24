@@ -168,11 +168,18 @@
                         <WrapPanel Orientation="Vertical"
                                    Margin="0 0 0 5">
                             <WrapPanel Orientation="Horizontal"
-                                   Margin="0 0 0 5">
-                            <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
-                                      Content="Use skin heads"
-                                      Foreground="White" />
-                        </WrapPanel>
+                                       Margin="0 0 0 5">
+                                <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
+                                          Content="Use skin heads"
+                                          Foreground="White" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <CheckBox IsChecked="{Binding CurrentChosen.SetPovPBText}"
+                                          Content="Use personal best text"
+                                          Foreground="White" />
+                            </WrapPanel>
+
                             <Label Content="Use names for povs"
                                    Foreground="White"
                                    Padding="0" />

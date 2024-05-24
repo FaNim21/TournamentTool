@@ -24,6 +24,7 @@ public class PointOfView : BaseViewModel
 
     public string TextFieldItemName { get; set; } = string.Empty;
     public string HeadItemName { get; set; } = string.Empty;
+    public string PersonalBestItemName { get; set; } = string.Empty;
 
     public Brush? BackgroundColor { get; set; }
 
@@ -32,6 +33,7 @@ public class PointOfView : BaseViewModel
     public bool IsFromWhiteList { get; set; }
 
     public string DisplayedPlayer { get; set; } = string.Empty;
+    public string PersonalBest { get; set; } = string.Empty;
     public string HeadViewParametr { get; set; } = string.Empty;
     public string TwitchName { get; set; } = string.Empty;
 
@@ -68,6 +70,7 @@ public class PointOfView : BaseViewModel
     {
         OnPropertyChanged(nameof(DisplayedPlayer));
         OnPropertyChanged(nameof(TextFieldItemName));
+        OnPropertyChanged(nameof(PersonalBestItemName));
         OnPropertyChanged(nameof(HeadItemName));
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(Volume));
@@ -83,28 +86,29 @@ public class PointOfView : BaseViewModel
 
     public void SetPOV(ITwitchPovInformation povInfo)
     {
-        SetPOV(povInfo.GetDisplayName(), povInfo.GetTwitchName(), povInfo.GetHeadViewParametr(), povInfo.IsFromWhiteList());
+        SetPOV(povInfo.GetDisplayName(), povInfo.GetTwitchName(), povInfo.GetHeadViewParametr(), povInfo.GetPersonalBest(), povInfo.IsFromWhiteList());
     }
-    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr, bool isFromWhiteList)
+    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr, string personalBest, bool isFromWhiteList)
     {
         DisplayedPlayer = DisplayedName;
         TwitchName = twitchName;
         HeadViewParametr = headInfoParametr;
+        PersonalBest = personalBest;
         IsFromWhiteList = isFromWhiteList;
 
-        SetHead();
-        Update();
         _obs.SetBrowserURL(this);
+        Update();
     }
     public void Swap(PointOfView pov)
     {
         string tempDisplayedPlayer = pov.DisplayedPlayer;
         string tempTwitchName = pov.TwitchName;
         string tempHeadViewParametr = pov.HeadViewParametr;
+        string tempPersonalBest = pov.PersonalBest;
         bool tempIsFromWhiteList = pov.IsFromWhiteList;
 
-        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, IsFromWhiteList);
-        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr, tempIsFromWhiteList);
+        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, PersonalBest, IsFromWhiteList);
+        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr, tempPersonalBest, tempIsFromWhiteList);
     }
 
     public void Focus()
@@ -165,6 +169,13 @@ public class PointOfView : BaseViewModel
         _obs.SetTextField(TextFieldItemName, name);
     }
 
+    public void UpdatePersonalBestTextField()
+    {
+        if (string.IsNullOrEmpty(PersonalBestItemName)) return;
+
+        _obs.SetTextField(PersonalBestItemName, PersonalBest);
+    }
+
     public string GetURL()
     {
         if (string.IsNullOrEmpty(TwitchName)) return string.Empty;
@@ -178,9 +189,9 @@ public class PointOfView : BaseViewModel
         Text = string.Empty;
         TwitchName = string.Empty;
         HeadViewParametr = string.Empty;
+        PersonalBest = string.Empty;
 
         _obs.SetBrowserURL(this);
-        _obs.SetBrowserURL(HeadItemName, string.Empty);
 
         Update();
     }

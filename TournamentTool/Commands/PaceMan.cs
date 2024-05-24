@@ -164,6 +164,10 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
     {
         return Player == null ? Nickname : Player.GetDisplayName();
     }
+    public string GetPersonalBest()
+    {
+        return Player == null ? "Unk" : Player.GetPersonalBest();
+    }
     public string GetTwitchName()
     {
         return User.TwitchName;
@@ -248,6 +252,7 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
             DialogBox.Show($"Rrror: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
 }
 
 public class PaceSplitsList
