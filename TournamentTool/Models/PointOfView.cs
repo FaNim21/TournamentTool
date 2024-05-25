@@ -54,6 +54,7 @@ public class PointOfView : BaseViewModel
     }
 
     public ICommand ApplyVolumeCommand { get; set; }
+    public ICommand RefreshCommand { get; set; }
 
 
     public PointOfView(ObsController obs, string? groupName = "")
@@ -63,6 +64,8 @@ public class PointOfView : BaseViewModel
         UnFocus();
 
         ApplyVolumeCommand = new RelayCommand(ApplyVolume);
+        RefreshCommand = new RelayCommand(async () => { await Refresh(); });
+
         GroupName = groupName;
     }
 
@@ -99,6 +102,13 @@ public class PointOfView : BaseViewModel
         _obs.SetBrowserURL(this);
         Update();
     }
+    public async Task Refresh()
+    {
+        _obs.SetBrowserURL(SceneItemName!, "");
+        await Task.Delay(25);
+        SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, PersonalBest, IsFromWhiteList);
+    }
+
     public void Swap(PointOfView pov)
     {
         string tempDisplayedPlayer = pov.DisplayedPlayer;

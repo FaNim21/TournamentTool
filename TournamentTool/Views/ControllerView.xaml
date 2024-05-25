@@ -130,71 +130,37 @@
                         <ColumnDefinition Width="250" />
                     </Grid.ColumnDefinitions>
 
-                    <WrapPanel Orientation="Vertical"
-                               Grid.Column="0"
-                               Margin="10 5 5 5"
-                               VerticalAlignment="Top"
-                               Height="250">
-                        <TextBlock Text="Canvas:"
-                                   FontSize="16"
-                                   Foreground="White" />
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Width: " />
-                            <Run Text="{Binding CanvasWidth, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Height: " />
-                            <Run Text="{Binding CanvasHeight, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Aspect ratio: " />
-                            <Run Text="{Binding ObsController.CanvasAspectRatio, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="x axis ratio: " />
-                            <Run Text="{Binding ObsController.XAxisRatio, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="y axis ratio: " />
-                            <Run Text="{Binding ObsController.YAxisRatio, Mode=OneWay}" />
-                        </TextBlock>
+                    <StackPanel Grid.Column="0">
+                        <components:ButtonNormal ContentText="Refresh OBS"
+                                                 FontSize="15"
+                                                 Width="150"
+                                                 Height="30"
+                                                 OnCommand="{Binding RefreshOBSCommand}"
+                                                 Margin="0 5 0 0" />
 
-                        <TextBlock Text="OBS Settings:"
-                                   FontSize="16"
-                                   Foreground="White"
-                                   Margin="0 10 0 0" />
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Base Width: " />
-                            <Run Text="{Binding ObsController.OBSVideoSettings.BaseWidth, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Base Height: " />
-                            <Run Text="{Binding ObsController.OBSVideoSettings.BaseHeight, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Output Height: " />
-                            <Run Text="{Binding ObsController.OBSVideoSettings.OutputWidth, Mode=OneWay}" />
-                        </TextBlock>
+                        <components:ButtonNormal ContentText="Refresh All POVS"
+                                                 FontSize="15"
+                                                 Width="150"
+                                                 Height="30"
+                                                 OnCommand="{Binding RefreshPOVsCommand}"
+                                                 Margin="0 5 0 0" />
 
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Output Height: " />
-                            <Run Text="{Binding ObsController.OBSVideoSettings.OutputHeight, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock FontSize="12"
-                                   Foreground="White">
-                            <Run Text="Aspect ratio: " />
-                            <Run Text="{Binding ObsController.OBSVideoSettings.AspectRatio, Mode=OneWay}" />
-                        </TextBlock>
-                    </WrapPanel>
+
+                        <!--
+                        <components:ButtonNormal ContentText="clip first stream xd"
+                                                 FontSize="15"
+                                                 Width="150"
+                                                 Height="30"
+                                                 OnCommand="{Binding ClipCommand}" />
+                        -->
+                        <!--
+                        <TextBlock Text="MORE CONTROLS IN FUTURE"
+                                   FontSize="48"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   VerticalAlignment="Center" />
+                        -->
+                    </StackPanel>
 
                     <Grid Grid.Column="1">
                         <TextBlock Text="Current Scene: "
@@ -220,80 +186,89 @@
                                               Margin="0 0 0 10">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="models:PointOfView">
-                                            <StackPanel Margin="-10 10 0 0">
-                                                <TextBlock>
-                                                    <Run Text="Item: "
-                                                         FontSize="12"
-                                                         Foreground="White" />
-                                                    <Run Text="{Binding SceneItemName}"
-                                                         Foreground="White"
-                                                         FontWeight="SemiBold" />
-                                                </TextBlock>
-                                                <TextBlock>
+                                            <Grid>
+                                                <StackPanel Margin="-10 10 0 0">
+                                                    <TextBlock>
+                                                        <Run Text="Item: "
+                                                             FontSize="12"
+                                                             Foreground="White" />
+                                                        <Run Text="{Binding SceneItemName}"
+                                                             Foreground="White"
+                                                             FontWeight="SemiBold" />
+                                                    </TextBlock>
+                                                    <TextBlock>
                                                     <Run Text="Text Item: "
                                                          FontSize="12"
                                                          Foreground="White" />
                                                     <Run Text="{Binding TextFieldItemName}"
                                                          Foreground="White"
                                                          FontWeight="SemiBold" />
-                                                </TextBlock>
-                                                <TextBlock>
+                                                    </TextBlock>
+                                                    <TextBlock>
                                                     <Run Text="PB Item: "
                                                          FontSize="12"
                                                          Foreground="White" />
                                                     <Run Text="{Binding PersonalBestItemName}"
                                                          Foreground="White"
                                                          FontWeight="SemiBold" />
-                                                </TextBlock>
-                                                <TextBlock>
+                                                    </TextBlock>
+                                                    <TextBlock>
                                                     <Run Text="Head Item: "
                                                          FontSize="12"
                                                          Foreground="White" />
                                                     <Run Text="{Binding HeadItemName}"
                                                          Foreground="White"
                                                          FontWeight="SemiBold" />
-                                                </TextBlock>
-                                                <TextBlock>
+                                                    </TextBlock>
+                                                    <TextBlock>
                                                     <Run Text="Player: "
                                                          FontSize="12"
                                                          Foreground="White" />
                                                     <Run Text="{Binding DisplayedPlayer}"
                                                          Foreground="Cyan" />
-                                                </TextBlock>
-                                                <StackPanel Orientation="Horizontal"
-                                                            Margin="0 5 0 0">
-                                                    <components:ButtonNormal Width="45"
-                                                                             Height="25"
-                                                                             ContentText="Apply"
-                                                                             OnCommand="{Binding ApplyVolumeCommand}" />
-                                                    <Grid>
-                                                        <Slider Width="100"
-                                                                Height="20"
-                                                                Margin="5 5 0 0"
-                                                                Opacity="0.5"
-                                                                Minimum="0"
-                                                                Maximum="1"
-                                                                TickFrequency="0.01"
-                                                                Value="{Binding Volume}" />
-                                                        <Slider Width="100"
-                                                                Height="20"
-                                                                Minimum="0"
-                                                                Maximum="1"
-                                                                IsSnapToTickEnabled="True"
-                                                                Value="{Binding NewVolume}"
-                                                                PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
-                                                                TickFrequency="0.01"
-                                                                SmallChange="0.01"
-                                                                LargeChange="0"
-                                                                Margin="5 5 0 0" />
-                                                    </Grid>
-                                                    <Label Content="{Binding TextVolume}"
-                                                           FontWeight="Bold"
-                                                           Foreground="Wheat"
-                                                           Padding="0"
-                                                           Margin="1 5 0 0" />
+                                                    </TextBlock>
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Margin="0 5 0 0">
+                                                        <components:ButtonNormal Width="45"
+                                                                                 Height="25"
+                                                                                 ContentText="Apply"
+                                                                                 OnCommand="{Binding ApplyVolumeCommand}" />
+                                                        <Grid>
+                                                            <Slider Width="100"
+                                                                    Height="20"
+                                                                    Margin="5 5 0 0"
+                                                                    Opacity="0.5"
+                                                                    Minimum="0"
+                                                                    Maximum="1"
+                                                                    TickFrequency="0.01"
+                                                                    Value="{Binding Volume}" />
+                                                            <Slider Width="100"
+                                                                    Height="20"
+                                                                    Minimum="0"
+                                                                    Maximum="1"
+                                                                    IsSnapToTickEnabled="True"
+                                                                    Value="{Binding NewVolume}"
+                                                                    PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                                                    TickFrequency="0.01"
+                                                                    SmallChange="0.01"
+                                                                    LargeChange="0"
+                                                                    Margin="5 5 0 0" />
+                                                        </Grid>
+                                                        <Label Content="{Binding TextVolume}"
+                                                               FontWeight="Bold"
+                                                               Foreground="Wheat"
+                                                               Padding="0"
+                                                               Margin="1 5 0 0" />
+                                                    </StackPanel>
                                                 </StackPanel>
-                                            </StackPanel>
+                                                <components:ButtonNormal Width="55"
+                                                                         Height="25"
+                                                                         HorizontalAlignment="Right"
+                                                                         VerticalAlignment="Top"
+                                                                         ContentText="Refresh"
+                                                                         OnCommand="{Binding RefreshCommand}"
+                                                                         Margin="0 12 0 0" />
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -301,20 +276,6 @@
                         </WrapPanel>
                     </Grid>
 
-                    <!--
-                    <components:ButtonNormal ContentText="clip first stream xd"
-                                             FontSize="15"
-                                             Width="150"
-                                             Height="30"
-                                             OnCommand="{Binding ClipCommand}" />
-                    -->
-                    <!--
-                    <TextBlock Text="MORE CONTROLS IN FUTURE"
-                               FontSize="48"
-                               TextWrapping="Wrap"
-                               TextAlignment="Center"
-                               VerticalAlignment="Center" />
-                    -->
                 </Grid>
             </Grid>
 
