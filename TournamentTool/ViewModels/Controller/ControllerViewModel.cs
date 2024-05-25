@@ -1,23 +1,25 @@
-﻿using OBSStudioClient.Enums;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
-using TwitchLib.Api;
 
 namespace TournamentTool.ViewModels.Controller;
 
 public class ControllerViewModel : BaseViewModel
 {
-    private readonly BackgroundWorker? paceManWorker;
-    private BackgroundWorker twitchWorker = new();
+    private readonly TwitchService _twitch;
+
+    private readonly BackgroundWorker? _paceManWorker;
+    private BackgroundWorker _twitchWorker = new();
+
+    public HttpClient? WebServer { get; set; }
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
 
@@ -49,9 +51,6 @@ public class ControllerViewModel : BaseViewModel
     public ObsController ObsController { get; set; }
 
     public Tournament Configuration { get => MainViewModel.CurrentChosen!; }
-
-    public TwitchAPI? TwitchAPI { get; set; }
-    public HttpClient? WebServer { get; set; }
 
     private ITwitchPovInformation? _currentChosenPlayer;
     public ITwitchPovInformation? CurrentChosenPlayer
@@ -153,13 +152,17 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
+    public ICommand RefreshOBSCommand { get; set; }
+    public ICommand RefreshPOVsCommand { get; set; }
+
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
-        TwitchAPI = new();
         ObsController = new(this);
+        _twitch = new();
 
-        TwitchAPI.Settings.ClientId = Consts.ClientID;
+        RefreshOBSCommand = new RelayCommand(async () => { await ObsController.GetCurrentSceneitems(); });
+        RefreshPOVsCommand = new RelayCommand(async () => { await RefreshPovs(); });
 
         /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
         Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
@@ -174,15 +177,15 @@ public class ControllerViewModel : BaseViewModel
 
         if (MainViewModel.CurrentChosen!.IsUsingPaceMan)
         {
-            paceManWorker = new() { WorkerSupportsCancellation = true };
-            paceManWorker.DoWork += PaceManUpdate;
-            paceManWorker.RunWorkerAsync();
+            _paceManWorker = new() { WorkerSupportsCancellation = true };
+            _paceManWorker.DoWork += PaceManUpdate;
+            _paceManWorker.RunWorkerAsync();
         }
 
-        Task.Run(async () =>
+        Task.Factory.StartNew(async () =>
         {
             await ObsController.Connect(Configuration.Password!, Configuration.Port);
-            await TwitchApi();
+            await ConnectTwitchAPI();
         });
     }
 
@@ -197,60 +200,110 @@ public class ControllerViewModel : BaseViewModel
         GroupedPaceManPlayers = collectionViewSource.View;
     }
 
-    private async Task TwitchApi()
+    private async Task ConnectTwitchAPI()
     {
-        twitchWorker = new() { WorkerSupportsCancellation = true };
-        if (TwitchAPI == null || !MainViewModel.CurrentChosen!.IsUsingTwitchAPI) return;
+        _twitchWorker = new() { WorkerSupportsCancellation = true };
+        if (!MainViewModel.CurrentChosen!.IsUsingTwitchAPI) return;
 
-        var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
-        string auth = TwitchAPI.Auth.GetAuthorizationCodeUrl(Consts.RedirectURL, authScopes, true, null, Consts.ClientID);
+        await _twitch.AuthorizeAsync();
 
-        try
+        _twitchWorker.DoWork += TwitchUpdate;
+        _twitchWorker.RunWorkerAsync();
+    }
+
+    private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
+    {
+        while (!_paceManWorker!.CancellationPending)
         {
-            var server = new WebServer(Consts.RedirectURL);
-
-            Process.Start(new ProcessStartInfo
+            try
             {
-                FileName = auth,
-                UseShellExecute = true
-            });
-
-            var auth2 = await server.Listen();
-            if (auth2 == null)
+                await RefreshPaceManAsync();
+            }
+            catch (Exception ex)
             {
-                DialogBox.Show($"Error with listening for twitch authentication", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            await Task.Delay(TimeSpan.FromMilliseconds(MainViewModel.CurrentChosen!.PaceManRefreshRateMiliseconds));
+        }
+    }
+    private async Task RefreshPaceManAsync()
+    {
+        string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
+        List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
+        if (paceMan == null) return;
+
+        List<PaceMan> notFoundPaceMans = new(PaceManPlayers);
+
+        for (int i = 0; i < paceMan.Count; i++)
+        {
+            var resultPaceman = paceMan[i];
+            bool foundPlayer = false;
+
+            for (int j = 0; j < notFoundPaceMans.Count; j++)
+            {
+                var player = notFoundPaceMans[j];
+                if (resultPaceman.Nickname.Equals(player.Nickname, StringComparison.OrdinalIgnoreCase))
+                {
+                    foundPlayer = true;
+                    player.Update(resultPaceman);
+                    notFoundPaceMans.Remove(player);
+                    break;
+                }
+            }
+
+            if (foundPlayer) continue;
+            if (resultPaceman.User.TwitchName == null) continue;
+
+            resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+            if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
+
+            resultPaceman.Initialize(this, resultPaceman.Splits);
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(resultPaceman); });
+        }
+
+        for (int i = 0; i < notFoundPaceMans.Count; i++)
+        {
+            var current = notFoundPaceMans[i];
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
+        }
+
+        OnPropertyChanged(nameof(PaceManPlayers));
+        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
+    }
+
+    private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
+    {
+        while (!_twitchWorker.CancellationPending)
+        {
+            try
+            {
+                await UpdateTwitchInformations();
+                FilterItems();
+            }
+            catch (Exception ex)
+            {
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var resp = await TwitchAPI.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, Consts.RedirectURL, Consts.ClientID);
-            TwitchAPI.Settings.AccessToken = resp.AccessToken;
+            await Task.Delay(TimeSpan.FromMilliseconds(30000));
         }
-        catch (Exception ex)
-        {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        twitchWorker.DoWork += TwitchUpdate;
-        twitchWorker.RunWorkerAsync();
     }
     private async Task UpdateTwitchInformations()
     {
-        if (TwitchAPI == null || ObsController.Client.ConnectionState != ConnectionState.Connected) return;
-
         List<string> logins = [];
+        List<TwitchStreamData> notLivePlayers = [];
         for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
         {
             var current = MainViewModel.CurrentChosen.Players[i];
             logins.Add(current.TwitchName!);
+            notLivePlayers.Add(current.TwitchStreamData);
         }
 
-        var response = await TwitchAPI.Helix.Streams.GetStreamsAsync(userLogins: logins);
-        List<TwitchStreamData> notLivePlayers = [];
-        foreach (var player in MainViewModel.CurrentChosen.Players)
-            notLivePlayers.Add(player.TwitchStreamData);
-
-        for (int i = 0; i < response.Streams.Length; i++)
+        var streams = await _twitch.GetAllStreamsAsync(logins);
+        for (int i = 0; i < streams.Count; i++)
         {
-            var current = response.Streams[i];
+            var current = streams[i];
             if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && MainViewModel.CurrentChosen.ShowLiveOnlyForMinecraftCategory) continue;
 
             for (int j = 0; j < notLivePlayers.Count; j++)
@@ -304,57 +357,13 @@ public class ControllerViewModel : BaseViewModel
             Application.Current.Dispatcher.Invoke(() => FilteredPlayers.Add(player));
     }
 
-    private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
+    private async Task RefreshPovs()
     {
-        while (!paceManWorker.CancellationPending)
+        for (int i = 0; i < POVs.Count; i++)
         {
-            await RefreshPaceManAsync();
-            await Task.Delay(TimeSpan.FromMilliseconds(MainViewModel.CurrentChosen!.PaceManRefreshRateMiliseconds));
+            await POVs[i].Refresh();
         }
     }
-    private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
-    {
-        while (!twitchWorker.CancellationPending)
-        {
-            try
-            {
-                await UpdateTwitchInformations();
-                FilterItems();
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            await Task.Delay(TimeSpan.FromMilliseconds(15000));
-        }
-    }
-
-    public void ControllerExit()
-    {
-        paceManWorker?.CancelAsync();
-        paceManWorker?.Dispose();
-
-        try
-        {
-            twitchWorker?.CancelAsync();
-        }
-        catch { }
-        twitchWorker?.Dispose();
-
-        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
-        {
-            var current = MainViewModel.CurrentChosen.Players[i];
-            current.TwitchStreamData.StatusLabelColor = null;
-        }
-
-        POVs.Clear();
-        PaceManPlayers.Clear();
-        FilteredPlayers!.Clear();
-
-        Task.Run(ObsController.Disconnect);
-    }
-
     public void AddPov(PointOfView pov)
     {
         Application.Current.Dispatcher.Invoke(delegate { POVs.Add(pov); });
@@ -365,7 +374,6 @@ public class ControllerViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(delegate { POVs.Remove(pov); });
         OnPropertyChanged(nameof(POVs));
     }
-
     public void ClearPovs()
     {
         POVs.Clear();
@@ -386,59 +394,6 @@ public class ControllerViewModel : BaseViewModel
             CanvasHeight = calculatedHeight;
     }
 
-    private async Task RefreshPaceManAsync()
-    {
-        string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
-        List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
-        if (paceMan == null) return;
-
-        List<PaceMan> notFoundPaceMans = new(PaceManPlayers);
-
-        for (int i = 0; i < paceMan.Count; i++)
-        {
-            var resultPaceman = paceMan[i];
-            bool foundPlayer = false;
-
-            for (int j = 0; j < notFoundPaceMans.Count; j++)
-            {
-                var player = notFoundPaceMans[j];
-                if (resultPaceman.Nickname.Equals(player.Nickname, StringComparison.OrdinalIgnoreCase))
-                {
-                    foundPlayer = true;
-                    player.Update(resultPaceman);
-                    notFoundPaceMans.Remove(player);
-                    break;
-                }
-            }
-
-            if (foundPlayer) continue;
-            if (resultPaceman.User.TwitchName == null) continue;
-
-            try
-            {
-                resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
-
-            resultPaceman.Initialize(this, resultPaceman.Splits);
-            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(resultPaceman); });
-        }
-
-        for (int i = 0; i < notFoundPaceMans.Count; i++)
-        {
-            var current = notFoundPaceMans[i];
-            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
-        }
-
-        OnPropertyChanged(nameof(PaceManPlayers));
-        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
-    }
-
     private void SetPovAfterClickedCanvas()
     {
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
@@ -455,5 +410,30 @@ public class ControllerViewModel : BaseViewModel
         _selectedWhitelistPlayer = null;
         OnPropertyChanged(nameof(SelectedWhitelistPlayer));
         if (ClearAll) CurrentChosenPOV = null;
+    }
+
+    public void ControllerExit()
+    {
+        _paceManWorker?.CancelAsync();
+        _paceManWorker?.Dispose();
+
+        try
+        {
+            _twitchWorker?.CancelAsync();
+        }
+        catch { }
+        _twitchWorker?.Dispose();
+
+        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
+        {
+            var current = MainViewModel.CurrentChosen.Players[i];
+            current.TwitchStreamData.StatusLabelColor = null;
+        }
+
+        POVs.Clear();
+        PaceManPlayers.Clear();
+        FilteredPlayers!.Clear();
+
+        Task.Run(ObsController.Disconnect);
     }
 }

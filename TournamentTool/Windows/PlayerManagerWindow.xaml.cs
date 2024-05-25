@@ -27,6 +27,12 @@ public partial class PlayerManagerWindow : Window
             DialogBox.Show("Finish editing before closing the window", "Editing");
             return;
         }
+
+        double mainLeft = ((MainWindow)Application.Current.MainWindow).Width / 2;
+        double mainTop = ((MainWindow)Application.Current.MainWindow).Height / 2;
+
+        ((MainWindow)Application.Current.MainWindow).Left = Left + (Width / 2) - mainLeft;
+        ((MainWindow)Application.Current.MainWindow).Top = Top + (Height / 2) - mainTop;
         Application.Current.MainWindow.Show();
         Close();
     }

@@ -4,11 +4,9 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
-using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
@@ -18,8 +16,6 @@ namespace TournamentTool.ViewModels.Controller;
 public class ObsController : BaseViewModel
 {
     public ControllerViewModel Controller { get; private set; }
-
-    public OBSVideoSettings OBSVideoSettings { get; set; } = new();
 
     public ObsClient Client { get; set; } = new();
 
@@ -75,11 +71,6 @@ public class ObsController : BaseViewModel
                 Controller.CanvasHeight = 240;
 
                 var settings = await Client.GetVideoSettings();
-                OBSVideoSettings.BaseWidth = settings.BaseWidth;
-                OBSVideoSettings.BaseHeight = settings.BaseHeight;
-                OBSVideoSettings.OutputWidth = settings.OutputWidth;
-                OBSVideoSettings.OutputHeight = settings.OutputHeight;
-                OBSVideoSettings.AspectRatio = (float)settings.BaseWidth / settings.BaseHeight;
 
                 XAxisRatio = settings.BaseWidth / Controller.CanvasWidth;
                 OnPropertyChanged(nameof(XAxisRatio));
@@ -205,8 +196,11 @@ public class ObsController : BaseViewModel
     }
     private async Task SetupPovFromSceneItem(SceneItem item, SceneItem? group = null)
     {
-        if (!item.InputKind!.Equals("game_capture") &&
-            !item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
+        if (!item.InputKind!.Equals("browser_source") ||
+            !item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
 
         float positionX = item.SceneItemTransform.PositionX;
         float positionY = item.SceneItemTransform.PositionY;
