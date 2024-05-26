@@ -234,11 +234,10 @@ public class ObsController : BaseViewModel
         if (!string.IsNullOrEmpty(currentName))
         {
             Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
+            pov.Clear();
 
-            if (player == null)
-                pov.Clear();
-            else
-                pov.SetPOV(player.Name!, currentName, player.InGameName!, player.PersonalBest ?? "Unk", true);
+            if (player != null && !player.IsUsedInPov)
+                pov.SetPOV(player);
         }
 
         Controller.AddPov(pov);

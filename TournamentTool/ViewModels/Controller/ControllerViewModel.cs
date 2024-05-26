@@ -52,8 +52,8 @@ public class ControllerViewModel : BaseViewModel
 
     public Tournament Configuration { get => MainViewModel.CurrentChosen!; }
 
-    private ITwitchPovInformation? _currentChosenPlayer;
-    public ITwitchPovInformation? CurrentChosenPlayer
+    private IPlayer? _currentChosenPlayer;
+    public IPlayer? CurrentChosenPlayer
     {
         get => _currentChosenPlayer;
         set
@@ -251,21 +251,19 @@ public class ControllerViewModel : BaseViewModel
                 }
             }
 
-            if (foundPlayer) continue;
-            if (resultPaceman.User.TwitchName == null) continue;
+            if (foundPlayer || resultPaceman.User.TwitchName == null) continue;
 
             resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-
             if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
 
             resultPaceman.Initialize(this, resultPaceman.Splits);
-            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(resultPaceman); });
+            AddPaceMan(resultPaceman);
         }
 
         for (int i = 0; i < notFoundPaceMans.Count; i++)
         {
             var current = notFoundPaceMans[i];
-            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(current); });
+            RemovePaceMan(current);
         }
 
         OnPropertyChanged(nameof(PaceManPlayers));
@@ -379,6 +377,28 @@ public class ControllerViewModel : BaseViewModel
         POVs.Clear();
     }
 
+    public void AddPaceMan(PaceMan paceMan)
+    {
+        Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceMan); });
+    }
+    public void RemovePaceMan(PaceMan paceMan)
+    {
+        Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
+    }
+
+    public bool IsPlayerInPov(string twitchName)
+    {
+        if (string.IsNullOrEmpty(twitchName)) return false;
+
+        for (int i = 0; i < POVs.Count; i++)
+        {
+            var current = POVs[i];
+            if (current.TwitchName.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
     public void ResizeCanvas()
     {
         if (CanvasWidth == 0 || CanvasHeight == 0) return;
@@ -431,8 +451,17 @@ public class ControllerViewModel : BaseViewModel
         }
 
         POVs.Clear();
-        PaceManPlayers.Clear();
         FilteredPlayers!.Clear();
+
+        for (int i = 0; i < PaceManPlayers.Count; i++)
+        {
+            PaceManPlayers[i].Player = null;
+        }
+
+        PaceManPlayers.Clear();
+
+        for (int i = 0; i < Configuration.Players.Count; i++)
+            Configuration.Players[i].ClearFromController();
 
         Task.Run(ObsController.Disconnect);
     }

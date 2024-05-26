@@ -27,7 +27,7 @@ public partial class ControllerView : UserControl
         if (sender is not Border border) return;
         ((ControllerViewModel)DataContext).UnSelectItems(true);
 
-        DragDrop.DoDragDrop(border, new DataObject(typeof(ITwitchPovInformation), border.DataContext), DragDropEffects.Move);
+        DragDrop.DoDragDrop(border, new DataObject(typeof(IPlayer), border.DataContext), DragDropEffects.Move);
     }
 
     private void Border_Drop(object sender, DragEventArgs e)
@@ -36,7 +36,7 @@ public partial class ControllerView : UserControl
         if (DataContext is not ControllerViewModel controller) return;
         if (droppedBorder!.DataContext is not PointOfView pov) return;
 
-        if (e.Data.GetData(typeof(ITwitchPovInformation)) is ITwitchPovInformation info)
+        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
         {
             pov.SetPOV(info);
         }

@@ -95,7 +95,7 @@ public class TwitchStreamData : BaseViewModel
     }
 }
 
-public class Player : BaseViewModel, ITwitchPovInformation
+public class Player : BaseViewModel, IPlayer
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -208,6 +208,18 @@ public class Player : BaseViewModel, ITwitchPovInformation
         }
     }
 
+    [JsonIgnore] private bool _isUsedInPov;
+    [JsonIgnore]
+    public bool IsUsedInPov
+    {
+        get => _isUsedInPov;
+        set
+        {
+            _isUsedInPov = value;
+            OnPropertyChanged(nameof(IsUsedInPov));
+        }
+    }
+
 
     [JsonConstructor]
     public Player(string name = "")
@@ -285,6 +297,11 @@ public class Player : BaseViewModel, ITwitchPovInformation
         PersonalBest = string.Empty;
     }
 
+    public void ClearFromController()
+    {
+        IsUsedInPov = false;
+    }
+
     public string GetDisplayName()
     {
         return Name!;
@@ -305,5 +322,4 @@ public class Player : BaseViewModel, ITwitchPovInformation
     {
         return true;
     }
-
 }

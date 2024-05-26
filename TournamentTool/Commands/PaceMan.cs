@@ -8,6 +8,7 @@ using System.Windows;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
 using System.Windows.Media;
+using System.ComponentModel;
 
 namespace TournamentTool.Commands;
 
@@ -24,7 +25,7 @@ public enum SplitType
     credits
 }
 
-public class PaceMan : BaseViewModel, ITwitchPovInformation
+public class PaceMan : BaseViewModel, IPlayer
 {
     private ControllerViewModel? Controller { get; set; }
 
@@ -102,6 +103,18 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
 
     public Brush? PaceSplitTimeColor { get; set; }
     public FontWeight PaceFontWeight { get; set; } = FontWeights.Normal;
+
+    public bool IsUsedInPov
+    {
+        get => Player?.IsUsedInPov ?? false;
+        set
+        {
+            if (Player == null) return;
+
+            Player.IsUsedInPov = value;
+            OnPropertyChanged(nameof(IsUsedInPov));
+        }
+    }
 
 
     public void Initialize(ControllerViewModel controller, List<PaceSplitsList> splits)
@@ -253,6 +266,14 @@ public class PaceMan : BaseViewModel, ITwitchPovInformation
         }
     }
 
+    private void PlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        //To jest jeden ze sposobow, zeby zrobic realtime identyfikator w povie dla pacemana z odwolaniem do whitelisty, ale mi sie totalnie nie podoba
+        if (e.PropertyName == nameof(Player.IsUsedInPov))
+        {
+            OnPropertyChanged(nameof(IsUsedInPov));
+        }
+    }
 }
 
 public class PaceSplitsList

@@ -23,17 +23,28 @@
 
         <Grid Grid.Row="0"
               Background="#000D14">
-            <TextBlock FontSize="15"
-                       Height="25"
-                       Padding="0 3 0 0"
-                       Margin="5 0 0 0"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontSize="15"
+                           Height="25"
+                           Padding="0 3 0 0"
+                           Margin="5 0 0 0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top">
                 <Run Foreground="#CCCCCC"
-                     Text="Connected: " />
+                     Text="Connected:" />
                 <Run Foreground="{Binding ObsController.IsConnectedColor, Mode=OneWay}"
                      Text="{Binding ObsController.IsConnectedToWebSocket, Mode=OneWay}" />
-            </TextBlock>
+                </TextBlock>
+
+                <TextBlock FontSize="15"
+                           Padding="0 3 0 0"
+                           Margin="15 0 0 0"
+                           Foreground="#CCCCCC">
+                    <Run Text="Scene:" />
+                    <Run Text="{Binding ObsController.CurrentSceneName}"
+                         Foreground="#ffffff" />
+                </TextBlock>
+            </StackPanel>
 
             <TextBlock Text="Search: "
                        FontSize="18"
@@ -163,17 +174,10 @@
                     </StackPanel>
 
                     <Grid Grid.Column="1">
-                        <TextBlock Text="Current Scene: "
-                                   FontSize="17"
-                                   Margin="0 5 0 0"
-                                   FontWeight="SemiBold"
-                                   Foreground="FloralWhite">
-                                <Run Text="{Binding ObsController.CurrentSceneName}" />
-                        </TextBlock>
                         <WrapPanel Orientation="Vertical"
-                                   Margin="0 15 0 1">
+                                   Margin="0 0 0 1">
                             <ScrollViewer Width="250"
-                                          Margin="0 10 0 0">
+                                          Margin="0 00 0 0">
                                 <ItemsControl Background="Transparent"
                                               Focusable="False"
                                               BorderThickness="0"
@@ -305,6 +309,13 @@
                                         Height="{Binding BoxHeight}"
                                         MouseMove="ListBorder_MouseMove">
                                     <Grid>
+                                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                                 Width="7"
+                                                 Height="7"
+                                                 HorizontalAlignment="Right"
+                                                 VerticalAlignment="Top"
+                                                 Fill="Red"
+                                                 Margin="5" />
                                         <StackPanel Orientation="Vertical"
                                                     Width="100">
                                             <TextBlock Text="{Binding Name}"
@@ -370,6 +381,13 @@
             </Grid>
 
             <Grid Grid.Column="2">
+                <Line X1="2"
+                      X2="2"
+                      Y1="0"
+                      Y2="2000"
+                      Stroke="#000D14"
+                      StrokeThickness="4" />
+
                 <ScrollViewer>
                     <ListBox x:Name="PaceMan"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -394,47 +412,56 @@
                                         Width="263"
                                         Height="45"
                                         MouseMove="ListBorder_MouseMove">
-                                    <StackPanel Orientation="Horizontal"
-                                                Margin="5 0 0 0">
-                                        <Image Source="{Binding HeadImage}"
-                                               Width="30"
-                                               Height="30"
-                                               Opacity="{Binding HeadImageOpacity}" />
-                                        <TextBlock Text="{Binding Nickname}"
-                                                   Width="67"
-                                                   Height="20"
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Left"
-                                                   Foreground="White"
-                                                   Padding="0"
-                                                   FontWeight="Bold"
-                                                   Margin="5 6 0 0" />
-
-                                        <TextBlock Foreground="{Binding PaceSplitTimeColor}"
-                                                   Width="70"
+                                    <Grid>
+                                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Width="7"
+                                                 Height="7"
+                                                 HorizontalAlignment="Right"
+                                                 VerticalAlignment="Top"
+                                                 Fill="Red"
+                                                 Margin="5" />
+                                        <StackPanel Orientation="Horizontal"
+                                                    Margin="5 0 0 0">
+                                            <Image Source="{Binding HeadImage}"
+                                                   Width="30"
                                                    Height="30"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   Margin="3 0 0 0">
+                                                   Opacity="{Binding HeadImageOpacity}" />
+                                            <TextBlock Text="{Binding Nickname}"
+                                                       Width="67"
+                                                       Height="20"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       TextAlignment="Left"
+                                                       Foreground="White"
+                                                       Padding="0"
+                                                       FontWeight="Bold"
+                                                       Margin="5 6 0 0" />
+
+                                            <TextBlock Foreground="{Binding PaceSplitTimeColor}"
+                                                       Width="70"
+                                                       Height="30"
+                                                       HorizontalAlignment="Left"
+                                                       VerticalAlignment="Center"
+                                                       TextAlignment="Center"
+                                                       Margin="3 0 0 0">
                                                 <Run Text="{Binding CurrentSplitTime}"
                                                      FontWeight="{Binding PaceFontWeight}"
                                                      FontSize="23" />
-                                        </TextBlock>
+                                            </TextBlock>
 
-                                        <TextBlock Foreground="FloralWhite"
-                                                   Width="80"
-                                                   Height="30"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   Margin="0 0 0 0">
+                                            <TextBlock Foreground="FloralWhite"
+                                                       Width="80"
+                                                       Height="30"
+                                                       HorizontalAlignment="Left"
+                                                       VerticalAlignment="Center"
+                                                       TextAlignment="Center"
+                                                       Margin="0 0 0 0">
                                                 <Run Text="{Binding IGTTime}"
                                                      FontWeight="{Binding PaceFontWeight}"
                                                      FontSize="23" />
-                                        </TextBlock>
-                                    </StackPanel>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -478,14 +505,6 @@
                     </ListBox>
                 </ScrollViewer>
             </Grid>
-
-            <Line Grid.Column="2"
-                  X1="2"
-                  X2="2"
-                  Y1="0"
-                  Y2="2000"
-                  Stroke="#000D14"
-                  StrokeThickness="4" />
         </Grid>
     </Grid>
 </UserControl>

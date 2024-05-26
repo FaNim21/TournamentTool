@@ -32,6 +32,7 @@ public class PointOfView : BaseViewModel
 
     public bool IsFromWhiteList { get; set; }
 
+    public IPlayer? player;
     public string DisplayedPlayer { get; set; } = string.Empty;
     public string PersonalBest { get; set; } = string.Empty;
     public string HeadViewParametr { get; set; } = string.Empty;
@@ -87,39 +88,61 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
-    public void SetPOV(ITwitchPovInformation povInfo)
+    public void SetPOV(IPlayer? povInfo)
     {
-        SetPOV(povInfo.GetDisplayName(), povInfo.GetTwitchName(), povInfo.GetHeadViewParametr(), povInfo.GetPersonalBest(), povInfo.IsFromWhiteList());
+        var oldPlayer = player;
+        player = povInfo;
+        if (player == null)
+        {
+            Clear();
+            return;
+        }
+
+        if ((IsFromWhiteList && player.IsUsedInPov) || _obs.Controller.IsPlayerInPov(player!.GetTwitchName()))
+        {
+            player = oldPlayer;
+            return;
+        }
+
+        if (oldPlayer != null) oldPlayer.IsUsedInPov = false;
+        player.IsUsedInPov = true;
+        SetPOV();
     }
-    public void SetPOV(string DisplayedName, string twitchName, string headInfoParametr, string personalBest, bool isFromWhiteList)
+    private void SetPOV()
     {
-        DisplayedPlayer = DisplayedName;
-        TwitchName = twitchName;
-        HeadViewParametr = headInfoParametr;
-        PersonalBest = personalBest;
-        IsFromWhiteList = isFromWhiteList;
+        if (player == null)
+        {
+            Clear();
+            return;
+        }
+
+        DisplayedPlayer = player.GetDisplayName();
+        TwitchName = player.GetTwitchName();
+        HeadViewParametr = player.GetHeadViewParametr();
+        PersonalBest = player.GetPersonalBest() ?? "Unk";
+        IsFromWhiteList = player.IsFromWhiteList();
+        player.IsUsedInPov = true;
 
         _obs.SetBrowserURL(this);
         Update();
     }
+    public void Swap(PointOfView pov)
+    {
+        IPlayer? povPlayer = pov.player;
+
+        pov.player = player;
+        pov.SetPOV();
+        player = povPlayer;
+        SetPOV();
+    }
+
     public async Task Refresh()
     {
         _obs.SetBrowserURL(SceneItemName!, "");
         await Task.Delay(25);
-        SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, PersonalBest, IsFromWhiteList);
+        SetPOV();
     }
 
-    public void Swap(PointOfView pov)
-    {
-        string tempDisplayedPlayer = pov.DisplayedPlayer;
-        string tempTwitchName = pov.TwitchName;
-        string tempHeadViewParametr = pov.HeadViewParametr;
-        string tempPersonalBest = pov.PersonalBest;
-        bool tempIsFromWhiteList = pov.IsFromWhiteList;
-
-        pov.SetPOV(DisplayedPlayer, TwitchName, HeadViewParametr, PersonalBest, IsFromWhiteList);
-        SetPOV(tempDisplayedPlayer, tempTwitchName, tempHeadViewParametr, tempPersonalBest, tempIsFromWhiteList);
-    }
 
     public void Focus()
     {
@@ -200,6 +223,12 @@ public class PointOfView : BaseViewModel
         TwitchName = string.Empty;
         HeadViewParametr = string.Empty;
         PersonalBest = string.Empty;
+
+        if (player != null)
+        {
+            player.IsUsedInPov = false;
+            player = null;
+        }
 
         _obs.SetBrowserURL(this);
 
