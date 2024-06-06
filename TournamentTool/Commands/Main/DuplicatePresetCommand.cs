@@ -8,9 +8,9 @@ namespace TournamentTool.Commands.Main;
 
 public class DuplicatePresetCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
-    public DuplicatePresetCommand(MainViewModel mainViewModel)
+    public DuplicatePresetCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }

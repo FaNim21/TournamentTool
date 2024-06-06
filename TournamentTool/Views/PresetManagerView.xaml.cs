@@ -7,7 +7,7 @@ using TournamentTool.Models;
 
 namespace TournamentTool.Views;
 
-public partial class MainView : UserControl
+public partial class PresetManagerView : UserControl
 {
     [GeneratedRegex("[^0-9]+")]
     private static partial Regex NumberRegex();
@@ -17,10 +17,10 @@ public partial class MainView : UserControl
         get { return (ICommand)GetValue(OnListItemClickCommandProperty); }
         set { SetValue(OnListItemClickCommandProperty, value); }
     }
-    public static readonly DependencyProperty OnListItemClickCommandProperty = DependencyProperty.Register("OnListItemClickCommand", typeof(ICommand), typeof(MainView), new PropertyMetadata(null));
+    public static readonly DependencyProperty OnListItemClickCommandProperty = DependencyProperty.Register("OnListItemClickCommand", typeof(ICommand), typeof(PresetManagerView), new PropertyMetadata(null));
 
 
-    public MainView()
+    public PresetManagerView()
     {
         InitializeComponent();
     }

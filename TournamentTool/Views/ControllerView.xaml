@@ -63,7 +63,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="428" />
                 <ColumnDefinition MinWidth="350" />
-                <ColumnDefinition Width="291" />
+                <ColumnDefinition Width="290" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
@@ -141,37 +141,47 @@
                         <ColumnDefinition Width="250" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
-                        <components:ButtonNormal ContentText="Refresh OBS"
+                    <Grid Grid.Column="0">
+                        <StackPanel>
+                            <components:ButtonNormal ContentText="Refresh OBS"
+                                                     FontSize="15"
+                                                     Width="150"
+                                                     Height="30"
+                                                     OnCommand="{Binding RefreshOBSCommand}"
+                                                     Margin="0 5 0 0" />
+
+                            <components:ButtonNormal ContentText="Refresh All POVS"
+                                                     FontSize="15"
+                                                     Width="150"
+                                                     Height="30"
+                                                     OnCommand="{Binding RefreshPOVsCommand}"
+                                                     Margin="0 5 0 0" />
+
+                            <!--
+                            <components:ButtonNormal ContentText="clip first stream xd"
+                                                     FontSize="15"
+                                                     Width="150"
+                                                     Height="30"
+                                                     OnCommand="{Binding ClipCommand}" />
+                            -->
+                            <!--
+                            <TextBlock Text="MORE CONTROLS IN FUTURE"
+                                       FontSize="48"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"
+                                       VerticalAlignment="Center" />
+                            -->
+                        </StackPanel>
+
+                        <components:ButtonNormal ContentText="Leave"
                                                  FontSize="15"
                                                  Width="150"
                                                  Height="30"
-                                                 OnCommand="{Binding RefreshOBSCommand}"
-                                                 Margin="0 5 0 0" />
-
-                        <components:ButtonNormal ContentText="Refresh All POVS"
-                                                 FontSize="15"
-                                                 Width="150"
-                                                 Height="30"
-                                                 OnCommand="{Binding RefreshPOVsCommand}"
-                                                 Margin="0 5 0 0" />
-
-
-                        <!--
-                        <components:ButtonNormal ContentText="clip first stream xd"
-                                                 FontSize="15"
-                                                 Width="150"
-                                                 Height="30"
-                                                 OnCommand="{Binding ClipCommand}" />
-                        -->
-                        <!--
-                        <TextBlock Text="MORE CONTROLS IN FUTURE"
-                                   FontSize="48"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center"
-                                   VerticalAlignment="Center" />
-                        -->
-                    </StackPanel>
+                                                 FontWeight="SemiBold"
+                                                 VerticalAlignment="Bottom"
+                                                 OnCommand="{Binding GoBackCommand}"
+                                                 Margin="0 5" />
+                    </Grid>
 
                     <Grid Grid.Column="1">
                         <WrapPanel Orientation="Vertical"

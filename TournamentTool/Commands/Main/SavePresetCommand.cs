@@ -6,12 +6,12 @@ namespace TournamentTool.Commands.Main;
 
 public class SavePresetCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
     private readonly JsonSerializerOptions serializerOptions;
 
 
-    public SavePresetCommand(MainViewModel mainViewModel)
+    public SavePresetCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
         serializerOptions = new JsonSerializerOptions() { WriteIndented = true };

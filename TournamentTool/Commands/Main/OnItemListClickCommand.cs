@@ -4,9 +4,9 @@ namespace TournamentTool.Commands.Main;
 
 public class OnItemListClickCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
-    public OnItemListClickCommand(MainViewModel mainViewModel)
+    public OnItemListClickCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }

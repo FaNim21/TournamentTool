@@ -4,9 +4,9 @@ namespace TournamentTool.Commands;
 
 class UpdateViewCommand : BaseCommand
 {
-    private readonly MainViewModel viewModel;
+    private readonly PresetManagerViewModel viewModel;
 
-    public UpdateViewCommand(MainViewModel viewModel) { this.viewModel = viewModel; }
+    public UpdateViewCommand(PresetManagerViewModel viewModel) { this.viewModel = viewModel; }
 
     public override void Execute(object? parameter)
     {

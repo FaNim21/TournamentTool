@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 
 namespace TournamentTool.ViewModels;
@@ -19,8 +18,8 @@ public class BaseViewModel : INotifyPropertyChanged, IDisposable
             Application.Current.Dispatcher.Invoke(delegate { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); });
     }
 
-    public virtual void OnEnable() { }
-    public virtual void OnDisable() { }
+    public virtual void OnEnable(object? parameter) { }
+    public virtual bool OnDisable() { return true; }
 
     public virtual void Dispose() { }
 }

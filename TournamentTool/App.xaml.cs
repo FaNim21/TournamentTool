@@ -5,7 +5,7 @@ namespace TournamentTool;
 
 public partial class App : Application
 {
-    public MainViewModel? MainViewModel { get; set; }
+    public MainViewModel MainViewModel { get; set; }
 
     public App() { }
 

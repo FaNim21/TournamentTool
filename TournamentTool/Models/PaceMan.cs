@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
 using TournamentTool.Components.Controls;
-using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using System.Windows;
 using TournamentTool.Utils;
@@ -10,7 +9,7 @@ using TournamentTool.ViewModels.Controller;
 using System.Windows.Media;
 using System.ComponentModel;
 
-namespace TournamentTool.Commands;
+namespace TournamentTool.Models;
 
 public enum SplitType
 {

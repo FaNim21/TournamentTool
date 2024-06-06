@@ -8,9 +8,9 @@ namespace TournamentTool.Commands.Main;
 
 public class RemovePresetCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
-    public RemovePresetCommand(MainViewModel mainViewModel)
+    public RemovePresetCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }

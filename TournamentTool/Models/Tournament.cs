@@ -1,5 +1,6 @@
 ﻿using MultiOpener.Entities.Interfaces;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.IO;
 using System.Text.Json.Serialization;
 using System.Windows;
@@ -24,7 +25,7 @@ public class Tournament : BaseViewModel, IRenameItem
     public ObservableCollection<Player> Players { get; set; } = [];
 
     [JsonIgnore]
-    public MainViewModel? MainViewModel;
+    public PresetManagerViewModel? MainViewModel;
 
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
@@ -193,7 +194,7 @@ public class Tournament : BaseViewModel, IRenameItem
     {
         Name = name;
     }
-    public Tournament(MainViewModel mainViewModel, string name = "")
+    public Tournament(PresetManagerViewModel mainViewModel, string name = "")
     {
         MainViewModel = mainViewModel;
         Name = name;
@@ -236,7 +237,7 @@ public class Tournament : BaseViewModel, IRenameItem
         File.Move(path, newPath);
         Name = name;
         OnPropertyChanged(nameof(Name));
-        MainViewModel.SavePresetCommand.Execute(this);
+        MainViewModel!.SavePresetCommand.Execute(this);
     }
 
     public string GetPath()
@@ -256,6 +257,24 @@ public class Tournament : BaseViewModel, IRenameItem
     {
         if (string.IsNullOrEmpty(twitchName)) return false;
         return Players.Any(player => player.TwitchName!.Equals(twitchName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public Player? GetPlayerByTwitchName(string twitchName)
+    {
+        int n = Players.Count;
+        for (int i = 0; i < n; i++)
+        {
+            var current = Players[i];
+            if (current.TwitchName!.Equals(twitchName))
+                return current;
+        }
+        return null;
+    }
+
+    public void ClearFromController()
+    {
+        for (int i = 0; i < Players.Count; i++)
+            Players[i].ClearFromController();
     }
 
     public void Clear()
@@ -283,17 +302,5 @@ public class Tournament : BaseViewModel, IRenameItem
         EnterStrongholdGoodPaceMiliseconds = 450000;
         EnterEndGoodPaceMiliseconds = 480000;
         CreditsGoodPaceMiliseconds = 600000;
-    }
-
-    public Player? GetPlayerByTwitchName(string twitchName)
-    {
-        int n = Players.Count;
-        for (int i = 0; i < n; i++)
-        {
-            var current = Players[i];
-            if (current.TwitchName!.Equals(twitchName))
-                return current;
-        }
-        return null;
     }
 }

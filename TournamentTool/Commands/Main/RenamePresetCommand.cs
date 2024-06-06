@@ -6,9 +6,9 @@ namespace TournamentTool.Commands.Main;
 
 public class RenamePresetCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
-    public RenamePresetCommand(MainViewModel mainViewModel)
+    public RenamePresetCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }

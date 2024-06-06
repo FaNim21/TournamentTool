@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -83,12 +84,13 @@ public class PlayerManagerViewModel : BaseViewModel
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
 
+    public ICommand GoBackCommand { get; set; }
 
-    public PlayerManagerViewModel(MainViewModel mainViewModel, Tournament tournament)
+
+    public PlayerManagerViewModel(MainViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
-        Tournament = tournament;
-        Player = new();
+        GoBackCommand = new RelayCommand(GoBack);
 
         SavePlayerCommand = new RelayCommand(SavePlayer);
 
@@ -100,6 +102,16 @@ public class PlayerManagerViewModel : BaseViewModel
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
+    }
+
+    public override void OnEnable(object? parameter)
+    {
+        if (parameter != null && parameter is Tournament tournament)
+        {
+            Tournament = tournament;
+        }
+
+        Player = new();
 
         Task.Run(async () =>
         {
@@ -110,6 +122,17 @@ public class PlayerManagerViewModel : BaseViewModel
             PaceManEvents = new(eventsData);
             OnPropertyChanged(nameof(PaceManEvents));
         });
+    }
+    public override bool OnDisable()
+    {
+        if (IsEditing)
+        {
+            DialogBox.Show("Finish editing before closing the window", "Editing");
+            return false;
+        }
+
+        MainViewModel.SavePreset();
+        return true;
     }
 
     private void SavePlayer()
@@ -147,7 +170,7 @@ public class PlayerManagerViewModel : BaseViewModel
             Tournament!.AddPlayer(newPlayer);
         }
         Player = new();
-        MainViewModel.SavePresetCommand.Execute(null);
+        MainViewModel.SavePreset();
     }
 
     private void LoadDataFromPaceMan()
@@ -229,5 +252,10 @@ public class PlayerManagerViewModel : BaseViewModel
 
             DialogBox.Show("Done fixing players head skins");
         });
+    }
+
+    public void GoBack()
+    {
+        MainViewModel.Open<PresetManagerViewModel>();
     }
 }

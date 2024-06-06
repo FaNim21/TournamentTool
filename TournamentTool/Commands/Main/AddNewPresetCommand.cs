@@ -6,9 +6,9 @@ namespace TournamentTool.Commands.Main;
 
 public class AddNewPresetCommand : BaseCommand
 {
-    public MainViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel MainViewModel { get; set; }
 
-    public AddNewPresetCommand(MainViewModel mainViewModel)
+    public AddNewPresetCommand(PresetManagerViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }

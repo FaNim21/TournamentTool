@@ -4,6 +4,7 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
+using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -113,6 +114,12 @@ public class ObsController : BaseViewModel
         Client.SceneItemCreated -= OnSceneItemCreated;
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
+    }
+
+    public async Task Refresh()
+    {
+        Controller.Configuration.ClearFromController();
+        await GetCurrentSceneitems();
     }
 
     public async Task GetCurrentSceneitems()

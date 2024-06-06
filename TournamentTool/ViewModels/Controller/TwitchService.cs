@@ -21,6 +21,8 @@ public class TwitchService
 
     public async Task AuthorizeAsync()
     {
+        if (!string.IsNullOrEmpty(_api.Settings.AccessToken)) return;
+
         var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
         string auth = _api.Auth.GetAuthorizationCodeUrl(Consts.RedirectURL, authScopes, true, null, _api.Settings.AccessToken);
 

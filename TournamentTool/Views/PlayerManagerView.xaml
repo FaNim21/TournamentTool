@@ -29,6 +29,15 @@
 
         <Grid Grid.Column="0"
               Background="Transparent">
+            <components:ButtonNormal Width="40"
+                                     Height="40"
+                                     ContentText="↩"
+                                     FontSize="28"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     FontWeight="SemiBold"
+                                     OnCommand="{Binding GoBackCommand}"
+                                     Margin="10" />
             <TextBlock Text="WHITELIST"
                        FontSize="38"
                        FontWeight="Bold"
@@ -216,8 +225,7 @@
                     <DataTemplate DataType="models:Player">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
-                                Width="110"
-                                Height="65">
+                                Width="110">
                             <Grid>
                                 <StackPanel>
                                     <TextBlock Text="{Binding Name}"
@@ -230,23 +238,32 @@
                                                TextAlignment="Center"
                                                Margin="0 4 0 0">
                                     </TextBlock>
-                                    <TextBlock Text="{Binding PersonalBest}"
-                                               Foreground="White"
-                                               Background="Transparent"
-                                               FontSize="21"
-                                               Width="64"
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding PersonalBest}"
+                                                   Foreground="White"
+                                                   Background="Transparent"
+                                                   FontSize="21"
+                                                   Width="64"
+                                                   Height="30"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   Margin="5 5 0 0" />
+                                        <Image Width="30"
                                                Height="30"
-                                               HorizontalAlignment="Left"
-                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Margin="0 5 0 0"
+                                               Source="{Binding Image}" />
+                                    </StackPanel>
+                                    <TextBlock FontSize="12"
+                                               VerticalAlignment="Bottom"
+                                               Background="Transparent"
                                                TextAlignment="Center"
-                                               Margin="5 5 0 0" />
+                                               Foreground="#8f8067 "
+                                               Text="{Binding TwitchName}"
+                                               Margin="0 2 0 2" />
                                 </StackPanel>
-                                <Image Width="30"
-                                       Height="30"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Bottom"
-                                       Margin="0 0 6 6"
-                                       Source="{Binding Image}" />
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -258,10 +275,10 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
-                        <Setter Property="Width"
-                                Value="120" />
-                        <Setter Property="Height"
-                                Value="75" />
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

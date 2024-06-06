@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
-using TournamentTool.Commands;
+using TournamentTool.Models;
 
 namespace TournamentTool.Converters;
 

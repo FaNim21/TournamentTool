@@ -14,10 +14,12 @@ namespace TournamentTool.ViewModels.Controller;
 
 public class ControllerViewModel : BaseViewModel
 {
+    private MainViewModel MainViewModel { get; set; }
+
     private readonly TwitchService _twitch;
 
-    private readonly BackgroundWorker? _paceManWorker;
-    private BackgroundWorker _twitchWorker = new();
+    private BackgroundWorker? _paceManWorker;
+    private BackgroundWorker? _twitchWorker;
 
     public HttpClient? WebServer { get; set; }
 
@@ -47,10 +49,9 @@ public class ControllerViewModel : BaseViewModel
 
     public ICollectionView? GroupedPaceManPlayers { get; set; }
 
-    public MainViewModel MainViewModel { get; set; }
     public ObsController ObsController { get; set; }
 
-    public Tournament Configuration { get => MainViewModel.CurrentChosen!; }
+    public Tournament Configuration { get; private set; }
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -152,30 +153,40 @@ public class ControllerViewModel : BaseViewModel
         }
     }
 
+    public ICommand GoBackCommand { get; set; }
     public ICommand RefreshOBSCommand { get; set; }
     public ICommand RefreshPOVsCommand { get; set; }
 
 
     public ControllerViewModel(MainViewModel mainViewModel)
     {
+        MainViewModel = mainViewModel;
+        GoBackCommand = new RelayCommand(GoBack);
+
         ObsController = new(this);
         _twitch = new();
 
-        RefreshOBSCommand = new RelayCommand(async () => { await ObsController.GetCurrentSceneitems(); });
+        RefreshOBSCommand = new RelayCommand(async () => { await ObsController.Refresh(); });
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshPovs(); });
 
         /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
         Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
+    }
 
-        MainViewModel = mainViewModel;
+    public override void OnEnable(object? parameter)
+    {
+        if (parameter != null && parameter is Tournament tournament)
+        {
+            Configuration = tournament;
+        }
 
-        foreach (var player in MainViewModel.CurrentChosen!.Players)
-            player.ShowCategory(!MainViewModel.CurrentChosen!.ShowLiveOnlyForMinecraftCategory);
+        foreach (var player in Configuration.Players)
+            player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory);
 
         FilterItems();
         SetupPaceManGrouping();
 
-        if (MainViewModel.CurrentChosen!.IsUsingPaceMan)
+        if (Configuration.IsUsingPaceMan)
         {
             _paceManWorker = new() { WorkerSupportsCancellation = true };
             _paceManWorker.DoWork += PaceManUpdate;
@@ -187,6 +198,39 @@ public class ControllerViewModel : BaseViewModel
             await ObsController.Connect(Configuration.Password!, Configuration.Port);
             await ConnectTwitchAPI();
         });
+    }
+    public override bool OnDisable()
+    {
+        _paceManWorker?.CancelAsync();
+        _paceManWorker?.Dispose();
+
+        try
+        {
+            _twitchWorker?.CancelAsync();
+        }
+        catch { }
+        _twitchWorker?.Dispose();
+
+        for (int i = 0; i < Configuration.Players.Count; i++)
+        {
+            var current = Configuration.Players[i];
+            current.TwitchStreamData.StatusLabelColor = null;
+        }
+
+        POVs.Clear();
+        FilteredPlayers!.Clear();
+
+        for (int i = 0; i < PaceManPlayers.Count; i++)
+        {
+            PaceManPlayers[i].Player = null;
+        }
+
+        PaceManPlayers.Clear();
+        Configuration.ClearFromController();
+
+        Task.Run(ObsController.Disconnect);
+
+        return true;
     }
 
     private void SetupPaceManGrouping()
@@ -203,7 +247,7 @@ public class ControllerViewModel : BaseViewModel
     private async Task ConnectTwitchAPI()
     {
         _twitchWorker = new() { WorkerSupportsCancellation = true };
-        if (!MainViewModel.CurrentChosen!.IsUsingTwitchAPI) return;
+        if (!Configuration.IsUsingTwitchAPI) return;
 
         await _twitch.AuthorizeAsync();
 
@@ -223,7 +267,7 @@ public class ControllerViewModel : BaseViewModel
             {
                 DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(MainViewModel.CurrentChosen!.PaceManRefreshRateMiliseconds));
+            await Task.Delay(TimeSpan.FromMilliseconds(Configuration.PaceManRefreshRateMiliseconds));
         }
     }
     private async Task RefreshPaceManAsync()
@@ -253,8 +297,8 @@ public class ControllerViewModel : BaseViewModel
 
             if (foundPlayer || resultPaceman.User.TwitchName == null) continue;
 
-            resultPaceman.Player = MainViewModel.CurrentChosen!.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-            if (MainViewModel.CurrentChosen!.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
+            resultPaceman.Player = Configuration.Players.Where(x => x.TwitchName!.Equals(resultPaceman.User.TwitchName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            if (Configuration.IsUsingWhitelistOnPaceMan && resultPaceman.Player == null) continue;
 
             resultPaceman.Initialize(this, resultPaceman.Splits);
             AddPaceMan(resultPaceman);
@@ -272,7 +316,7 @@ public class ControllerViewModel : BaseViewModel
 
     private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
     {
-        while (!_twitchWorker.CancellationPending)
+        while (!_twitchWorker!.CancellationPending)
         {
             try
             {
@@ -284,16 +328,16 @@ public class ControllerViewModel : BaseViewModel
                 DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(30000));
+            await Task.Delay(TimeSpan.FromMilliseconds(60000));
         }
     }
     private async Task UpdateTwitchInformations()
     {
         List<string> logins = [];
         List<TwitchStreamData> notLivePlayers = [];
-        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
+        for (int i = 0; i < Configuration.Players.Count; i++)
         {
-            var current = MainViewModel.CurrentChosen.Players[i];
+            var current = Configuration.Players[i];
             logins.Add(current.TwitchName!);
             notLivePlayers.Add(current.TwitchStreamData);
         }
@@ -302,7 +346,7 @@ public class ControllerViewModel : BaseViewModel
         for (int i = 0; i < streams.Count; i++)
         {
             var current = streams[i];
-            if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && MainViewModel.CurrentChosen.ShowLiveOnlyForMinecraftCategory) continue;
+            if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && Configuration.ShowLiveOnlyForMinecraftCategory) continue;
 
             for (int j = 0; j < notLivePlayers.Count; j++)
             {
@@ -341,13 +385,11 @@ public class ControllerViewModel : BaseViewModel
     private void FilterItems()
     {
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
-        if (MainViewModel.CurrentChosen == null) return;
-
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
 
         IEnumerable<Player> playersToAdd = [];
 
-        playersToAdd = MainViewModel.CurrentChosen.Players
+        playersToAdd = Configuration.Players
                        .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase))
                        .OrderByDescending(player => player.TwitchStreamData.Status.Equals("live"));
 
@@ -432,37 +474,8 @@ public class ControllerViewModel : BaseViewModel
         if (ClearAll) CurrentChosenPOV = null;
     }
 
-    public void ControllerExit()
+    public void GoBack()
     {
-        _paceManWorker?.CancelAsync();
-        _paceManWorker?.Dispose();
-
-        try
-        {
-            _twitchWorker?.CancelAsync();
-        }
-        catch { }
-        _twitchWorker?.Dispose();
-
-        for (int i = 0; i < MainViewModel.CurrentChosen!.Players.Count; i++)
-        {
-            var current = MainViewModel.CurrentChosen.Players[i];
-            current.TwitchStreamData.StatusLabelColor = null;
-        }
-
-        POVs.Clear();
-        FilteredPlayers!.Clear();
-
-        for (int i = 0; i < PaceManPlayers.Count; i++)
-        {
-            PaceManPlayers[i].Player = null;
-        }
-
-        PaceManPlayers.Clear();
-
-        for (int i = 0; i < Configuration.Players.Count; i++)
-            Configuration.Players[i].ClearFromController();
-
-        Task.Run(ObsController.Disconnect);
+        MainViewModel.Open<PresetManagerViewModel>();
     }
 }

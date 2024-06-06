@@ -100,7 +100,7 @@ public partial class EditableTextBlock : UserControl
                 }
 
                 bool isUnique = true;
-                MainViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as MainViewModel;
+                PresetManagerViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as PresetManagerViewModel;
                 if (DataContext is Tournament)
                 {
                     isUnique = main!.IsPresetNameUnique(textBlock.Text);
