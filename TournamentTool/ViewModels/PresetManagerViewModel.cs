@@ -135,6 +135,15 @@ public class PresetManagerViewModel : BaseViewModel
                 if (string.IsNullOrEmpty(text)) continue;
                 Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
                 if (data == null) continue;
+                for (int j = 0; j < data.Players.Count; j++)
+                {
+                    var current = data.Players[j];
+                    if (!string.IsNullOrEmpty(current.TwitchName))
+                    {
+                        current.StreamData.Main = current.TwitchName;
+                        current.TwitchName = string.Empty;
+                    }
+                }
                 data.MainViewModel = this;
                 Presets.Add(data);
             }

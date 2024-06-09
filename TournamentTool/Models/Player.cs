@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using TournamentTool.Components.Controls;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -19,6 +20,71 @@ public struct ResponseApiName
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }
+}
+
+public class StreamData : BaseViewModel
+{
+    [JsonIgnore] public TwitchStreamData LiveData { get; set; } = new();
+
+    private string _main = string.Empty;
+    public string Main
+    {
+        get => _main;
+        set
+        {
+            _main = value;
+            OnPropertyChanged(nameof(Main));
+        }
+    }
+
+    private string _alt = string.Empty;
+    public string Alt
+    {
+        get => _alt;
+        set
+        {
+            _alt = value;
+            OnPropertyChanged(nameof(Alt));
+        }
+    }
+
+
+    public bool ExistName(string name)
+    {
+        return Main.Equals(name, StringComparison.OrdinalIgnoreCase) || Alt.Equals(name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public string GetCorrectName()
+    {
+        if (string.IsNullOrEmpty(Main))
+            return Alt;
+        return Main;
+    }
+
+    public bool IsMainEmpty()
+    {
+        return string.IsNullOrEmpty(Main);
+    }
+    public bool IsAltEmpty()
+    {
+        return string.IsNullOrEmpty(Alt);
+    }
+    public bool IsNullOrEmpty()
+    {
+        return IsMainEmpty() || IsAltEmpty();
+    }
+    public bool AreBothNullOrEmpty()
+    {
+        return IsMainEmpty() && IsAltEmpty();
+    }
+
+    public void Clear()
+    {
+        Main = string.Empty;
+        Alt = string.Empty;
+
+        LiveData.Clear();
+    }
 }
 
 public class TwitchStreamData : BaseViewModel
@@ -37,16 +103,22 @@ public class TwitchStreamData : BaseViewModel
     public string Status { get; set; } = "offline";
     public static Color liveColor = Color.FromRgb(0, 255, 127);
     public static Color offlineColor = Color.FromRgb(201, 61, 59);
+    public static Color normalColor = Color.FromRgb(220, 220, 220);
 
     public bool GameNameVisibility { get; set; } = false;
     public string GameName { get; set; } = string.Empty;
 
+    public bool WasUpdated { get; set; } = false;
 
-    public void Update(TwitchStreamData data)
+
+    public void Update(TwitchStreamData data, bool isUsingTwitchApi = true)
     {
+        WasUpdated = true;
+
         ID = data.ID;
         BroadcasterID = data.BroadcasterID;
         UserName = data.UserName;
+        UserLogin = data.UserLogin;
         GameName = data.GameName;
         Title = data.Title;
         ViewerCount = data.ViewerCount;
@@ -55,7 +127,9 @@ public class TwitchStreamData : BaseViewModel
         ThumbnailUrl = data.ThumbnailUrl;
 
         Status = data.Status;
-        if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
+        if (!isUsingTwitchApi)
+            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(normalColor); });
+        else if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
             Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(liveColor); });
         else
             Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(offlineColor); });
@@ -102,9 +176,6 @@ public class Player : BaseViewModel, IPlayer
     public string? UUID { get; set; }
 
     [JsonIgnore]
-    public TwitchStreamData TwitchStreamData { get; set; } = new();
-
-    [JsonIgnore]
     private BitmapImage? _image;
     [JsonIgnore]
     public BitmapImage? Image
@@ -133,6 +204,8 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
+    public StreamData StreamData { get; set; } = new();
+
     private string? _inGameName;
     public string? InGameName
     {
@@ -144,10 +217,7 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
-    //TODO: 0 Zamiast jednego TwitchName to zrobic TwitchStreamData w tablicy i uwzgledniac alty
-    //i ewentualnie mozna zostawic twitch name albo dla podobienstwa zrobic wyciaganie aktywnego twitch streamdata
-    //dla nazwy streama
-    private string? _twitchName = "";
+    private string? _twitchName = string.Empty;
     public string? TwitchName
     {
         get => _twitchName;
@@ -155,25 +225,11 @@ public class Player : BaseViewModel, IPlayer
         {
             if (string.IsNullOrEmpty(value)) return;
             _twitchName = value;
-            TwitchStreamData.UserLogin = value;
             OnPropertyChanged(nameof(TwitchName));
         }
     }
 
-    private string? _twitchNameAlt = "";
-    public string? TwitchNameAlt
-    {
-        get => _twitchNameAlt;
-        set
-        {
-            if (string.IsNullOrEmpty(value)) return;
-            _twitchNameAlt = value;
-            //TwitchStreamData.UserLogin = value;
-            OnPropertyChanged(nameof(TwitchNameAlt));
-        }
-    }
-
-    private string? _personalBest = "";
+    private string? _personalBest = string.Empty;
     public string? PersonalBest
     {
         get => _personalBest;
@@ -225,7 +281,7 @@ public class Player : BaseViewModel, IPlayer
     public Player(string name = "")
     {
         Name = name;
-        TwitchStreamData.Update(new TwitchStreamData());
+        StreamData.LiveData.Update(new TwitchStreamData());
     }
 
     public void ShowCategory(bool option)
@@ -234,13 +290,13 @@ public class Player : BaseViewModel, IPlayer
         {
             BoxHeight = 80;
             BoxHeightBorder = 90;
-            TwitchStreamData.GameNameVisibility = true;
+            StreamData.LiveData.GameNameVisibility = true;
             return;
         }
 
         BoxHeight = 65;
         BoxHeightBorder = 75;
-        TwitchStreamData.GameNameVisibility = false;
+        StreamData.LiveData.GameNameVisibility = false;
     }
 
     public void LoadHead()
@@ -267,7 +323,6 @@ public class Player : BaseViewModel, IPlayer
             ResponseApiName name = JsonSerializer.Deserialize<ResponseApiName>(result);
             InGameName = name.Name;
             await UpdateHeadImage();
-            TwitchName = Name;
         }
         catch (Exception ex)
         {
@@ -293,8 +348,9 @@ public class Player : BaseViewModel, IPlayer
     public void Clear()
     {
         Name = string.Empty;
-        TwitchName = string.Empty;
         PersonalBest = string.Empty;
+
+        StreamData.Clear();
     }
 
     public void ClearFromController()
@@ -312,7 +368,9 @@ public class Player : BaseViewModel, IPlayer
     }
     public string GetTwitchName()
     {
-        return TwitchName!;
+        if (string.IsNullOrEmpty(StreamData.LiveData.ID)) return StreamData.GetCorrectName();
+
+        return StreamData.LiveData.UserLogin;
     }
     public string GetHeadViewParametr()
     {

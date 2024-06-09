@@ -51,18 +51,15 @@ public partial class MainWindow : Window
     private void ExitButtonClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not MainViewModel mainViewModel) return;
+        if (mainViewModel.SelectedViewModel != null && !mainViewModel.SelectedViewModel.OnDisable()) return;
+
         if (mainViewModel.SelectedViewModel != null && mainViewModel.SelectedViewModel is not PresetManagerViewModel)
         {
             var option = DialogBox.Show($"Are you sure you want to exit from here?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (option == MessageBoxResult.Yes)
-            {
-                mainViewModel.SelectedViewModel?.OnDisable();
-                Close();
-            }
+            if (option == MessageBoxResult.Yes) Close();
             return;
         }
 
-        mainViewModel.SelectedViewModel?.OnDisable();
         Close();
     }
 

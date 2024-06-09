@@ -100,10 +100,10 @@ public partial class EditableTextBlock : UserControl
                 }
 
                 bool isUnique = true;
-                PresetManagerViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as PresetManagerViewModel;
+                MainViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as MainViewModel;
                 if (DataContext is Tournament)
                 {
-                    isUnique = main!.IsPresetNameUnique(textBlock.Text);
+                    isUnique = main!.PresetManager.IsPresetNameUnique(textBlock.Text);
                     if (!isUnique)
                         ShowPopup($"Preset item named '{textBlock.Text}' already exists", 2);
                 }

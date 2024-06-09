@@ -27,7 +27,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
 
     private async Task LoadFile(string path)
     {
-        List<Player> dataList = [];
+        //List<Player> dataList = [];
         using TextFieldParser parser = new(path);
         parser.HasFieldsEnclosedInQuotes = true;
         parser.SetDelimiters(",");
@@ -42,11 +42,12 @@ public class GetCSVPlayersDataCommand : BaseCommand
             {
                 Name = fields[1],
                 UUID = fields[2],
-                PersonalBest = fields[3],
-                TwitchName = fields[4]
+                PersonalBest = fields[3]
             };
-            if (string.IsNullOrEmpty(data.TwitchName)) continue;
-            if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.TwitchName)) continue;
+            data.StreamData.Main = fields[4];
+
+            //if (data.StreamData.IsNullOrEmpty()) continue;
+            if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.StreamData.Main)) continue;
             await data.CompleteData();
             PlayerManagerViewModel.Tournament!.AddPlayer(data);
         }

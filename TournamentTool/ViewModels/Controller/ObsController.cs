@@ -4,11 +4,12 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
-using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
+using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 
@@ -40,10 +41,16 @@ public class ObsController : BaseViewModel
 
     public float CanvasAspectRatio { get; private set; }
 
+    public ICommand RefreshOBSCommand { get; set; }
+    public ICommand AddPovItemToOBSCommand { get; set; }
+
 
     public ObsController(ControllerViewModel controller)
     {
         Controller = controller;
+
+        RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
+        AddPovItemToOBSCommand = new RelayCommand(async () => { await CreateNestedSceneItem("PovSceneLOL"); });
     }
 
     public async Task Connect(string password, int port)
@@ -53,7 +60,7 @@ public class ObsController : BaseViewModel
         int timeoutCount = 0;
         int timeoutChecks = 35;
 
-        EventSubscriptions subscription = EventSubscriptions.All;
+        EventSubscriptions subscription = EventSubscriptions.All | EventSubscriptions.Scenes | EventSubscriptions.SceneItems;
         bool isConnected = await Client.ConnectAsync(true, password, "localhost", port, subscription);
         Client.PropertyChanged += OnPropertyChanged;
         if (isConnected)
@@ -317,8 +324,36 @@ public class ObsController : BaseViewModel
     {
         if (Client.ConnectionState == ConnectionState.Disconnected) return;
 
+        try
+        {
+
+            var existingItem = await Client.GetSceneItemId(sceneName, newSceneItemName);
+            if (existingItem > 0)
+            {
+                DialogBox.Show($"Scene item '{newSceneItemName}' already exists in scene '{sceneName}'.");
+                return;
+            }
+        }
+        catch { }
+
         Input input = new(inputKind, newSceneItemName, inputKind);
         await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
+    }
+
+    private async Task CreateNestedSceneItem(string sceneName)
+    {
+        if (Client.ConnectionState == ConnectionState.Disconnected) return;
+
+        await Client.CreateScene(sceneName);
+
+        await CreateNewSceneItem(sceneName, "item1", "browser_source");
+        await CreateNewSceneItem(sceneName, "item2", "browser_source");
+
+        int sceneItem1 = await Client.GetSceneItemId(sceneName, "item1");
+        int sceneItem2 = await Client.GetSceneItemId(sceneName, "item2");
+
+        //Client.setscene
+        await Client.CreateSceneItem(CurrentSceneName, sceneName);
     }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)

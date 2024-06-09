@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -17,16 +16,7 @@ public class PlayerManagerViewModel : BaseViewModel
     public MainViewModel MainViewModel { get; set; }
 
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-
-    private Tournament? _tournament;
-    public Tournament? Tournament
-    {
-        get => _tournament; set
-        {
-            _tournament = value;
-            OnPropertyChanged(nameof(Tournament));
-        }
-    }
+    public Tournament Tournament { get; set; }
 
     private Player? _player;
     public Player? Player
@@ -89,6 +79,7 @@ public class PlayerManagerViewModel : BaseViewModel
 
     public PlayerManagerViewModel(MainViewModel mainViewModel)
     {
+        Tournament = mainViewModel.PresetManager.CurrentChosen!;
         MainViewModel = mainViewModel;
         GoBackCommand = new RelayCommand(GoBack);
 
@@ -97,7 +88,7 @@ public class PlayerManagerViewModel : BaseViewModel
         EditPlayerCommand = new EditPlayerCommand(this);
         RemovePlayerCommand = new RemovePlayerCommand(this);
 
-        LoadFromPaceManCommand = new RelayCommand(LoadDataFromPaceMan);
+        LoadFromPaceManCommand = new RelayCommand(async () => { await LoadDataFromPaceManAsync(); });
         LoadFromCSVCommand = new GetCSVPlayersDataCommand(this);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
@@ -131,6 +122,10 @@ public class PlayerManagerViewModel : BaseViewModel
             return false;
         }
 
+        Player = null;
+        IsEditing = false;
+        PaceManEvents.Clear();
+
         MainViewModel.SavePreset();
         return true;
     }
@@ -138,7 +133,7 @@ public class PlayerManagerViewModel : BaseViewModel
     private void SavePlayer()
     {
         if (Player == null) return;
-        if (string.IsNullOrEmpty(Player.Name) || string.IsNullOrEmpty(Player.TwitchName)) return;
+        if (string.IsNullOrEmpty(Player.Name) || string.IsNullOrEmpty(Player.InGameName)) return;
 
         if (IsEditing)
         {
@@ -149,7 +144,8 @@ public class PlayerManagerViewModel : BaseViewModel
                 {
                     current.Name = Player.Name;
                     current.InGameName = Player.InGameName;
-                    current.TwitchName = Player.TwitchName.ToLower().Trim();
+                    current.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
+                    current.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
                     current.PersonalBest = Player.PersonalBest;
                     Task.Run(current.UpdateHeadImage);
                 }
@@ -159,13 +155,21 @@ public class PlayerManagerViewModel : BaseViewModel
         }
         else
         {
-            Player newPlayer = new()
+            Player newPlayer = new() { Name = Player.Name, InGameName = Player.InGameName, PersonalBest = Player.PersonalBest };
+            newPlayer.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
+            newPlayer.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
+
+            if (Tournament.IsNameDuplicate(newPlayer.StreamData.Main))
             {
-                Name = Player.Name,
-                InGameName = Player.InGameName,
-                TwitchName = Player.TwitchName.ToLower().Trim(),
-                PersonalBest = Player.PersonalBest,
-            };
+                DialogBox.Show($"{newPlayer.StreamData.Main} main twitch name exist in whitelist");
+                return;
+            }
+            else if (Tournament.IsNameDuplicate(newPlayer.StreamData.Alt))
+            {
+                DialogBox.Show($"{newPlayer.StreamData.Alt} alt twitch name exist in whitelist");
+                return;
+            }
+
             Task.Run(newPlayer.UpdateHeadImage);
             Tournament!.AddPlayer(newPlayer);
         }
@@ -173,14 +177,10 @@ public class PlayerManagerViewModel : BaseViewModel
         MainViewModel.SavePreset();
     }
 
-    private void LoadDataFromPaceMan()
+    private async Task LoadDataFromPaceManAsync()
     {
         if (ChoosenEvent == null) return;
 
-        Task.Run(LoadDataFromPaceManAsync);
-    }
-    private async Task LoadDataFromPaceManAsync()
-    {
         using HttpClient client = new();
 
         var requestData = new { uuids = ChoosenEvent!.WhiteList };
@@ -195,11 +195,11 @@ public class PlayerManagerViewModel : BaseViewModel
         }
 
         HttpContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync("https://paceman.gg/api/us/twitch", content);
+        HttpResponseMessage response = await client.PostAsync(Consts.PaceManTwitchAPI, content);
 
         if (!response.IsSuccessStatusCode) return;
         string responseContent = await response.Content.ReadAsStringAsync();
-        List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent)!.Where(x => !string.IsNullOrEmpty(x.liveAccount)).ToList();
+        List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent)/*!.Where(x => !string.IsNullOrEmpty(x.liveAccount)).ToList()*/;
         if (twitchNames == null) return;
 
         for (int i = 0; i < twitchNames.Count; i++)
@@ -220,10 +220,10 @@ public class PlayerManagerViewModel : BaseViewModel
                 var twitch = twitchNames[j];
                 if (player.UUID == twitch.uuid)
                 {
-                    player.TwitchName = twitch.liveAccount;
-                    player.Name = twitch.liveAccount;
+                    player.StreamData.Main = twitch.liveAccount ?? string.Empty;
                     player.PersonalBest = "Unk";
                     await player.CompleteData();
+                    player.Name = twitch.liveAccount ?? player.InGameName;
                     Tournament!.AddPlayer(player);
                     break;
                 }

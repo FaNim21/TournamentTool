@@ -295,3 +295,12 @@ public class PaceManUser
     [JsonPropertyName("liveAccount")]
     public string TwitchName { get; set; }
 }
+
+public struct PaceManStreamData
+{
+    [JsonPropertyName("twitchId")]
+    public string MainID { get; set; }
+
+    [JsonPropertyName("alt")]
+    public string AltID { get; set; }
+}

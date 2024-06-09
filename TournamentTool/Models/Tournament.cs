@@ -19,7 +19,6 @@ public enum DisplayedNameType
 
 public class Tournament : BaseViewModel, IRenameItem
 {
-
     public string Name { get; set; } = string.Empty;
 
     public ObservableCollection<Player> Players { get; set; } = [];
@@ -55,7 +54,17 @@ public class Tournament : BaseViewModel, IRenameItem
         }
     }
 
-    public bool IsUsingTwitchAPI { get; set; } = true;
+    private bool _isUsingTwitchAPI = true;
+    public bool IsUsingTwitchAPI
+    {
+        get => _isUsingTwitchAPI;
+        set
+        {
+            _isUsingTwitchAPI = value;
+            OnPropertyChanged(nameof(IsUsingTwitchAPI));
+        }
+    }
+
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
 
     public bool SetPovHeadsInBrowser { get; set; } = false;
@@ -256,7 +265,18 @@ public class Tournament : BaseViewModel, IRenameItem
     public bool IsNameDuplicate(string? twitchName)
     {
         if (string.IsNullOrEmpty(twitchName)) return false;
-        return Players.Any(player => player.TwitchName!.Equals(twitchName, StringComparison.OrdinalIgnoreCase));
+        int n = Players.Count;
+        for (int i = 0; i < n; i++)
+        {
+            var current = Players[i];
+            if (current.StreamData.Main.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (current.StreamData.Alt.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+        //return Players.Any(player => player.TwitchName!.Equals(twitchName, StringComparison.OrdinalIgnoreCase));
     }
 
     public Player? GetPlayerByTwitchName(string twitchName)
@@ -265,7 +285,7 @@ public class Tournament : BaseViewModel, IRenameItem
         for (int i = 0; i < n; i++)
         {
             var current = Players[i];
-            if (current.TwitchName!.Equals(twitchName))
+            if (current.StreamData.ExistName(twitchName))
                 return current;
         }
         return null;

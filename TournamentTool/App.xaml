@@ -8,9 +8,9 @@
     <Application.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                               TrueValue="Visible"
-                                              FalseValue="Hidden" />
+                                              FalseValue="Collapsed" />
         <converters:BoolToVisibilityConverter x:Key="ReverseBoolToVisibilityConverter"
-                                              TrueValue="Hidden"
+                                              TrueValue="Collapsed"
                                               FalseValue="Visible" />
         <converters:BoolReverseConverter x:Key="BoolReverseConverter" />
         <converters:EmptyStringConverter x:Key="EmptyStringConverter" />

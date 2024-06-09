@@ -17,7 +17,17 @@ public class EditPlayerCommand : BaseCommand
         if (parameter == null || PlayerManagerViewModel == null) return;
         if (parameter is not Player player) return;
 
+        Player newPlayer = new()
+        {
+            Id = player.Id,
+            Name = player.Name,
+            InGameName = player.InGameName,
+            PersonalBest = player.PersonalBest,
+        };
+        newPlayer.StreamData.Main = player.StreamData.Main ?? string.Empty;
+        newPlayer.StreamData.Alt = player.StreamData.Alt ?? string.Empty;
+
         PlayerManagerViewModel.IsEditing = true;
-        PlayerManagerViewModel.Player = player;
+        PlayerManagerViewModel.Player = newPlayer;
     }
 }

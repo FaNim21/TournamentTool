@@ -27,8 +27,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0"
-              Background="Transparent">
+        <Grid Grid.Column="0">
             <components:ButtonNormal Width="40"
                                      Height="40"
                                      ContentText="↩"
@@ -43,7 +42,7 @@
                        FontWeight="Bold"
                        Foreground="White"
                        Height="50"
-                       Width="280"
+                       Width="225"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Top"
                        TextAlignment="Center"
@@ -51,7 +50,7 @@
 
             <Grid Background="#2d2d2d"
                   Width="300"
-                  Height="290"
+                  Height="240"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Top"
                   Margin="0 60 0 0">
@@ -78,7 +77,8 @@
 
                 <StackPanel Margin="0 30 15 0">
                     <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center">
+                                HorizontalAlignment="Center"
+                                Margin="-2 10 0 0">
                         <Label Content=" Name: "
                                Foreground="White"
                                Height="18"
@@ -123,17 +123,34 @@
                                  Background="#9E9E9E" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center">
-                        <Label Content="Twitch: "
+                                HorizontalAlignment="Center"
+                                Margin="-35 10 0 0">
+                        <Label Content="Twitch Main: "
                                Foreground="White"
                                Height="18"
                                FontSize="16"
                                Padding="0"
-                               Margin="5 0 0 3" />
+                               Margin="0 0 0 3" />
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.TwitchName, Mode=TwoWay}"
+                                 Text="{Binding Player.StreamData.Main, Mode=TwoWay}"
+                                 Padding="0 2 0 0"
+                                 Background="#9E9E9E" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="-19 10 0 0">
+                        <Label Content="Twitch Alt: "
+                               Foreground="White"
+                               Height="18"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="0 0 0 3" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding Player.StreamData.Alt, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -150,7 +167,7 @@
 
             <Grid Background="#2d2d2d"
                   Width="350"
-                  Height="150"
+                  Height="225"
                   VerticalAlignment="Bottom">
                 <StackPanel Margin="10 5 10 90"
                             Orientation="Horizontal"
@@ -261,8 +278,15 @@
                                                Background="Transparent"
                                                TextAlignment="Center"
                                                Foreground="#8f8067 "
-                                               Text="{Binding TwitchName}"
+                                               Text="{Binding StreamData.Main}"
                                                Margin="0 2 0 2" />
+                                    <TextBlock FontSize="12"
+                                               VerticalAlignment="Bottom"
+                                               Background="Transparent"
+                                               TextAlignment="Center"
+                                               Foreground="#8f8067 "
+                                               Text="{Binding StreamData.Alt}"
+                                               Margin="0 0 0 2" />
                                 </StackPanel>
                             </Grid>
                         </Border>
