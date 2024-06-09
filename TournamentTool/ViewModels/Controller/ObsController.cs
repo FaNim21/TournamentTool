@@ -12,6 +12,7 @@ using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TwitchLib.Communication.Interfaces;
 
 namespace TournamentTool.ViewModels.Controller;
 
@@ -19,7 +20,7 @@ public class ObsController : BaseViewModel
 {
     public ControllerViewModel Controller { get; private set; }
 
-    public ObsClient Client { get; set; } = new();
+    public ObsClient Client { get; set; }
 
     public Brush? IsConnectedColor { get; set; }
 
@@ -48,6 +49,8 @@ public class ObsController : BaseViewModel
     public ObsController(ControllerViewModel controller)
     {
         Controller = controller;
+
+        Client = new() { RequestTimeout = 10000 };
 
         RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
         AddPovItemToOBSCommand = new RelayCommand(async () => { await CreateNestedSceneItem("PovSceneLOL"); });

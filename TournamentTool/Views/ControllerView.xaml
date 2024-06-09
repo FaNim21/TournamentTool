@@ -157,14 +157,23 @@
                                                      OnCommand="{Binding RefreshPOVsCommand}"
                                                      Margin="0 5 0 0" />
 
-                            <!--
-                            -->
-                            <components:ButtonNormal ContentText="Create Group Item"
+                            <!-- TO MOZE BARDZIEJ JAKO POV MANAGER JAKO VIEW ZASTEPUJACE KONTROLER DO TEGO ZEBY PRZERZEC SCENY W OBSIE i zarzadzac nimi
+                            <components:ButtonNormal ContentText="Create new POV"
                                                      FontSize="15"
                                                      Width="150"
                                                      Height="30"
                                                      OnCommand="{Binding ObsController.AddPovItemToOBSCommand}"
                                                      Margin="0 5 0 0" />
+                            -->
+
+                            <!-- TUTAJ BEDZIE ODPALANE OKNO Z KLIPAMI - czyli czas zrobienia klipa, czyj jest klip itp
+                            <components:ButtonNormal ContentText="Open Clip Manager"
+                                                     FontSize="15"
+                                                     Width="150"
+                                                     Height="30"
+                                                     OnCommand="{Binding .}"
+                                                     Margin="0 5 0 0" />
+                            -->
 
                             <!--
                             <components:ButtonNormal ContentText="clip first stream xd"
@@ -419,8 +428,8 @@
                              VirtualizingPanel.IsVirtualizing="True"
                              VirtualizingPanel.VirtualizationMode="Recycling"
                              AllowDrop="True"
-                             ItemsSource="{Binding GroupedPaceManPlayers}"
-                             SelectedItem="{Binding SelectedPaceManPlayer, Mode=TwoWay}"
+                             ItemsSource="{Binding PaceManService.GroupedPaceManPlayers}"
+                             SelectedItem="{Binding PaceManService.SelectedPaceManPlayer, Mode=TwoWay}"
                              SelectionChanged="List_SelectionChanged"
                              PreviewKeyDown="List_PreviewKeyDown"
                              PreviewMouseWheel="ListBox_PreviewMouseWheel">

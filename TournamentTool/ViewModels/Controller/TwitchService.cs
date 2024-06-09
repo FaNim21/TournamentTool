@@ -6,7 +6,6 @@ using System.Windows;
 using TournamentTool.Components.Controls;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using System.ComponentModel;
-using System.Configuration;
 using TournamentTool.Models;
 
 namespace TournamentTool.ViewModels.Controller;
@@ -98,7 +97,7 @@ public class TwitchService
         return response;
     }
 
-    public async Task ConnectTwitchAPIAsync() 
+    public async Task ConnectTwitchAPIAsync()
     {
         _twitchWorker = new() { WorkerSupportsCancellation = true };
         if (!Controller.Configuration.IsUsingTwitchAPI) return;

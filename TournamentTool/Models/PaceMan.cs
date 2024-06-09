@@ -193,6 +193,11 @@ public class PaceMan : BaseViewModel, IPlayer
         return Player != null;
     }
 
+    public bool IsLive()
+    {
+        return !string.IsNullOrEmpty(User.TwitchName);
+    }
+
     private void CheckForGoodPace(PaceSplitsList lastSplit)
     {
         if (Controller == null) return;

@@ -49,6 +49,20 @@ public class StreamData : BaseViewModel
     }
 
 
+    public void SetName(string name)
+    {
+        if (string.IsNullOrEmpty(name) || ExistName(name)) return;
+
+        if (IsMainEmpty())
+        {
+            Main = name;
+        }
+        else if (IsAltEmpty())
+        {
+            Alt = name;
+        }
+    }
+
     public bool ExistName(string name)
     {
         return Main.Equals(name, StringComparison.OrdinalIgnoreCase) || Alt.Equals(name, StringComparison.OrdinalIgnoreCase);
