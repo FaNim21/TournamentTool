@@ -17,6 +17,7 @@ public class TwitchService
     private readonly TwitchAPI _api;
 
     private BackgroundWorker? _twitchWorker;
+    private CancellationTokenSource? _cancellationTokenSource;
 
 
     public TwitchService(ControllerViewModel controllerViewModel)
@@ -100,7 +101,7 @@ public class TwitchService
     public async Task ConnectTwitchAPIAsync()
     {
         _twitchWorker = new() { WorkerSupportsCancellation = true };
-        if (!Controller.Configuration.IsUsingTwitchAPI) return;
+        _cancellationTokenSource = new();
 
         await AuthorizeAsync();
 
@@ -110,7 +111,9 @@ public class TwitchService
 
     private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
     {
-        while (!_twitchWorker!.CancellationPending)
+        var cancellationToken = _cancellationTokenSource!.Token;
+
+        while (!_twitchWorker!.CancellationPending && !cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -122,7 +125,12 @@ public class TwitchService
                 DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(60000));
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(60000), cancellationToken);
+            }
+            catch (TaskCanceledException) { break; }
         }
     }
     private async Task UpdateTwitchInformations()
@@ -202,6 +210,10 @@ public class TwitchService
             _twitchWorker?.CancelAsync();
         }
         catch { }
+        _cancellationTokenSource?.Cancel();
         _twitchWorker?.Dispose();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+        _twitchWorker = null;
     }
 }

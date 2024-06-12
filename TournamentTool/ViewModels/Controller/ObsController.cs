@@ -4,6 +4,8 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
+using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -12,7 +14,6 @@ using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
-using TwitchLib.Communication.Interfaces;
 
 namespace TournamentTool.ViewModels.Controller;
 
@@ -54,6 +55,20 @@ public class ObsController : BaseViewModel
 
         RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
         AddPovItemToOBSCommand = new RelayCommand(async () => { await CreateNestedSceneItem("PovSceneLOL"); });
+    }
+
+    public override void OnEnable(object? parameter)
+    {
+        Task.Factory.StartNew(async () =>
+        {
+            await Connect(Controller.Configuration.Password!, Controller.Configuration.Port);
+        });
+    }
+    public override bool OnDisable()
+    {
+        Task.Run(Disconnect);
+
+        return true;
     }
 
     public async Task Connect(string password, int port)

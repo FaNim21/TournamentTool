@@ -16,8 +16,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        labelVersion.Content = Consts.Version;
-
         if (Settings.Default.MainWindowLeft == -1 && Settings.Default.MainWindowTop == -1)
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
         else

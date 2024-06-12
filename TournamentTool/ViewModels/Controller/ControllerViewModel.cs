@@ -8,10 +8,8 @@ using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Controller;
 
-public class ControllerViewModel : BaseViewModel
+public class ControllerViewModel : SelectableViewModel
 {
-    private MainViewModel MainViewModel { get; set; }
-
     private readonly TwitchService _twitch;
 
     public HttpClient? WebServer { get; set; }
@@ -32,7 +30,7 @@ public class ControllerViewModel : BaseViewModel
     public ObsController ObsController { get; set; }
     public PaceManService PaceManService { get; set; }
 
-    public Tournament Configuration { get; private set; }
+    public Tournament Configuration { get; private set; } = new();
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -116,16 +114,13 @@ public class ControllerViewModel : BaseViewModel
     public ICommand RefreshPOVsCommand { get; set; }
 
 
-    public ControllerViewModel(MainViewModel mainViewModel)
+    public ControllerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        Configuration = mainViewModel.PresetManager.CurrentChosen!;
-        MainViewModel = mainViewModel;
-        GoBackCommand = new RelayCommand(GoBack);
-
         ObsController = new(this);
         PaceManService = new(this);
         _twitch = new(this);
 
+        GoBackCommand = new RelayCommand(GoBack);
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshPovs(); });
 
         /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
@@ -145,37 +140,33 @@ public class ControllerViewModel : BaseViewModel
         if (!Configuration.IsUsingTwitchAPI)
         {
             foreach (var player in Configuration.Players)
-                player.StreamData.LiveData.Update(new TwitchStreamData(), false);
+                player.StreamData.LiveData.Clear();
         }
 
         FilterItems();
 
         PaceManService.OnEnable(null);
+        ObsController.OnEnable(null);
 
+        if (!Configuration.IsUsingTwitchAPI) return;
         Task.Factory.StartNew(async () =>
         {
-            await ObsController.Connect(Configuration.Password!, Configuration.Port);
             await _twitch.ConnectTwitchAPIAsync();
         });
     }
     public override bool OnDisable()
     {
         PaceManService.OnDisable();
-
+        ObsController.OnDisable();
         _twitch?.Dispose();
-
-        for (int i = 0; i < Configuration.Players.Count; i++)
-        {
-            var current = Configuration.Players[i];
-            current.StreamData.LiveData.StatusLabelColor = null;
-        }
-
-        POVs.Clear();
-        FilteredPlayers!.Clear();
 
         Configuration.ClearFromController();
 
-        Task.Run(ObsController.Disconnect);
+        POVs.Clear();
+        FilteredPlayers!.Clear();
+        CurrentChosenPOV = null;
+        SelectedWhitelistPlayer = null;
+        CurrentChosenPlayer = null;
 
         return true;
     }
@@ -271,5 +262,10 @@ public class ControllerViewModel : BaseViewModel
     {
         _selectedWhitelistPlayer = null;
         OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+    }
+
+    public void SavePreset()
+    {
+        MainViewModel.SavePreset();
     }
 }

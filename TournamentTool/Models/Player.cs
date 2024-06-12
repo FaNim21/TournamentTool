@@ -124,7 +124,7 @@ public class TwitchStreamData : BaseViewModel
 
     public bool WasUpdated { get; set; } = false;
 
-
+    //??
     public void Update(TwitchStreamData data, bool isUsingTwitchApi = true)
     {
         WasUpdated = true;
@@ -178,7 +178,7 @@ public class TwitchStreamData : BaseViewModel
         Language = string.Empty;
         ThumbnailUrl = string.Empty;
         Status = "offline";
-        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(offlineColor); });
+        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(normalColor); });
         Update();
     }
 }
@@ -370,6 +370,8 @@ public class Player : BaseViewModel, IPlayer
     public void ClearFromController()
     {
         IsUsedInPov = false;
+
+        StreamData.LiveData.Clear();
     }
 
     public string GetDisplayName()

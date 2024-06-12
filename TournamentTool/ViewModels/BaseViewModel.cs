@@ -8,6 +8,11 @@ public class BaseViewModel : INotifyPropertyChanged, IDisposable
     public event PropertyChangedEventHandler? PropertyChanged;
 
 
+    public virtual void OnEnable(object? parameter) { }
+    public virtual bool OnDisable() { return true; }
+
+    public virtual void Dispose() { }
+
     protected void OnPropertyChanged(string propertyName)
     {
         if (Application.Current == null) return;
@@ -17,9 +22,4 @@ public class BaseViewModel : INotifyPropertyChanged, IDisposable
         else
             Application.Current.Dispatcher.Invoke(delegate { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); });
     }
-
-    public virtual void OnEnable(object? parameter) { }
-    public virtual bool OnDisable() { return true; }
-
-    public virtual void Dispose() { }
 }

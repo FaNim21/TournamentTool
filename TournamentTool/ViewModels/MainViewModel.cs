@@ -1,15 +1,18 @@
-﻿using TournamentTool.ViewModels.Controller;
+﻿using TournamentTool.Utils;
+using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    public List<BaseViewModel> baseViewModels = [];
+    public string VersionText { get; set; }
+
+    public List<SelectableViewModel> baseViewModels = [];
 
     public PresetManagerViewModel PresetManager { get; private set; }
 
-    private BaseViewModel? _selectedViewModel;
-    public BaseViewModel? SelectedViewModel
+    private SelectableViewModel? _selectedViewModel;
+    public SelectableViewModel? SelectedViewModel
     {
         get => _selectedViewModel;
         set
@@ -22,17 +25,19 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel()
     {
+        VersionText = Consts.Version;
+        OnPropertyChanged(nameof(VersionText));
+
         PresetManager = new(this);
 
         baseViewModels.Add(PresetManager);
-        baseViewModels.Add(new PlayerManagerViewModel(this));
         baseViewModels.Add(new ControllerViewModel(this));
 
         SelectedViewModel = PresetManager;
         SelectedViewModel.OnEnable(null);
     }
 
-    public T? GetViewModel<T>() where T : BaseViewModel
+    public T? GetViewModel<T>() where T : SelectableViewModel
     {
         for (int i = 0; i < baseViewModels.Count; i++)
         {
@@ -47,21 +52,32 @@ public class MainViewModel : BaseViewModel
         return null;
     }
 
-    public void Open<T>() where T : BaseViewModel
+    public void Open<T>() where T : SelectableViewModel
     {
-        for (int i = 0; i < baseViewModels.Count; i++)
-        {
-            var current = baseViewModels[i];
+        if (SelectedViewModel != null && typeof(T) == SelectedViewModel.GetType()) return;
+        if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
 
-            if (current is T viewModel)
+        object? parameter = SelectedViewModel?.parameterForNextSelectable;
+
+        T? viewModel = GetViewModel<T>();
+        if (viewModel == null)
+        {
+            viewModel = (T)Activator.CreateInstance(typeof(T), this)!;
+            baseViewModels.Add(viewModel);
+        }
+
+        if (SelectedViewModel != null && SelectedViewModel.CanBeDestroyed)
+        {
+            baseViewModels.Remove(SelectedViewModel);
+
+            if (SelectedViewModel is IDisposable disposableViewModel)
             {
-                if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
-                SelectedViewModel = viewModel;
-                break;
+                //disposableViewModel.Dispose();
             }
         }
 
-        SelectedViewModel?.OnEnable(PresetManager.CurrentChosen);
+        SelectedViewModel = viewModel;
+        SelectedViewModel?.OnEnable(parameter);
     }
 
     public void SavePreset()

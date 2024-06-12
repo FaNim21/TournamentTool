@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
-using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
@@ -9,13 +8,11 @@ using TournamentTool.Models;
 using TournamentTool.Properties;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
-using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
 
-public class PresetManagerViewModel : BaseViewModel
+public class PresetManagerViewModel : SelectableViewModel
 {
-    public MainViewModel MainViewModel { get; set; }
     public ObservableCollection<Tournament> Presets { get; set; } = [];
 
     private Tournament? _currentChosen;
@@ -72,11 +69,9 @@ public class PresetManagerViewModel : BaseViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(MainViewModel mainViewModel)
+    public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        MainViewModel = mainViewModel;
-
-        //TODO: 0 Zrobic zabezpieczenia do tego zeby nie wychodzic bez zapisywania
+        CanBeDestroyed = true;
 
         if (!Directory.Exists(Consts.PresetsPath))
             Directory.CreateDirectory(Consts.PresetsPath);
@@ -104,7 +99,10 @@ public class PresetManagerViewModel : BaseViewModel
     }
     public override bool OnDisable()
     {
+        SetParameter(CurrentChosen);
         SavePreset();
+
+        Presets.Clear();
         return true;
     }
 

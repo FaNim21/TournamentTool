@@ -11,12 +11,10 @@ using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
 
-public class PlayerManagerViewModel : BaseViewModel
+public class PlayerManagerViewModel : SelectableViewModel
 {
-    public MainViewModel MainViewModel { get; set; }
-
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-    public Tournament Tournament { get; set; }
+    public Tournament? Tournament { get; set; } = new();
 
     private Player? _player;
     public Player? Player
@@ -77,11 +75,9 @@ public class PlayerManagerViewModel : BaseViewModel
     public ICommand GoBackCommand { get; set; }
 
 
-    public PlayerManagerViewModel(MainViewModel mainViewModel)
+    public PlayerManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        Tournament = mainViewModel.PresetManager.CurrentChosen!;
-        MainViewModel = mainViewModel;
-        GoBackCommand = new RelayCommand(GoBack);
+        CanBeDestroyed = true;
 
         SavePlayerCommand = new RelayCommand(SavePlayer);
 
@@ -93,6 +89,8 @@ public class PlayerManagerViewModel : BaseViewModel
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
+
+        GoBackCommand = new RelayCommand(GoBack);
     }
 
     public override void OnEnable(object? parameter)
@@ -122,8 +120,10 @@ public class PlayerManagerViewModel : BaseViewModel
             return false;
         }
 
+        Tournament = null;
         Player = null;
-        IsEditing = false;
+        ChoosenEvent = null;
+
         PaceManEvents.Clear();
 
         MainViewModel.SavePreset();
@@ -199,7 +199,7 @@ public class PlayerManagerViewModel : BaseViewModel
 
         if (!response.IsSuccessStatusCode) return;
         string responseContent = await response.Content.ReadAsStringAsync();
-        List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent)/*!.Where(x => !string.IsNullOrEmpty(x.liveAccount)).ToList()*/;
+        List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent);
         if (twitchNames == null) return;
 
         for (int i = 0; i < twitchNames.Count; i++)

@@ -6,7 +6,6 @@ using TournamentTool.Models;
 using TournamentTool.Utils;
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using System.Diagnostics;
 
 namespace TournamentTool.ViewModels.Controller;
 
@@ -15,6 +14,7 @@ public class PaceManService : BaseViewModel
     private ControllerViewModel Controller { get; set; }
 
     private BackgroundWorker? _paceManWorker;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     private PaceMan? _selectedPaceManPlayer;
     public PaceMan? SelectedPaceManPlayer
@@ -44,7 +44,6 @@ public class PaceManService : BaseViewModel
     public ICollectionView? GroupedPaceManPlayers { get; set; }
 
 
-    //TODO: 0 Zrobic aktualizowanie nazw twitch dla whitelisty jezeli osoba z whitelisty bez nazwy twitch jest w pacemanie
     public PaceManService(ControllerViewModel controllerViewModel)
     {
         Controller = controllerViewModel;
@@ -56,6 +55,7 @@ public class PaceManService : BaseViewModel
 
         if (Controller.Configuration.IsUsingPaceMan)
         {
+            _cancellationTokenSource = new();
             _paceManWorker = new() { WorkerSupportsCancellation = true };
             _paceManWorker.DoWork += PaceManUpdate;
             _paceManWorker.RunWorkerAsync();
@@ -64,12 +64,19 @@ public class PaceManService : BaseViewModel
     public override bool OnDisable()
     {
         _paceManWorker?.CancelAsync();
+        _cancellationTokenSource?.Cancel();
         _paceManWorker?.Dispose();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+        _paceManWorker = null;
 
         for (int i = 0; i < PaceManPlayers.Count; i++)
             PaceManPlayers[i].Player = null;
 
         PaceManPlayers.Clear();
+
+        SelectedPaceManPlayer = null;
+        GroupedPaceManPlayers = null;
 
         return true;
     }
@@ -87,7 +94,9 @@ public class PaceManService : BaseViewModel
 
     private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
     {
-        while (!_paceManWorker!.CancellationPending)
+        var cancellationToken = _cancellationTokenSource!.Token;
+
+        while (!_paceManWorker!.CancellationPending && !cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -97,7 +106,12 @@ public class PaceManService : BaseViewModel
             {
                 DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(Controller.Configuration.PaceManRefreshRateMiliseconds));
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(Controller.Configuration.PaceManRefreshRateMiliseconds), cancellationToken);
+            }
+            catch (TaskCanceledException) { break; }
         }
     }
     private async Task RefreshPaceManAsync()
@@ -150,33 +164,34 @@ public class PaceManService : BaseViewModel
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
 
-        OnPropertyChanged(nameof(PaceManPlayers));
-        RefreshPaceManGroups();
+        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
     }
 
     public void AddPaceMan(PaceMan paceMan)
     {
-        Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceMan); });
+        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceMan); });
 
         int n = Controller.Configuration.Players.Count;
+        bool updatedPlayer = false;
         for (int i = 0; i < n; i++)
         {
             var player = Controller.Configuration.Players[i];
 
             if (player.InGameName!.Equals(paceMan.Nickname))
             {
+                updatedPlayer = true;
                 player.StreamData.SetName(paceMan.User.TwitchName);
             }
+        }
+
+        if (updatedPlayer)
+        {
+            Controller.SavePreset();
         }
     }
     public void RemovePaceMan(PaceMan paceMan)
     {
-        Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
-    }
-
-    private void RefreshPaceManGroups()
-    {
-        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
+        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
     }
 
     public void ClearSelectedPaceManPlayer()
