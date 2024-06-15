@@ -6,101 +6,142 @@
         xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:vm="clr-namespace:TournamentTool.ViewModels"
         xmlns:vmController="clr-namespace:TournamentTool.ViewModels.Controller"
+        xmlns:components="clr-namespace:TournamentTool.Components.Controls"
         xmlns:views="clr-namespace:TournamentTool.Views"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
-        x:Name="window"
         Closed="OnClosed"
         Width="1024"
-        Height="601"
+        Height="605"
         WindowStyle="None"
         Title="Tournament Tool"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
         MinWidth="1080"
         MinHeight="601"
+        MaxHeight="{Binding Source={x:Static SystemParameters.MaximizedPrimaryScreenHeight}}"
         Background="#383A3f">
+    <WindowChrome.WindowChrome>
+        <WindowChrome GlassFrameThickness="0"
+                      ResizeBorderThickness="5"
+                      CaptionHeight="24"
+                      CornerRadius="0" />
+    </WindowChrome.WindowChrome>
     <!--
     MinWidth="800"
     MinHeight="450"
     -->
-
     <Window.Resources>
-        <Style x:Key="RectBorderStyle"
-               TargetType="Rectangle">
-            <Setter Property="Focusable"
-                    Value="False" />
-            <Setter Property="Fill"
-                    Value="Transparent" />
-            <Setter Property="Tag"
-                    Value="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
-            <EventSetter Event="MouseLeftButtonDown"
-                         Handler="Resize_Init" />
-            <EventSetter Event="MouseLeftButtonUp"
-                         Handler="Resize_End" />
-            <EventSetter Event="MouseMove"
-                         Handler="Resizeing_Form" />
+        <Style TargetType="{x:Type Panel}"
+               x:Key="WindowMainPanelStyle">
+            <Setter Property="Margin"
+                    Value="0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=WindowState}"
+                             Value="Maximized">
+                    <Setter Property="Margin"
+                            Value="7" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
-    <Grid>
+
+    <Grid Style="{StaticResource WindowMainPanelStyle}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
+            <RowDefinition Height="29" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!--
-        <Popup x:Name="popup"
-               Placement="MousePoint">
-            <Border Background="DarkGray"
-                    CornerRadius="5"
-                    Padding="5">
-                <TextBlock Text="Text Copied to Clipboard!"
-                           Foreground="Black" />
-            </Border>
-        </Popup>
-        -->
-
         <!--HEADER-->
-        <Grid Background="#000D14"
-              Grid.ColumnSpan="3"
-              MouseDown="HeaderMouseDown">
-            <Grid>
-                <Label Content="TournamentTool by FaNim"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Left"
-                       FontSize="14"
-                       Margin="5 -2 0 0"
-                       Foreground="LightCyan" />
-                <Label Content="{Binding VersionText}"
-                       FontWeight="Bold"
-                       FontSize="10"
-                       HorizontalAlignment="Left"
-                       Margin="185 2 0 0"
-                       Foreground="LightCyan" />
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  Background="#000D14">
+                <CheckBox WindowChrome.IsHitTestVisibleInChrome="True"
+                          IsChecked="{Binding IsHamburgerMenuOpen}"
+                          HorizontalAlignment="Left">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <Grid x:Name="RootElement"
+                                              Width="30"
+                                              Height="30"
+                                              Background="#000D14">
+                                            <Border Width="20"
+                                                    Height="22"
+                                                    CornerRadius="5">
+                                                <Viewbox>
+                                                    <Path Fill="White"
+                                                          Stretch="Uniform"
+                                                          Data="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 Z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 Z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 Z" />
+                                                </Viewbox>
+                                            </Border>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver"
+                                                     Value="True">
+                                                <Setter TargetName="RootElement"
+                                                        Property="Background"
+                                                        Value="#3e3e3e" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked"
+                                                     Value="True">
+                                                <Setter TargetName="RootElement"
+                                                        Property="Background"
+                                                        Value="#252525" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+            </Grid>
+
+            <Grid Grid.Column="1"
+                  Background="#000D14">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="TournamentTool by FaNim"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Left"
+                           FontSize="14"
+                           Margin="0 0 0 0"
+                           Foreground="LightCyan" />
+                    <Label Content="{Binding VersionText}"
+                           FontWeight="Bold"
+                           FontSize="10"
+                           HorizontalAlignment="Left"
+                           Margin="-5 4 0 0"
+                           Foreground="LightCyan" />
+                </StackPanel>
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right">
 
                     <local:ButtonTaskbar Width="30"
-                                         Height="25"
+                                         Height="30"
                                          FontSize="20"
+                                         WindowChrome.IsHitTestVisibleInChrome="True"
                                          HorizontalAlignment="Right"
                                          ColorBrush="#5a5d65"
                                          ContentText="-"
+                                         Padding="2"
                                          Click="MinimizeButtonsClick" />
-                    <local:ButtonTaskbar x:Name="MaximizeButton"
-                                         Width="30"
-                                         Height="25"
-                                         FontSize="20"
-                                         HorizontalAlignment="Right"
-                                         ColorBrush="#5a5d65"
-                                         ContentText="🗖"
-                                         Click="ChangeWindowMaximizeStateClick" />
                     <local:ButtonTaskbar Width="30"
-                                         Height="25"
+                                         Height="30"
                                          FontSize="20"
+                                         WindowChrome.IsHitTestVisibleInChrome="True"
                                          HorizontalAlignment="Right"
                                          ColorBrush="#ff000f"
                                          ContentText="X"
+                                         Padding="1"
                                          Click="ExitButtonClick" />
                 </StackPanel>
             </Grid>
@@ -122,58 +163,29 @@
             </ContentControl.Resources>
         </ContentControl>
 
-        <!--RESIZE-->
-        <Grid x:Name="ResizableRects"
-              Grid.RowSpan="2">
-            <Rectangle x:Name="leftSizeGrip"
-                       Width="5"
-                       HorizontalAlignment="Left"
-                       Cursor="SizeWE"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle x:Name="rightSizeGrip"
-                       Width="5"
-                       HorizontalAlignment="Right"
-                       Cursor="SizeWE"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle x:Name="topSizeGrip"
-                       Height="5"
-                       VerticalAlignment="Top"
-                       Cursor="SizeNS"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle x:Name="bottomSizeGrip"
-                       Height="5"
-                       VerticalAlignment="Bottom"
-                       Cursor="SizeNS"
-                       Style="{StaticResource RectBorderStyle}" />
-            <!--  Corners  -->
-            <Rectangle Name="topLeftSizeGrip"
-                       Width="5"
-                       Height="5"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Top"
-                       Cursor="SizeNWSE"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle Name="bottomRightSizeGrip"
-                       Width="5"
-                       Height="5"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Bottom"
-                       Cursor="SizeNWSE"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle Name="topRightSizeGrip"
-                       Width="5"
-                       Height="5"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Top"
-                       Cursor="SizeNESW"
-                       Style="{StaticResource RectBorderStyle}" />
-            <Rectangle Name="bottomLeftSizeGrip"
-                       Width="5"
-                       Height="5"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Cursor="SizeNESW"
-                       Style="{StaticResource RectBorderStyle}" />
+        <components:HamburgerMenu Grid.Row="1"
+                                  IsOpen="{Binding IsHamburgerMenuOpen}">
+            <components:HamburgerMenu.HamburgerContent>
+                <TextBlock Text="fghjdhgfghf"
+                           Foreground="White"
+                           FontSize="18"
+                           Padding="10" />
+            </components:HamburgerMenu.HamburgerContent>
+        </components:HamburgerMenu>
+
+        <!--
+        <Grid Grid.Row="1">
+            <Border Background="Red"
+                    CornerRadius="999"
+                    Width="19"
+                    Height="19"
+                    Padding="1">
+                <Label Foreground="White"
+                       FontWeight="Bold"
+                       Padding="0"
+                       FontSize="12">12</Label>
+            </Border>
         </Grid>
+        -->
     </Grid>
 </Window>

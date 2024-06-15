@@ -1,15 +1,16 @@
 ﻿<UserControl x:Class="TournamentTool.Components.Buttons.ButtonPresets"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
     <Button Name="ConsoleButton"
             FontWeight="Medium"
-            Command="{Binding OnConsoleCommand, RelativeSource={RelativeSource AncestorType={x:Type local:ButtonPresets}}}"
-            CommandParameter="{Binding OnConsoleCommandParameter, RelativeSource={RelativeSource AncestorType={x:Type local:ButtonPresets}}}">
+            Command="{Binding OnConsoleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            CommandParameter="{Binding OnConsoleCommandParameter, RelativeSource={RelativeSource AncestorType=UserControl}}">
         <Button.Style>
             <Style TargetType="{x:Type Button}">
                 <Setter Property="Background"
@@ -48,8 +49,8 @@
             <TextBlock IsHitTestVisible="False"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Text="{Binding ButtonText, RelativeSource={RelativeSource AncestorType={x:Type local:ButtonPresets}}}"
-                       Margin="0 -12 0 0"></TextBlock>
+                       Text="{Binding ButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       Margin="0 -12 0 0" />
         </Button.Content>
 
         <Button.Template>

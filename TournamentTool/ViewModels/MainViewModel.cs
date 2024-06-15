@@ -1,4 +1,6 @@
-﻿using TournamentTool.Utils;
+﻿using System.Windows.Input;
+using TournamentTool.Commands;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.ViewModels;
@@ -22,9 +24,24 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    private bool _isHamburgerMenuOpen = false;
+    public bool IsHamburgerMenuOpen
+    {
+        get => _isHamburgerMenuOpen;
+        set
+        {
+            _isHamburgerMenuOpen = value;
+            OnPropertyChanged(nameof(IsHamburgerMenuOpen));
+        }
+    }
+
+    public ICommand OnHamburegerClick { get; set; }
+
 
     public MainViewModel()
     {
+        OnHamburegerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
+
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
 

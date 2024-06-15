@@ -38,22 +38,18 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0"
-                  Background="#000d14">
+                  Margin="0 0 0 0"
+                  Background="#2a2a2a">
                 <TextBlock FontSize="28"
                            Height="40"
                            HorizontalAlignment="Center">
-                    <Run Foreground="DarkGray"
-                         Text="Current Preset: " />
                     <Run Foreground="White"
+                         FontWeight="Thin"
+                         Text="Current Preset: " />
+                    <Run Foreground="AntiqueWhite"
+                         FontWeight="SemiBold"
                          Text="{Binding CurrentChosen.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
-
-                <Line X1="0"
-                      X2="600"
-                      Y1="50"
-                      Y2="50"
-                      Stroke="#000D14"
-                      StrokeThickness="5" />
             </Grid>
 
             <ScrollViewer Grid.Row="1">

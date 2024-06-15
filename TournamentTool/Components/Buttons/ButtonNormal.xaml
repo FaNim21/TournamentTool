@@ -4,16 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             x:Name="NormalButton"
              d:DesignHeight="25"
              d:DesignWidth="100">
     <Button Name="button"
             Click="ButtonClick"
             FontWeight="Medium"
             Foreground="White"
-            Content="{Binding ContentText, ElementName=NormalButton}"
-            Command="{Binding OnCommand, ElementName=NormalButton}"
-            CommandParameter="{Binding OnCommandParameter, ElementName=NormalButton}">
+            Content="{Binding ContentText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Command="{Binding OnCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            CommandParameter="{Binding OnCommandParameter, RelativeSource={RelativeSource AncestorType=UserControl}}">
         <Button.Style>
             <Style TargetType="Button">
                 <Setter Property="Background"
@@ -48,7 +47,7 @@
                         CornerRadius="2">
                     <ContentPresenter VerticalAlignment="Center"
                                       HorizontalAlignment="Center"
-                                      Margin="{Binding ContentMargin, ElementName=NormalButton}" />
+                                      Margin="{Binding ContentMargin, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                 </Border>
             </ControlTemplate>
         </Button.Template>
