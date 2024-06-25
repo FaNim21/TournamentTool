@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Properties;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool;
@@ -41,6 +43,11 @@ public partial class MainWindow : Window
         Close();
     }
 
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        InputController.Instance.Cleanup();
+        base.OnClosing(e);
+    }
     private void OnClosed(object sender, EventArgs e)
     {
         Settings.Default.MainWindowLeft = Left;

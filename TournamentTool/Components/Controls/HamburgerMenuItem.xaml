@@ -1,0 +1,57 @@
+﻿<RadioButton x:Class="TournamentTool.Components.Controls.HamburgerMenuItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:TournamentTool.Components.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <RadioButton.Resources>
+        <Style TargetType="{x:Type local:HamburgerMenuItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:HamburgerMenuItem}">
+                        <Border Padding="20 15"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0">
+                            <TextBlock Text="{TemplateBinding Text}"
+                                       Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <!--
+            Foreground="#bdbdbd"
+                                           FontWeight="SemiBold"
+                                           FontSize="16"
+            Background="#252500"
+            -->
+
+            <Setter Property="Foreground"
+                    Value="#bdbdbd" />
+            <Setter Property="Background"
+                    Value="#252525" />
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+            <Setter Property="FontSize"
+                    Value="20" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="#3583af" />
+                    <Setter Property="Background"
+                            Value="#3d3d3d" />
+                </Trigger>
+                <Trigger Property="IsChecked"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="#3583af" />
+                    <Setter Property="Background"
+                            Value="#3d3d3d" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </RadioButton.Resources>
+</RadioButton>

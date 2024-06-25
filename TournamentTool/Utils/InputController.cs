@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 
-namespace MultiOpener.Utils;
+namespace TournamentTool.Utils;
 
 public class Hotkey
 {

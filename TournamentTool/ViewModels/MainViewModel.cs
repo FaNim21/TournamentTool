@@ -36,11 +36,13 @@ public class MainViewModel : BaseViewModel
     }
 
     public ICommand OnHamburegerClick { get; set; }
+    public ICommand SelectViewModelCommand { get; set; }
 
 
     public MainViewModel()
     {
         OnHamburegerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
+        SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
 
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
@@ -89,12 +91,35 @@ public class MainViewModel : BaseViewModel
 
             if (SelectedViewModel is IDisposable disposableViewModel)
             {
-                //disposableViewModel.Dispose();
+                disposableViewModel.Dispose();
             }
         }
 
         SelectedViewModel = viewModel;
         SelectedViewModel?.OnEnable(parameter);
+        IsHamburgerMenuOpen = false;
+    }
+
+    public void SelectViewModel(string viewModelName)
+    {
+        switch (viewModelName)
+        {
+            case "Presets":
+                Open<PresetManagerViewModel>();
+                break;
+            case "Whitelist":
+                Open<PlayerManagerViewModel>();
+                break;
+            case "Controller":
+                Open<ControllerViewModel>();
+                break;
+            case "Updates":
+                //SelectedViewModel = new UpdatesViewModel();
+                break;
+            case "Settings":
+                //SelectedViewModel = new SettingsViewModel();
+                break;
+        }
     }
 
     public void SavePreset()

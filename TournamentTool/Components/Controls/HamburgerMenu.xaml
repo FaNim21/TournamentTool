@@ -21,7 +21,7 @@
                             </Border>
 
                             <Border HorizontalAlignment="Left"
-                                    Width="225"
+                                    Width="200"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}">
                                 <Grid Background="#252525">

@@ -166,10 +166,52 @@
         <components:HamburgerMenu Grid.Row="1"
                                   IsOpen="{Binding IsHamburgerMenuOpen}">
             <components:HamburgerMenu.HamburgerContent>
-                <TextBlock Text="fghjdhgfghf"
-                           Foreground="White"
-                           FontSize="18"
-                           Padding="10" />
+                <Grid>
+                    <StackPanel>
+                        <components:HamburgerMenuItem Text="Presets"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Presets"
+                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PresetManagerViewModel}}"
+                                                      GroupName="MenuItem" />
+                        <components:HamburgerMenuItem Text="Whitelist"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Whitelist"
+                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PlayerManagerViewModel}}"
+                                                      GroupName="MenuItem" />
+                        <components:HamburgerMenuItem Text="Controller"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Controller"
+                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vmController:ControllerViewModel}}"
+                                                      GroupName="MenuItem" />
+                    </StackPanel>
+
+                    <StackPanel VerticalAlignment="Bottom">
+                        <Grid>
+                            <components:HamburgerMenuItem Text="Updates"
+                                                          Command="{Binding SelectViewModelCommand}"
+                                                          CommandParameter="Updates"
+                                                          GroupName="MenuItem" />
+                            <Border Visibility="Hidden"
+                                    Background="Red"
+                                    CornerRadius="10"
+                                    Width="19"
+                                    Height="19"
+                                    Padding="1"
+                                    Margin="35 5 0 0">
+                                <Label Foreground="White"
+                                       FontWeight="Bold"
+                                       Padding="0"
+                                       Content="!"
+                                       FontSize="18"
+                                       Margin="5 -5" />
+                            </Border>
+                        </Grid>
+                        <components:HamburgerMenuItem Text="Settings"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Settings"
+                                                      GroupName="MenuItem" />
+                    </StackPanel>
+                </Grid>
             </components:HamburgerMenu.HamburgerContent>
         </components:HamburgerMenu>
 
