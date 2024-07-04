@@ -1,4 +1,6 @@
-﻿namespace TournamentTool.ViewModels;
+﻿using TournamentTool.Models;
+
+namespace TournamentTool.ViewModels;
 
 public class SelectableViewModel : BaseViewModel
 {
@@ -11,6 +13,11 @@ public class SelectableViewModel : BaseViewModel
     public SelectableViewModel(MainViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
+    }
+
+    public virtual bool CanEnable(Tournament tournament)
+    {
+        return true;
     }
 
     public void SetParameter(object? parameter)

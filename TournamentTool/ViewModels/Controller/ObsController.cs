@@ -4,8 +4,6 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
-using System.Configuration;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -22,6 +20,7 @@ public class ObsController : BaseViewModel
     public ControllerViewModel Controller { get; private set; }
 
     public ObsClient Client { get; set; }
+    private CancellationTokenSource _cancellationTokenSource;
 
     public Brush? IsConnectedColor { get; set; }
 
@@ -59,10 +58,11 @@ public class ObsController : BaseViewModel
 
     public override void OnEnable(object? parameter)
     {
+        _cancellationTokenSource = new();
         Task.Factory.StartNew(async () =>
         {
             await Connect(Controller.Configuration.Password!, Controller.Configuration.Port);
-        });
+        }, _cancellationTokenSource.Token);
     }
     public override bool OnDisable()
     {
@@ -87,9 +87,17 @@ public class ObsController : BaseViewModel
             {
                 while (Client.ConnectionState != ConnectionState.Connected && timeoutCount <= timeoutChecks)
                 {
-                    await Task.Delay(100);
+                    try
+                    {
+                        await Task.Delay(100, _cancellationTokenSource.Token);
+                    }
+                    catch { }
+
                     timeoutCount++;
                 }
+
+                if (timeoutCount > timeoutChecks)
+                    return;
 
                 await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
 
@@ -127,6 +135,9 @@ public class ObsController : BaseViewModel
     public async Task Disconnect()
     {
         if (!IsConnectedToWebSocket) return;
+
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
 
         Client.Disconnect();
         Client.Dispose();

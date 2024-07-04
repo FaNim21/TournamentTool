@@ -28,15 +28,6 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            <components:ButtonNormal Width="40"
-                                     Height="40"
-                                     ContentText="↩"
-                                     FontSize="28"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     FontWeight="SemiBold"
-                                     OnCommand="{Binding GoBackCommand}"
-                                     Margin="10" />
             <TextBlock Text="WHITELIST"
                        FontSize="38"
                        FontWeight="Bold"

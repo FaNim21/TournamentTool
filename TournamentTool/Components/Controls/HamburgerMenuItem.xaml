@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:TournamentTool.Components.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450"
-             d:DesignWidth="800">
+             d:DesignWidth="800"
+             PreviewMouseLeftButtonDown="HamburgerMenuItem_PreviewMouseLeftButtonDown">
     <RadioButton.Resources>
         <Style TargetType="{x:Type local:HamburgerMenuItem}">
             <Setter Property="Template">
@@ -21,12 +22,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <!--
-            Foreground="#bdbdbd"
-                                           FontWeight="SemiBold"
-                                           FontSize="16"
-            Background="#252500"
-            -->
 
             <Setter Property="Foreground"
                     Value="#bdbdbd" />

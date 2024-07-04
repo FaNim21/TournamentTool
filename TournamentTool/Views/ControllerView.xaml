@@ -190,15 +190,6 @@
                                        VerticalAlignment="Center" />
                             -->
                         </StackPanel>
-
-                        <components:ButtonNormal ContentText="Leave"
-                                                 FontSize="15"
-                                                 Width="150"
-                                                 Height="30"
-                                                 FontWeight="SemiBold"
-                                                 VerticalAlignment="Bottom"
-                                                 OnCommand="{Binding GoBackCommand}"
-                                                 Margin="0 5" />
                     </Grid>
 
                     <Grid Grid.Column="1">

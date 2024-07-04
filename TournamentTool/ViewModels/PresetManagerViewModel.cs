@@ -5,7 +5,6 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Models;
-using TournamentTool.Properties;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
 
@@ -25,8 +24,8 @@ public class PresetManagerViewModel : SelectableViewModel
             if (_currentChosen != null)
             {
                 _currentChosen.UpdatePlayers();
-                Settings.Default.LastOpenedPresetName = _currentChosen!.Name;
-                Settings.Default.Save();
+                Properties.Settings.Default.LastOpenedPresetName = _currentChosen!.Name;
+                Properties.Settings.Default.Save();
             }
 
             IsPresetOpened = _currentChosen != null;
@@ -93,22 +92,23 @@ public class PresetManagerViewModel : SelectableViewModel
         LoadCurrentPreset();
     }
 
+    public override bool CanEnable(Tournament tournament)
+    {
+        return true;
+    }
     public override void OnEnable(object? parameter)
     {
 
     }
     public override bool OnDisable()
     {
-        SetParameter(CurrentChosen);
         SavePreset();
-
-        Presets.Clear();
         return true;
     }
 
     private void LoadCurrentPreset()
     {
-        string lastOpened = Settings.Default.LastOpenedPresetName;
+        string lastOpened = Properties.Settings.Default.LastOpenedPresetName;
         if (string.IsNullOrEmpty(lastOpened)) return;
 
         for (int i = 0; i < Presets.Count; i++)

@@ -110,7 +110,6 @@ public class ControllerViewModel : SelectableViewModel
         }
     }
 
-    public ICommand GoBackCommand { get; set; }
     public ICommand RefreshPOVsCommand { get; set; }
 
 
@@ -120,20 +119,18 @@ public class ControllerViewModel : SelectableViewModel
         PaceManService = new(this);
         _twitch = new(this);
 
-        GoBackCommand = new RelayCommand(GoBack);
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshPovs(); });
-
-        /*Google.Apis.YouTube.v3.LiveStreamsResource.ListRequest
-        Google.Apis.Auth.OAuth2.ExternalAccountCredential*/
     }
 
+    public override bool CanEnable(Tournament tournament)
+    {
+        if (tournament is null) return false;
+
+        Configuration = tournament;
+        return true;
+    }
     public override void OnEnable(object? parameter)
     {
-        if (parameter != null && parameter is Tournament tournament)
-        {
-            Configuration = tournament;
-        }
-
         foreach (var player in Configuration.Players)
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
 
@@ -158,7 +155,7 @@ public class ControllerViewModel : SelectableViewModel
     {
         PaceManService.OnDisable();
         ObsController.OnDisable();
-        _twitch?.Dispose();
+        _twitch?.OnDisable();
 
         Configuration.ClearFromController();
 
@@ -251,11 +248,6 @@ public class ControllerViewModel : SelectableViewModel
         PaceManService.ClearSelectedPaceManPlayer();
         ClearSelectedWhitelistPlayer();
         if (ClearAll) CurrentChosenPOV = null;
-    }
-
-    public void GoBack()
-    {
-        MainViewModel.Open<PresetManagerViewModel>();
     }
 
     public void ClearSelectedWhitelistPlayer()

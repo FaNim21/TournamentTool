@@ -105,6 +105,7 @@ public class TwitchService
 
         await AuthorizeAsync();
 
+        if (_twitchWorker == null) return;
         _twitchWorker.DoWork += TwitchUpdate;
         _twitchWorker.RunWorkerAsync();
     }
@@ -203,7 +204,7 @@ public class TwitchService
         notLivePlayers.Clear();
     }
 
-    public void Dispose()
+    public void OnDisable()
     {
         try
         {

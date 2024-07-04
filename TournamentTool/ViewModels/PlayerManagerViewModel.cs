@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -93,13 +94,15 @@ public class PlayerManagerViewModel : SelectableViewModel
         GoBackCommand = new RelayCommand(GoBack);
     }
 
+    public override bool CanEnable(Tournament tournament)
+    {
+        if (tournament is null) return false;
+
+        Tournament = tournament;
+        return true;
+    }
     public override void OnEnable(object? parameter)
     {
-        if (parameter != null && parameter is Tournament tournament)
-        {
-            Tournament = tournament;
-        }
-
         Player = new();
 
         Task.Run(async () =>

@@ -27,10 +27,6 @@
                       CaptionHeight="24"
                       CornerRadius="0" />
     </WindowChrome.WindowChrome>
-    <!--
-    MinWidth="800"
-    MinHeight="450"
-    -->
     <Window.Resources>
         <Style TargetType="{x:Type Panel}"
                x:Key="WindowMainPanelStyle">

@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
 
@@ -12,6 +13,8 @@ public class MainViewModel : BaseViewModel
     public List<SelectableViewModel> baseViewModels = [];
 
     public PresetManagerViewModel PresetManager { get; private set; }
+    public Tournament? Configuration { get => PresetManager?.CurrentChosen; }
+
 
     private SelectableViewModel? _selectedViewModel;
     public SelectableViewModel? SelectedViewModel
@@ -30,6 +33,7 @@ public class MainViewModel : BaseViewModel
         get => _isHamburgerMenuOpen;
         set
         {
+            if (_isHamburgerMenuOpen == value) return;
             _isHamburgerMenuOpen = value;
             OnPropertyChanged(nameof(IsHamburgerMenuOpen));
         }
@@ -74,16 +78,20 @@ public class MainViewModel : BaseViewModel
     public void Open<T>() where T : SelectableViewModel
     {
         if (SelectedViewModel != null && typeof(T) == SelectedViewModel.GetType()) return;
-        if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
-
-        object? parameter = SelectedViewModel?.parameterForNextSelectable;
 
         T? viewModel = GetViewModel<T>();
+        bool wasCreated = false;
         if (viewModel == null)
         {
             viewModel = (T)Activator.CreateInstance(typeof(T), this)!;
-            baseViewModels.Add(viewModel);
+            wasCreated = true;
         }
+        if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
+        if (!viewModel.CanEnable(Configuration!)) return;
+
+        object? parameter = SelectedViewModel?.parameterForNextSelectable;
+
+        if (wasCreated) baseViewModels.Add(viewModel);
 
         if (SelectedViewModel != null && SelectedViewModel.CanBeDestroyed)
         {

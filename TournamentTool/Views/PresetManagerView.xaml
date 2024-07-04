@@ -328,6 +328,7 @@
                         </WrapPanel>
                     </WrapPanel>
 
+                    <!--
                     <WrapPanel Orientation="Vertical"
                                VerticalAlignment="Top"
                                HorizontalAlignment="Right"
@@ -349,6 +350,7 @@
                                                  OnCommand="{Binding OpenPlayerManagerCommand}"
                                                  Margin="0 20 0 0" />
                     </WrapPanel>
+                    -->
                 </Grid>
             </ScrollViewer>
         </Grid>
