@@ -3,6 +3,7 @@ using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Controller;
+using TournamentTool.ViewModels.Settings;
 
 namespace TournamentTool.ViewModels;
 
@@ -125,7 +126,7 @@ public class MainViewModel : BaseViewModel
                 //SelectedViewModel = new UpdatesViewModel();
                 break;
             case "Settings":
-                //SelectedViewModel = new SettingsViewModel();
+                Open<SettingsViewModel>();
                 break;
         }
     }

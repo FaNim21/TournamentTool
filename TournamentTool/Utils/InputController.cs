@@ -85,4 +85,13 @@ public class InputController
     {
         _hotkeys.Remove(hotkey);
     }
+    public void ChangeHotkey(Hotkey hotkey)
+    {
+        //TODO: 0 Zmiana hotkey
+    }
+
+    public List<Hotkey> GetHotkeys()
+    {
+        return _hotkeys;
+    }
 }

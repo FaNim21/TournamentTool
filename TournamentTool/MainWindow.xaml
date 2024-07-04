@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:vm="clr-namespace:TournamentTool.ViewModels"
         xmlns:vmController="clr-namespace:TournamentTool.ViewModels.Controller"
+        xmlns:vmSettings="clr-namespace:TournamentTool.ViewModels.Settings"
         xmlns:components="clr-namespace:TournamentTool.Components.Controls"
         xmlns:views="clr-namespace:TournamentTool.Views"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -156,6 +157,9 @@
                 <DataTemplate DataType="{x:Type vmController:ControllerViewModel}">
                     <views:ControllerView />
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type vmSettings:SettingsViewModel}">
+                    <views:SettingsView />
+                </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
 
@@ -205,6 +209,7 @@
                         <components:HamburgerMenuItem Text="Settings"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Settings"
+                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vmSettings:SettingsViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
                 </Grid>

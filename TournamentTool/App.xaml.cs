@@ -39,7 +39,7 @@ public partial class App : Application
         {
             Key = Key.F2,
             ModifierKeys = ModifierKeys.None,
-            Description = "Bind to trigger renaming elements",
+            Description = "Triggers renaming elements for now mainly in preset panel",
             Action = () =>
             {
                 var textBlock = Helper.GetFocusedUIElement<EditableTextBlock>();
