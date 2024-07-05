@@ -29,6 +29,7 @@ public class PresetManagerViewModel : SelectableViewModel
             }
 
             IsPresetOpened = _currentChosen != null;
+            MainViewModel.Configuration = _currentChosen;
             OnPropertyChanged(nameof(CurrentChosen));
         }
     }
@@ -78,7 +79,7 @@ public class PresetManagerViewModel : SelectableViewModel
         LoadAllPresets();
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
-        SavePresetCommand = new SavePresetCommand(this);
+        SavePresetCommand = new RelayCommand(SavePreset);
         OnItemListClickCommand = new OnItemListClickCommand(this);
 
         ClearCurrentPresetCommand = new ClearPresetCommand(this);
@@ -181,9 +182,13 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         IsCurrentPresetSaved = false;
     }
+    public void PresetIsSaved()
+    {
+        IsCurrentPresetSaved = true;
+    }
 
     public void SavePreset()
     {
-        SavePresetCommand.Execute(null);
+        MainViewModel.SavePreset();
     }
 }

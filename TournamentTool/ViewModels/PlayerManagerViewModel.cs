@@ -15,7 +15,7 @@ namespace TournamentTool.ViewModels;
 public class PlayerManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-    public Tournament? Tournament { get; set; } = new();
+    public Tournament? Tournament { get; set; }
 
     private Player? _player;
     public Player? Player
@@ -123,12 +123,13 @@ public class PlayerManagerViewModel : SelectableViewModel
             return false;
         }
 
-        Tournament = null;
         Player = null;
         ChoosenEvent = null;
 
         PaceManEvents.Clear();
 
+        MainViewModel.Configuration = Tournament;
+        Tournament = null;
         MainViewModel.SavePreset();
         return true;
     }

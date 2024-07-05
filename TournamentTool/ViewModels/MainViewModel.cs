@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.IO;
+using System.Text.Json;
+using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
@@ -9,13 +11,13 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
+    private readonly JsonSerializerOptions _serializerOptions;
+
     public string VersionText { get; set; }
 
     public List<SelectableViewModel> baseViewModels = [];
 
-    public PresetManagerViewModel PresetManager { get; private set; }
-    public Tournament? Configuration { get => PresetManager?.CurrentChosen; }
-
+    public Tournament? Configuration { get; set; }
 
     private SelectableViewModel? _selectedViewModel;
     public SelectableViewModel? SelectedViewModel
@@ -46,19 +48,15 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel()
     {
+        _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
+
         OnHamburegerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
 
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
 
-        PresetManager = new(this);
-
-        baseViewModels.Add(PresetManager);
-        baseViewModels.Add(new ControllerViewModel(this));
-
-        SelectedViewModel = PresetManager;
-        SelectedViewModel.OnEnable(null);
+        Open<PresetManagerViewModel>();
     }
 
     public T? GetViewModel<T>() where T : SelectableViewModel
@@ -133,6 +131,14 @@ public class MainViewModel : BaseViewModel
 
     public void SavePreset()
     {
-        PresetManager.SavePreset();
+        if (Configuration == null) return;
+
+        var data = JsonSerializer.Serialize<object>(Configuration, _serializerOptions);
+
+        string path = Configuration.GetPath();
+        File.WriteAllText(path, data);
+
+        if (SelectedViewModel is not PresetManagerViewModel presetManager) return;
+        presetManager.PresetIsSaved();
     }
 }
