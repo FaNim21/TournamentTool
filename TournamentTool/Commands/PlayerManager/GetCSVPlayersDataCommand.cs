@@ -40,7 +40,8 @@ public class GetCSVPlayersDataCommand : BaseCommand
 
             Player data = new()
             {
-                Name = fields[1],
+                Name = fields[0],
+                InGameName = fields[1],
                 UUID = fields[2],
                 PersonalBest = fields[3]
             };
