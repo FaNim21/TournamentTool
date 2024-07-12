@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
 using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.DialogBoxViewModels;
+using TournamentTool.ViewModels.Modals;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Components.Controls;

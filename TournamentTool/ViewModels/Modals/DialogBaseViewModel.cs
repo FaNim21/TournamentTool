@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 
-namespace TournamentTool.ViewModels.DialogBoxViewModels;
+namespace TournamentTool.ViewModels.Modals;
 
 public class DialogBaseViewModel : BaseViewModel
 {

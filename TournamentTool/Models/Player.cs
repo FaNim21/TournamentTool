@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Diagnostics;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
@@ -125,7 +126,7 @@ public class TwitchStreamData : BaseViewModel
     public bool WasUpdated { get; set; } = false;
 
     //??
-    public void Update(TwitchStreamData data, bool isUsingTwitchApi = true)
+    public void Update(TwitchStreamData data)
     {
         WasUpdated = true;
 
@@ -139,14 +140,15 @@ public class TwitchStreamData : BaseViewModel
         StartedAt = data.StartedAt;
         Language = data.Language;
         ThumbnailUrl = data.ThumbnailUrl;
-
         Status = data.Status;
-        if (!isUsingTwitchApi)
-            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(normalColor); });
-        else if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
-            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(liveColor); });
-        else
-            Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(offlineColor); });
+
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
+                StatusLabelColor = new SolidColorBrush(liveColor);
+            else
+                StatusLabelColor = new SolidColorBrush(offlineColor);
+        });
 
         Update();
     }
@@ -166,9 +168,8 @@ public class TwitchStreamData : BaseViewModel
         OnPropertyChanged(nameof(StatusLabelColor));
     }
 
-    public void Clear()
+    public void Clear(bool isUsingTwitchApi = true)
     {
-        ID = string.Empty;
         BroadcasterID = string.Empty;
         UserName = string.Empty;
         GameName = string.Empty;
@@ -178,7 +179,13 @@ public class TwitchStreamData : BaseViewModel
         Language = string.Empty;
         ThumbnailUrl = string.Empty;
         Status = "offline";
-        Application.Current?.Dispatcher.Invoke(delegate { StatusLabelColor = new SolidColorBrush(normalColor); });
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            if (!isUsingTwitchApi)
+                StatusLabelColor = new SolidColorBrush(normalColor);
+            else
+                StatusLabelColor = new SolidColorBrush(offlineColor);
+        });
         Update();
     }
 }

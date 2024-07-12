@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using TournamentTool.ViewModels.DialogBoxViewModels;
+using TournamentTool.ViewModels.Modals;
 
 namespace TournamentTool.Windows;
 

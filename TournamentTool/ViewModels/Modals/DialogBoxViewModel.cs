@@ -2,7 +2,7 @@
 using TournamentTool.Commands.DialogBoxCommands;
 using TournamentTool.Components.Controls;
 
-namespace TournamentTool.ViewModels.DialogBoxViewModels;
+namespace TournamentTool.ViewModels.Modals;
 
 public class DialogBoxViewModel : DialogBaseViewModel
 {

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
-        xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels.DialogBoxViewModels"
+        xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels.Modals"
         xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
         xmlns:converters="clr-namespace:TournamentTool.Converters"
         d:DataContext="{d:DesignInstance Type=viewmodels:DialogBaseViewModel}"

@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using TournamentTool.ViewModels.DialogBoxViewModels;
+using TournamentTool.ViewModels.Modals;
 
 namespace TournamentTool.Commands.DialogBoxCommands;
 

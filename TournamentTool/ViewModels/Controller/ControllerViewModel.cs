@@ -134,18 +134,19 @@ public class ControllerViewModel : SelectableViewModel
         foreach (var player in Configuration.Players)
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
 
-        if (!Configuration.IsUsingTwitchAPI)
-        {
-            foreach (var player in Configuration.Players)
-                player.StreamData.LiveData.Clear();
-        }
-
         FilterItems();
 
         PaceManService.OnEnable(null);
         ObsController.OnEnable(null);
 
-        if (!Configuration.IsUsingTwitchAPI) return;
+        if (!Configuration.IsUsingTwitchAPI)
+        {
+            foreach (var player in Configuration.Players)
+                player.StreamData.LiveData.Clear(false);
+
+            return;
+        }
+
         Task.Factory.StartNew(async () =>
         {
             await _twitch.ConnectTwitchAPIAsync();
