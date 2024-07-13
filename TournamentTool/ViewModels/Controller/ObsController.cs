@@ -50,6 +50,7 @@ public class ObsController : BaseViewModel
     {
         Controller = controller;
 
+        _cancellationTokenSource = new();
         Client = new() { RequestTimeout = 10000 };
 
         RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
@@ -75,60 +76,45 @@ public class ObsController : BaseViewModel
     {
         if (Controller.Configuration == null) return;
 
-        int timeoutCount = 0;
-        int timeoutChecks = 35;
-
         EventSubscriptions subscription = EventSubscriptions.All | EventSubscriptions.Scenes | EventSubscriptions.SceneItems;
-        bool isConnected = await Client.ConnectAsync(true, password, "localhost", port, subscription);
+        await Client.ConnectAsync(true, password, "localhost", port, subscription);
         Client.PropertyChanged += OnPropertyChanged;
-        if (isConnected)
+    }
+
+    private async Task OnConnected()
+    {
+        try
         {
-            try
-            {
-                while (Client.ConnectionState != ConnectionState.Connected && timeoutCount <= timeoutChecks)
-                {
-                    try
-                    {
-                        await Task.Delay(100, _cancellationTokenSource.Token);
-                    }
-                    catch { }
+            await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
 
-                    timeoutCount++;
-                }
+            Controller.CanvasWidth = 426;
+            Controller.CanvasHeight = 240;
 
-                if (timeoutCount > timeoutChecks)
-                    return;
+            var settings = await Client.GetVideoSettings();
 
-                await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
+            XAxisRatio = settings.BaseWidth / Controller.CanvasWidth;
+            OnPropertyChanged(nameof(XAxisRatio));
+            YAxisRatio = settings.BaseHeight / Controller.CanvasHeight;
+            OnPropertyChanged(nameof(YAxisRatio));
 
-                Controller.CanvasWidth = 426;
-                Controller.CanvasHeight = 240;
+            CanvasAspectRatio = (float)Controller.CanvasWidth / Controller.CanvasHeight;
+            OnPropertyChanged(nameof(CanvasAspectRatio));
 
-                var settings = await Client.GetVideoSettings();
+            CurrentSceneName = await Client.GetCurrentProgramScene();
+            OnPropertyChanged(nameof(CurrentSceneName));
+            await GetCurrentSceneitems();
 
-                XAxisRatio = settings.BaseWidth / Controller.CanvasWidth;
-                OnPropertyChanged(nameof(XAxisRatio));
-                YAxisRatio = settings.BaseHeight / Controller.CanvasHeight;
-                OnPropertyChanged(nameof(YAxisRatio));
+            Client.SceneItemListReindexed += OnSceneItemListReindexed;
+            Client.SceneItemCreated += OnSceneItemCreated;
+            Client.SceneItemRemoved += OnSceneItemRemoved;
+            Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
+        }
 
-                CanvasAspectRatio = (float)Controller.CanvasWidth / Controller.CanvasHeight;
-                OnPropertyChanged(nameof(CanvasAspectRatio));
-
-                CurrentSceneName = await Client.GetCurrentProgramScene();
-                OnPropertyChanged(nameof(CurrentSceneName));
-                await GetCurrentSceneitems();
-
-                Client.SceneItemListReindexed += OnSceneItemListReindexed;
-                Client.SceneItemCreated += OnSceneItemCreated;
-                Client.SceneItemRemoved += OnSceneItemRemoved;
-                Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                await Disconnect();
-                return;
-            }
+        catch (Exception ex)
+        {
+            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            await Disconnect();
+            return;
         }
     }
 
@@ -154,7 +140,12 @@ public class ObsController : BaseViewModel
 
     public async Task Refresh()
     {
-        Controller.Configuration.ClearFromController();
+        if(!IsConnectedToWebSocket)
+        {
+            await Connect(Controller.Configuration.Password!, Controller.Configuration.Port);
+        }
+
+        Controller.Configuration.ClearPlayersFromPOVS();
         await GetCurrentSceneitems();
     }
 
@@ -390,14 +381,21 @@ public class ObsController : BaseViewModel
         if (e.PropertyName == "ConnectionState")
         {
             bool option = Client!.ConnectionState == ConnectionState.Connected;
-            if (!option)
+
+            Application.Current?.Dispatcher.Invoke(async delegate
             {
-                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor); });
-            }
-            else
-            {
-                Application.Current?.Dispatcher.Invoke(delegate { IsConnectedColor = new SolidColorBrush(TwitchStreamData.liveColor); });
-            }
+                if (!option)
+                {
+                    IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor);
+                    Controller.Configuration.ClearPlayersFromPOVS();
+                    Controller.ClearPovs();
+                }
+                else
+                {
+                    IsConnectedColor = new SolidColorBrush(TwitchStreamData.liveColor);
+                    await OnConnected();
+                }
+            });
 
             IsConnectedToWebSocket = option;
             OnPropertyChanged(nameof(IsConnectedColor));

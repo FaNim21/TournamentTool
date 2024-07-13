@@ -203,6 +203,7 @@ public class ControllerViewModel : SelectableViewModel
     }
     public void ClearPovs()
     {
+
         POVs.Clear();
     }
 

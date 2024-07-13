@@ -297,6 +297,12 @@ public class Tournament : BaseViewModel, IRenameItem
             Players[i].ClearFromController();
     }
 
+    public void ClearPlayersFromPOVS()
+    {
+        for (int i = 0; i < Players.Count; i++)
+            Players[i].IsUsedInPov = false;
+    }
+
     public void Clear()
     {
         Port = 4455;

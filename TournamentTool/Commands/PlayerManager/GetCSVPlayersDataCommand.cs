@@ -45,7 +45,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
                 UUID = fields[2],
                 PersonalBest = fields[3]
             };
-            data.StreamData.Main = fields[4];
+            data.StreamData.SetName(fields[4].ToLower().Trim());
 
             //if (data.StreamData.IsNullOrEmpty()) continue;
             if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.StreamData.Main)) continue;
