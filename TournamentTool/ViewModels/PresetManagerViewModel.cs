@@ -175,6 +175,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public void AddItem(Tournament item)
     {
+        MainViewModel.SavePreset(item);
         Presets.Add(item);
     }
 

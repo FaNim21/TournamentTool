@@ -13,6 +13,8 @@ public class MainViewModel : BaseViewModel
 {
     private readonly JsonSerializerOptions _serializerOptions;
 
+    //
+
     public string VersionText { get; set; }
 
     public List<SelectableViewModel> baseViewModels = [];
@@ -129,13 +131,14 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    public void SavePreset()
+    public void SavePreset(Tournament? configuration = null)
     {
-        if (Configuration == null) return;
+        configuration ??= Configuration;
+        if (configuration == null) return;
 
-        var data = JsonSerializer.Serialize<object>(Configuration, _serializerOptions);
+        var data = JsonSerializer.Serialize<object>(configuration, _serializerOptions);
 
-        string path = Configuration.GetPath();
+        string path = configuration.GetPath();
         File.WriteAllText(path, data);
 
         if (SelectedViewModel is not PresetManagerViewModel presetManager) return;

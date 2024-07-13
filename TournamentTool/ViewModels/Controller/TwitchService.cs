@@ -63,20 +63,32 @@ public class TwitchService
     public async Task<List<Stream>> GetAllStreamsAsync(List<string> logins)
     {
         var allStreams = new List<Stream>();
+        const int batchSize = 100;
         string cursor = null;
 
         try
         {
-            do
+            var loginBatches = logins
+                .Select((login, index) => new { login, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.login).ToList())
+                .ToList();
+
+            foreach (var batch in loginBatches)
             {
-                var streamsResponse = await _api.Helix.Streams.GetStreamsAsync(userLogins: logins, after: cursor);
-                allStreams.AddRange(streamsResponse.Streams);
-                cursor = streamsResponse.Pagination.Cursor;
-            } while (!string.IsNullOrEmpty(cursor));
+                cursor = null;
+
+                do
+                {
+                    var streamsResponse = await _api.Helix.Streams.GetStreamsAsync(userLogins: batch, after: cursor);
+                    allStreams.AddRange(streamsResponse.Streams);
+                    cursor = streamsResponse.Pagination.Cursor;
+                } while (!string.IsNullOrEmpty(cursor));
+            }
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            DialogBox.Show($"Error: Error while fetching streaming datas\n{ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         return allStreams.DistinctBy(stream => stream.UserId).ToList();

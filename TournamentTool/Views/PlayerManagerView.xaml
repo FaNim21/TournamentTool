@@ -183,6 +183,13 @@
                                              OnCommand="{Binding FixPlayersHeadsCommand}" />
                 </StackPanel>
 
+                <components:ButtonNormal ContentText="Validate Twitch"
+                                         FontSize="15"
+                                         Background="#a970ff"
+                                         Width="150"
+                                         Height="30"
+                                         OnCommand="{Binding ValidateStreamNamesCommand}" />
+
                 <ComboBox Style="{StaticResource ComboBoxTest2}"
                           HorizontalAlignment="Left"
                           VerticalAlignment="Bottom"
