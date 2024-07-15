@@ -1,11 +1,9 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using TournamentTool.Components.Controls;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;

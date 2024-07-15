@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -72,7 +71,6 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
-    public ICommand ValidateStreamNamesCommand { get; set; }
 
     public ICommand GoBackCommand { get; set; }
 
@@ -91,7 +89,6 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
-        ValidateStreamNamesCommand = new RelayCommand(ValidateStreamNames);
 
         GoBackCommand = new RelayCommand(GoBack);
     }
@@ -258,11 +255,6 @@ public class PlayerManagerViewModel : SelectableViewModel
 
             DialogBox.Show("Done fixing players head skins");
         });
-    }
-
-    private void ValidateStreamNames()
-    {
-        //var usersResponse = await _api.Helix.Users.GetUsersAsync(logins: logins);
     }
 
     public void GoBack()

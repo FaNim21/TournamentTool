@@ -35,7 +35,10 @@ public class ObsController : BaseViewModel
         }
     }
 
-    public string CurrentSceneName { get; set; } = "";
+    public bool StudioMode { get; private set; }
+
+    public string CurrentSceneName { get; private set; } = "";
+    public string CurrentPreviewSceneName { get; private set; } = "";
 
     public float XAxisRatio { get; private set; }
     public float YAxisRatio { get; private set; }
@@ -87,6 +90,11 @@ public class ObsController : BaseViewModel
         {
             await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
 
+            //await Client.TriggerStudioModeTransition();
+            //await Client.GetStudioModeEnabled();
+            //await Client.GetCurrentPreviewScene();
+            //await Client.GetCurrentProgramScene();
+
             Controller.CanvasWidth = 426;
             Controller.CanvasHeight = 240;
 
@@ -108,6 +116,8 @@ public class ObsController : BaseViewModel
             Client.SceneItemCreated += OnSceneItemCreated;
             Client.SceneItemRemoved += OnSceneItemRemoved;
             Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
+            Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
+            Client.StudioModeStateChanged += OnStudioModeStateChanged;
         }
 
         catch (Exception ex)
@@ -136,6 +146,7 @@ public class ObsController : BaseViewModel
         Client.SceneItemCreated -= OnSceneItemCreated;
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
+        Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
     }
 
     public async Task Refresh()
@@ -452,5 +463,15 @@ public class ObsController : BaseViewModel
         OnPropertyChanged(nameof(CurrentSceneName));
 
         Task.Run(GetCurrentSceneitems);
+    }
+    private void OnCurrentPreviewSceneChanged(object? sender, SceneNameEventArgs e)
+    {
+        CurrentPreviewSceneName = e.SceneName;
+        OnPropertyChanged(nameof(CurrentPreviewSceneName));
+    }
+    private void OnStudioModeStateChanged(object? sender, StudioModeStateChangedEventArgs e)
+    {
+        StudioMode = e.StudioModeEnabled;
+        OnPropertyChanged(nameof(StudioMode));
     }
 }

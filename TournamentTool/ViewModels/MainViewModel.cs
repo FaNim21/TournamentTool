@@ -13,8 +13,6 @@ public class MainViewModel : BaseViewModel
 {
     private readonly JsonSerializerOptions _serializerOptions;
 
-    //
-
     public string VersionText { get; set; }
 
     public List<SelectableViewModel> baseViewModels = [];
