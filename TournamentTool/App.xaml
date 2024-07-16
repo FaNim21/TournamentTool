@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
-             xmlns:viewModels2="clr-namespace:TournamentTool.ViewModels.Controller"
              xmlns:views="clr-namespace:TournamentTool.Views"
              xmlns:converters="clr-namespace:TournamentTool.Converters">
     <Application.Resources>

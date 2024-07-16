@@ -4,7 +4,6 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels.Controller;
 using TournamentTool.ViewModels.Settings;
 
 namespace TournamentTool.ViewModels;

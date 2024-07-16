@@ -4,9 +4,11 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Modules.OBS;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 
-namespace TournamentTool.ViewModels.Controller;
+namespace TournamentTool.ViewModels;
 
 public class ControllerViewModel : SelectableViewModel
 {

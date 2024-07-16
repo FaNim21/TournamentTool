@@ -2,8 +2,8 @@
 using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
+using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.Models;
 

@@ -7,8 +7,9 @@ using TournamentTool.Components.Controls;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using System.ComponentModel;
 using TournamentTool.Models;
+using TournamentTool.ViewModels;
 
-namespace TournamentTool.ViewModels.Controller;
+namespace TournamentTool.Services;
 
 public class TwitchService
 {

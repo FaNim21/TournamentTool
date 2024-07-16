@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Models;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels.Controller;
+using TournamentTool.ViewModels;
 
 namespace TournamentTool.Views;
 

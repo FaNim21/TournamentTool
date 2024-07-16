@@ -6,7 +6,6 @@ using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Models;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels.Controller;
 
 namespace TournamentTool.ViewModels;
 

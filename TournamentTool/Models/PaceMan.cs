@@ -5,7 +5,6 @@ using TournamentTool.Components.Controls;
 using TournamentTool.ViewModels;
 using System.Windows;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels.Controller;
 using System.Windows.Media;
 using System.ComponentModel;
 

@@ -6,8 +6,9 @@ using TournamentTool.Models;
 using TournamentTool.Utils;
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using TournamentTool.ViewModels;
 
-namespace TournamentTool.ViewModels.Controller;
+namespace TournamentTool.Services;
 
 public class PaceManService : BaseViewModel
 {

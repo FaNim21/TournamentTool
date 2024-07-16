@@ -12,8 +12,9 @@ using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.ViewModels;
 
-namespace TournamentTool.ViewModels.Controller;
+namespace TournamentTool.Modules.OBS;
 
 public class ObsController : BaseViewModel
 {
@@ -47,6 +48,7 @@ public class ObsController : BaseViewModel
 
     public ICommand RefreshOBSCommand { get; set; }
     public ICommand AddPovItemToOBSCommand { get; set; }
+    public ICommand SwitchStudioMode {  get; set; }
 
 
     public ObsController(ControllerViewModel controller)
@@ -58,6 +60,13 @@ public class ObsController : BaseViewModel
 
         RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
         AddPovItemToOBSCommand = new RelayCommand(async () => { await CreateNestedSceneItem("PovSceneLOL"); });
+        SwitchStudioMode = new RelayCommand(() =>
+        {
+            if (!IsConnectedToWebSocket) return;
+
+            ChangeStudioMode(!StudioMode);
+            Client.SetStudioModeEnabled(StudioMode);
+        });
     }
 
     public override void OnEnable(object? parameter)
@@ -71,6 +80,8 @@ public class ObsController : BaseViewModel
     public override bool OnDisable()
     {
         Task.Run(Disconnect);
+        CurrentSceneName = string.Empty;
+        CurrentPreviewSceneName = string.Empty;
 
         return true;
     }
@@ -98,6 +109,9 @@ public class ObsController : BaseViewModel
             Controller.CanvasWidth = 426;
             Controller.CanvasHeight = 240;
 
+            bool studioMode = await Client.GetStudioModeEnabled();
+            ChangeStudioMode(studioMode);
+
             var settings = await Client.GetVideoSettings();
 
             XAxisRatio = settings.BaseWidth / Controller.CanvasWidth;
@@ -108,9 +122,8 @@ public class ObsController : BaseViewModel
             CanvasAspectRatio = (float)Controller.CanvasWidth / Controller.CanvasHeight;
             OnPropertyChanged(nameof(CanvasAspectRatio));
 
-            CurrentSceneName = await Client.GetCurrentProgramScene();
-            OnPropertyChanged(nameof(CurrentSceneName));
-            await GetCurrentSceneitems();
+            string loadedScene = await Client.GetCurrentProgramScene();
+            await GetCurrentSceneitems(loadedScene);
 
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
             Client.SceneItemCreated += OnSceneItemCreated;
@@ -157,17 +170,29 @@ public class ObsController : BaseViewModel
         }
 
         Controller.Configuration.ClearPlayersFromPOVS();
-        await GetCurrentSceneitems();
+        await GetCurrentSceneitems(CurrentSceneName, true);
     }
 
-    public async Task GetCurrentSceneitems()
+    public async Task GetCurrentSceneitems(string scene, bool force = false)
     {
-        if (string.IsNullOrEmpty(CurrentSceneName)) return;
+        if (string.IsNullOrEmpty(scene)) return;
+
+        if(StudioMode)
+        {
+            //TODO: 0 
+        }
+        else
+        {
+            if (scene.Equals(CurrentSceneName) && !force) return;
+            CurrentSceneName = scene;
+            OnPropertyChanged(nameof(CurrentSceneName));
+        }
+
 
         Application.Current.Dispatcher.Invoke(Controller.ClearPovs);
         await Task.Delay(50);
 
-        SceneItem[] sceneItems = await Client.GetSceneItemList(CurrentSceneName);
+        SceneItem[] sceneItems = await Client.GetSceneItemList(scene);
         List<SceneItem> additionals = [];
 
         foreach (var item in sceneItems)
@@ -414,11 +439,11 @@ public class ObsController : BaseViewModel
     }
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {
-        Task.Run(GetCurrentSceneitems);
+        Task.Run(async ()=> { await GetCurrentSceneitems(e.SceneName); });
     }
-    public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs args)
+    public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
     {
-        Task.Run(GetCurrentSceneitems);
+        Task.Run(async ()=> { await GetCurrentSceneitems(e.SceneName); });
 
         //TODO: 0 Zrobic wylapywanie dodawania wszystkich elementow tez typu head i text od povow
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
@@ -437,9 +462,9 @@ public class ObsController : BaseViewModel
         };
         Controller.AddPov(pov);*/
     }
-    public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs args)
+    public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
     {
-        Task.Run(GetCurrentSceneitems);
+        Task.Run(async ()=> { await GetCurrentSceneitems(e.SceneName); });
 
         //TODO: 0 Zrobic wylapywanie usuwania wszystkich elementow tez typu head i text od povow
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
@@ -459,10 +484,7 @@ public class ObsController : BaseViewModel
     }
     private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
     {
-        CurrentSceneName = e.SceneName;
-        OnPropertyChanged(nameof(CurrentSceneName));
-
-        Task.Run(GetCurrentSceneitems);
+        Task.Run(async ()=> { await GetCurrentSceneitems(e.SceneName); }); 
     }
     private void OnCurrentPreviewSceneChanged(object? sender, SceneNameEventArgs e)
     {
@@ -471,7 +493,12 @@ public class ObsController : BaseViewModel
     }
     private void OnStudioModeStateChanged(object? sender, StudioModeStateChangedEventArgs e)
     {
-        StudioMode = e.StudioModeEnabled;
+        ChangeStudioMode(e.StudioModeEnabled);
+    }
+
+    private void ChangeStudioMode(bool option)
+    {
+        StudioMode = option;
         OnPropertyChanged(nameof(StudioMode));
     }
 }
