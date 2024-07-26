@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="TournamentTool.Components.SceneCanvas"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:TournamentTool.Components"
+             xmlns:obs="clr-namespace:TournamentTool.Modules.OBS"
+             d:DataContext="{d:DesignInstance Type=obs:Scene}"
+             mc:Ignorable="d">
+    <Border Background="Transparent"
+            BorderBrush="Black"
+            BorderThickness="1">
+        <Grid>
+            <Canvas Background="#2C2C2C"
+                    Width="{Binding CanvasWidth}"
+                    Height="{Binding CanvasHeight}"
+                    SizeChanged="Canvas_SizeChanged"
+                    AllowDrop="True"
+                    ClipToBounds="True"
+                    Focusable="True">
+                <ItemsControl ItemsSource="{Binding POVs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left"
+                                    Value="{Binding X}" />
+                            <Setter Property="Canvas.Top"
+                                    Value="{Binding Y}" />
+                            <Setter Property="Width"
+                                    Value="{Binding Width}" />
+                            <Setter Property="Height"
+                                    Value="{Binding Height}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding BackgroundColor}"
+                                    Width="{Binding Width}"
+                                    Height="{Binding Height}"
+                                    BorderBrush="#1E90FF"
+                                    BorderThickness="1"
+                                    CornerRadius="5"
+                                    Drop="Border_Drop"
+                                    MouseMove="CanvasBorder_MouseMove"
+                                    PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown"
+                                    PreviewMouseRightButtonDown="CanvasItem_RightMouseButtonDown"
+                                    MouseEnter="CanvasItem_MouseEnter"
+                                    MouseLeave="CanvasItem_MouseLeave">
+                                <Grid>
+                                    <TextBlock Text="{Binding SceneItemName}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               FontSize="{Binding DataContext.FontSizeSceneName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Foreground="#E0E0E0" />
+                                    <TextBlock Text="{Binding DisplayedPlayer}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="{Binding DataContext.FontSizeDisplayedName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               FontWeight="SemiBold"
+                                               Foreground="#FFFFFF" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Canvas>
+            <TextBlock Text="{Binding MainText}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="OrangeRed"
+                       FontWeight="SemiBold"
+                       FontSize="20" />
+        </Grid>
+    </Border>
+</UserControl>

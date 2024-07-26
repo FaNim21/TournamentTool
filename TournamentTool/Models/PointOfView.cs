@@ -11,15 +11,21 @@ public class PointOfView : BaseViewModel
 {
     private readonly ObsController _obs;
 
+    public Scene Scene { get; set; }
+
     public string? GroupName { get; set; }
     public string? SceneName { get; set; }
     public string? SceneItemName { get; set; }
     public int ID { get; set; }
 
+    public int OriginWidth { get; set; }
     public int Width { get; set; }
+    public int OriginHeight { get; set; }
     public int Height { get; set; }
 
+    public int OriginX { get; set; }
     public int X { get; set; }
+    public int OriginY { get; set; }
     public int Y { get; set; }
 
     public string TextFieldItemName { get; set; } = string.Empty;
@@ -58,9 +64,10 @@ public class PointOfView : BaseViewModel
     public ICommand RefreshCommand { get; set; }
 
 
-    public PointOfView(ObsController obs, string? groupName = "")
+    public PointOfView(ObsController obs, Scene scene, string? groupName = "")
     {
         _obs = obs;
+        Scene = scene;
 
         UnFocus();
 
@@ -79,8 +86,14 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(Volume));
     }
-    public void UpdateTransform()
+    public void UpdateTransform(float proportion)
     {
+        X = (int)(OriginX / proportion);
+        Y = (int)(OriginY / proportion);
+
+        Width = (int)(OriginWidth / proportion);
+        Height = (int)(OriginHeight / proportion);
+
         OnPropertyChanged(nameof(X));
         OnPropertyChanged(nameof(Y));
 
@@ -98,7 +111,7 @@ public class PointOfView : BaseViewModel
             return;
         }
 
-        if ((IsFromWhiteList && player.IsUsedInPov) || _obs.Controller.IsPlayerInPov(player!.GetTwitchName()))
+        if ((IsFromWhiteList && player.IsUsedInPov) || Scene.IsPlayerInPov(player!.GetTwitchName()))
         {
             player = oldPlayer;
             return;
@@ -143,7 +156,6 @@ public class PointOfView : BaseViewModel
         SetPOV();
     }
 
-
     public void Focus()
     {
         Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(153, 224, 255)); });
@@ -170,7 +182,7 @@ public class PointOfView : BaseViewModel
         _obs.SetBrowserURL(this);
     }
 
-    public void SetHead()
+    public void UpdateHead()
     {
         if (string.IsNullOrEmpty(HeadItemName)) return;
 
@@ -179,6 +191,11 @@ public class PointOfView : BaseViewModel
             path = string.Empty;
 
         _obs.SetBrowserURL(HeadItemName, path);
+    }
+    private void ClearHead()
+    {
+        if (string.IsNullOrEmpty(HeadItemName)) return;
+        _obs.SetBrowserURL(HeadItemName, "");
     }
 
     public void UpdateNameTextField()
@@ -201,12 +218,21 @@ public class PointOfView : BaseViewModel
 
         _obs.SetTextField(TextFieldItemName, name);
     }
+    private void ClearNameTextField()
+    {
+        if (string.IsNullOrEmpty(TextFieldItemName)) return;
+        _obs.SetTextField(TextFieldItemName, "");
+    }
 
     public void UpdatePersonalBestTextField()
     {
         if (string.IsNullOrEmpty(PersonalBestItemName)) return;
-
         _obs.SetTextField(PersonalBestItemName, PersonalBest);
+    }
+    private void ClearPersonalBestTextField()
+    {
+        if (string.IsNullOrEmpty(PersonalBestItemName)) return;
+        _obs.SetTextField(PersonalBestItemName, "");
     }
 
     public string GetURL()
@@ -221,6 +247,7 @@ public class PointOfView : BaseViewModel
         DisplayedPlayer = string.Empty;
         Text = string.Empty;
         TwitchName = string.Empty;
+        Volume = 0;
         HeadViewParametr = string.Empty;
         PersonalBest = string.Empty;
 
@@ -230,7 +257,10 @@ public class PointOfView : BaseViewModel
             player = null;
         }
 
-        _obs.SetBrowserURL(this);
+        if (!_obs.SetBrowserURL(SceneItemName!, GetURL())) return;
+        ClearHead();
+        ClearNameTextField();
+        ClearPersonalBestTextField();
 
         Update();
     }

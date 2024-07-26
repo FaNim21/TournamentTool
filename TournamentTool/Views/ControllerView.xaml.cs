@@ -14,13 +14,6 @@ public partial class ControllerView : UserControl
         InitializeComponent();
     }
 
-    private void CanvasBorder_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (e.LeftButton != MouseButtonState.Pressed) return;
-        if (sender is not Border border) return;
-
-        DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
-    }
     private void ListBorder_MouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
@@ -30,76 +23,7 @@ public partial class ControllerView : UserControl
         DragDrop.DoDragDrop(border, new DataObject(typeof(IPlayer), border.DataContext), DragDropEffects.Move);
     }
 
-    private void Border_Drop(object sender, DragEventArgs e)
-    {
-        if (sender is not Border droppedBorder) return;
-        if (DataContext is not ControllerViewModel controller) return;
-        if (droppedBorder!.DataContext is not PointOfView pov) return;
-
-        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
-        {
-            pov.SetPOV(info);
-        }
-        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
-        {
-            dragPov.Swap(pov);
-        }
-
-        if (string.IsNullOrEmpty(pov.TwitchName)) return;
-        controller.UnSelectItems(true);
-    }
-
-    private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        if (DataContext is not ControllerViewModel viewModel) return;
-        viewModel.ResizeCanvas();
-    }
-
-    private void CanvasBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (DataContext is not ControllerViewModel viewModel) return;
-        if (sender is not Border clickedBorder) return;
-        if (clickedBorder!.DataContext is not PointOfView pov) return;
-
-        viewModel.CurrentChosenPOV?.UnFocus();
-        PointOfView? previousPOV = viewModel.CurrentChosenPOV;
-        viewModel.CurrentChosenPOV = pov;
-        viewModel.CurrentChosenPOV.Focus();
-
-        if (viewModel.CurrentChosenPlayer == null)
-        {
-            if (previousPOV == null) return;
-
-            viewModel.CurrentChosenPOV.Swap(previousPOV);
-            viewModel.CurrentChosenPOV = null;
-            return;
-        }
-
-        pov.SetPOV(viewModel.CurrentChosenPlayer);
-
-        viewModel.CurrentChosenPOV.UnFocus();
-        viewModel.UnSelectItems(true);
-    }
-
-    private void CanvasItem_RightMouseButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (DataContext is not ControllerViewModel) return;
-        if (sender is not Border clickedBorder) return;
-        if (clickedBorder!.DataContext is not PointOfView pov) return;
-
-        pov.Clear();
-    }
-
-    private void CanvasItem_MouseEnter(object sender, MouseEventArgs e)
-    {
-        Mouse.OverrideCursor = Cursors.Hand;
-    }
-    private void CanvasItem_MouseLeave(object sender, MouseEventArgs e)
-    {
-        Mouse.OverrideCursor = null;
-    }
-
-    private void Window_KeyDown(object sender, KeyEventArgs e)
+    /*private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         //Trace.WriteLine("Wcisniety guzik");
         //TODO: 0 PROBLEMY Z CZYSZCZENIEM NA WCISNIECIU ESCAPE MOZE LEPIEJ ZROBIC INPUT CONTROLLER
@@ -114,7 +38,7 @@ public partial class ControllerView : UserControl
             if (DataContext is not ControllerViewModel viewModel) return;
             viewModel.UnSelectItems(true);
         }
-    }
+    }*/
 
     private void List_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
