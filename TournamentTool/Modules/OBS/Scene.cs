@@ -13,7 +13,7 @@ public class Scene : BaseViewModel
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
 
-    public string? SceneName { get; set; }
+    public string SceneName { get; set; } = string.Empty;
 
     private float _canvasWidth;
     public float CanvasWidth
@@ -133,9 +133,7 @@ public class Scene : BaseViewModel
         if (scene.Equals(SceneName) && !force) return;
 
         SetSceneName(scene);
-
-        Application.Current.Dispatcher.Invoke(ClearPovs);
-        await Task.Delay(50);
+        ClearPovs();
 
         SceneItem[] sceneItems = await Controller.OBS.Client.GetSceneItemList(scene);
         List<SceneItem> additionals = [];
@@ -240,7 +238,8 @@ public class Scene : BaseViewModel
         {
             Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
 
-            if (player != null && !player.IsUsedInPov)
+            //tu usunalem weryfikowanie czy jest uzywany w povie
+            if (player != null)
                 pov.SetPOV(player);
         }
 
@@ -269,16 +268,14 @@ public class Scene : BaseViewModel
     public void AddPov(PointOfView pov)
     {
         Application.Current.Dispatcher.Invoke(delegate { POVs.Add(pov); });
-        OnPropertyChanged(nameof(POVs));
     }
     public void RemovePov(PointOfView pov)
     {
         Application.Current.Dispatcher.Invoke(delegate { POVs.Remove(pov); });
-        OnPropertyChanged(nameof(POVs));
     }
     public void ClearPovs()
     {
-        POVs.Clear();
+        Application.Current.Dispatcher.Invoke(POVs.Clear);
     }
 
     public bool IsPlayerInPov(string twitchName)
@@ -323,6 +320,7 @@ public class Scene : BaseViewModel
     public void Clear()
     {
         SetSceneName(string.Empty);
+        POVs.Clear();
         Application.Current.Dispatcher.Invoke(POVs.Clear);
     }
 }

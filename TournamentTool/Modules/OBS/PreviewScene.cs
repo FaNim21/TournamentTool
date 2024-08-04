@@ -14,6 +14,7 @@ public class PreviewScene : Scene
 
     public override async Task GetCurrentSceneItems(string scene, bool force = false)
     {
+        await Task.Delay(50);
         if (Controller.MainScene.SceneName!.Equals(scene) && string.IsNullOrEmpty(TransitionSceneName))
         {
             MainText = "NOT SUPPORTED";
