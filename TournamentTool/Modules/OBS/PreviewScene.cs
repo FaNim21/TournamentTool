@@ -13,7 +13,7 @@ public class PreviewScene : Scene
         SceneType = "Preview";
     }
 
-    public override async Task GetCurrentSceneItems(string scene, bool force = false)
+    public override async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
         Trace.WriteLine($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {Controller.MainScene.SceneName}");
         if (Controller.MainScene.SceneName!.Equals(scene))
@@ -26,7 +26,7 @@ public class PreviewScene : Scene
 
         MainText = string.Empty;
         TransitionSceneName = string.Empty;
-        await base.GetCurrentSceneItems(scene, force);
+        await base.GetCurrentSceneItems(scene, force, false);
     }
 
 }

@@ -176,6 +176,17 @@
             </Setter>
         </Style>
 
+        <Style TargetType="ToolTip">
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="BorderBrush"
+                    Value="#2D2D2D" />
+            <Setter Property="Background"
+                    Value="#081217" />
+            <Setter Property="Foreground"
+                    Value="#FFFFFF" />
+        </Style>
+
         <Style x:Key="{x:Type ScrollBar}"
                TargetType="{x:Type ScrollBar}">
             <Setter Property="Stylus.IsFlicksEnabled"

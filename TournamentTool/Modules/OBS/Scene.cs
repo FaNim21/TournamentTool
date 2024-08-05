@@ -134,7 +134,7 @@ public class Scene : BaseViewModel
         FontSizeDisplayedName = 13;
     }
 
-    public virtual async Task GetCurrentSceneItems(string scene, bool force = false)
+    public virtual async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
         if (string.IsNullOrEmpty(scene)) return;
         if (scene.Equals(SceneName) && !force) return;
