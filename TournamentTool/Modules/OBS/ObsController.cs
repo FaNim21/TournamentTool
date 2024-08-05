@@ -21,7 +21,19 @@ public class ObsController : BaseViewModel
 {
     public ControllerViewModel Controller { get; private set; }
 
-    public ObservableCollection<string> Scenes { get; private set; } = [];
+    private ObservableCollection<string> _scenes = [];
+    public ObservableCollection<string> Scenes
+    {
+        get { return _scenes; }
+        set
+        {
+            if (_scenes != value)
+            {
+                _scenes = value;
+                OnPropertyChanged(nameof(Scenes));
+            }
+        }
+    }
 
     private string _selectedScene = string.Empty;
     public string SelectedScene
@@ -222,13 +234,14 @@ public class ObsController : BaseViewModel
 
     private async Task LoadScenesForStudioMode()
     {
-        Scenes.Clear();
+        Application.Current.Dispatcher.Invoke(Scenes.Clear);
+
         var loadedScenes = await Client.GetSceneList();
 
         for (int i = 0; i < loadedScenes.Scenes.Length; i++)
         {
             var current = loadedScenes.Scenes[i];
-            Scenes.Add(current.SceneName);
+            Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
         }
     }
 
@@ -436,14 +449,29 @@ public class ObsController : BaseViewModel
 
     private void LoadPreviewScene(string sceneName, bool isFromApi = false)
     {
-        if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName) || sceneName.Equals(SelectedScene)) return;
+        if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
         Trace.WriteLine($"loading preview - {sceneName}");
 
-        _selectedScene = sceneName;
-        OnPropertyChanged(nameof(SelectedScene));
+        UpdateSelectedScene(sceneName);
 
         if (isFromApi || SelectedScene.Equals(Controller.PreviewScene.SceneName)) return;
         Client.SetCurrentPreviewScene(SelectedScene);
+    }
+
+    private void UpdateSelectedScene(string sceneName)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            for (int i = 0; i < Scenes.Count; i++)
+            {
+                var current = Scenes[i];
+                if(current.Equals(sceneName))
+                {
+                    _selectedScene = current;
+                    OnPropertyChanged(nameof(SelectedScene));
+                }
+            }
+        });
     }
 
     private void Client_SceneTransitionStarted(object? sender, TransitionNameEventArgs e)
@@ -459,6 +487,8 @@ public class ObsController : BaseViewModel
 
             await Controller.MainScene.GetCurrentSceneItems(previewScene);
             await Controller.PreviewScene.GetCurrentSceneItems(mainScene);
+
+            UpdateSelectedScene(mainScene);
         });
     }
 }
