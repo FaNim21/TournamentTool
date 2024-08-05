@@ -1,5 +1,6 @@
 ﻿using OBSStudioClient.Classes;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using TournamentTool.Models;
 using TournamentTool.Utils;
@@ -9,6 +10,9 @@ namespace TournamentTool.Modules.OBS;
 
 public class Scene : BaseViewModel
 {
+    private readonly object _lock = new();
+    protected string SceneType;
+
     public ControllerViewModel Controller;
 
     public ObservableCollection<PointOfView> POVs { get; set; } = [];
@@ -80,6 +84,7 @@ public class Scene : BaseViewModel
 
     public Scene(ControllerViewModel controllerViewModel)
     {
+        SceneType = "Scene";
         Controller = controllerViewModel;
 
         CanvasWidth = 426;
@@ -112,6 +117,8 @@ public class Scene : BaseViewModel
 
     public void SetStudioMode(bool option)
     {
+        string output = option?"<Smaller>" : "<Bigger>";
+        Trace.WriteLine($"Resizing scene ([{SceneType}] - {SceneName}) to {output}");
         if (option)
         {
             CanvasWidth = 200;
@@ -267,11 +274,23 @@ public class Scene : BaseViewModel
 
     public void AddPov(PointOfView pov)
     {
-        Application.Current.Dispatcher.Invoke(delegate { POVs.Add(pov); });
+        Application.Current.Dispatcher.Invoke(delegate
+        {
+            lock (_lock)
+            {
+                POVs.Add(pov);
+            }
+        });
     }
     public void RemovePov(PointOfView pov)
     {
-        Application.Current.Dispatcher.Invoke(delegate { POVs.Remove(pov); });
+        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            lock (_lock)
+            {
+                POVs.Remove(pov);
+            }
+        }));
     }
     public void ClearPovs()
     {
@@ -320,7 +339,6 @@ public class Scene : BaseViewModel
     public void Clear()
     {
         SetSceneName(string.Empty);
-        POVs.Clear();
         Application.Current.Dispatcher.Invoke(POVs.Clear);
     }
 }

@@ -12,8 +12,8 @@
             BorderThickness="1">
         <Grid>
             <Canvas Background="#2C2C2C"
-                    Width="{Binding CanvasWidth}"
-                    Height="{Binding CanvasHeight}"
+                    Width="{Binding CanvasWidth, Mode=OneWay}"
+                    Height="{Binding CanvasHeight, Mode=OneWay}"
                     SizeChanged="Canvas_SizeChanged"
                     AllowDrop="True"
                     ClipToBounds="True"
@@ -27,20 +27,20 @@
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
                             <Setter Property="Canvas.Left"
-                                    Value="{Binding X}" />
+                                    Value="{Binding X, Mode=OneWay}" />
                             <Setter Property="Canvas.Top"
-                                    Value="{Binding Y}" />
+                                    Value="{Binding Y, Mode=OneWay}" />
                             <Setter Property="Width"
-                                    Value="{Binding Width}" />
+                                    Value="{Binding Width, Mode=OneWay}" />
                             <Setter Property="Height"
-                                    Value="{Binding Height}" />
+                                    Value="{Binding Height, Mode=OneWay}" />
                         </Style>
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="{Binding BackgroundColor}"
-                                    Width="{Binding Width}"
-                                    Height="{Binding Height}"
+                            <Border Background="{Binding BackgroundColor, Mode=OneWay}"
+                                    Width="{Binding Width, Mode=OneWay}"
+                                    Height="{Binding Height, Mode=OneWay}"
                                     BorderBrush="#1E90FF"
                                     BorderThickness="1"
                                     CornerRadius="5"
@@ -54,12 +54,12 @@
                                     <TextBlock Text="{Binding SceneItemName}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
-                                               FontSize="{Binding DataContext.FontSizeSceneName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               FontSize="{Binding DataContext.FontSizeSceneName, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
                                                Foreground="#E0E0E0" />
                                     <TextBlock Text="{Binding DisplayedPlayer}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               FontSize="{Binding DataContext.FontSizeDisplayedName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               FontSize="{Binding DataContext.FontSizeDisplayedName, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
                                                FontWeight="SemiBold"
                                                Foreground="#FFFFFF" />
                                 </Grid>
@@ -68,7 +68,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Canvas>
-            <TextBlock Text="{Binding MainText}"
+            <TextBlock Text="{Binding MainText, Mode=OneWay}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        Foreground="OrangeRed"

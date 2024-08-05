@@ -2,7 +2,6 @@
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -60,22 +59,12 @@ public class ObsController : BaseViewModel
     public ICommand SwitchStudioModeCommand {  get; set; }
     public ICommand StudioModeTransitionCommand { get; set; }
 
-    //shitty things to make changing studio mode work in both ways
-    private bool _turnedOffStudioMode = false;
-    private Timer _debounceTimer;
-    private ConcurrentQueue<Action> _eventQueue;
-    private Timer _eventProcessorTimer;
-    private bool _processingEvent;
+    private bool _startedTransition;
 
 
     public ObsController(ControllerViewModel controller)
     {
         Controller = controller;
-
-        //obs problems
-        _debounceTimer = new Timer(DebounceTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
-        _eventQueue = new ConcurrentQueue<Action>();
-        _eventProcessorTimer = new Timer(EventProcessorCallback, null, 0, 100);
 
         _cancellationTokenSource = new();
         Client = new() { RequestTimeout = 10000 };
@@ -92,7 +81,6 @@ public class ObsController : BaseViewModel
         {
             if (!IsConnectedToWebSocket || Controller.MainScene.SceneName!.Equals(Controller.PreviewScene.SceneName)) return;
 
-            Controller.PreviewScene.TransitionSceneName = Controller.PreviewScene.SceneName!;
             Client.TriggerStudioModeTransition();
         });
     }
@@ -110,7 +98,6 @@ public class ObsController : BaseViewModel
         Task.Run(Disconnect);
         Controller.MainScene.Clear();
         Controller.PreviewScene.Clear();
-        _turnedOffStudioMode = false;
         SelectedScene = string.Empty;
         StudioMode = false;
         Scenes.Clear();
@@ -133,21 +120,17 @@ public class ObsController : BaseViewModel
         {
             await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
 
-            bool studioMode = await Client.GetStudioModeEnabled();
-            ChangeStudioMode(studioMode, false);
-
             var settings = await Client.GetVideoSettings();
             Controller.MainScene.CalculateProportionsRatio(settings.BaseWidth);
             Controller.PreviewScene.CalculateProportionsRatio(settings.BaseWidth);
 
             string mainScene = await Client.GetCurrentProgramScene();
-            await Controller.MainScene.GetCurrentSceneItems(mainScene); 
+            await Controller.MainScene.GetCurrentSceneItems(mainScene);
 
-            if (studioMode)
-            {
-                string? previewScene = await Client.GetCurrentPreviewScene();
-                if (!string.IsNullOrEmpty(previewScene)) await Controller.PreviewScene.GetCurrentSceneItems(previewScene);
-            } 
+            bool studioMode = await Client.GetStudioModeEnabled();
+            ChangeStudioMode(studioMode, false);
+
+            Controller.MainScene.RefreshItems();
 
             Client.StudioModeStateChanged += OnStudioModeStateChanged;
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
@@ -155,6 +138,7 @@ public class ObsController : BaseViewModel
             Client.SceneItemRemoved += OnSceneItemRemoved;
             Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
             Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
+            Client.SceneTransitionStarted += Client_SceneTransitionStarted;
         }
 
         catch (Exception ex)
@@ -164,7 +148,7 @@ public class ObsController : BaseViewModel
             return;
         }
     }
-
+ 
     public async Task Disconnect()
     {
         if (!IsConnectedToWebSocket) return;
@@ -177,6 +161,7 @@ public class ObsController : BaseViewModel
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
         Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
+        Client.SceneTransitionStarted -= Client_SceneTransitionStarted;
 
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
@@ -244,12 +229,6 @@ public class ObsController : BaseViewModel
         {
             var current = loadedScenes.Scenes[i];
             Scenes.Add(current.SceneName);
-        }
-        SelectedScene = Controller.MainScene.SceneName!;
-
-        if (string.IsNullOrEmpty(Controller.PreviewScene.SceneName))
-        {
-            await Controller.PreviewScene.GetCurrentSceneItems(SelectedScene);
         }
     }
 
@@ -400,86 +379,86 @@ public class ObsController : BaseViewModel
 
     private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
     {
-        _eventQueue.Enqueue(() => { OnCurrentProgrmaSceneChanged(e.SceneName); });
-    }
-    private void OnCurrentProgrmaSceneChanged(string scene)
-    {
+        if (StudioMode) return;
+
+        string scene = e.SceneName;
         bool isDuplicate = scene.Equals(Controller.MainScene.SceneName);
         Trace.WriteLine($"Program scene: {scene}, duplicate: {isDuplicate}");
         if (isDuplicate) return;
 
-        if (_turnedOffStudioMode)
-        {
-            _turnedOffStudioMode = false;
-            return;
-        }
-        Task.Run(async () => { await Controller.MainScene.GetCurrentSceneItems(scene); });
+        Task.Run(async () => {await Controller.MainScene.GetCurrentSceneItems(scene); });
     }
-
     private void OnCurrentPreviewSceneChanged(object? sender, SceneNameEventArgs e)
     {
+        if (_startedTransition)
+        {
+            _startedTransition = false;
+            return;
+        }
+
         string sceneName = e.SceneName;
         if (sceneName.Equals(Controller.PreviewScene.SceneName)) return;
-        Trace.WriteLine("Preview scene: " + sceneName);
-        Task.Run(async ()=> { await Controller.PreviewScene.GetCurrentSceneItems(sceneName); });
+
+        Trace.WriteLine("Loading Preview scene: " + sceneName);
+        Task.Run(async () => { await Controller.PreviewScene.GetCurrentSceneItems(sceneName); });
         LoadPreviewScene(sceneName, true);
     }
 
     private void OnStudioModeStateChanged(object? sender, StudioModeStateChangedEventArgs e)
     {
-        _eventQueue.Enqueue(() => { OnStudioModeStateChanged(e.StudioModeEnabled); });
-    }
-    private void OnStudioModeStateChanged(bool mode)
-    {
-        _turnedOffStudioMode = !mode;
-
-        Trace.WriteLine($"StudioMode: {mode}, Main scene name: {Controller.MainScene.SceneName}");
-        SelectedScene = Controller.MainScene.SceneName!;
-
-        ChangeStudioMode(mode);
+        ChangeStudioMode(e.StudioModeEnabled);
     }
     private void ChangeStudioMode(bool option, bool refresh = true)
     {
+        Trace.WriteLine($"StudioMode: {option}");
+
         StudioMode = option;
         OnPropertyChanged(nameof(StudioMode));
-
-        if (StudioMode)
-        {
-            Application.Current?.Dispatcher.Invoke(async () => await LoadScenesForStudioMode());
-        }
 
         Controller.MainScene.SetStudioMode(option);
         Controller.PreviewScene.SetStudioMode(option);
 
-        if (!refresh) return;
-        Controller.MainScene.RefreshItems();
-        Controller.PreviewScene.RefreshItems();
+        if (refresh)
+        {
+            Controller.MainScene.RefreshItems();
+            Controller.PreviewScene.RefreshItems();
+        }
+
+        if (StudioMode)
+        {
+            Application.Current?.Dispatcher.Invoke(async () => {
+                await LoadScenesForStudioMode();
+                await Controller.PreviewScene.GetCurrentSceneItems(Controller.MainScene.SceneName, true);
+                LoadPreviewScene(Controller.MainScene.SceneName);
+            });
+        }
     }
 
     private void LoadPreviewScene(string sceneName, bool isFromApi = false)
     {
-        if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
+        if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName) || sceneName.Equals(SelectedScene)) return;
+        Trace.WriteLine($"loading preview - {sceneName}");
 
         _selectedScene = sceneName;
         OnPropertyChanged(nameof(SelectedScene));
 
-        if (isFromApi) return;
-        Client.SetCurrentPreviewScene(_selectedScene);
+        if (isFromApi || SelectedScene.Equals(Controller.PreviewScene.SceneName)) return;
+        Client.SetCurrentPreviewScene(SelectedScene);
     }
 
-    private void DebounceTimerCallback(object? state)
+    private void Client_SceneTransitionStarted(object? sender, TransitionNameEventArgs e)
     {
-        _turnedOffStudioMode = false;
-    }
-    private void EventProcessorCallback(object state)
-    {
-        if (_processingEvent) return;
+        if (!StudioMode || Controller.MainScene.SceneName!.Equals(Controller.PreviewScene.SceneName)) return;
+        _startedTransition = true;
 
-        if (_eventQueue.TryDequeue(out var nextEvent))
+        Trace.WriteLine("Started Transition");
+        Task.Run(async () =>
         {
-            _processingEvent = true;
-            nextEvent();
-            _processingEvent = false;
-        }
+            string previewScene = Controller.PreviewScene.SceneName;
+            string mainScene = Controller.MainScene.SceneName;
+
+            await Controller.MainScene.GetCurrentSceneItems(previewScene);
+            await Controller.PreviewScene.GetCurrentSceneItems(mainScene);
+        });
     }
 }
