@@ -150,7 +150,7 @@ public class ObsController : BaseViewModel
             Client.SceneItemRemoved += OnSceneItemRemoved;
             Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
             Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
-            Client.SceneTransitionStarted += Client_SceneTransitionStarted;
+            Client.SceneTransitionStarted += OnSceneTransitionStarted;
         }
 
         catch (Exception ex)
@@ -173,7 +173,7 @@ public class ObsController : BaseViewModel
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
         Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
-        Client.SceneTransitionStarted -= Client_SceneTransitionStarted;
+        Client.SceneTransitionStarted -= OnSceneTransitionStarted;
 
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
@@ -230,19 +230,6 @@ public class ObsController : BaseViewModel
 
         Dictionary<string, object> input = new() { { "text", text }, };
         Client.SetInputSettings(sceneItemName, input);
-    }
-
-    private async Task LoadScenesForStudioMode()
-    {
-        Application.Current.Dispatcher.Invoke(Scenes.Clear);
-
-        var loadedScenes = await Client.GetSceneList();
-
-        for (int i = 0; i < loadedScenes.Scenes.Length; i++)
-        {
-            var current = loadedScenes.Scenes[i];
-            Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
-        }
     }
 
     public async Task<(string, float)> GetBrowserURLTwitchName(string sceneItemName)
@@ -447,6 +434,19 @@ public class ObsController : BaseViewModel
         }
     }
 
+    private async Task LoadScenesForStudioMode()
+    {
+        Application.Current.Dispatcher.Invoke(Scenes.Clear);
+
+        var loadedScenes = await Client.GetSceneList();
+
+        for (int i = 0; i < loadedScenes.Scenes.Length; i++)
+        {
+            var current = loadedScenes.Scenes[i];
+            Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
+        }
+    }
+
     private void LoadPreviewScene(string sceneName, bool isFromApi = false)
     {
         if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
@@ -474,7 +474,7 @@ public class ObsController : BaseViewModel
         });
     }
 
-    private void Client_SceneTransitionStarted(object? sender, TransitionNameEventArgs e)
+    private void OnSceneTransitionStarted(object? sender, TransitionNameEventArgs e)
     {
         if (!StudioMode || Controller.MainScene.SceneName!.Equals(Controller.PreviewScene.SceneName)) return;
         _startedTransition = true;

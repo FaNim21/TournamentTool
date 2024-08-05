@@ -352,13 +352,12 @@ public class Player : BaseViewModel, IPlayer
     private async Task<BitmapImage?> RequestHeadImage()
     {
         using HttpClient client = new();
-        HttpResponseMessage response = await client.GetAsync($"https://api.mojang.com/users/profiles/minecraft/{InGameName}");
-        if (!response.IsSuccessStatusCode) return null;
-        string output = await response.Content.ReadAsStringAsync();
-        ResponseApiID apiID = JsonSerializer.Deserialize<ResponseApiID>(output);
+        if (string.IsNullOrEmpty(InGameName)) return null;
 
-        response = await client.GetAsync($"https://api.mineatar.io/face/{apiID.ID}");
+        string path = $"https://minotar.net/helm/{InGameName}/180.png";
+        HttpResponseMessage response = await client.GetAsync(path);
         if (!response.IsSuccessStatusCode) return null;
+
         byte[] stream = await response.Content.ReadAsByteArrayAsync();
         ImageStream = stream;
         return Helper.LoadImageFromStream(stream);
