@@ -19,6 +19,8 @@ namespace TournamentTool.Modules.OBS;
 
 public class ObsController : BaseViewModel
 {
+    private readonly object _lock = new();
+
     public ControllerViewModel Controller { get; private set; }
 
     private ObservableCollection<string> _scenes = [];
@@ -185,7 +187,7 @@ public class ObsController : BaseViewModel
             await Task.Delay(100);
         Client = new();
     }
-
+ 
     public async Task Refresh()
     {
         if(!IsConnectedToWebSocket)
@@ -400,8 +402,12 @@ public class ObsController : BaseViewModel
         if (sceneName.Equals(Controller.PreviewScene.SceneName)) return;
 
         Trace.WriteLine("Loading Preview scene: " + sceneName);
-        Task.Run(async () => { await Controller.PreviewScene.GetCurrentSceneItems(sceneName); });
-        LoadPreviewScene(sceneName, true);
+        Task.Run(async () =>
+        {
+            await LoadScenesForStudioMode(false);
+            await Controller.PreviewScene.GetCurrentSceneItems(sceneName);
+            LoadPreviewScene(sceneName, true);
+        });
     }
 
     private void OnStudioModeStateChanged(object? sender, StudioModeStateChangedEventArgs e)
@@ -434,16 +440,23 @@ public class ObsController : BaseViewModel
         }
     }
 
-    private async Task LoadScenesForStudioMode()
+    private async Task LoadScenesForStudioMode(bool force = true)
     {
-        Application.Current.Dispatcher.Invoke(Scenes.Clear);
-
+        await Task.Delay(50);
         var loadedScenes = await Client.GetSceneList();
 
-        for (int i = 0; i < loadedScenes.Scenes.Length; i++)
+        lock (_lock)
         {
-            var current = loadedScenes.Scenes[i];
-            Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
+            if (!force && loadedScenes.Scenes.Length == Scenes.Count) return;
+
+            Trace.WriteLine("Loading preview scenes list");
+            Application.Current.Dispatcher.Invoke(Scenes.Clear);
+
+            for (int i = 0; i < loadedScenes.Scenes.Length; i++)
+            {
+                var current = loadedScenes.Scenes[i];
+                Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
+            }
         }
     }
 

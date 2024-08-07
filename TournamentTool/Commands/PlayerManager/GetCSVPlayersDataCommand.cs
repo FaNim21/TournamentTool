@@ -37,6 +37,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
             string[]? fields = parser.ReadFields();
             if (fields == null) continue;
 
+            //TODO: 9 Zrobic dynamiczny tooltip dla headerow
             Player data = new()
             {
                 Name = fields[0],

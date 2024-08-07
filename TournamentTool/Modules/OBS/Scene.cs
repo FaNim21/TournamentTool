@@ -262,7 +262,7 @@ public class Scene : BaseViewModel
     }
     public async Task Refresh()
     {
-        await GetCurrentSceneItems(SceneName!, true);
+        await GetCurrentSceneItems(SceneName!, true, false);
     }
     public async Task RefreshPovs()
     {
