@@ -108,7 +108,7 @@ public class Scene : BaseViewModel
 
         if (Controller.CurrentChosenPlayer == null)
         {
-            if (previousPOV == null) return;
+            if (previousPOV == null || previousPOV.Scene.Type != Type) return;
 
             Controller.CurrentChosenPOV.Swap(previousPOV);
             Controller.CurrentChosenPOV = null;

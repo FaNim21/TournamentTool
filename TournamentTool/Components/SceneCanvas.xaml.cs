@@ -31,7 +31,7 @@ public partial class SceneCanvas : UserControl
         {
             pov.SetPOV(info);
         }
-        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
+        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov && dragPov.Scene.Type == pov.Scene.Type)
         {
             dragPov.Swap(pov);
         }
