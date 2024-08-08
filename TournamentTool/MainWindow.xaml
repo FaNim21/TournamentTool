@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:vm="clr-namespace:TournamentTool.ViewModels"
-        xmlns:vmSettings="clr-namespace:TournamentTool.ViewModels.Settings"
         xmlns:components="clr-namespace:TournamentTool.Components.Controls"
         xmlns:views="clr-namespace:TournamentTool.Views"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -156,8 +155,11 @@
                 <DataTemplate DataType="{x:Type vm:ControllerViewModel}">
                     <views:ControllerView />
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type vmSettings:SettingsViewModel}">
+                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                     <views:SettingsView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
+                    <views:UpdatesView />
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
@@ -189,6 +191,7 @@
                             <components:HamburgerMenuItem Text="Updates"
                                                           Command="{Binding SelectViewModelCommand}"
                                                           CommandParameter="Updates"
+                                                          IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:UpdatesViewModel}}"
                                                           GroupName="MenuItem" />
                             <Border Visibility="Hidden"
                                     Background="Red"
@@ -208,7 +211,7 @@
                         <components:HamburgerMenuItem Text="Settings"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Settings"
-                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vmSettings:SettingsViewModel}}"
+                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SettingsViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
                 </Grid>

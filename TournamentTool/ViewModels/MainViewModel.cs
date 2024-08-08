@@ -4,7 +4,6 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels.Settings;
 
 namespace TournamentTool.ViewModels;
 
@@ -120,7 +119,7 @@ public class MainViewModel : BaseViewModel
                 Open<ControllerViewModel>();
                 break;
             case "Updates":
-                //SelectedViewModel = new UpdatesViewModel();
+                Open<UpdatesViewModel>();
                 break;
             case "Settings":
                 Open<SettingsViewModel>();

@@ -2,7 +2,7 @@
 using TournamentTool.Models;
 using TournamentTool.Utils;
 
-namespace TournamentTool.ViewModels.Settings;
+namespace TournamentTool.ViewModels;
 
 public class SettingsViewModel : SelectableViewModel
 {

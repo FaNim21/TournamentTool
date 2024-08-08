@@ -59,7 +59,20 @@ public partial class App : Application
             }
         };
 
+        var toggleStudioMode = new Hotkey
+        {
+            Key = Key.S,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Toggle Sudio Mode in controller panel",
+            Action = () =>
+            {
+                if (MainViewModel.SelectedViewModel is not ControllerViewModel controller) return;
+                controller.OBS.SwitchStudioModeCommand.Execute(null);
+            }
+        };
+
         InputController.Instance.AddHotkey(renameTextBox);
         InputController.Instance.AddHotkey(toggleHamburgerMenu);
+        InputController.Instance.AddHotkey(toggleStudioMode);
     }
 }

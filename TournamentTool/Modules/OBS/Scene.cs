@@ -163,7 +163,7 @@ public class Scene : BaseViewModel
                     if (CheckForAdditionals(additionals, groupItem)) continue;
 
                     if (groupItem.InputKind!.Equals("browser_source") &&
-                        item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                        groupItem.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
                     {
                         povItems.Add((groupItem, item));
                     }
@@ -182,6 +182,7 @@ public class Scene : BaseViewModel
 
         if (updatePlayersInPov) Controller.Configuration.ClearPlayersFromPOVS();
 
+        povItems.Reverse();
         for (int i = 0; i < povItems.Count; i++)
         {
             (SceneItem, SceneItem?) current = povItems[i];

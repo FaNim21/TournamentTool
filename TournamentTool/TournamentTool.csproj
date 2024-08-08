@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <Folder Include="Commands\Controller\" />
-    <Folder Include="ViewModels\Updates\" />
   </ItemGroup>
 
 </Project>
