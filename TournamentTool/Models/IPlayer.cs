@@ -3,6 +3,8 @@
 public interface IPlayer
 {
     public bool IsUsedInPov { get; set; }
+    public bool IsUsedInPreview { get; set; }
+
 
     public string GetDisplayName();
     public string GetPersonalBest();

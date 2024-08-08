@@ -114,6 +114,7 @@ public class PaceMan : BaseViewModel, IPlayer
         }
     }
 
+    public bool IsUsedInPreview { get; set; }
 
     public void Initialize(ControllerViewModel controller, List<PaceSplitsList> splits)
     {

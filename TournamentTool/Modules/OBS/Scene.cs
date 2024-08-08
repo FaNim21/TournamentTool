@@ -8,10 +8,16 @@ using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.OBS;
 
+public enum SceneType
+{
+    Main,
+    Preview
+}
+
 public class Scene : BaseViewModel
 {
     private readonly object _lock = new();
-    protected string SceneType;
+    public SceneType Type { get; protected set; }
 
     public ControllerViewModel Controller;
 
@@ -84,7 +90,7 @@ public class Scene : BaseViewModel
 
     public Scene(ControllerViewModel controllerViewModel)
     {
-        SceneType = "Scene";
+        Type = SceneType.Main;
         Controller = controllerViewModel;
 
         CanvasWidth = 426;
@@ -118,7 +124,7 @@ public class Scene : BaseViewModel
     public void SetStudioMode(bool option)
     {
         string output = option?"<Smaller>" : "<Bigger>";
-        Trace.WriteLine($"Resizing scene ([{SceneType}] - {SceneName}) to {output}");
+        Trace.WriteLine($"Resizing scene ([{Type}] - {SceneName}) to {output}");
         if (option)
         {
             CanvasWidth = 200;
@@ -144,7 +150,7 @@ public class Scene : BaseViewModel
 
         SceneItem[] sceneItems = await Controller.OBS.Client.GetSceneItemList(scene);
         List<SceneItem> additionals = [];
-        List<(SceneItem, SceneItem?)> povs = [];
+        List<(SceneItem, SceneItem?)> povItems = [];
 
         foreach (var item in sceneItems)
         {
@@ -159,7 +165,7 @@ public class Scene : BaseViewModel
                     if (groupItem.InputKind!.Equals("browser_source") &&
                         item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
                     {
-                        povs.Add((groupItem, item));
+                        povItems.Add((groupItem, item));
                     }
                 }
             }
@@ -170,13 +176,15 @@ public class Scene : BaseViewModel
             if (item.InputKind!.Equals("browser_source") &&
                 item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
             {
-                povs.Add((item, null));
+                povItems.Add((item, null));
             }
         }
 
-        for (int i = 0; i < povs.Count; i++)
+        if (updatePlayersInPov) Controller.Configuration.ClearPlayersFromPOVS();
+
+        for (int i = 0; i < povItems.Count; i++)
         {
-            (SceneItem, SceneItem?) current = povs[i];
+            (SceneItem, SceneItem?) current = povItems[i];
             await SetupPovFromSceneItem(additionals, current.Item1, current.Item2);
         }
     }
@@ -239,15 +247,13 @@ public class Scene : BaseViewModel
                 pov.PersonalBestItemName = additional.SourceName;
             }
         }
+
         pov.Clear();
 
         if (!string.IsNullOrEmpty(currentName))
         {
             Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
-
-            //tu usunalem weryfikowanie czy jest uzywany w povie
-            if (player != null)
-                pov.SetPOV(player);
+            if (player != null) pov.SetPOV(player);
         }
 
         AddPov(pov);

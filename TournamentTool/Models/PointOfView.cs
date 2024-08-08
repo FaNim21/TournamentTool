@@ -36,6 +36,34 @@ public class PointOfView : BaseViewModel
 
     public string Text { get; set; } = string.Empty;
 
+    public bool IsPlayerUsed
+    {
+        get
+        {
+            if (player == null) return false;
+            if (Scene.Type == SceneType.Main)
+            {
+                return player.IsUsedInPov;
+            }
+            else
+            {
+                return player.IsUsedInPreview;
+            }
+        }
+        set
+        {
+            if (player == null) return;
+            if (Scene.Type == SceneType.Main)
+            {
+                player.IsUsedInPov = value;
+            }
+            else
+            {
+                player.IsUsedInPreview = value;
+            }
+        }
+    }
+
     public bool IsFromWhiteList { get; set; }
 
     public IPlayer? player;
@@ -53,8 +81,7 @@ public class PointOfView : BaseViewModel
         get => _newVolume;
         set
         {
-            if (_newVolume != value)
-                _newVolume = value;
+            if (_newVolume != value) _newVolume = value;
             OnPropertyChanged(nameof(NewVolume));
             OnPropertyChanged(nameof(TextVolume));
         }
@@ -111,14 +138,25 @@ public class PointOfView : BaseViewModel
             return;
         }
 
-        if ((IsFromWhiteList && player.IsUsedInPov) || Scene.IsPlayerInPov(player!.GetTwitchName()))
+        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.GetTwitchName()))
         {
             player = oldPlayer;
             return;
         }
 
-        if (oldPlayer != null) oldPlayer.IsUsedInPov = false;
-        player.IsUsedInPov = true;
+        if (oldPlayer != null)
+        {
+            if (Scene.Type == SceneType.Main)
+            {
+                oldPlayer.IsUsedInPov = false;
+            }
+            else
+            {
+                oldPlayer.IsUsedInPreview = false;
+            }
+        }
+
+        IsPlayerUsed = true;
         SetPOV();
     }
     private void SetPOV()
@@ -134,7 +172,7 @@ public class PointOfView : BaseViewModel
         HeadViewParametr = player.GetHeadViewParametr();
         PersonalBest = player.GetPersonalBest() ?? "Unk";
         IsFromWhiteList = player.IsFromWhiteList();
-        player.IsUsedInPov = true;
+        IsPlayerUsed = true;
 
         _obs.SetBrowserURL(this);
         Update();
@@ -253,7 +291,7 @@ public class PointOfView : BaseViewModel
 
         if (player != null)
         {
-            player.IsUsedInPov = false;
+            IsPlayerUsed = false;
             player = null;
         }
 

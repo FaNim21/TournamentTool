@@ -295,6 +295,18 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
+    [JsonIgnore] private bool _isUsedInPreview;
+    [JsonIgnore]
+    public bool IsUsedInPreview
+    {
+        get => _isUsedInPreview;
+        set
+        {
+            _isUsedInPreview = value;
+            OnPropertyChanged(nameof(IsUsedInPreview));
+        }
+    }
+
 
     [JsonConstructor]
     public Player(string name = "")

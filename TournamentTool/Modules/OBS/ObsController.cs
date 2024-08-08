@@ -452,7 +452,7 @@ public class ObsController : BaseViewModel
             Trace.WriteLine("Loading preview scenes list");
             Application.Current.Dispatcher.Invoke(Scenes.Clear);
 
-            for (int i = 0; i < loadedScenes.Scenes.Length; i++)
+            for (int i = loadedScenes.Scenes.Length - 1; i >= 0; i--)
             {
                 var current = loadedScenes.Scenes[i];
                 Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });

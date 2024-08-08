@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.OBS;
@@ -10,7 +11,7 @@ public class PreviewScene : Scene
 
     public PreviewScene(ControllerViewModel controllerViewModel) : base(controllerViewModel)
     {
-        SceneType = "Preview";
+        Type = SceneType.Preview;
     }
 
     public override async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
@@ -21,6 +22,7 @@ public class PreviewScene : Scene
             MainText = "NOT SUPPORTED";
             Clear();
             SetSceneName(scene);
+            await Controller.OBS.Client.SetCurrentPreviewScene(scene);
             return;
         }
 
@@ -28,5 +30,4 @@ public class PreviewScene : Scene
         TransitionSceneName = string.Empty;
         await base.GetCurrentSceneItems(scene, force, false);
     }
-
 }

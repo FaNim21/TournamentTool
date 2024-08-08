@@ -300,7 +300,10 @@ public class Tournament : BaseViewModel, IRenameItem
     public void ClearPlayersFromPOVS()
     {
         for (int i = 0; i < Players.Count; i++)
+        {
             Players[i].IsUsedInPov = false;
+            Players[i].IsUsedInPreview = false;
+        }
     }
 
     public void Clear()
