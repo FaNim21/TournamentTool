@@ -32,6 +32,19 @@ public class PointOfView : BaseViewModel
     public string HeadItemName { get; set; } = string.Empty;
     public string PersonalBestItemName { get; set; } = string.Empty;
 
+    private bool _isResizing;
+    public bool IsResizing
+    {
+        get => _isResizing;
+        set
+        {
+            if (_isResizing == value) return;
+
+            _isResizing = value;
+            OnPropertyChanged(nameof(IsResizing));
+        }
+    }
+
     public Brush? BackgroundColor { get; set; }
 
     public string Text { get; set; } = string.Empty;
@@ -156,6 +169,7 @@ public class PointOfView : BaseViewModel
             }
         }
 
+        IsResizing = true;
         IsPlayerUsed = true;
         SetPOV();
     }

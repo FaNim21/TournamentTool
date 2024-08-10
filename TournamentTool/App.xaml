@@ -18,6 +18,7 @@
         <converters:EnumToBooleanConverter x:Key="EnumToBoolConverter" />
         <converters:TypeToBoolConverter x:Key="TypeToBoolConverter" />
         <converters:HotkeyConverter x:Key="HotkeyConverter" />
+        <converters:FontSizeConverter x:Key="FontSizeConverter" />
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">

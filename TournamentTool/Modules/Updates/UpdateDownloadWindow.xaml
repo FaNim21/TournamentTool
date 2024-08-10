@@ -1,0 +1,95 @@
+﻿<Window x:Class="MultiOpener.Windows.UpdateDownloadWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:buttons="clr-namespace:TournamentTool.Components.Buttons"
+        xmlns:local="clr-namespace:MultiOpener.Windows"
+        mc:Ignorable="d"
+        Title="OpenedInformation"
+        Width="700"
+        Height="400"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        ShowInTaskbar="False"
+        BorderThickness="1"
+        BorderBrush="#00090e"
+        WindowStartupLocation="CenterOwner"
+        Background="#383A3C"
+        PreviewKeyDown="WindowKeyDown">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Background="#000D14"
+              Grid.Row="0">
+            <buttons:ButtonTaskbar x:Name="ExitButton"
+                                   Width="25"
+                                   Height="25"
+                                   FontSize="16"
+                                   HorizontalAlignment="Right"
+                                   VerticalContentAlignment="Center"
+                                   ContentText="X"
+                                   Click="ExitButtonClick" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Visible">
+                <Grid x:Name="GridPatchNotes"
+                      Visibility="Visible">
+                    <TextBlock x:Name="HeaderText"
+                               Height="50"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Center"
+                               Foreground="White"
+                               Text="Loading name..."
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Margin="10 0 10 0" />
+                    <TextBlock x:Name="BodyText"
+                               Width="680"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Left"
+                               Foreground="White"
+                               FontSize="12"
+                               Text="Loading body..."
+                               TextWrapping="Wrap"
+                               Margin="10 50 10 50" />
+                </Grid>
+            </ScrollViewer>
+            <buttons:ButtonNormal ContentText="Download"
+                                  Width="140"
+                                  Height="30"
+                                  VerticalAlignment="Bottom"
+                                  FontSize="18"
+                                  Margin="0 0 0 10"
+                                  Click="StartDownload" />
+
+            <Grid x:Name="GridProgressBar"
+                  Visibility="Hidden">
+                <ProgressBar x:Name="ProgressBar"
+                             Height="40"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center"
+                             Margin="20" />
+
+                <TextBlock x:Name="ProgressText"
+                           Foreground="Black"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Text="0%"
+                           Margin="0 0 0 0" />
+
+                <Label Content="After download is finished it should take 3 seconds to reopen MultiOpener with new version"
+                       Foreground="White"
+                       FontSize="16"
+                       VerticalAlignment="Center"
+                       Margin="17 0 0 90" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

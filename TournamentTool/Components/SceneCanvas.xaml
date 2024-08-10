@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Components"
+             xmlns:utils="clr-namespace:TournamentTool.Utils"
              xmlns:obs="clr-namespace:TournamentTool.Modules.OBS"
              d:DataContext="{d:DesignInstance Type=obs:Scene}"
              mc:Ignorable="d">
@@ -42,7 +43,7 @@
                                     Width="{Binding Width, Mode=OneWay}"
                                     Height="{Binding Height, Mode=OneWay}"
                                     BorderBrush="#1E90FF"
-                                    BorderThickness="1"
+                                    BorderThickness="0.8"
                                     CornerRadius="5"
                                     Drop="Border_Drop"
                                     MouseMove="CanvasBorder_MouseMove"
@@ -51,17 +52,18 @@
                                     MouseEnter="CanvasItem_MouseEnter"
                                     MouseLeave="CanvasItem_MouseLeave">
                                 <Grid>
-                                    <TextBlock Text="{Binding SceneItemName}"
+                                    <TextBlock Text="{Binding SceneItemName, Mode=OneWay}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
                                                FontSize="{Binding DataContext.FontSizeSceneName, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
                                                Foreground="#E0E0E0" />
-                                    <TextBlock Text="{Binding DisplayedPlayer}"
+
+                                    <TextBlock Text="{Binding DisplayedPlayer, Mode=OneWay}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               FontSize="{Binding DataContext.FontSizeDisplayedName, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
-                                               FontWeight="SemiBold"
-                                               Foreground="#FFFFFF" />
+                                               FontSize="{Binding Width, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FontSizeConverter}}"
+                                               FontWeight="Bold"
+                                               Foreground="#373737" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

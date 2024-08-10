@@ -62,17 +62,6 @@ public class Scene : BaseViewModel
         }
     }
 
-    private float _fontSizeDisplayedName;
-    public float FontSizeDisplayedName
-    {
-        get => _fontSizeDisplayedName;
-        set
-        {
-            _fontSizeDisplayedName = value;
-            OnPropertyChanged(nameof(FontSizeDisplayedName));
-        }
-    }
-
     public float BaseWidth {  get; set; } 
     public float ProportionsRatio { get => BaseWidth / CanvasWidth; }
 
@@ -96,7 +85,6 @@ public class Scene : BaseViewModel
         CanvasWidth = 426;
         CanvasHeight = 239.625f;
         FontSizeSceneName = 10;
-        FontSizeDisplayedName = 13;
     }
 
     public void OnPOVClick(PointOfView clickedPov)
@@ -127,18 +115,16 @@ public class Scene : BaseViewModel
         Trace.WriteLine($"Resizing scene ([{Type}] - {SceneName}) to {output}");
         if (option)
         {
-            CanvasWidth = 200;
-            CanvasHeight = 112.5f;
+            CanvasWidth = 210;
+            CanvasHeight = 118.12f;
             FontSizeSceneName = 4;
-            FontSizeDisplayedName = 5;
             return;
         }
 
         CanvasWidth = 426;
         CanvasHeight = 239.625f;
         FontSizeSceneName = 10;
-        FontSizeDisplayedName = 13;
-    }
+    } 
 
     public virtual async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
@@ -346,6 +332,6 @@ public class Scene : BaseViewModel
     public void Clear()
     {
         SetSceneName(string.Empty);
-        Application.Current.Dispatcher.Invoke(POVs.Clear);
+        ClearPovs();
     }
 }
