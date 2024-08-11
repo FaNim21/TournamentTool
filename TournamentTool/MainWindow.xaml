@@ -193,7 +193,7 @@
                                                           CommandParameter="Updates"
                                                           IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:UpdatesViewModel}}"
                                                           GroupName="MenuItem" />
-                            <Border Visibility="Hidden"
+                            <Border Visibility="{Binding NewUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Background="Red"
                                     CornerRadius="10"
                                     Width="19"

@@ -5,15 +5,64 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:models="clr-namespace:TournamentTool.Models"
-             xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+             xmlns:buttons="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=viewmodels:UpdatesViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="1024"
              d:DesignHeight="605"
-             Background="#1E1E1E">
+             Background="#1E1E1E" >
     <Grid>
-        <Label Content="UPDATES"/>
+        <ScrollViewer VerticalScrollBarVisibility="Visible">
+            <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock x:Name="HeaderText"
+                           Height="50"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           Text="Loading name..."
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Margin="10 0 10 0" />
+                <TextBlock x:Name="BodyText"
+                           Width="680"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Left"
+                           Foreground="White"
+                           FontSize="12"
+                           Text="Loading body..."
+                           TextWrapping="Wrap"
+                           Margin="10 50 10 50" />
+            </Grid>
+        </ScrollViewer>
+        <buttons:ButtonNormal ContentText="Download"
+                              Width="140"
+                              Height="30"
+                              VerticalAlignment="Bottom"
+                              FontSize="18"
+                              Margin="0 0 0 10"
+                              OnCommand="{Binding DownloadCommand}"/>
+
+        <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
+            <ProgressBar Height="40"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         Margin="20" />
+
+            <TextBlock Foreground="Black"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Text="0%"
+                       Margin="0 0 0 0" />
+
+            <Label Content="After download is finished it should take 3 seconds to reopen MultiOpener with new version"
+                   Foreground="White"
+                   FontSize="16"
+                   VerticalAlignment="Center"
+                   Margin="17 0 0 90" />
+        </Grid>
     </Grid>
 </UserControl>

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using System.Windows.Input;
 using TournamentTool.Commands;
@@ -40,6 +41,17 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    private bool _newUpdate { get; set; }
+    public bool NewUpdate
+    {
+        get => _newUpdate;
+        set
+        {
+            _newUpdate = value;
+            OnPropertyChanged(nameof(NewUpdate));
+        }
+    }
+
     public ICommand OnHamburegerClick { get; set; }
     public ICommand SelectViewModelCommand { get; set; }
 
@@ -53,6 +65,8 @@ public class MainViewModel : BaseViewModel
 
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
+
+        Task.Factory.StartNew(async () => await CheckForUpdate());
 
         Open<PresetManagerViewModel>();
     }
@@ -139,5 +153,22 @@ public class MainViewModel : BaseViewModel
 
         if (SelectedViewModel is not PresetManagerViewModel presetManager) return;
         presetManager.PresetIsSaved();
+    }
+
+    private async Task CheckForUpdate()
+    {
+        UpdateChecker updateChecker = new();
+        bool isNewUpdate = false;
+
+        try
+        {
+            isNewUpdate = await updateChecker.CheckForUpdates();
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex);
+        }
+
+        NewUpdate = isNewUpdate;
     }
 }

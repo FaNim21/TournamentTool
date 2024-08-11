@@ -1,27 +1,27 @@
-﻿/*using MultiOpener.ViewModels;
-using NuGet.Versioning;
+﻿using NuGet.Versioning;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
-namespace MultiOpener.Utils;
+namespace TournamentTool.Utils;
 
-public class Release
+public struct Release
 {
-    public string tag_name { get; set; }
+    [JsonPropertyName("tag_name")] public string Version { get; set; }
 }
 
 public class UpdateChecker
 {
     private const string OWNER = "FaNim21";
-    private const string REPO = "MultiOpener";
+    private const string REPO = "TournamentTool";
 
     public async Task<bool> CheckForUpdates(string? version = null)
     {
         if (string.IsNullOrEmpty(version))
             version = Consts.Version[1..];
 
-        const string apiUrl = "https://api.github.com/repos/FaNim21/MultiOpener/releases";
+        const string apiUrl = "https://api.github.com/repos/FaNim21/TournamentTool/releases";
         using (var httpClient = new HttpClient())
         {
             httpClient.DefaultRequestHeaders.Add("User-Agent", REPO);
@@ -33,19 +33,19 @@ public class UpdateChecker
                 var releases = JsonSerializer.Deserialize<Release[]>(responseBody);
                 var latestRelease = releases![0];
 
-                if (latestRelease != null && !IsUpToDate(latestRelease.tag_name, version))
+                if (!string.IsNullOrEmpty(latestRelease.Version) && !IsUpToDate(latestRelease.Version, version))
                 {
-                    StartViewModel.Log($"Found new update - {latestRelease.tag_name}", Entities.ConsoleLineOption.Warning);
+                    Trace.WriteLine($"Found new update - {latestRelease.Version}");
                     return true;
                 }
             }
             else
             {
-                throw new System.Exception($"{response.StatusCode}");
+                throw new Exception($"{response.StatusCode}");
             }
         }
 
-        StartViewModel.Log($"You are up to date - {version}");
+        Trace.WriteLine($"You are up to date - {version}");
         return false;
     }
 
@@ -56,4 +56,4 @@ public class UpdateChecker
 
         return latest <= current;
     }
-}*/
+}
