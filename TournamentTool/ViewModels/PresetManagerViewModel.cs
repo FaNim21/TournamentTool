@@ -55,6 +55,8 @@ public class PresetManagerViewModel : SelectableViewModel
         }
     }
 
+    public ICommand OpenControllerCommand { get; set; }
+
     public ICommand AddNewPresetCommand { get; set; }
     public ICommand SavePresetCommand { get; set; }
     public ICommand OnItemListClickCommand { get; set; }
@@ -76,6 +78,8 @@ public class PresetManagerViewModel : SelectableViewModel
             Directory.CreateDirectory(Consts.PresetsPath);
 
         LoadAllPresets();
+
+        OpenControllerCommand = new RelayCommand(MainViewModel.Open<ControllerViewModel>);
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(SavePreset);

@@ -16,26 +16,20 @@
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Visible">
             <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock x:Name="HeaderText"
-                           Height="50"
+                <TextBlock Height="50"
                            VerticalAlignment="Top"
                            HorizontalAlignment="Center"
                            Foreground="White"
-                           Text="Loading name..."
+                           Text="{Binding HeaderText, Mode=OneWay}"
                            FontSize="28"
                            FontWeight="SemiBold"
                            Margin="10 0 10 0" />
-                <TextBlock x:Name="BodyText"
-                           Width="680"
-                           VerticalAlignment="Top"
-                           HorizontalAlignment="Left"
-                           Foreground="White"
-                           FontSize="12"
-                           Text="Loading body..."
-                           TextWrapping="Wrap"
-                           Margin="10 50 10 50" />
+
+                <ContentControl Content="{Binding ParsedMarkdown}"
+                                Margin="10 25 10 50" />
             </Grid>
         </ScrollViewer>
+
         <buttons:ButtonNormal ContentText="Download"
                               Width="140"
                               Height="30"
@@ -44,10 +38,26 @@
                               Margin="0 0 0 10"
                               OnCommand="{Binding DownloadCommand}"/>
 
+        <TextBlock VerticalAlignment="Top"
+                   Margin="10">
+            <Hyperlink NavigateUri="https://github.com/FaNim21/TournamentTool/releases"
+                       RequestNavigate="OpenVersionsSite">
+                <Hyperlink.Style>
+                    <Style TargetType="Hyperlink"
+                           BasedOn="{StaticResource {x:Type Hyperlink}}">
+                        <Setter Property="Foreground"
+                                Value="LightSkyBlue" />
+                    </Style>
+                </Hyperlink.Style>
+                All releases here
+            </Hyperlink>
+        </TextBlock>
+
         <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
             <ProgressBar Height="40"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
+                         Value="{Binding ProgressValue}"
                          Margin="20" />
 
             <TextBlock Foreground="Black"
@@ -55,13 +65,14 @@
                        HorizontalAlignment="Center"
                        FontSize="28"
                        FontWeight="SemiBold"
-                       Text="0%"
+                       Text="{Binding ProgressText}"
                        Margin="0 0 0 0" />
 
             <Label Content="After download is finished it should take 3 seconds to reopen MultiOpener with new version"
                    Foreground="White"
                    FontSize="16"
                    VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
                    Margin="17 0 0 90" />
         </Grid>
     </Grid>

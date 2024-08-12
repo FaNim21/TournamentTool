@@ -92,7 +92,7 @@
         -->
 
         <Grid Grid.ColumnSpan="2">
-            <Label Content="WORK IN PROGRES..."
+            <Label Content="WORK IN PROGRESS..."
                    Foreground="White"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"

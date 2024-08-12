@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using TournamentTool.Components.Controls;
 
-namespace TournamentTool.Views
+namespace TournamentTool.Views;
+
+public partial class UpdatesView : UserControl
 {
-    /// <summary>
-    /// Logika interakcji dla klasy UpdatesView.xaml
-    /// </summary>
-    public partial class UpdatesView : UserControl
+    public UpdatesView()
     {
-        public UpdatesView()
+        InitializeComponent();
+    }
+
+    private void OpenVersionsSite(object sender, RequestNavigateEventArgs e)
+    {
+        if (DialogBox.Show($"Do you want to open TournamentTool site to check for new updates or patch notes?", $"Opening Github Release site For TournamentTool", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
         {
-            InitializeComponent();
+            var processStart = new ProcessStartInfo(e.Uri.ToString())
+            {
+                UseShellExecute = true,
+                Verb = "open"
+            };
+            Process.Start(processStart);
         }
     }
 }

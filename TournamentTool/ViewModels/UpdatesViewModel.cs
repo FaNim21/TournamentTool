@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
@@ -28,6 +29,8 @@ public class UpdatesViewModel : SelectableViewModel
         [JsonPropertyName("size")] public long Size { get; set; }
     }
 
+    public bool Downloading { get; private set; }
+
     private bool _patchNotesGrid { get; set; }
     public bool PatchNotesGrid
     {
@@ -39,7 +42,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
     }
 
-    private string _headerText { get; set; }
+    private string _headerText { get; set; } = "Loading name...";
     public string HeaderText
     {
         get => _headerText;
@@ -50,7 +53,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
     }
 
-    private string _bodyText { get; set; }
+    private string _bodyText { get; set; } = "Loading body...";
     public string BodyText
     {
         get => _bodyText;
@@ -58,6 +61,40 @@ public class UpdatesViewModel : SelectableViewModel
         {
             _bodyText = value;
             OnPropertyChanged(nameof(BodyText));
+            ParsedMarkdown = MarkdownParser.ParseMarkdown(_bodyText);
+        }
+    }
+
+    private string _progressText { get; set; } = "0%";
+    public string ProgressText
+    {
+        get => _progressText;
+        set
+        {
+            _progressText = value;
+            OnPropertyChanged(nameof(ProgressText));
+        }
+    }
+
+    private double _progressValue { get; set; }
+    public double ProgressValue
+    {
+        get => _progressValue;
+        set
+        {
+            _progressValue = value;
+            OnPropertyChanged(nameof(ProgressValue));
+        }
+    }
+
+    private TextBlock? _parsedMarkdown;
+    public TextBlock? ParsedMarkdown
+    {
+        get => _parsedMarkdown;
+        private set
+        {
+            _parsedMarkdown = value;
+            OnPropertyChanged(nameof(ParsedMarkdown));
         }
     }
 
@@ -70,14 +107,13 @@ public class UpdatesViewModel : SelectableViewModel
     private string? downloadUrl;
     private long size;
 
-    private bool startedDownloading;
+    public bool startedDownloading;
     private bool canDownloadUpdate;
 
 
     public UpdatesViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
         CanBeDestroyed = false;
-
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
         DownloadCommand = new RelayCommand(() =>
@@ -86,19 +122,18 @@ public class UpdatesViewModel : SelectableViewModel
 
             Task.Factory.StartNew(Download);
         });
+
+        Task.Run(Setup);
     }
 
     public override bool CanEnable(Tournament tournament)
     {
         return true;
     }
-
     public override void OnEnable(object? parameter)
     {
         PatchNotesGrid = true;
-        Task.Run(Setup);
     }
-
     public override bool OnDisable()
     {
         return true;
@@ -106,6 +141,13 @@ public class UpdatesViewModel : SelectableViewModel
 
     private async Task Setup()
     {
+        if (!MainViewModel.NewUpdate)
+        {
+            HeaderText = "NO NEW UPDATES";
+            BodyText = "";
+            return;
+        }
+
         canDownloadUpdate = true;
         try
         {
@@ -115,7 +157,7 @@ public class UpdatesViewModel : SelectableViewModel
 
             if (!releasesResponse.IsSuccessStatusCode)
             {
-                //StartViewModel.Log("Error while searching for update: " + releasesResponse.StatusCode);
+                Trace.WriteLine("Error while searching for update: " + releasesResponse.StatusCode);
                 canDownloadUpdate = false;
                 return;
             }
@@ -136,13 +178,13 @@ public class UpdatesViewModel : SelectableViewModel
             }
             else
             {
-                //StartViewModel.Log("No releases found in the repository.", Entities.ConsoleLineOption.Error);
+                Trace.WriteLine("No releases found in the repository.");
                 canDownloadUpdate = false;
             }
         }
         catch (Exception ex)
         {
-            //StartViewModel.Log($"Error: {ex.Message} {ex.StackTrace}", Entities.ConsoleLineOption.Error);
+            Trace.WriteLine($"Error: {ex.Message} {ex.StackTrace}");
             canDownloadUpdate = false;
         }
         finally
@@ -153,10 +195,13 @@ public class UpdatesViewModel : SelectableViewModel
 
     private async Task Download()
     {
+        if (!canDownloadUpdate) return;
+
         Application.Current?.Dispatcher.Invoke(delegate
         {
             startedDownloading = true;
             PatchNotesGrid = false;
+            Downloading = true;
         });
 
         try
@@ -180,13 +225,13 @@ public class UpdatesViewModel : SelectableViewModel
                 }
             }
 
-            //StartViewModel.Log("Download completed successfully.");
+            Trace.WriteLine("Download completed successfully.");
 
             ReplaceExecutable();
         }
         catch (Exception ex)
         {
-            //StartViewModel.Log($"Error: {ex.Message} {ex.StackTrace}", Entities.ConsoleLineOption.Error);
+            Trace.WriteLine($"Error: {ex.Message} {ex.StackTrace}");
         }
         finally
         {
@@ -213,7 +258,7 @@ public class UpdatesViewModel : SelectableViewModel
                 }
                 else
                 {
-                    //StartViewModel.Log($"{executableFileName} not found in the zip file.");
+                    Trace.WriteLine($"{executableFileName} not found in the zip file.");
                     return;
                 }
             }
@@ -235,9 +280,9 @@ public class UpdatesViewModel : SelectableViewModel
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex);
-            //StartViewModel.Log($"Error replacing executable: {ex.Message}\n{ex.StackTrace}", Entities.ConsoleLineOption.Error);
+            Trace.WriteLine($"Error replacing executable: {ex.Message}\n{ex.StackTrace}");
         }
+        Downloading = false;
     }
 
     public void UpdateProgress(long bytesDownloaded, long totalBytes)
@@ -245,8 +290,8 @@ public class UpdatesViewModel : SelectableViewModel
         if (totalBytes <= 0) return;
         Application.Current?.Dispatcher.Invoke(delegate
         {
-            /*ProgressText.Text = $"{Math.Round((double)bytesDownloaded / totalBytes, 2) * 100}%";
-            ProgressBar.Value = (double)bytesDownloaded / totalBytes * 100;*/
+            ProgressText = $"{Math.Round((double)bytesDownloaded / totalBytes, 2) * 100}%";
+            ProgressValue = (double)bytesDownloaded / totalBytes * 100;
         });
     }
 }

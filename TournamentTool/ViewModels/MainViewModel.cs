@@ -35,7 +35,9 @@ public class MainViewModel : BaseViewModel
         get => _isHamburgerMenuOpen;
         set
         {
+            if (SelectedViewModel is UpdatesViewModel updates && updates.Downloading) return;
             if (_isHamburgerMenuOpen == value) return;
+
             _isHamburgerMenuOpen = value;
             OnPropertyChanged(nameof(IsHamburgerMenuOpen));
         }
