@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\blazeRodIcon.png" />
+    <None Remove="Resources\pearlIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="TT.ico" />
   </ItemGroup>
 
@@ -38,6 +43,13 @@
   <ItemGroup>
     <Folder Include="Commands\Controller\" />
     <Folder Include="Modules\Updates\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\blazeRodIcon.png" />
+    <Resource Include="Resources\pearlIcon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

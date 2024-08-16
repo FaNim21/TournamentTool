@@ -435,7 +435,6 @@
                                 <Border BorderBrush="#7e8691"
                                         BorderThickness="1"
                                         Width="263"
-                                        Height="45"
                                         MouseMove="ListBorder_MouseMove">
                                     <Grid>
                                         <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -445,46 +444,77 @@
                                                  VerticalAlignment="Top"
                                                  Fill="Red"
                                                  Margin="5" />
-                                        <StackPanel Orientation="Horizontal"
-                                                    Margin="5 0 0 0">
-                                            <Image Source="{Binding HeadImage}"
-                                                   Width="30"
-                                                   Height="30"
-                                                   Opacity="{Binding HeadImageOpacity}" />
-                                            <TextBlock Text="{Binding Nickname}"
-                                                       Width="67"
-                                                       Height="20"
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"
-                                                       TextAlignment="Left"
-                                                       Foreground="White"
-                                                       Padding="0"
-                                                       FontWeight="Bold"
-                                                       Margin="5 6 0 0" />
-
-                                            <TextBlock Foreground="{Binding PaceSplitTimeColor}"
-                                                       Width="70"
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="5 5 0 5">
+                                                <Image Source="{Binding HeadImage}"
+                                                       Width="30"
                                                        Height="30"
-                                                       HorizontalAlignment="Left"
-                                                       VerticalAlignment="Center"
-                                                       TextAlignment="Center"
-                                                       Margin="3 0 0 0">
+                                                       Opacity="{Binding HeadImageOpacity}" />
+                                                <TextBlock Text="{Binding Nickname}"
+                                                           Width="67"
+                                                           Height="20"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Center"
+                                                           TextAlignment="Left"
+                                                           Foreground="White"
+                                                           Padding="0"
+                                                           FontWeight="Bold"
+                                                           Margin="5 6 0 0" />
+
+                                                <TextBlock Foreground="{Binding PaceSplitTimeColor}"
+                                                           Width="70"
+                                                           Height="30"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           TextAlignment="Center"
+                                                           Margin="3 0 0 0">
                                                 <Run Text="{Binding CurrentSplitTime}"
                                                      FontWeight="{Binding PaceFontWeight}"
                                                      FontSize="23" />
-                                            </TextBlock>
+                                                </TextBlock>
 
-                                            <TextBlock Foreground="FloralWhite"
-                                                       Width="80"
-                                                       Height="30"
-                                                       HorizontalAlignment="Left"
-                                                       VerticalAlignment="Center"
-                                                       TextAlignment="Center"
-                                                       Margin="0 0 0 0">
+                                                <TextBlock Foreground="FloralWhite"
+                                                           Width="80"
+                                                           Height="30"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           TextAlignment="Center"
+                                                           Margin="0 0 0 0">
                                                 <Run Text="{Binding IGTTime}"
                                                      FontWeight="{Binding PaceFontWeight}"
                                                      FontSize="23" />
-                                            </TextBlock>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                        Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Width="20">
+                                                        <Image.Source>
+                                                            <BitmapImage DecodePixelWidth="20"
+                                                                         UriSource="/Resources/pearlIcon.png" />
+                                                        </Image.Source>
+                                                    </Image>
+                                                    <TextBox Background="Transparent"
+                                                             Foreground="White"
+                                                             BorderThickness="0"
+                                                             Text="{Binding PearlsCount}" />
+                                                </StackPanel>
+
+                                                <StackPanel Margin="10 0 0 0"
+                                                            Orientation="Horizontal">
+                                                    <Image Width="20">
+                                                        <Image.Source>
+                                                            <BitmapImage DecodePixelWidth="20"
+                                                                         UriSource="/Resources/blazeRodIcon.png" />
+                                                        </Image.Source>
+                                                    </Image>
+                                                    <TextBox Background="Transparent"
+                                                             Foreground="White"
+                                                             BorderThickness="0"
+                                                             Text="{Binding BlazeRodsCount}" />
+                                                </StackPanel>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Grid>
                                 </Border>

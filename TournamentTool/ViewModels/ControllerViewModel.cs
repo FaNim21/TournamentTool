@@ -4,6 +4,7 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Modules.OBS;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
 
 namespace TournamentTool.ViewModels;
@@ -28,6 +29,8 @@ public class ControllerViewModel : SelectableViewModel
 
     public ObsController OBS { get; set; }
     public PaceManService PaceManService { get; set; }
+
+    public SidePanel SidePanel { get; set; }
 
     public Tournament Configuration { get; private set; } = new();
  

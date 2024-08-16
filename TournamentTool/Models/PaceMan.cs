@@ -36,6 +36,9 @@ public class PaceMan : BaseViewModel, IPlayer
     [JsonPropertyName("eventList")]
     public List<PaceSplitsList> Splits { get; set; } = [];
 
+    [JsonPropertyName("itemData")]
+    public PaceItemData ItemsData { get; set; } = new();
+
     [JsonPropertyName("lastUpdated")]
     public long LastUpdate { get; set; }
 
@@ -53,6 +56,39 @@ public class PaceMan : BaseViewModel, IPlayer
     }
 
     public float HeadImageOpacity { get; set; }
+
+    private bool _displayItems {  get; set; }
+    public bool DisplayItems
+    {
+        get => _displayItems;
+        set
+        {
+            _displayItems = value;
+            OnPropertyChanged(nameof(DisplayItems));
+        }
+    }
+
+    private int _pearlsCount { get; set; }
+    public int PearlsCount
+    {
+        get => _pearlsCount;
+        set
+        {
+            _pearlsCount = value;
+            OnPropertyChanged(nameof(PearlsCount));
+        }
+    }
+
+    private int _blazeRodsCounts { get; set; }
+    public int BlazeRodsCount
+    {
+        get => _blazeRodsCounts;
+        set
+        {
+            _blazeRodsCounts = value;
+            OnPropertyChanged(nameof(BlazeRodsCount));
+        }
+    }
 
     private SplitType _splitType;
     public SplitType SplitType
@@ -130,6 +166,14 @@ public class PaceMan : BaseViewModel, IPlayer
         Splits = paceman.Splits;
         LastUpdate = paceman.LastUpdate;
 
+        if (ItemsData.EstimatedCounts != null)
+        {
+            ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
+            ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
+            BlazeRodsCount = estimatedRods;
+            PearlsCount = estimatedPearls;
+        }
+
         if (Splits == null || Splits.Count == 0) return;
         UpdateTime(Splits);
     }
@@ -139,6 +183,8 @@ public class PaceMan : BaseViewModel, IPlayer
         for (int i = 0; i < splits.Count; i++)
             splits[i].SplitName = splits[i].SplitName.Replace("rsg.", "");
         PaceSplitsList lastSplit = splits[^1];
+
+        if (splits.Count > 2) DisplayItems = true;
 
         if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
         {
@@ -308,4 +354,13 @@ public struct PaceManStreamData
 
     [JsonPropertyName("alt")]
     public string AltID { get; set; }
+}
+
+public struct PaceItemData
+{
+    [JsonPropertyName("estimatedCounts")]
+    public Dictionary<string, int> EstimatedCounts { get; set; }
+
+    [JsonPropertyName("usages")]
+    public Dictionary<string, int> Usages { get; set; }
 }
