@@ -487,31 +487,34 @@
                                                 </TextBlock>
                                             </StackPanel>
                                             <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                        Orientation="Horizontal">
+                                                        Orientation="Horizontal"
+                                                        Margin="2 -4 0 1">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Image Width="20">
+                                                    <Image Width="18">
                                                         <Image.Source>
-                                                            <BitmapImage DecodePixelWidth="20"
+                                                            <BitmapImage DecodePixelWidth="18"
                                                                          UriSource="/Resources/pearlIcon.png" />
                                                         </Image.Source>
                                                     </Image>
                                                     <TextBox Background="Transparent"
                                                              Foreground="White"
                                                              BorderThickness="0"
+                                                             FontSize="14"
                                                              Text="{Binding PearlsCount}" />
                                                 </StackPanel>
 
                                                 <StackPanel Margin="10 0 0 0"
                                                             Orientation="Horizontal">
-                                                    <Image Width="20">
+                                                    <Image Width="18">
                                                         <Image.Source>
-                                                            <BitmapImage DecodePixelWidth="20"
+                                                            <BitmapImage DecodePixelWidth="18"
                                                                          UriSource="/Resources/blazeRodIcon.png" />
                                                         </Image.Source>
                                                     </Image>
                                                     <TextBox Background="Transparent"
                                                              Foreground="White"
                                                              BorderThickness="0"
+                                                             FontSize="14"
                                                              Text="{Binding BlazeRodsCount}" />
                                                 </StackPanel>
                                             </StackPanel>

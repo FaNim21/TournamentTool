@@ -128,7 +128,7 @@ public class PaceManService : BaseViewModel
             var pace = paceMan[i];
             bool wasPaceFound = false;
 
-            if (!pace.IsLive()) continue;
+            if (!pace.IsLive() || pace.IsHidden || pace.IsCheated) continue;
 
             for (int j = 0; j < currentPaces.Count; j++)
             {

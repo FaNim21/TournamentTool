@@ -42,6 +42,12 @@ public class PaceMan : BaseViewModel, IPlayer
     [JsonPropertyName("lastUpdated")]
     public long LastUpdate { get; set; }
 
+    [JsonPropertyName("isHidden")]
+    public bool IsHidden { get; set; }
+
+    [JsonPropertyName("isCheated")]
+    public bool IsCheated { get; set; }
+
     public Player? Player { get; set; }
 
     private BitmapImage? _headImage;
@@ -166,13 +172,6 @@ public class PaceMan : BaseViewModel, IPlayer
         Splits = paceman.Splits;
         LastUpdate = paceman.LastUpdate;
 
-        if (ItemsData.EstimatedCounts != null)
-        {
-            ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
-            ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            BlazeRodsCount = estimatedRods;
-            PearlsCount = estimatedPearls;
-        }
 
         if (Splits == null || Splits.Count == 0) return;
         UpdateTime(Splits);
@@ -184,7 +183,15 @@ public class PaceMan : BaseViewModel, IPlayer
             splits[i].SplitName = splits[i].SplitName.Replace("rsg.", "");
         PaceSplitsList lastSplit = splits[^1];
 
-        if (splits.Count > 2) DisplayItems = true;
+        if (ItemsData.EstimatedCounts != null)
+        {
+            ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
+            ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
+            if (estimatedPearls > 0 && !DisplayItems) DisplayItems = true;
+
+            BlazeRodsCount = estimatedRods;
+            PearlsCount = estimatedPearls;
+        }
 
         if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
         {
