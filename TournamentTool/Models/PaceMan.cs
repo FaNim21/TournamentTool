@@ -171,7 +171,9 @@ public class PaceMan : BaseViewModel, IPlayer
         User = paceman.User;
         Splits = paceman.Splits;
         LastUpdate = paceman.LastUpdate;
-
+        ItemsData = paceman.ItemsData;
+        IsCheated = paceman.IsCheated;
+        IsHidden = paceman.IsHidden;
 
         if (Splits == null || Splits.Count == 0) return;
         UpdateTime(Splits);
@@ -187,7 +189,7 @@ public class PaceMan : BaseViewModel, IPlayer
         {
             ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
             ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if (estimatedPearls > 0 && !DisplayItems) DisplayItems = true;
+            if ((estimatedPearls > 0 || estimatedRods > 0) && !DisplayItems) DisplayItems = true;
 
             BlazeRodsCount = estimatedRods;
             PearlsCount = estimatedPearls;

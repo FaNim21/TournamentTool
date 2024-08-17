@@ -204,7 +204,7 @@
                         <Grid x:Name="GridRoot"
                               Width="12"
                               Background="{x:Null}"
-                              Margin="0 5">
+                              Margin="3 5 0 0">
                             <Grid.RenderTransform>
                                 <TranslateTransform X="-3" />
                             </Grid.RenderTransform>
