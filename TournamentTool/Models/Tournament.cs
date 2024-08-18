@@ -37,6 +37,21 @@ public class Tournament : BaseViewModel, IRenameItem
     public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;
 
+    private bool _isAlwaysOnTop = true;
+    public bool IsAlwaysOnTop
+    {
+        get => _isAlwaysOnTop;
+        set
+        {
+            _isAlwaysOnTop = value;
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                Application.Current.MainWindow.Topmost = value;
+            });
+            OnPropertyChanged(nameof(IsAlwaysOnTop));
+        }
+    }
+
     private string _filterNameAtStartForSceneItems = "pov";
     public string FilterNameAtStartForSceneItems
     {
@@ -74,17 +89,6 @@ public class Tournament : BaseViewModel, IRenameItem
         {
             _displayedNameType = value;
             OnPropertyChanged(nameof(DisplayedNameType));
-        }
-    }
-
-    private ControllerMode _controllerMode;
-    public ControllerMode ControllerMode
-    {
-        get => _controllerMode;
-        set
-        {
-            _controllerMode = value;
-            OnPropertyChanged(nameof(ControllerMode));
         }
     }
 
@@ -189,18 +193,36 @@ public class Tournament : BaseViewModel, IRenameItem
     }
     public string? CreditsToText { set; get; }
 
-    private bool _isAlwaysOnTop = true;
-    public bool IsAlwaysOnTop
+    private ControllerMode _controllerMode;
+    public ControllerMode ControllerMode
     {
-        get => _isAlwaysOnTop;
+        get => _controllerMode;
         set
         {
-            _isAlwaysOnTop = value;
-            Application.Current?.Dispatcher.Invoke(() =>
-            {
-                Application.Current.MainWindow.Topmost = value;
-            });
-            OnPropertyChanged(nameof(IsAlwaysOnTop));
+            _controllerMode = value;
+            OnPropertyChanged(nameof(ControllerMode));
+        }
+    }
+
+    private string _rankedRoomDataPath = string.Empty;
+    public string RankedRoomDataPath
+    {
+        get => _rankedRoomDataPath;
+        set
+        {
+            _rankedRoomDataPath = value;
+            OnPropertyChanged(nameof(RankedRoomDataPath));
+        }
+    }
+
+    private string _rankedRoomDataName = "spectate_match.json";
+    public string RankedRoomDataName
+    {
+        get => _rankedRoomDataName;
+        set
+        {
+            _rankedRoomDataName = value;
+            OnPropertyChanged(nameof(RankedRoomDataName));
         }
     }
 

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 
@@ -69,6 +70,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RenameItemCommand { get; set; }
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
+    public ICommand SetRankedDataPathCommand { get; set; }
 
     public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
@@ -92,6 +94,8 @@ public class PresetManagerViewModel : SelectableViewModel
 
         OpenCommand = new RelayCommand(OpenPresetControlPanel);
         OpenPlayerManagerCommand = new RelayCommand(OpenPlayerManagerWindow);
+
+        SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
 
         LoadCurrentPreset();
     }
@@ -189,6 +193,14 @@ public class PresetManagerViewModel : SelectableViewModel
     public void PresetIsSaved()
     {
         IsCurrentPresetSaved = true;
+    }
+
+    public void SetRankedDataPath()
+    {
+        string path = DialogBox.ShowOpenFolder();
+        if (string.IsNullOrEmpty(path)) return;
+
+        CurrentChosen!.RankedRoomDataPath = path;
     }
 
     public void SavePreset()

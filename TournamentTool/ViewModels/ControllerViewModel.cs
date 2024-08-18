@@ -120,6 +120,7 @@ public class ControllerViewModel : SelectableViewModel
         foreach (var player in Configuration.Players)
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
 
+        //TODO: 0 to zrobic zeby nie tworzylo nowych instancji za kazdym wejsciem tylko zeby to robilo przy rzeczywistej zmianie w configu preseta
         switch(Configuration.ControllerMode)
         {
             case ControllerMode.None:

@@ -47,7 +47,7 @@
                          FontWeight="Thin"
                          Text="Current Preset: " />
                     <Run Foreground="AntiqueWhite"
-                         FontWeight="SemiBold"
+                         FontWeight="Bold"
                          Text="{Binding CurrentChosen.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
             </Grid>
@@ -66,66 +66,9 @@
                                    HorizontalAlignment="Left"
                                    VerticalAlignment="Top">
 
-                            <!-- OBS CONNECTION -->
-                            <Label  Content="OBS Connection"
-                                    Foreground="White"
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Padding="0"
-                                    Margin="0 0 0 5" />
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="50"
-                                         Height="20"
-                                         Text="{Binding CurrentChosen.Port}"
-                                         PreviewTextInput="NumberValidationTextBox"
-                                         Padding="0 2 0 0"
-                                         Background="#9E9E9E"
-                                         MaxLength="5" />
-                                <Label Content="Port"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="120"
-                                         Height="20"
-                                         Text="{Binding CurrentChosen.Password}"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <Label Content="Password"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="120"
-                                         Height="20"
-                                         Text="{Binding CurrentChosen.SceneCollection}"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <Label Content="Scene Collection"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
-                            </WrapPanel>
-
                             <!-- GENERAL -->
                             <Label  Content="General"
-                                    Foreground="White"
+                                    Foreground="Wheat"
                                     FontSize="24"
                                     FontWeight="SemiBold"
                                     Padding="0"
@@ -171,7 +114,8 @@
                             <WrapPanel Orientation="Vertical"
                                        Visibility="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
                                 <Label  Content="Paceman"
-                                        Foreground="White"
+                                        Foreground="Wheat"
+                                        FontWeight="SemiBold"
                                         FontSize="24"
                                         Padding="0"
                                         Margin="0 10 0 5" />
@@ -295,10 +239,49 @@
                             <WrapPanel Orientation="Vertical"
                                        Visibility="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
                                 <Label  Content="Ranked"
-                                        Foreground="White"
+                                        Foreground="Wheat"
                                         FontSize="24"
+                                        FontWeight="SemiBold"
                                         Padding="0"
                                         Margin="0 10 0 5" />
+
+                                <WrapPanel Orientation="Horizontal"
+                                           Margin="0 0 0 5">
+                                    <TextBox TextWrapping="NoWrap"
+                                             Width="220"
+                                             Height="20"
+                                             IsReadOnly="True"
+                                             Text="{Binding CurrentChosen.RankedRoomDataPath}"
+                                             Background="#9E9E9E"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Top" />
+                                    <components:ButtonNormal ContentText="SET"
+                                                             Width="35"
+                                                             Margin="5 0 0 3"
+                                                             OnCommand="{Binding SetRankedDataPathCommand}" />
+                                    <Label Content="Spectator Path"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
+                                </WrapPanel>
+                                <WrapPanel Orientation="Horizontal"
+                                           Margin="0 0 0 5">
+                                    <TextBox TextWrapping="Wrap"
+                                             Width="120"
+                                             Height="20"
+                                             Text="{Binding CurrentChosen.RankedRoomDataName}"
+                                             Background="#9E9E9E"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Top" />
+                                    <Label Content="Data name"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
+                                </WrapPanel>
                             </WrapPanel>
                         </WrapPanel>
                     </Grid>
@@ -311,12 +294,71 @@
                                                  FontSize="45"
                                                  VerticalAlignment="Top"
                                                  OnCommand="{Binding OpenControllerCommand}"
-                                                 Margin="40" />
+                                                 Margin="30" />
 
                         <WrapPanel Orientation="Vertical"
-                                   Margin="40 150 0 0">
+                                   Margin="40 140 0 0">
+
+                            <!-- OBS CONNECTION -->
+                            <Label  Content="OBS Connection"
+                                    Foreground="Wheat"
+                                    FontSize="24"
+                                    FontWeight="SemiBold"
+                                    Padding="0"
+                                    Margin="0 0 0 5" />
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="50"
+                                         Height="20"
+                                         Text="{Binding CurrentChosen.Port}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Padding="0 2 0 0"
+                                         Background="#9E9E9E"
+                                         MaxLength="5" />
+                                <Label Content="Port"
+                                       Foreground="White"
+                                       Height="18"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding CurrentChosen.Password}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <Label Content="Password"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding CurrentChosen.SceneCollection}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <Label Content="Scene Collection"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+
+                            <!--POV MANAGEMENT-->
                             <Label  Content="Pov management"
-                                    Foreground="White"
+                                    Foreground="Wheat"
                                     FontSize="24"
                                     FontWeight="SemiBold"
                                     Padding="0"

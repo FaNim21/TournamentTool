@@ -131,7 +131,7 @@ public class PaceManService : BaseViewModel
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
 
-        OnRefreshGroup!();
+        OnRefreshGroup?.Invoke();
     }
 
     public void AddPaceMan(PaceMan paceMan)

@@ -32,6 +32,12 @@ public static class DialogBox
         return openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
     }
 
+    public static string ShowOpenFolder()
+    {
+        OpenFolderDialog openFolderDialog = new();
+        return openFolderDialog.ShowDialog() == true ? openFolderDialog.FolderName : string.Empty;
+    }
+
     private static void Create<T, TU>(TU model) where T : Window, new() where TU : BaseViewModel
     {
         try

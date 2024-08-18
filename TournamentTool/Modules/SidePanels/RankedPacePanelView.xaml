@@ -11,8 +11,83 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance Type=sidePanels:RankedPacePanelView}">
-    <Grid>
-            
-    </Grid>
+             d:DataContext="{d:DesignInstance Type=sidePanels:RankedPacePanel}">
+
+    <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             Background="Transparent"
+             BorderThickness="0"
+             Width="273"
+             VerticalAlignment="Top"
+             HorizontalAlignment="Left"
+             VirtualizingPanel.IsVirtualizing="True"
+             VirtualizingPanel.VirtualizationMode="Recycling"
+             AllowDrop="True"
+             ItemsSource="{Binding Paces}"
+             SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
+             SelectionChanged="List_SelectionChanged"
+             PreviewKeyDown="List_PreviewKeyDown"
+             PreviewMouseWheel="ListBox_PreviewMouseWheel">
+        <ListBox.ItemTemplate>
+            <DataTemplate DataType="models:PaceMan">
+                <Border BorderBrush="#7e8691"
+                        BorderThickness="1"
+                        Width="263"
+                        MouseMove="ListBorder_MouseMove">
+                    <Grid>
+                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
+                                 Width="7"
+                                 Height="7"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Top"
+                                 Fill="Red"
+                                 Margin="5" />
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="IGN: "
+                                           FontSize="16"
+                                           Foreground="Wheat" />
+                                <TextBlock Text="{Binding InGameName}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="Gold" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Elo rating: "
+                                           FontSize="16"
+                                           Foreground="Wheat" />
+                                <TextBlock Text="{Binding EloRate}"
+                                           FontSize="16"
+                                           FontWeight="Thin"
+                                           Foreground="LightGray" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+        <ListBox.GroupStyle>
+            <GroupStyle>
+                <GroupStyle.Panel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </GroupStyle.Panel>
+            </GroupStyle>
+        </ListBox.GroupStyle>
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="Margin"
+                        Value="0 -1 0 -1" />
+                <Setter Property="Padding"
+                        Value="0" />
+            </Style>
+        </ListBox.ItemContainerStyle>
+    </ListBox>
 </UserControl>
