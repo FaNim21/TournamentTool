@@ -28,9 +28,8 @@ public class ControllerViewModel : SelectableViewModel
     }
 
     public ObsController OBS { get; set; }
-    public PaceManService PaceManService { get; set; }
 
-    public SidePanel SidePanel { get; set; }
+    public SidePanel? SidePanel { get; set; }
 
     public Tournament Configuration { get; private set; } = new();
  
@@ -51,7 +50,7 @@ public class ControllerViewModel : SelectableViewModel
         get { return _selectedWhitelistPlayer; }
         set
         {
-            PaceManService.ClearSelectedPaceManPlayer();
+            SidePanel?.ClearSelectedPlayer();
             ClearSelectedWhitelistPlayer();
 
             CurrentChosenPlayer = value;
@@ -84,6 +83,17 @@ public class ControllerViewModel : SelectableViewModel
         }
     }
 
+    private bool _useSidePanel = true;
+    public bool UseSidePanel
+    {
+        get => _useSidePanel;
+        set
+        {
+            _useSidePanel = value;
+            OnPropertyChanged(nameof(UseSidePanel));
+        }
+    }
+
     public ICommand RefreshPOVsCommand { get; set; }
 
 
@@ -93,7 +103,6 @@ public class ControllerViewModel : SelectableViewModel
         PreviewScene = new(this);
 
         OBS = new(this);
-        PaceManService = new(this);
         _twitch = new(this);
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
@@ -111,9 +120,24 @@ public class ControllerViewModel : SelectableViewModel
         foreach (var player in Configuration.Players)
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
 
+        switch(Configuration.ControllerMode)
+        {
+            case ControllerMode.None:
+                UseSidePanel = false;
+                break;
+            case ControllerMode.PaceMan:
+                UseSidePanel = true;
+                SidePanel = new PaceManPanel(this);
+                break;
+            case ControllerMode.Ranked:
+                UseSidePanel = true;
+                SidePanel = new RankedPacePanel(this);
+                break;
+        }
+
         FilterItems();
 
-        PaceManService.OnEnable(null);
+        SidePanel?.OnEnable(null);
         OBS.OnEnable(null);
 
         if (!Configuration.IsUsingTwitchAPI)
@@ -131,7 +155,7 @@ public class ControllerViewModel : SelectableViewModel
     }
     public override bool OnDisable()
     {
-        PaceManService.OnDisable();
+        SidePanel?.OnDisable();
         OBS.OnDisable();
         _twitch?.OnDisable();
 
@@ -186,7 +210,7 @@ public class ControllerViewModel : SelectableViewModel
     {
         CurrentChosenPlayer = null;
 
-        PaceManService.ClearSelectedPaceManPlayer();
+        SidePanel?.ClearSelectedPlayer();
         ClearSelectedWhitelistPlayer();
         if (ClearAll) CurrentChosenPOV = null;
     }

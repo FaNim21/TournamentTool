@@ -17,6 +17,13 @@ public enum DisplayedNameType
     WhiteList
 }
 
+public enum ControllerMode
+{
+    None,
+    PaceMan,
+    Ranked,
+}
+
 public class Tournament : BaseViewModel, IRenameItem
 {
     public string Name { get; set; } = string.Empty;
@@ -40,17 +47,6 @@ public class Tournament : BaseViewModel, IRenameItem
                 _filterNameAtStartForSceneItems = value;
 
             OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
-        }
-    }
-
-    private bool _isUsingPaceMan = true;
-    public bool IsUsingPaceMan
-    {
-        get => _isUsingPaceMan;
-        set
-        {
-            _isUsingPaceMan = value;
-            OnPropertyChanged(nameof(IsUsingPaceMan));
         }
     }
 
@@ -78,6 +74,17 @@ public class Tournament : BaseViewModel, IRenameItem
         {
             _displayedNameType = value;
             OnPropertyChanged(nameof(DisplayedNameType));
+        }
+    }
+
+    private ControllerMode _controllerMode;
+    public ControllerMode ControllerMode
+    {
+        get => _controllerMode;
+        set
+        {
+            _controllerMode = value;
+            OnPropertyChanged(nameof(ControllerMode));
         }
     }
 
@@ -314,13 +321,13 @@ public class Tournament : BaseViewModel, IRenameItem
 
         Players = [];
         FilterNameAtStartForSceneItems = "pov";
-        IsUsingPaceMan = true;
         IsUsingTwitchAPI = true;
         IsUsingWhitelistOnPaceMan = true;
 
         SetPovHeadsInBrowser = false;
         SetPovPBText = false;
         DisplayedNameType = DisplayedNameType.None;
+        ControllerMode = ControllerMode.None;
 
         ShowLiveOnlyForMinecraftCategory = true;
         PaceManRefreshRateMiliseconds = 10000;

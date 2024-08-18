@@ -17,20 +17,6 @@ public class PaceManService : BaseViewModel
     private BackgroundWorker? _paceManWorker;
     private CancellationTokenSource? _cancellationTokenSource;
 
-    private PaceMan? _selectedPaceManPlayer;
-    public PaceMan? SelectedPaceManPlayer
-    {
-        get { return _selectedPaceManPlayer; }
-        set
-        {
-            Controller.ClearSelectedWhitelistPlayer();
-            ClearSelectedPaceManPlayer();
-
-            Controller.CurrentChosenPlayer = value;
-            Controller.SetPovAfterClickedCanvas();
-        }
-    }
-
     private ObservableCollection<PaceMan> _paceManPlayers = [];
     public ObservableCollection<PaceMan> PaceManPlayers
     {
@@ -42,8 +28,7 @@ public class PaceManService : BaseViewModel
         }
     }
 
-    public ICollectionView? GroupedPaceManPlayers { get; set; }
-
+    public event Action? OnRefreshGroup;
 
     public PaceManService(ControllerViewModel controllerViewModel)
     {
@@ -52,15 +37,10 @@ public class PaceManService : BaseViewModel
 
     public override void OnEnable(object? parameter)
     {
-        SetupPaceManGrouping();
-
-        if (Controller.Configuration.IsUsingPaceMan)
-        {
-            _cancellationTokenSource = new();
-            _paceManWorker = new() { WorkerSupportsCancellation = true };
-            _paceManWorker.DoWork += PaceManUpdate;
-            _paceManWorker.RunWorkerAsync();
-        }
+        _cancellationTokenSource = new();
+        _paceManWorker = new() { WorkerSupportsCancellation = true };
+        _paceManWorker.DoWork += PaceManUpdate;
+        _paceManWorker.RunWorkerAsync();
     }
     public override bool OnDisable()
     {
@@ -76,21 +56,7 @@ public class PaceManService : BaseViewModel
 
         PaceManPlayers.Clear();
 
-        SelectedPaceManPlayer = null;
-        GroupedPaceManPlayers = null;
-
         return true;
-    }
-
-    private void SetupPaceManGrouping()
-    {
-        var collectionViewSource = new CollectionViewSource { Source = PaceManPlayers };
-
-        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceMan.SplitName)));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.SplitType), ListSortDirection.Descending));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
-
-        GroupedPaceManPlayers = collectionViewSource.View;
     }
 
     private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
@@ -165,7 +131,7 @@ public class PaceManService : BaseViewModel
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
 
-        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
+        OnRefreshGroup!();
     }
 
     public void AddPaceMan(PaceMan paceMan)
@@ -195,9 +161,4 @@ public class PaceManService : BaseViewModel
         Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
     }
 
-    public void ClearSelectedPaceManPlayer()
-    {
-        _selectedPaceManPlayer = null;
-        OnPropertyChanged(nameof(SelectedPaceManPlayer));
-    }
 }

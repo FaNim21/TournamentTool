@@ -132,7 +132,8 @@ public class ObsController : BaseViewModel
     {
         try
         {
-            await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection!);
+            if (!string.IsNullOrEmpty(Controller.Configuration.SceneCollection))
+                await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection);
 
             var settings = await Client.GetVideoSettings();
             Controller.MainScene.CalculateProportionsRatio(settings.BaseWidth);

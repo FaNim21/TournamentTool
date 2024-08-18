@@ -42,13 +42,13 @@ public partial class ControllerView : UserControl
 
     private void List_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        PaceMan.UpdateLayout();
+        //PaceMan.UpdateLayout();
         WhiteList.UpdateLayout();
 
         if (DataContext is not ControllerViewModel viewModel) return;
         if (viewModel.CurrentChosenPOV != null)
         {
-            PaceMan.UnselectAll();
+            //PaceMan.UnselectAll();
             WhiteList.UnselectAll();
             Keyboard.ClearFocus();
             viewModel.CurrentChosenPOV = null;

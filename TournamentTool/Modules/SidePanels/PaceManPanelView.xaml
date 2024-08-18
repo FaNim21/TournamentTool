@@ -1,0 +1,162 @@
+﻿<UserControl x:Class="TournamentTool.Modules.SidePanels.PaceManPanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TournamentTool.Modules.SidePanels"
+             xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+             xmlns:local2="clr-namespace:TournamentTool.Components"
+             xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
+             xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=sidePanels:PaceManPanel}">
+
+    <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             Background="Transparent"
+             BorderThickness="0"
+             Width="273"
+             VerticalAlignment="Top"
+             HorizontalAlignment="Left"
+             VirtualizingPanel.IsVirtualizing="True"
+             VirtualizingPanel.VirtualizationMode="Recycling"
+             AllowDrop="True"
+             ItemsSource="{Binding GroupedPaceManPlayers}"
+             SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
+             SelectionChanged="List_SelectionChanged"
+             PreviewKeyDown="List_PreviewKeyDown"
+             PreviewMouseWheel="ListBox_PreviewMouseWheel">
+        <ListBox.ItemTemplate>
+            <DataTemplate DataType="models:PaceMan">
+                <Border BorderBrush="#7e8691"
+                        BorderThickness="1"
+                        Width="263"
+                        MouseMove="ListBorder_MouseMove">
+                    <Grid>
+                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
+                                 Width="7"
+                                 Height="7"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Top"
+                                 Fill="Red"
+                                 Margin="5" />
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="5 5 0 5">
+                                <Image Source="{Binding HeadImage}"
+                                       Width="30"
+                                       Height="30"
+                                       Opacity="{Binding HeadImageOpacity}" />
+                                <TextBlock Text="{Binding Nickname}"
+                                           Width="67"
+                                           Height="20"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Left"
+                                           Foreground="White"
+                                           Padding="0"
+                                           FontWeight="Bold"
+                                           Margin="5 6 0 0" />
+
+                                <TextBlock Foreground="{Binding PaceSplitTimeColor}"
+                                           Width="70"
+                                           Height="30"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Center"
+                                           Margin="3 0 0 0">
+                                                <Run Text="{Binding CurrentSplitTime}"
+                                                     FontWeight="{Binding PaceFontWeight}"
+                                                     FontSize="23" />
+                                </TextBlock>
+
+                                <TextBlock Foreground="FloralWhite"
+                                           Width="80"
+                                           Height="30"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Center"
+                                           Margin="0 0 0 0">
+                                                <Run Text="{Binding IGTTime}"
+                                                     FontWeight="{Binding PaceFontWeight}"
+                                                     FontSize="23" />
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Orientation="Horizontal"
+                                        Margin="2 -4 0 1">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Width="18">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="18"
+                                                         UriSource="/Resources/pearlIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding PearlsCount}" />
+                                </StackPanel>
+
+                                <StackPanel Margin="10 0 0 0"
+                                            Orientation="Horizontal">
+                                    <Image Width="18">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="18"
+                                                         UriSource="/Resources/blazeRodIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding BlazeRodsCount}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+        <ListBox.GroupStyle>
+            <GroupStyle>
+                <GroupStyle.HeaderTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1"
+                                BorderBrush="#7e8691"
+                                Background="#7e8691"
+                                Padding="1"
+                                Margin="6 10 2 0">
+                            <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}}"
+                                       Foreground="#1e1e1e"
+                                       HorizontalAlignment="Center"
+                                       FontWeight="Bold"
+                                       FontSize="18" />
+                        </Border>
+                    </DataTemplate>
+                </GroupStyle.HeaderTemplate>
+                <GroupStyle.Panel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </GroupStyle.Panel>
+            </GroupStyle>
+        </ListBox.GroupStyle>
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="Margin"
+                        Value="0 -1 0 -1" />
+                <Setter Property="Padding"
+                        Value="0" />
+            </Style>
+        </ListBox.ItemContainerStyle>
+    </ListBox>
+</UserControl>

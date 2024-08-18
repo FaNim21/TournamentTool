@@ -19,6 +19,7 @@
         <converters:TypeToBoolConverter x:Key="TypeToBoolConverter" />
         <converters:HotkeyConverter x:Key="HotkeyConverter" />
         <converters:FontSizeConverter x:Key="FontSizeConverter" />
+        <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">
