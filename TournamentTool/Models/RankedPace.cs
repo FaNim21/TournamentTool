@@ -1,16 +1,33 @@
-﻿using TournamentTool.Utils;
+﻿using System.Collections.ObjectModel;
+using System.Data;
+using TournamentTool.Modules.SidePanels;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
 
 public enum RankedSplitType
 {
-    None,
-
+    none,
+    enter_the_nether,
+    structure1,  // find_bastion
+    structure2,  // find_fortress
+    blind_travel,
+    follow_ender_eye,
+    enter_the_end,
+    kill_dragon,
+    complete,
 }
 
 public class RankedPace : BaseViewModel, IPlayer, IPace
 {
+    private ControllerViewModel Controller { get; set; }
+
+    public Player? Player { get; set; }
+    public PlayerInventory Inventory { get; set; } = new();
+
+    public ObservableCollection<RankedSplitType> Splits { get; set; } = [];
+
     private string _inGameName { get; set; }
     public string InGameName
     {
@@ -94,33 +111,47 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     }
 
 
-    public RankedPace()
+    public RankedPace(ControllerViewModel controller)
     {
-        
+        Controller = controller;
+    }
+
+    public void Update(RankedPaceData data)
+    {
+        /*Timelines.Clear();
+        for (int i = 0; i < data.Timelines.Count; i++)
+        {
+
+        }*/
+
+        Inventory.BlazeRodsCount = data.Inventory.BlazeRod;
+        Inventory.ObsidianCount = data.Inventory.Obsidian;
+        Inventory.BedsCount = data.Inventory.WhiteBed;
+        Inventory.EnderEyeCount = data.Inventory.EnderEye;
+        Inventory.PearlsCount = data.Inventory.EnderPearl;
+
+        if (data.Timelines.Count == 0) return;
+        LastTimeline = data.Timelines[^1].Type.ToString();
     }
 
     public string GetDisplayName()
     {
-        throw new NotImplementedException();
+        return Player == null ? InGameName : Player.GetDisplayName();
     }
-
-    public string GetHeadViewParametr()
-    {
-        throw new NotImplementedException();
-    }
-
     public string GetPersonalBest()
     {
-        throw new NotImplementedException();
+        return Player == null ? "Unk" : Player.GetPersonalBest();
     }
-
     public string GetTwitchName()
     {
-        throw new NotImplementedException();
+        return Player == null ? string.Empty : Player.GetTwitchName();
     }
-
+    public string GetHeadViewParametr()
+    {
+        return Player == null ? InGameName : Player.GetHeadViewParametr();
+    }
     public bool IsFromWhiteList()
     {
-        throw new NotImplementedException();
+        return Player != null;
     }
 }

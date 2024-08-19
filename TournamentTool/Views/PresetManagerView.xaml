@@ -282,6 +282,22 @@
                                            Padding="0"
                                            Margin="5 0 0 3" />
                                 </WrapPanel>
+                                <WrapPanel Orientation="Horizontal"
+                                           Margin="0 0 0 5">
+                                    <TextBox TextWrapping="Wrap"
+                                             Width="120"
+                                             Height="20"
+                                             Text="{Binding CurrentChosen.RankedRoomUpdateFrequency}"
+                                             Background="#9E9E9E"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Top" />
+                                    <Label Content="Spectator update frequency (ms)"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
+                                </WrapPanel>
                             </WrapPanel>
                         </WrapPanel>
                     </Grid>

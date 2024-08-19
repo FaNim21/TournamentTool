@@ -49,6 +49,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
     public bool IsCheated { get; set; }
 
     public Player? Player { get; set; }
+    public PlayerInventory Inventory { get; set; } = new();
 
     private BitmapImage? _headImage;
     public BitmapImage? HeadImage
@@ -62,39 +63,6 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
     }
 
     public float HeadImageOpacity { get; set; }
-
-    private bool _displayItems {  get; set; }
-    public bool DisplayItems
-    {
-        get => _displayItems;
-        set
-        {
-            _displayItems = value;
-            OnPropertyChanged(nameof(DisplayItems));
-        }
-    }
-
-    private int _pearlsCount { get; set; }
-    public int PearlsCount
-    {
-        get => _pearlsCount;
-        set
-        {
-            _pearlsCount = value;
-            OnPropertyChanged(nameof(PearlsCount));
-        }
-    }
-
-    private int _blazeRodsCounts { get; set; }
-    public int BlazeRodsCount
-    {
-        get => _blazeRodsCounts;
-        set
-        {
-            _blazeRodsCounts = value;
-            OnPropertyChanged(nameof(BlazeRodsCount));
-        }
-    }
 
     private SplitType _splitType;
     public SplitType SplitType
@@ -157,6 +125,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
 
     public bool IsUsedInPreview { get; set; }
 
+
     public void Initialize(ControllerViewModel controller, List<PaceSplitsList> splits)
     {
         Controller = controller;
@@ -188,10 +157,10 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         {
             ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
             ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if ((estimatedPearls > 0 || estimatedRods > 0) && !DisplayItems) DisplayItems = true;
+            if ((estimatedPearls > 0 || estimatedRods > 0) && !Inventory.DisplayItems) Inventory.DisplayItems = true;
 
-            BlazeRodsCount = estimatedRods;
-            PearlsCount = estimatedPearls;
+            Inventory.BlazeRodsCount = estimatedRods;
+            Inventory.PearlsCount = estimatedPearls;
         }
 
         if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))

@@ -226,6 +226,21 @@ public class Tournament : BaseViewModel, IRenameItem
         }
     }
 
+    private int _rankedRoomUpdateFrequency = 1000;
+    public int RankedRoomUpdateFrequency
+    {
+        get => _rankedRoomUpdateFrequency;
+        set
+        {
+            if (value < 500)
+                _paceManRefreshRateMiliseconds = 500;
+            else
+                _paceManRefreshRateMiliseconds = value;
+
+            OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
+        }
+    }
+
 
     [JsonConstructor]
     public Tournament(string name = "")

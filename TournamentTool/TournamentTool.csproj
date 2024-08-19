@@ -10,7 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\bedIcon.png" />
     <None Remove="Resources\blazeRodIcon.png" />
+    <None Remove="Resources\enderEyeIcon.png" />
+    <None Remove="Resources\obsidianIcon.png" />
     <None Remove="Resources\pearlIcon.png" />
   </ItemGroup>
 
@@ -46,7 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\bedIcon.png" />
     <Resource Include="Resources\blazeRodIcon.png" />
+    <Resource Include="Resources\enderEyeIcon.png" />
+    <Resource Include="Resources\obsidianIcon.png" />
     <Resource Include="Resources\pearlIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

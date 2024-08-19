@@ -84,7 +84,7 @@
                                                      FontSize="23" />
                                 </TextBlock>
                             </StackPanel>
-                            <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                            <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                         Orientation="Horizontal"
                                         Margin="2 -4 0 1">
                                 <StackPanel Orientation="Horizontal">
@@ -98,14 +98,14 @@
                                              Foreground="White"
                                              BorderThickness="0"
                                              FontSize="14"
-                                             Text="{Binding PearlsCount, Mode=OneWay}" />
+                                             Text="{Binding Inventory.PearlsCount, Mode=OneWay}" />
                                 </StackPanel>
 
                                 <StackPanel Margin="10 0 0 0"
                                             Orientation="Horizontal">
-                                    <Image Width="18">
+                                    <Image Width="16">
                                         <Image.Source>
-                                            <BitmapImage DecodePixelWidth="18"
+                                            <BitmapImage DecodePixelWidth="16"
                                                          UriSource="/Resources/blazeRodIcon.png" />
                                         </Image.Source>
                                     </Image>
@@ -113,7 +113,7 @@
                                              Foreground="White"
                                              BorderThickness="0"
                                              FontSize="14"
-                                             Text="{Binding BlazeRodsCount, Mode=OneWay}" />
+                                             Text="{Binding Inventory.BlazeRodsCount, Mode=OneWay}" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>

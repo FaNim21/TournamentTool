@@ -45,22 +45,98 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="IGN: "
-                                           FontSize="16"
+                                           FontSize="13"
                                            Foreground="Wheat" />
                                 <TextBlock Text="{Binding InGameName}"
-                                           FontSize="16"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="LightCyan" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Split: "
+                                           FontSize="13"
+                                           Foreground="Wheat" />
+                                <TextBlock Text="{Binding LastTimeline}"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
                                            Foreground="Gold" />
                             </StackPanel>
+                            <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                        Orientation="Horizontal"
+                                        Margin="2 2 0 1">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Width="18">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="18"
+                                                         UriSource="/Resources/pearlIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding Inventory.PearlsCount, Mode=OneWay}" />
+                                </StackPanel>
 
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Elo rating: "
-                                           FontSize="16"
-                                           Foreground="Wheat" />
-                                <TextBlock Text="{Binding EloRate}"
-                                           FontSize="16"
-                                           FontWeight="Thin"
-                                           Foreground="LightGray" />
+                                <StackPanel Margin="10 0 0 0"
+                                            Orientation="Horizontal">
+                                    <Image Width="16">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="16"
+                                                         UriSource="/Resources/blazeRodIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding Inventory.BlazeRodsCount, Mode=OneWay}" />
+                                </StackPanel>
+
+                                <StackPanel Margin="10 0 0 0"
+                                            Orientation="Horizontal">
+                                    <Image Width="16">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="16"
+                                                         UriSource="/Resources/bedIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding Inventory.BedsCount, Mode=OneWay}" />
+                                </StackPanel>
+
+                                <StackPanel Margin="10 0 0 0"
+                                            Orientation="Horizontal">
+                                    <Image Width="16">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="16"
+                                                         UriSource="/Resources/obsidianIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding Inventory.ObsidianCount, Mode=OneWay}" />
+                                </StackPanel>
+
+                                <StackPanel Margin="10 0 0 0"
+                                            Orientation="Horizontal">
+                                    <Image Width="16">
+                                        <Image.Source>
+                                            <BitmapImage DecodePixelWidth="16"
+                                                         UriSource="/Resources/enderEyeIcon.png" />
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBox Background="Transparent"
+                                             Foreground="White"
+                                             BorderThickness="0"
+                                             FontSize="14"
+                                             Text="{Binding Inventory.EnderEyeCount, Mode=OneWay}" />
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
