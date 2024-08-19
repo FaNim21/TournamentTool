@@ -130,6 +130,7 @@ public class RankedPacePanel : SidePanel
 
     public override void OnEnable(object? parameter)
     {
+        base.OnEnable(parameter);
         string dataName = Controller.Configuration.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
@@ -150,6 +151,7 @@ public class RankedPacePanel : SidePanel
 
     public override bool OnDisable()
     {
+        base.OnDisable();
         _fileWatcher.Changed -= OnJsonFileChanged;
         _fileWatcher.EnableRaisingEvents = false;
 

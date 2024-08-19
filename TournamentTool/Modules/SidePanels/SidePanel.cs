@@ -1,4 +1,5 @@
-﻿using TournamentTool.Models;
+﻿using System.Diagnostics;
+using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.SidePanels;
@@ -25,6 +26,18 @@ public abstract class SidePanel : BaseViewModel
     public SidePanel(ControllerViewModel controller)
     {
         Controller = controller;
+        Trace.WriteLine("Constructor: " + GetType().Name);
+    }
+
+    public override void OnEnable(object? parameter)
+    {
+        Trace.WriteLine("OnEnable: " + GetType().Name);
+    }
+
+    public override bool OnDisable()
+    {
+        Trace.WriteLine("OnDisable: " + GetType().Name);
+        return true;
     }
 
     public void ClearSelectedPlayer()

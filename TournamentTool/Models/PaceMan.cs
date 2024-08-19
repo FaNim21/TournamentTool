@@ -23,7 +23,7 @@ public enum SplitType
     credits
 }
 
-public class PaceMan : BaseViewModel, IPlayer
+public class PaceMan : BaseViewModel, IPlayer, IPace
 {
     private ControllerViewModel? Controller { get; set; }
 
@@ -106,7 +106,6 @@ public class PaceMan : BaseViewModel, IPlayer
 
             _splitType = value;
             SplitName = value.ToString().Replace('_', ' ').CaptalizeAll();
-
             OnPropertyChanged(nameof(SplitType));
             OnPropertyChanged(nameof(SplitName));
         }

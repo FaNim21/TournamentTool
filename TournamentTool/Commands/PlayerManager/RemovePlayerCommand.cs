@@ -18,5 +18,6 @@ public class RemovePlayerCommand : BaseCommand
         if (parameter is not Player player) return;
 
         PlayerManagerViewModel.Tournament!.Players.Remove(player);
+        PlayerManagerViewModel.SavePreset();
     }
 }

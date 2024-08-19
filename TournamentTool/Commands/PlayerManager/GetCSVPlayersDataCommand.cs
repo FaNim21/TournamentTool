@@ -21,6 +21,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
 
         OpenFileDialog openFileDialog = new() { Filter = "All Files (*.csv)|*.csv", };
         string path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
+        if (string.IsNullOrEmpty(path)) return;
 
         Task.Run(() => LoadFile(path));
     }
@@ -56,6 +57,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
             PlayerManagerViewModel.Tournament!.AddPlayer(data);
         }
 
+        PlayerManagerViewModel.SavePreset();
         DialogBox.Show("Done loading data from .csv file");
     }
 }

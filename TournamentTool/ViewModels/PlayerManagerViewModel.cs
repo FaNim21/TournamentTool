@@ -14,7 +14,17 @@ namespace TournamentTool.ViewModels;
 public class PlayerManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-    public Tournament? Tournament { get; set; }
+
+    private Tournament _tournament = new();
+    public Tournament Tournament
+    {
+        get => _tournament;
+        set
+        {
+            _tournament = value;
+            OnPropertyChanged(nameof(Tournament));
+        }
+    }
 
     private Player? _player;
     public Player? Player
@@ -68,6 +78,7 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public ICommand LoadFromPaceManCommand { get; set; }
     public ICommand LoadFromCSVCommand { get; set; }
+    public ICommand LoadFromJSONCommand { get; set; }
 
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
@@ -79,13 +90,14 @@ public class PlayerManagerViewModel : SelectableViewModel
     {
         CanBeDestroyed = true;
 
-        SavePlayerCommand = new RelayCommand(SavePlayer);
+        SavePlayerCommand = new RelayCommand(async ()=> { await SavePlayer(); });
 
         EditPlayerCommand = new EditPlayerCommand(this);
         RemovePlayerCommand = new RemovePlayerCommand(this);
 
         LoadFromPaceManCommand = new RelayCommand(async () => { await LoadDataFromPaceManAsync(); });
         LoadFromCSVCommand = new GetCSVPlayersDataCommand(this);
+        LoadFromJSONCommand = new GetJSONPlayersDataCommand(this);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
@@ -126,14 +138,10 @@ public class PlayerManagerViewModel : SelectableViewModel
         ChoosenEvent = null;
 
         PaceManEvents.Clear();
-
-        MainViewModel.Configuration = Tournament;
-        Tournament = null;
-        MainViewModel.SavePreset();
         return true;
     }
 
-    private void SavePlayer()
+    private async Task SavePlayer()
     {
         if (Player == null) return;
         if (string.IsNullOrEmpty(Player.Name) || string.IsNullOrEmpty(Player.InGameName)) return;
@@ -150,7 +158,7 @@ public class PlayerManagerViewModel : SelectableViewModel
                     current.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
                     current.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
                     current.PersonalBest = Player.PersonalBest;
-                    Task.Run(current.UpdateHeadImage);
+                    await current.UpdateHeadImage();
                 }
             }
 
@@ -162,7 +170,7 @@ public class PlayerManagerViewModel : SelectableViewModel
             newPlayer.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
             newPlayer.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
 
-            if (Tournament.IsNameDuplicate(newPlayer.StreamData.Main))
+            if (Tournament!.IsNameDuplicate(newPlayer.StreamData.Main))
             {
                 DialogBox.Show($"{newPlayer.StreamData.Main} main twitch name exist in whitelist");
                 return;
@@ -173,11 +181,11 @@ public class PlayerManagerViewModel : SelectableViewModel
                 return;
             }
 
-            Task.Run(newPlayer.UpdateHeadImage);
+            await newPlayer.UpdateHeadImage();
             Tournament!.AddPlayer(newPlayer);
         }
         Player = new();
-        MainViewModel.SavePreset();
+        SavePreset();
     }
 
     private async Task LoadDataFromPaceManAsync()
@@ -233,6 +241,7 @@ public class PlayerManagerViewModel : SelectableViewModel
             }
         }
 
+        SavePreset();
         DialogBox.Show("Done loading data from paceman event");
     }
 
@@ -241,6 +250,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         MessageBoxResult result = DialogBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
             Tournament!.Players.Clear();
+
+        SavePreset();
     }
 
     private void FixPlayersHeads()
@@ -254,7 +265,13 @@ public class PlayerManagerViewModel : SelectableViewModel
             }
 
             DialogBox.Show("Done fixing players head skins");
+            SavePreset();
         });
+    }
+
+    public void SavePreset()
+    {
+        MainViewModel.SavePreset();
     }
 
     public void GoBack()

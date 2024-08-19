@@ -21,6 +21,7 @@ public class PaceManPanel : SidePanel
 
     public override void OnEnable(object? parameter)
     {
+        base.OnEnable(parameter);
         SetupPaceManGrouping();
 
         _paceManService.OnRefreshGroup += RefreshGroup;
@@ -28,6 +29,7 @@ public class PaceManPanel : SidePanel
     }
     public override bool OnDisable()
     {
+        base.OnDisable();
         _paceManService.OnRefreshGroup -= RefreshGroup;
         _paceManService.OnDisable();
 

@@ -120,19 +120,25 @@ public class ControllerViewModel : SelectableViewModel
         foreach (var player in Configuration.Players)
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
 
-        //TODO: 0 to zrobic zeby nie tworzylo nowych instancji za kazdym wejsciem tylko zeby to robilo przy rzeczywistej zmianie w configu preseta
         switch(Configuration.ControllerMode)
         {
             case ControllerMode.None:
                 UseSidePanel = false;
+
+                if (SidePanel != null)
+                    SidePanel = null;
                 break;
             case ControllerMode.PaceMan:
                 UseSidePanel = true;
-                SidePanel = new PaceManPanel(this);
+
+                if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(PaceManPanel))))
+                    SidePanel = new PaceManPanel(this);
                 break;
             case ControllerMode.Ranked:
                 UseSidePanel = true;
-                SidePanel = new RankedPacePanel(this);
+
+                if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(RankedPacePanel))))
+                    SidePanel = new RankedPacePanel(this);
                 break;
         }
 

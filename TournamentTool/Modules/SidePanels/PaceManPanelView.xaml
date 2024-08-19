@@ -35,7 +35,7 @@
                         Width="263"
                         MouseMove="ListBorder_MouseMove">
                     <Grid>
-                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
+                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                  Width="7"
                                  Height="7"
                                  HorizontalAlignment="Right"
@@ -45,11 +45,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal"
                                         Margin="5 5 0 5">
-                                <Image Source="{Binding HeadImage}"
+                                <Image Source="{Binding HeadImage, Mode=OneWay}"
                                        Width="30"
                                        Height="30"
-                                       Opacity="{Binding HeadImageOpacity}" />
-                                <TextBlock Text="{Binding Nickname}"
+                                       Opacity="{Binding HeadImageOpacity, Mode=OneWay}" />
+                                <TextBlock Text="{Binding Nickname, Mode=OneWay}"
                                            Width="67"
                                            Height="20"
                                            FontSize="12"
@@ -60,15 +60,15 @@
                                            FontWeight="Bold"
                                            Margin="5 6 0 0" />
 
-                                <TextBlock Foreground="{Binding PaceSplitTimeColor}"
+                                <TextBlock Foreground="{Binding PaceSplitTimeColor, Mode=OneWay}"
                                            Width="70"
                                            Height="30"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center"
                                            TextAlignment="Center"
                                            Margin="3 0 0 0">
-                                                <Run Text="{Binding CurrentSplitTime}"
-                                                     FontWeight="{Binding PaceFontWeight}"
+                                                <Run Text="{Binding CurrentSplitTime, Mode=OneWay}"
+                                                     FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
                                                      FontSize="23" />
                                 </TextBlock>
 
@@ -79,12 +79,12 @@
                                            VerticalAlignment="Center"
                                            TextAlignment="Center"
                                            Margin="0 0 0 0">
-                                                <Run Text="{Binding IGTTime}"
-                                                     FontWeight="{Binding PaceFontWeight}"
+                                                <Run Text="{Binding IGTTime, Mode=OneWay}"
+                                                     FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
                                                      FontSize="23" />
                                 </TextBlock>
                             </StackPanel>
-                            <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}}"
+                            <StackPanel Visibility="{Binding DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                         Orientation="Horizontal"
                                         Margin="2 -4 0 1">
                                 <StackPanel Orientation="Horizontal">
@@ -98,7 +98,7 @@
                                              Foreground="White"
                                              BorderThickness="0"
                                              FontSize="14"
-                                             Text="{Binding PearlsCount}" />
+                                             Text="{Binding PearlsCount, Mode=OneWay}" />
                                 </StackPanel>
 
                                 <StackPanel Margin="10 0 0 0"
@@ -113,7 +113,7 @@
                                              Foreground="White"
                                              BorderThickness="0"
                                              FontSize="14"
-                                             Text="{Binding BlazeRodsCount}" />
+                                             Text="{Binding BlazeRodsCount, Mode=OneWay}" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -130,7 +130,7 @@
                                 Background="#7e8691"
                                 Padding="1"
                                 Margin="6 10 2 0">
-                            <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}}"
+                            <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}, Mode=OneWay}"
                                        Foreground="#1e1e1e"
                                        HorizontalAlignment="Center"
                                        FontWeight="Bold"

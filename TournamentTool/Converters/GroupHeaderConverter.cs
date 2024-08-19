@@ -10,7 +10,7 @@ public class GroupHeaderConverter : IValueConverter
     {
         if (value is CollectionViewGroup group && group.ItemCount > 0)
         {
-            var firstItem = group.Items[0] as PaceMan;
+            var firstItem = group.Items[0] as IPace;
             return firstItem?.SplitName!;
         }
         return string.Empty;
