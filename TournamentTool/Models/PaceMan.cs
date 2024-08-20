@@ -166,9 +166,9 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
         {
             if (splits[^2].SplitName.Equals("enter_nether"))
-                SplitType = (SplitType)Enum.Parse(typeof(SplitType), "structure_1");
+                SplitType = SplitType.structure_1;
             else
-                SplitType = (SplitType)Enum.Parse(typeof(SplitType), "structure_2");
+                SplitType = SplitType.structure_1;
         }
         else
             SplitType = (SplitType)Enum.Parse(typeof(SplitType), lastSplit.SplitName);
@@ -178,6 +178,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         CurrentSplitTimeMiliseconds = lastSplit.IGT;
         IGTTimeMiliseconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - LastUpdate) + lastSplit.IGT;
     }
+
     private void UpdateHeadImage()
     {
         if (HeadImage != null) return;
@@ -186,7 +187,10 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         {
             string url = $"https://minotar.net/helm/{User.UUID}/180.png";
             HeadImageOpacity = 0.35f;
-            Task.Run(async () => await LoadImageFromUrlAsync(url));
+            Task.Run(async () =>
+            {
+                HeadImage = await Helper.LoadImageFromUrlAsync(url);
+            });
         }
         else
         {
@@ -265,32 +269,6 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
 
         OnPropertyChanged(nameof(PaceSplitTimeColor));
         OnPropertyChanged(nameof(PaceFontWeight));
-    }
-
-    private async Task LoadImageFromUrlAsync(string url)
-    {
-        try
-        {
-            using (HttpClient client = new())
-            {
-                var response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                var imageStream = await response.Content.ReadAsStreamAsync();
-
-                BitmapImage bitmap = new();
-                bitmap.BeginInit();
-                bitmap.StreamSource = imageStream;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
-
-                HeadImage = bitmap;
-            }
-        }
-        catch (Exception ex)
-        {
-            DialogBox.Show($"Rrror: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
     }
 
     private void PlayerPropertyChanged(object sender, PropertyChangedEventArgs e)

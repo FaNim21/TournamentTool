@@ -1,15 +1,16 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
+using System.Windows.Data;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.SidePanels;
 
-//readonly structy trzeba kiedys stestowac tutaj
 public struct RankedPlayer
 {
     [JsonPropertyName("uuid")]
@@ -108,36 +109,38 @@ public struct RankedTimeline
     [JsonPropertyName("shown")]
     public bool IsShown { get; set; }
 }
-public struct RankedData
+public readonly struct RankedData
 {
     [JsonPropertyName("matchType")]
-    public string MatchType { get; set; }
+    public string MatchType { get; init; }
 
     [JsonPropertyName("category")]
-    public string Category { get; set; }
+    public string Category { get; init; }
 
     [JsonPropertyName("startTime")]
-    public long StartTime { get; set; }
+    public long StartTime { get; init; }
 
     [JsonPropertyName("players")]
-    public RankedPlayer[] Players { get; set; }
+    public RankedPlayer[] Players { get; init; }
 
     [JsonPropertyName("completes")]
-    public RankedComplete[] Completes { get; set; }
+    public RankedComplete[] Completes { get; init; }
 
     [JsonPropertyName("inventories")]
-    public Dictionary<string, RankedInventory> Inventories { get; set; }
+    public Dictionary<string, RankedInventory> Inventories { get; init; }
 
     [JsonPropertyName("timelines")]
-    public List<RankedTimeline> Timelines { get; set; }
+    public List<RankedTimeline> Timelines { get; init; }
 }
 
 public struct RankedPaceData
 {
     public RankedPlayer Player { get; set; }
+    //eweutnalnie zrobic globaltimeline poniewaz obecny jest tylko dla rzeczywistych splitow
     public List<RankedTimeline> Timelines { get; set; }
     public RankedInventory Inventory { get; set; }
     public RankedComplete Completion { get; set; }
+    public int Resets { get; set; }
 }
 
 public class RankedPacePanel : SidePanel
@@ -160,6 +163,8 @@ public class RankedPacePanel : SidePanel
         }
     }
 
+    public ICollectionView? GroupedRankedPaces { get; set; }
+
  
     public RankedPacePanel(ControllerViewModel controller) : base(controller)
     {
@@ -175,6 +180,7 @@ public class RankedPacePanel : SidePanel
     public override void OnEnable(object? parameter)
     {
         base.OnEnable(parameter);
+        SetupPaceManGrouping();
         string dataName = Controller.Configuration.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
@@ -209,6 +215,17 @@ public class RankedPacePanel : SidePanel
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
         return true;
+    }
+
+    private void SetupPaceManGrouping()
+    {
+        var collectionViewSource = new CollectionViewSource { Source = Paces };
+
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(RankedPace.SplitName)));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPace.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPace.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+
+        GroupedRankedPaces = collectionViewSource.View;
     }
 
     private async Task UpdateSpectatorMatch()
@@ -292,9 +309,18 @@ public class RankedPacePanel : SidePanel
                 for (int j = 0; j < rankedData.Value.Timelines.Count; j++)
                 {
                     var timeline = rankedData.Value.Timelines[j];
-                    if(timeline.Type.EndsWith("root")) continue; 
-                    if(timeline.UUID.Equals(player.UUID))
+                    if (timeline.Type.EndsWith("root")) continue;
+
+                    if (timeline.UUID.Equals(player.UUID))
                     {
+                        if (timeline.Type.EndsWith("reset"))
+                        {
+                            data.Resets++;
+                            data.Timelines.Clear();
+                            continue;
+                        }
+                        timeline.Type = timeline.Type.Split('.')[^1];
+
                         data.Timelines.Add(timeline);
                         rankedData.Value.Timelines.RemoveAt(j);
                         j--;
@@ -314,7 +340,8 @@ public class RankedPacePanel : SidePanel
                     var data = pacesData[j];
                     if (pace.InGameName.Equals(data.Player.NickName))
                     {
-                        pace.Update(data);
+                        Application.Current.Dispatcher.Invoke(() => { pace.Update(data); });
+
                         pacesData.RemoveAt(j);
                         _paces.RemoveAt(i);
                         i--;
@@ -334,6 +361,8 @@ public class RankedPacePanel : SidePanel
                 var data = pacesData[i];
                 AddPace(data);
             }
+
+            Application.Current.Dispatcher.Invoke(()=> { GroupedRankedPaces?.Refresh(); });
         }
         catch (Exception ex)
         {
@@ -343,11 +372,8 @@ public class RankedPacePanel : SidePanel
 
     private void AddPace(RankedPaceData data)
     {
-        RankedPace pace = new(Controller)
-        {
-            InGameName = data.Player.NickName,
-            EloRate = data.Player.EloRate ?? -1,   
-        };
+        RankedPace pace = new(Controller);
+        pace.Initialize(data.Player);
 
         int n = Controller.Configuration.Players.Count;
         for (int j = 0; j < n; j++)

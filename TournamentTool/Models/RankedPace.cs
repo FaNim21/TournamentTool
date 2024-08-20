@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using System.Data;
+using System.Windows.Media.Imaging;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -9,9 +9,10 @@ namespace TournamentTool.Models;
 public enum RankedSplitType
 {
     none,
+    Start,
     enter_the_nether,
-    structure1,  // find_bastion
-    structure2,  // find_fortress
+    structure_1,  // find_bastion
+    structure_2,  // find_fortress
     blind_travel,
     follow_ender_eye,
     enter_the_end,
@@ -21,14 +22,32 @@ public enum RankedSplitType
 
 public class RankedPace : BaseViewModel, IPlayer, IPace
 {
+    public class RankedTimelineSplit : BaseViewModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public RankedSplitType Split { get; set; }
+        public long Time { get; set; }
+    }
+
     private ControllerViewModel Controller { get; set; }
 
     public Player? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
 
-    public ObservableCollection<RankedSplitType> Splits { get; set; } = [];
+    public ObservableCollection<RankedTimelineSplit> Splits { get; set; } = [];
 
-    private string _inGameName { get; set; }
+    private BitmapImage? _headImage;
+    public BitmapImage? HeadImage
+    {
+        get => _headImage;
+        set
+        {
+            _headImage = value;
+            OnPropertyChanged(nameof(HeadImage));
+        }
+    }
+
+    private string _inGameName { get; set; } = string.Empty;
     public string InGameName
     {
         get => _inGameName;
@@ -39,7 +58,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         }
     }
 
-    private int _eloRate { get; set; }
+    private int _eloRate { get; set; } = -1;
     public int EloRate
     {
         get => _eloRate;
@@ -47,6 +66,17 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         {
             _eloRate = value;
             OnPropertyChanged(nameof(EloRate));
+        }
+    }
+
+    private int _resets { get; set; }
+    public int Resets
+    {
+        get => _resets;
+        set
+        {
+            _resets = value;
+            OnPropertyChanged(nameof(Resets));
         }
     }
 
@@ -88,7 +118,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     }
     public string? SplitName { get; set; }
 
-    private List<string> _timelines;
+    private List<string> _timelines = [];
     public List<string> Timelines
     {
         get => _timelines;
@@ -99,7 +129,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         }
     }
 
-    private string _lastTimeline;
+    private string _lastTimeline = string.Empty;
     public string LastTimeline
     {
         get => _lastTimeline;
@@ -110,28 +140,129 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         }
     }
 
+    private long _currentSplitTimeMiliseconds;
+    public long CurrentSplitTimeMiliseconds
+    {
+        get => _currentSplitTimeMiliseconds;
+        set
+        {
+            _currentSplitTimeMiliseconds = value;
+            TimeSpan time = TimeSpan.FromMilliseconds(_currentSplitTimeMiliseconds);
+            CurrentSplitTime = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            OnPropertyChanged(nameof(CurrentSplitTime));
+        }
+    }
+    public string CurrentSplitTime { get; set; } = "00:00";
+
 
     public RankedPace(ControllerViewModel controller)
     {
         Controller = controller;
     }
+    public void Initialize(RankedPlayer player)
+    {
+        InGameName = player.NickName;
+        EloRate = player.EloRate ?? -1;
+
+        Splits.Add(new RankedTimelineSplit() { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+        UpdateHeadImage();
+    }
 
     public void Update(RankedPaceData data)
     {
-        /*Timelines.Clear();
+        if (Resets != data.Resets)
+        {
+            Timelines.Clear();
+            Splits.Clear();
+            Splits.Add(new RankedTimelineSplit() { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+
+            RankedTimelineSplit last = Splits[^1];
+            SplitType = last.Split;
+            CurrentSplitTimeMiliseconds = last.Time;
+            LastTimeline = string.Empty;
+        }
+        if (data.Timelines.Count == 0) return;
+
+        Resets = data.Resets;
+
         for (int i = 0; i < data.Timelines.Count; i++)
         {
+            var current = data.Timelines[i];
+            if (Timelines.Count > i && current.Type.Equals(Timelines[i])) continue;
 
-        }*/
+            Timelines.Add(current.Type);
+        }
 
-        Inventory.BlazeRodsCount = data.Inventory.BlazeRod;
-        Inventory.ObsidianCount = data.Inventory.Obsidian;
-        Inventory.BedsCount = data.Inventory.WhiteBed;
-        Inventory.EnderEyeCount = data.Inventory.EnderEye;
-        Inventory.PearlsCount = data.Inventory.EnderPearl;
+        UpdateSplits(data.Timelines);
+        UpdateInventory(data.Inventory);
 
-        if (data.Timelines.Count == 0) return;
-        LastTimeline = data.Timelines[^1].Type.ToString();
+        RankedTimelineSplit lastSplit = Splits[^1];
+        SplitType = lastSplit.Split;
+        CurrentSplitTimeMiliseconds = lastSplit.Time;
+
+        if (Timelines.Count == 0) return;
+        LastTimeline = Timelines[^1];
+    }
+
+    private void UpdateSplits(List<RankedTimeline> timelines)
+    {
+        for (int i = 0; i < timelines.Count; i++)
+        {
+            var timeline = timelines[i];
+            bool wasFound = false;
+
+            for (int j = 0; j < Splits.Count; j++)
+            {
+                var current = Splits[j];
+                if (current.Name.Equals(timeline.Type))
+                {
+                    wasFound = true;
+                    break;
+                }
+
+            }
+
+            if (wasFound) continue;
+            if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
+            {
+                Splits.Add(new RankedTimelineSplit() { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time });
+            }
+            else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
+            {
+                var splitType = RankedSplitType.structure_2;
+
+                if (Splits[^1].Name.Equals("enter_the_nether"))
+                    splitType = RankedSplitType.structure_1;
+
+                Splits.Add(new RankedTimelineSplit() { Name = timeline.Type, Split = splitType, Time = timeline.Time });
+            }
+        }
+    }
+    private void UpdateInventory(RankedInventory inventory)
+    {
+        Inventory.BlazeRodsCount = inventory.BlazeRod;
+        Inventory.ObsidianCount = inventory.Obsidian;
+        Inventory.BedsCount = inventory.WhiteBed;
+        Inventory.EnderEyeCount = inventory.EnderEye;
+        Inventory.PearlsCount = inventory.EnderPearl;
+    }
+
+    private void UpdateHeadImage()
+    {
+        if (HeadImage != null) return;
+
+        if (Player == null)
+        {
+            string url = $"https://minotar.net/helm/{InGameName}/180.png";
+            Task.Run(async () =>
+            {
+                HeadImage = await Helper.LoadImageFromUrlAsync(url);
+            });
+        }
+        else
+        {
+            HeadImage = Player!.Image;
+        }
     }
 
     public string GetDisplayName()

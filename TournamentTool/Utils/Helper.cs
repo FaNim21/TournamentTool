@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Net.Http;
+using TournamentTool.Components.Controls;
 
 namespace TournamentTool.Utils;
 
@@ -124,6 +125,30 @@ public static class Helper
         image.EndInit();
         image.Freeze();
         return image;
+    }
+    public static async Task<BitmapImage?> LoadImageFromUrlAsync(string url)
+    {
+        try
+        {
+            using HttpClient client = new();
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            var imageStream = await response.Content.ReadAsStreamAsync();
+
+            BitmapImage bitmap = new();
+            bitmap.BeginInit();
+            bitmap.StreamSource = imageStream;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+        catch (Exception ex)
+        {
+            DialogBox.Show($"Rrror: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            return null;
+        }
     }
 
     public static async Task<string> MakeRequestAsString(string ApiUrl)

@@ -23,7 +23,7 @@
              VirtualizingPanel.IsVirtualizing="True"
              VirtualizingPanel.VirtualizationMode="Recycling"
              AllowDrop="True"
-             ItemsSource="{Binding Paces}"
+             ItemsSource="{Binding GroupedRankedPaces}"
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
              SelectionChanged="List_SelectionChanged"
              PreviewKeyDown="List_PreviewKeyDown"
@@ -44,23 +44,41 @@
                                  Margin="5" />
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="IGN: "
-                                           FontSize="13"
-                                           Foreground="Wheat" />
-                                <TextBlock Text="{Binding InGameName}"
-                                           FontSize="13"
-                                           FontWeight="SemiBold"
-                                           Foreground="LightCyan" />
+                                <Image Source="{Binding HeadImage, Mode=OneWay}"
+                                       Width="30"
+                                       Height="30" 
+                                       Margin="5"/>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="IGN: "
+                                                   FontSize="13"
+                                                   Foreground="Wheat" />
+                                        <TextBlock Text="{Binding InGameName}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="LightCyan" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Split: "
+                                                   FontSize="13"
+                                                   Foreground="Wheat" />
+                                        <TextBlock Text="{Binding LastTimeline}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="Gold" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Time: "
+                                               FontSize="13"
+                                               Foreground="Wheat" />
+                                    <TextBlock Text="{Binding CurrentSplitTime}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="White" />
+                                </StackPanel>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Split: "
-                                           FontSize="13"
-                                           Foreground="Wheat" />
-                                <TextBlock Text="{Binding LastTimeline}"
-                                           FontSize="13"
-                                           FontWeight="SemiBold"
-                                           Foreground="Gold" />
-                            </StackPanel>
+
                             <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                         Orientation="Horizontal"
                                         Margin="2 2 0 1">
@@ -145,6 +163,21 @@
         </ListBox.ItemTemplate>
         <ListBox.GroupStyle>
             <GroupStyle>
+                <GroupStyle.HeaderTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1"
+                                BorderBrush="#7e8691"
+                                Background="#7e8691"
+                                Padding="1"
+                                Margin="6 10 2 0">
+                            <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}, Mode=OneWay}"
+                                       Foreground="#1e1e1e"
+                                       HorizontalAlignment="Center"
+                                       FontWeight="Bold"
+                                       FontSize="18" />
+                        </Border>
+                    </DataTemplate>
+                </GroupStyle.HeaderTemplate>
                 <GroupStyle.Panel>
                     <ItemsPanelTemplate>
                         <StackPanel />
