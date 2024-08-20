@@ -48,34 +48,26 @@
                                        Width="30"
                                        Height="30" 
                                        Margin="5"/>
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="IGN: "
-                                                   FontSize="13"
-                                                   Foreground="Wheat" />
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Vertical"
+                                                Width="140">
                                         <TextBlock Text="{Binding InGameName}"
-                                                   FontSize="13"
+                                                   FontSize="15"
                                                    FontWeight="SemiBold"
                                                    Foreground="LightCyan" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Split: "
-                                                   FontSize="13"
-                                                   Foreground="Wheat" />
                                         <TextBlock Text="{Binding LastTimeline}"
-                                                   FontSize="13"
+                                                   FontSize="15"
                                                    FontWeight="SemiBold"
                                                    Foreground="Gold" />
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Time: "
-                                               FontSize="13"
-                                               Foreground="Wheat" />
-                                    <TextBlock Text="{Binding CurrentSplitTime}"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               Foreground="White" />
-                                </StackPanel>
+                                    <Grid>
+                                        <TextBlock Text="{Binding CurrentSplitTime}"
+                                                   FontSize="30"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="White" />
+                                    </Grid>
                                 </StackPanel>
                             </StackPanel>
 

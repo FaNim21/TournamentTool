@@ -145,7 +145,6 @@ public struct RankedPaceData
 
 public class RankedPacePanel : SidePanel
 {
-    private readonly FileSystemWatcher _fileWatcher;
     private readonly JsonSerializerOptions _options;
 
     private CancellationTokenSource? _cancellationTokenSource;
@@ -168,8 +167,6 @@ public class RankedPacePanel : SidePanel
  
     public RankedPacePanel(ControllerViewModel controller) : base(controller)
     {
-        _fileWatcher = new FileSystemWatcher();
-
         _options = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
@@ -190,26 +187,10 @@ public class RankedPacePanel : SidePanel
         _cancellationTokenSource = new();
 
         Task.Run(UpdateSpectatorMatch);
-
-/*        _fileWatcher.Path = Controller.Configuration.RankedRoomDataPath;
-        _fileWatcher.Filter = dataName;
-        _fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-
-        _fileWatcher.Changed += OnJsonFileChanged;
-        _fileWatcher.EnableRaisingEvents = true;
-*/
-
-        //TEMP do tego zeby nie edytowac pliku do szybkiego podgladu danych
-        //LoadJsonFileAsync();
-
-
     }
     public override bool OnDisable()
     {
         base.OnDisable();
-/*        _fileWatcher.Changed -= OnJsonFileChanged;
-        _fileWatcher.EnableRaisingEvents = false;
-*/
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
@@ -250,12 +231,6 @@ public class RankedPacePanel : SidePanel
             catch (TaskCanceledException) { break; }
         }
     }
-
-    private async void OnJsonFileChanged(object sender, FileSystemEventArgs e)
-    {
-        await LoadJsonFileAsync();
-    }
-
     private async Task LoadJsonFileAsync()
     {
         try
@@ -395,7 +370,6 @@ public class RankedPacePanel : SidePanel
             Paces.Add(pace);
         });
     }
-
     private void RemovePace(RankedPace pace)
     {
         Application.Current.Dispatcher.Invoke(() =>

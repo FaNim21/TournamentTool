@@ -118,12 +118,21 @@ public class TwitchStreamData : BaseViewModel
     public static Color offlineColor = Color.FromRgb(201, 61, 59);
     public static Color normalColor = Color.FromRgb(220, 220, 220);
 
-    public bool GameNameVisibility { get; set; } = false;
     public string GameName { get; set; } = string.Empty;
-
     public bool WasUpdated { get; set; } = false;
 
-    //??
+    private bool _gameNameVisibility;
+    public bool GameNameVisibility
+    {
+        get => _gameNameVisibility;
+        set
+        {
+            _gameNameVisibility = value;
+            OnPropertyChanged(nameof(GameNameVisibility));
+        }
+    }
+
+
     public void Update(TwitchStreamData data)
     {
         WasUpdated = true;
@@ -259,30 +268,6 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
-    [JsonIgnore] private int _boxHeight = 80;
-    [JsonIgnore]
-    public int BoxHeight
-    {
-        get => _boxHeight;
-        set
-        {
-            _boxHeight = value;
-            OnPropertyChanged(nameof(BoxHeight));
-        }
-    }
-
-    [JsonIgnore] private int _boxHeightBorder = 90;
-    [JsonIgnore]
-    public int BoxHeightBorder
-    {
-        get => _boxHeightBorder;
-        set
-        {
-            _boxHeightBorder = value;
-            OnPropertyChanged(nameof(BoxHeightBorder));
-        }
-    }
-
     [JsonIgnore] private bool _isUsedInPov;
     [JsonIgnore]
     public bool IsUsedInPov
@@ -317,33 +302,7 @@ public class Player : BaseViewModel, IPlayer
 
     public void ShowCategory(bool option)
     {
-        if (option)
-        {
-            BoxHeight = 80;
-            BoxHeightBorder = 90;
-            StreamData.LiveData.GameNameVisibility = true;
-            return;
-        }
-
-        BoxHeight = 65;
-        BoxHeightBorder = 75;
-        StreamData.LiveData.GameNameVisibility = false;
-    }
-
-    public void LoadHead()
-    {
-        if (ImageStream == null) return;
-        Image = Helper.LoadImageFromStream(ImageStream);
-    }
-    public async Task UpdateHeadImage()
-    {
-        if (string.IsNullOrEmpty(InGameName) || Image != null) return;
-        Image = await RequestHeadImage();
-    }
-    public async Task ForceUpdateHeadImage()
-    {
-        if (string.IsNullOrEmpty(InGameName)) return;
-        Image = await RequestHeadImage();
+        StreamData.LiveData.GameNameVisibility = option;
     }
 
     public async Task CompleteData()
@@ -361,6 +320,21 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
+    public void LoadHead()
+    {
+        if (ImageStream == null) return;
+        Image = Helper.LoadImageFromStream(ImageStream);
+    }
+    public async Task UpdateHeadImage()
+    {
+        if (string.IsNullOrEmpty(InGameName) || Image != null) return;
+        Image = await RequestHeadImage();
+    }
+    public async Task ForceUpdateHeadImage()
+    {
+        if (string.IsNullOrEmpty(InGameName)) return;
+        Image = await RequestHeadImage();
+    }
     private async Task<BitmapImage?> RequestHeadImage()
     {
         using HttpClient client = new();
@@ -382,7 +356,6 @@ public class Player : BaseViewModel, IPlayer
 
         StreamData.Clear();
     }
-
     public void ClearFromController()
     {
         IsUsedInPov = false;
