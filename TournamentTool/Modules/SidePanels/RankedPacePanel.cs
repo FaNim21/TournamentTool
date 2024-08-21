@@ -261,20 +261,14 @@ public class RankedPacePanel : SidePanel
                     Timelines = []
                 };
 
-                foreach (var inv in rankedData.Value.Inventories)
-                {
-                    if(player.UUID.Equals(inv.Key.Replace("-", string.Empty)))
-                    {
-                        data.Inventory = inv.Value;
-                        break;
-                    }
-                }
+                rankedData.Value.Inventories.TryGetValue(player.UUID, out var inventory);
+                data.Inventory = inventory;
                 if (data.Inventory.SplashPotions == null) continue;
 
                 for (int j = 0; j < rankedData.Value.Completes.Length; j++)
                 {
                     var completion = rankedData.Value.Completes[j];
-                    if (completion.UUID.Replace("-", string.Empty).Equals(player.UUID))
+                    if (completion.UUID.Equals(player.UUID))
                     {
                         data.Completion = completion;
                         break;

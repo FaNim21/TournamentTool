@@ -201,7 +201,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         CurrentSplitTimeMiliseconds = lastSplit.Time;
 
         if (Timelines.Count == 0) return;
-        LastTimeline = Timelines[^1];
+        LastTimeline = Timelines[^1].CaptalizeAll();
     }
 
     private void UpdateSplits(List<RankedTimeline> timelines)
