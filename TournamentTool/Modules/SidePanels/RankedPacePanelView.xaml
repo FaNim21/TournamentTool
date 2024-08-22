@@ -61,12 +61,20 @@
                                                    Foreground="Gold" />
                                     </StackPanel>
                                     <Grid>
+                                        <StackPanel>
+                                        <TextBlock Text="{Binding SplitDifferenceTime}"
+                                                   FontSize="13"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#d43f3f" />
                                         <TextBlock Text="{Binding CurrentSplitTime}"
-                                                   FontSize="30"
+                                                   FontSize="17"
                                                    VerticalAlignment="Center"
                                                    HorizontalAlignment="Left"
                                                    FontWeight="SemiBold"
                                                    Foreground="White" />
+                                        </StackPanel>
                                     </Grid>
                                 </StackPanel>
                             </StackPanel>

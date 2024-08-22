@@ -53,14 +53,13 @@
             </Grid>
 
             <ScrollViewer Grid.Row="1">
-                <Grid>
+                <Grid Visibility="{Binding IsPresetOpened, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Visibility="{Binding IsPresetOpened, Converter={StaticResource BoolToVisibilityConverter}}"
-                          Grid.Column="0">
+                    <Grid Grid.Column="0">
                         <WrapPanel Orientation="Vertical"
                                    Margin="20 10 20 20"
                                    HorizontalAlignment="Left"

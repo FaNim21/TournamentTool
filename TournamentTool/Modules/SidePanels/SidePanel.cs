@@ -31,12 +31,10 @@ public abstract class SidePanel : BaseViewModel
 
     public override void OnEnable(object? parameter)
     {
-        Trace.WriteLine("OnEnable: " + GetType().Name);
     }
 
     public override bool OnDisable()
     {
-        Trace.WriteLine("OnDisable: " + GetType().Name);
         return true;
     }
 

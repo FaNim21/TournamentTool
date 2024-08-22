@@ -76,9 +76,6 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         CanBeDestroyed = true;
 
-        if (!Directory.Exists(Consts.PresetsPath))
-            Directory.CreateDirectory(Consts.PresetsPath);
-
         LoadAllPresets();
 
         OpenControllerCommand = new RelayCommand(MainViewModel.Open<ControllerViewModel>);

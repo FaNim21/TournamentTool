@@ -30,6 +30,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     }
 
     private ControllerViewModel Controller { get; set; }
+    private RankedPacePanel RankedPacePanel { get; set; }
 
     public Player? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -154,10 +155,25 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     }
     public string CurrentSplitTime { get; set; } = "00:00";
 
+    private long _differenceSplitTimeMiliseconds;
+    public long DifferenceSplitTimeMiliseconds
+    {
+        get => _differenceSplitTimeMiliseconds;
+        set
+        {
+            _differenceSplitTimeMiliseconds = value;
+            TimeSpan time = TimeSpan.FromMilliseconds(_differenceSplitTimeMiliseconds);
+            SplitDifferenceTime = string.Format("+{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            OnPropertyChanged(nameof(SplitDifferenceTime));
+        }
+    }
+    public string SplitDifferenceTime { get; set; } = "00:00";
 
-    public RankedPace(ControllerViewModel controller)
+
+    public RankedPace(ControllerViewModel controller, RankedPacePanel rankedPacePanel)
     {
         Controller = controller;
+        RankedPacePanel = rankedPacePanel;
     }
     public void Initialize(RankedPlayer player)
     {
@@ -176,6 +192,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
             Splits.Clear();
             Splits.Add(new RankedTimelineSplit() { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
 
+            //TODO: tu moze lepiej zgarnac timeline resetu i pobrac czas zeby na starcie nie bylo 00:00 tylko czas resetu z racji i tak rta czasu reszty splitow 
             RankedTimelineSplit last = Splits[^1];
             SplitType = last.Split;
             CurrentSplitTimeMiliseconds = last.Time;
@@ -219,13 +236,13 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
                     wasFound = true;
                     break;
                 }
-
             }
-
             if (wasFound) continue;
+
+            RankedTimelineSplit? newSplit = null;
             if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
             {
-                Splits.Add(new RankedTimelineSplit() { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time });
+                newSplit = new RankedTimelineSplit() { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
             }
             else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
             {
@@ -234,8 +251,23 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
                 if (Splits[^1].Name.Equals("enter_the_nether"))
                     splitType = RankedSplitType.structure_1;
 
-                Splits.Add(new RankedTimelineSplit() { Name = timeline.Type, Split = splitType, Time = timeline.Time });
+                newSplit = new RankedTimelineSplit() { Name = timeline.Type, Split = splitType, Time = timeline.Time };
             }
+
+            if (newSplit == null) continue;
+
+            //TODO: to powinno byc zapisywane inaczej i forowane po wszystkich dla wiekszej pewnosci? poniewaz po resecie aplikacji
+            //ta metoda jest obecnie najwydajniejsza, ale psuje sie po restarcie apki z racji kolejnosci czytania danych z pliku json ktorego sie nie da zmienic
+            RankedBestSplit bestSplit = RankedPacePanel.GetBestSplit(newSplit.Split);
+            if(string.IsNullOrEmpty(bestSplit.PlayerName))
+            {
+                bestSplit.PlayerName = InGameName;
+                bestSplit.Time = newSplit.Time;
+            }
+            DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
+            if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
+
+            Splits.Add(newSplit);
         }
     }
     private void UpdateInventory(RankedInventory inventory)
