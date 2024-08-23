@@ -314,8 +314,11 @@ public class RankedPacePanel : SidePanel
         if(rankedData.StartTime != StartTime)
         {
             StartTime = rankedData.StartTime;
-            BestSplits.Clear();
-            Paces.Clear();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                BestSplits.Clear();
+                Paces.Clear();
+            });
         }
 
         List<RankedPace> _paces = new(Paces);

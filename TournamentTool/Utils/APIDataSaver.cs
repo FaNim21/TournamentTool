@@ -5,6 +5,12 @@ namespace TournamentTool.Utils;
 
 public class APIDataSaver
 {
+    public APIDataSaver()
+    {
+        if (!Directory.Exists(Consts.AppAPIPath))
+            Directory.CreateDirectory(Consts.AppAPIPath);
+    }
+
     public void CheckFile(string fileName)
     {
         string path = Path.Combine(Consts.AppAPIPath, fileName + ".txt");
