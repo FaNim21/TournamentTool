@@ -18,7 +18,8 @@ public partial class ControllerView : UserControl
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;
-        ((ControllerViewModel)DataContext).UnSelectItems(true);
+        //TODO: 0 problem jest taki ze potzrebuje do tego zeby jak zaczynam drag and dropa to zeby odznaczyc inny ale to zarazem odznacza pova jezeli chce do pova wrzucic gracza
+        //((ControllerViewModel)DataContext).UnSelectItems(true);
 
         DragDrop.DoDragDrop(border, new DataObject(typeof(IPlayer), border.DataContext), DragDropEffects.Move);
     }
@@ -39,26 +40,6 @@ public partial class ControllerView : UserControl
             viewModel.UnSelectItems(true);
         }
     }*/
-
-    private void List_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        //PaceMan.UpdateLayout();
-        WhiteList.UpdateLayout();
-
-        if (DataContext is not ControllerViewModel viewModel) return;
-        if (viewModel.CurrentChosenPOV != null)
-        {
-            //PaceMan.UnselectAll();
-            WhiteList.UnselectAll();
-            Keyboard.ClearFocus();
-            viewModel.CurrentChosenPOV = null;
-        }
-    }
-
-    private void List_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        e.Handled = true;
-    }
 
     private void Slider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

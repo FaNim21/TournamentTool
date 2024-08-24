@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
@@ -310,8 +312,7 @@
                       Stroke="#000D14"
                       StrokeThickness="4" />
 
-                <ListBox x:Name="WhiteList"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          Background="Transparent"
                          BorderThickness="0"
@@ -322,10 +323,11 @@
                          AllowDrop="True"
                          ItemsSource="{Binding FilteredPlayers}"
                          SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
-                         SelectionChanged="List_SelectionChanged"
-                         PreviewKeyDown="List_PreviewKeyDown"
                          PreviewMouseWheel="ListBox_PreviewMouseWheel"
                          Margin="6 0 0 0">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ListBoxUpdateBehavior />
+                    </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:Player">
                             <Border BorderBrush="Gray"

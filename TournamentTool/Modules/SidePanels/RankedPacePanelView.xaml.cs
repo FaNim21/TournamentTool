@@ -13,19 +13,6 @@ public partial class RankedPacePanelView : UserControl
         InitializeComponent();
     }
 
-    private void List_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        //paceMan.UpdateLayout();
-
-        if (DataContext is not PaceManPanel viewModel) return;
-        if (viewModel.Controller.CurrentChosenPOV != null)
-        {
-            //paceMan.UnselectAll();
-            Keyboard.ClearFocus();
-            viewModel.Controller.CurrentChosenPOV = null;
-        }
-    }
-
     private void ListBorder_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
@@ -45,10 +32,4 @@ public partial class RankedPacePanelView : UserControl
         scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
         e.Handled = true;
     }
-
-    private void List_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        e.Handled = true;
-    }
-
 }

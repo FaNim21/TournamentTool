@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
@@ -7,7 +6,6 @@ using TournamentTool.Models;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
-using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
 
@@ -54,6 +52,9 @@ public class ControllerViewModel : SelectableViewModel
         {
             SidePanel?.ClearSelectedPlayer();
             ClearSelectedWhitelistPlayer();
+
+            _selectedWhitelistPlayer = value;
+            OnPropertyChanged(nameof(SelectedWhitelistPlayer));
 
             CurrentChosenPlayer = value;
             SetPovAfterClickedCanvas();

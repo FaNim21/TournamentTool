@@ -17,6 +17,9 @@ public abstract class SidePanel : BaseViewModel
             Controller.ClearSelectedWhitelistPlayer();
             ClearSelectedPlayer();
 
+            _selectedPlayer = value;
+            OnPropertyChanged(nameof(SelectedPlayer));
+
             Controller.CurrentChosenPlayer = value;
             Controller.SetPovAfterClickedCanvas();
         }

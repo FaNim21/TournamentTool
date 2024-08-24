@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Modules.SidePanels"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
@@ -25,9 +27,10 @@
              AllowDrop="True"
              ItemsSource="{Binding GroupedPaceManPlayers}"
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
-             SelectionChanged="List_SelectionChanged"
-             PreviewKeyDown="List_PreviewKeyDown"
              PreviewMouseWheel="ListBox_PreviewMouseWheel">
+        <i:Interaction.Behaviors>
+            <behaviors:ListBoxUpdateBehavior />
+        </i:Interaction.Behaviors>
         <ListBox.ItemTemplate>
             <DataTemplate DataType="models:PaceMan">
                 <Border BorderBrush="#7e8691"
