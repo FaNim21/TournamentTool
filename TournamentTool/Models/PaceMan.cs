@@ -1,7 +1,5 @@
-﻿using System.Net.Http;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
-using TournamentTool.Components.Controls;
 using TournamentTool.ViewModels;
 using System.Windows;
 using TournamentTool.Utils;

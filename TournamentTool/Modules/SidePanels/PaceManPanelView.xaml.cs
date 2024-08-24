@@ -26,7 +26,7 @@ public partial class PaceManPanelView : UserControl
         }
     }
 
-    private void ListBorder_MouseMove(object sender, MouseEventArgs e)
+    private void ListBorder_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;

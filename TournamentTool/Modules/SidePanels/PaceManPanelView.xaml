@@ -33,7 +33,7 @@
                 <Border BorderBrush="#7e8691"
                         BorderThickness="1"
                         Width="263"
-                        MouseMove="ListBorder_MouseMove">
+                        MouseDown="ListBorder_MouseDown">
                     <Grid>
                         <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                  Width="7"
