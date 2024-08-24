@@ -209,6 +209,7 @@ public class RankedPacePanel : SidePanel
     {
         base.OnEnable(parameter);
         SetupPaceManGrouping();
+
         string dataName = Controller.Configuration.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
@@ -398,7 +399,7 @@ public class RankedPacePanel : SidePanel
         {
             var current = Controller.Configuration.Players[j];
 
-            if (current.InGameName!.Equals(pace.InGameName))
+            if (current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase))
             {
                 pace.Player = current;
                 break;

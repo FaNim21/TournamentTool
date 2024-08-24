@@ -144,7 +144,7 @@ public class PaceManService : BaseViewModel
         {
             var player = Controller.Configuration.Players[i];
 
-            if (player.InGameName!.Equals(paceMan.Nickname))
+            if (player.InGameName!.Equals(paceMan.Nickname, StringComparison.OrdinalIgnoreCase))
             {
                 updatedPlayer = true;
                 player.StreamData.SetName(paceMan.User.TwitchName);
