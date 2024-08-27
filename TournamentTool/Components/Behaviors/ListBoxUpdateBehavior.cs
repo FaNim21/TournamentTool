@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Components.Behaviors;
@@ -31,12 +32,20 @@ public class ListBoxUpdateBehavior : Behavior<ListBox>
         if (AssociatedObject == null) return;
         UpdateAllListBoxesLayouts();
 
-        if (AssociatedObject.DataContext is not ControllerViewModel viewModel) return;
-        if (viewModel.CurrentChosenPOV != null)
+        ControllerViewModel? controller = null;
+        BaseViewModel viewModel = (BaseViewModel)AssociatedObject.DataContext;
+        if (viewModel is SidePanel sidePanel)
+            controller = sidePanel.Controller;
+
+        if (viewModel is ControllerViewModel controllerViewModel)
+            controller = controllerViewModel; 
+
+        if (controller == null) return;
+        if (controller.CurrentChosenPOV != null)
         {
             UnselectAllListBoxes();
             Keyboard.ClearFocus();
-            viewModel.CurrentChosenPOV = null;
+            controller.CurrentChosenPOV = null;
         }
     }
 

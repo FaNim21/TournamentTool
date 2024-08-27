@@ -23,7 +23,7 @@ public enum SplitType
 
 public class PaceMan : BaseViewModel, IPlayer, IPace
 {
-    private ControllerViewModel? Controller { get; set; }
+    public ControllerViewModel? Controller { get; set; }
 
     [JsonPropertyName("user")]
     public PaceManUser User { get; set; } = new();

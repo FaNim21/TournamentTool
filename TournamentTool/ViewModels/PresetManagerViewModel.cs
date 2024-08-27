@@ -138,6 +138,7 @@ public class PresetManagerViewModel : SelectableViewModel
                 if (string.IsNullOrEmpty(text)) continue;
                 Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
                 if (data == null) continue;
+                data.Validate();
                 for (int j = 0; j < data.Players.Count; j++)
                 {
                     var current = data.Players[j];

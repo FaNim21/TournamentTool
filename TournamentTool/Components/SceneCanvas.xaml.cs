@@ -13,7 +13,7 @@ public partial class SceneCanvas : UserControl
         InitializeComponent();
     }
 
-    private void CanvasBorder_MouseMove(object sender, MouseEventArgs e)
+    private void CanvasBorder_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;
@@ -36,7 +36,7 @@ public partial class SceneCanvas : UserControl
             dragPov.Swap(pov);
         }
 
-        if (string.IsNullOrEmpty(pov.TwitchName)) return;
+        if (string.IsNullOrEmpty(pov.DisplayedPlayer)) return;
         scene.Controller.UnSelectItems(true);
     }
 
@@ -72,5 +72,4 @@ public partial class SceneCanvas : UserControl
     {
         Mouse.OverrideCursor = null;
     }
-
 }

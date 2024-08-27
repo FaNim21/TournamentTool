@@ -46,9 +46,9 @@
                                     BorderThickness="0.8"
                                     CornerRadius="5"
                                     Drop="Border_Drop"
-                                    MouseMove="CanvasBorder_MouseMove"
                                     PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown"
                                     PreviewMouseRightButtonDown="CanvasItem_RightMouseButtonDown"
+                                    MouseDown="CanvasBorder_MouseDown"
                                     MouseEnter="CanvasItem_MouseEnter"
                                     MouseLeave="CanvasItem_MouseLeave">
                                 <Grid>

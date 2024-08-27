@@ -233,9 +233,9 @@ public class Tournament : BaseViewModel, IRenameItem
         set
         {
             if (value < 500)
-                _paceManRefreshRateMiliseconds = 500;
+                _rankedRoomUpdateFrequency = 500;
             else
-                _paceManRefreshRateMiliseconds = value;
+                _rankedRoomUpdateFrequency = value;
 
             OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
         }
@@ -277,6 +277,16 @@ public class Tournament : BaseViewModel, IRenameItem
 
         time = TimeSpan.FromMilliseconds(CreditsGoodPaceMiliseconds).ToString(@"mm\:ss");
         CreditsToText = $"Finish (sub {time})";
+    }
+
+    public void Validate()
+    {
+        if (PaceManRefreshRateMiliseconds < 3000)
+        {
+            PaceManRefreshRateMiliseconds = 3000;
+        }
+
+        //TODO: 9 add some validations or change it to some cleaner version
     }
 
     public void ChangeName(string name)

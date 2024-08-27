@@ -13,8 +13,8 @@ public class ControllerViewModel : SelectableViewModel
 {
     private readonly TwitchService _twitch;
 
-    public Scene MainScene { get; set; } 
-    public PreviewScene PreviewScene { get; set; } 
+    public Scene MainScene { get; set; }
+    public PreviewScene PreviewScene { get; set; }
 
     private ObservableCollection<Player> _filteredPlayers = [];
     public ObservableCollection<Player> FilteredPlayers
@@ -32,7 +32,7 @@ public class ControllerViewModel : SelectableViewModel
     public SidePanel? SidePanel { get; set; }
 
     public Tournament Configuration { get; private set; } = new();
- 
+
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
     {
@@ -56,8 +56,7 @@ public class ControllerViewModel : SelectableViewModel
             _selectedWhitelistPlayer = value;
             OnPropertyChanged(nameof(SelectedWhitelistPlayer));
 
-            CurrentChosenPlayer = value;
-            SetPovAfterClickedCanvas();
+            SetPovAfterClickedCanvas(value!);
         }
     }
 
@@ -98,6 +97,7 @@ public class ControllerViewModel : SelectableViewModel
     }
 
     public ICommand RefreshPOVsCommand { get; set; }
+    public ICommand UnSelectItemsCommand { get; set; }
 
 
     public ControllerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
@@ -109,6 +109,7 @@ public class ControllerViewModel : SelectableViewModel
         _twitch = new(this);
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
+        UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
 
     public override bool CanEnable(Tournament tournament)
@@ -208,8 +209,9 @@ public class ControllerViewModel : SelectableViewModel
         await PreviewScene.Refresh();
     }
 
-    public void SetPovAfterClickedCanvas()
+    public void SetPovAfterClickedCanvas(IPlayer chosenPlayer)
     {
+        CurrentChosenPlayer = chosenPlayer;
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
         CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
@@ -219,9 +221,9 @@ public class ControllerViewModel : SelectableViewModel
     public void UnSelectItems(bool ClearAll = false)
     {
         CurrentChosenPlayer = null;
-
         SidePanel?.ClearSelectedPlayer();
         ClearSelectedWhitelistPlayer();
+
         if (ClearAll) CurrentChosenPOV = null;
     }
 

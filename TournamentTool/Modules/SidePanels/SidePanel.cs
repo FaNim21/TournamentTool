@@ -20,8 +20,7 @@ public abstract class SidePanel : BaseViewModel
             _selectedPlayer = value;
             OnPropertyChanged(nameof(SelectedPlayer));
 
-            Controller.CurrentChosenPlayer = value;
-            Controller.SetPovAfterClickedCanvas();
+            Controller.SetPovAfterClickedCanvas(value!);
         }
     }
 

@@ -26,18 +26,20 @@
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  AllowDrop="True"
                  ItemsSource="{Binding GroupedRankedPaces}"
-                 SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
-                 PreviewMouseWheel="ListBox_PreviewMouseWheel">
+                 SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}" >
             <i:Interaction.Behaviors>
                 <behaviors:ListBoxUpdateBehavior />
+                <behaviors:ListBoxClampScrollBehavior />
             </i:Interaction.Behaviors>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="models:PaceMan">
                     <Border BorderBrush="#7e8691"
                             BorderThickness="1"
                             Width="263"
-                            MouseDown="ListBorder_MouseDown"
                             Background="Transparent">
+                        <i:Interaction.Behaviors>
+                            <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" />
+                        </i:Interaction.Behaviors>
                         <Grid>
                             <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
                                      Width="7"

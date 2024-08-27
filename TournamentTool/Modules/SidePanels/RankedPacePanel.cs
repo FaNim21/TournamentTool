@@ -185,6 +185,7 @@ public class RankedPacePanel : SidePanel
 
     public long StartTime { get; set; }
     public int CompletedRunsCount { get; set; }
+    public int PacesNotFromWhitelistAmount { get; set; }
 
     public ICollectionView? GroupedRankedPaces { get; set; }
 
@@ -322,6 +323,7 @@ public class RankedPacePanel : SidePanel
             });
         }
 
+        PacesNotFromWhitelistAmount = 0;
         List<RankedPace> _paces = new(Paces);
         for (int i = 0; i < rankedData.Players.Length; i++)
         {
@@ -395,15 +397,22 @@ public class RankedPacePanel : SidePanel
         pace.Initialize(data.Player);
 
         int n = Controller.Configuration.Players.Count;
+        bool found = false;
         for (int j = 0; j < n; j++)
         {
             var current = Controller.Configuration.Players[j];
 
             if (current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase))
             {
+                found = true;
                 pace.Player = current;
                 break;
             }
+        }
+        if (!found)
+        {
+            PacesNotFromWhitelistAmount += 1;
+            return;
         }
 
         pace.Inventory.DisplayItems = true;

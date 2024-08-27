@@ -29,7 +29,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         public long Time { get; set; }
     }
 
-    private ControllerViewModel Controller { get; set; }
+    public ControllerViewModel Controller { get; set; }
     private RankedPacePanel RankedPacePanel { get; set; }
 
     public Player? Player { get; set; }
