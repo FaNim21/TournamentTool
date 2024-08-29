@@ -1,16 +1,20 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.Utils;
+using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
     private readonly JsonSerializerOptions _serializerOptions;
+
+    public DebugWindow DebugWindow { get; set; }
 
     public string VersionText { get; set; }
 
@@ -25,6 +29,8 @@ public class MainViewModel : BaseViewModel
         set
         {
             _selectedViewModel = value;
+            if (DebugWindow != null)
+                ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = value;
             OnPropertyChanged(nameof(SelectedViewModel));
         }
     }
@@ -175,5 +181,28 @@ public class MainViewModel : BaseViewModel
         }
 
         NewUpdate = isNewUpdate;
+    }
+
+    public void SwitchDebugWindow()
+    {
+        if (DebugWindow == null)
+        {
+            DebugWindowViewModel viewModel = new()
+            {
+                SelectedViewModel = SelectedViewModel,
+            };
+            DebugWindow = new DebugWindow()
+            {
+                DataContext = viewModel
+            };
+            DebugWindow.Show();
+            Application.Current.MainWindow.Focus();
+        }
+        else
+        {
+            ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = null;
+            DebugWindow.Close();
+            DebugWindow = null;
+        }
     }
 }

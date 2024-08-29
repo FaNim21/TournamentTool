@@ -37,7 +37,7 @@ public class BorderDragDropBehavior : Behavior<Border>
 
         if(OnCommand != null && OnCommand.CanExecute(null))
         {
-            //OnCommand.Execute(null);
+            OnCommand.Execute(null);
         }
 
         DragDrop.DoDragDrop(border, new DataObject(typeof(IPlayer), border.DataContext), DragDropEffects.Move);

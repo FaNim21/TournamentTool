@@ -3,6 +3,7 @@ using System.Windows.Input;
 using TournamentTool.Components;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.Windows;
 
 namespace TournamentTool;
 
@@ -71,8 +72,20 @@ public partial class App : Application
             }
         };
 
+        var toggleDebugWindow = new Hotkey
+        {
+            Key = Key.F12,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Toggle mode for debug window for specific selected view model",
+            Action = () =>
+            {
+                MainViewModel.SwitchDebugWindow();
+            }
+        };
+
         InputController.Instance.AddHotkey(renameTextBox);
         InputController.Instance.AddHotkey(toggleHamburgerMenu);
         InputController.Instance.AddHotkey(toggleStudioMode);
+        InputController.Instance.AddHotkey(toggleDebugWindow);
     }
 }

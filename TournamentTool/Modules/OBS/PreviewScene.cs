@@ -19,6 +19,8 @@ public class PreviewScene : Scene
         Trace.WriteLine($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {Controller.MainScene.SceneName}");
         if (Controller.MainScene.SceneName!.Equals(scene))
         {
+            if (!Controller.OBS.IsConnectedToWebSocket) return;
+
             MainText = "NOT SUPPORTED";
             Clear();
             SetSceneName(scene);

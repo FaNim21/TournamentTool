@@ -56,5 +56,4 @@ public partial class MainWindow : Window
         Settings.Default.Save();
         Application.Current.Shutdown();
     }
-
 }
