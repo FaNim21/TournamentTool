@@ -20,6 +20,8 @@
         <converters:HotkeyConverter x:Key="HotkeyConverter" />
         <converters:FontSizeConverter x:Key="FontSizeConverter" />
         <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+        <converters:IndentConverter x:Key="IndentConverter" />
+        <converters:ExpandCollapseConverter x:Key="ExpandCollapseConverter" />
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">

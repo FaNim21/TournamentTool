@@ -15,6 +15,7 @@
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
+        Topmost="True"
         Background="#1E1E1E">
     <WindowChrome.WindowChrome>
         <WindowChrome GlassFrameThickness="0"
@@ -66,7 +67,7 @@
 
         <Grid Grid.Row="1">
             <ListBox Background="Transparent"
-                     Foreground="Wheat"
+                     Foreground="FloralWhite"
                      BorderThickness="0"
                      ItemsSource="{Binding Variables}">
                 <ListBox.ItemContainerStyle>
@@ -75,6 +76,34 @@
                                 Value="False" />
                     </Style>
                 </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="20"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    Foreground="NavajoWhite"
+                                    FontSize="16"
+                                    Padding="0 -5 2 0"
+                                    Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Content="{Binding IsExpanded, Converter={StaticResource ExpandCollapseConverter}}"
+                                    Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}">
+                            </Button>
+                            <TextBlock>
+                                <Run Text="{Binding Name}"
+                                     Foreground="Wheat" />
+                                <Run Text="{Binding Value}"
+                                     Foreground="White" />
+                                <TextBlock.Margin>
+                                    <MultiBinding Converter="{StaticResource IndentConverter}">
+                                        <Binding Path="IndentLevel" />
+                                    </MultiBinding>
+                                </TextBlock.Margin>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
         </Grid>
     </Grid>
