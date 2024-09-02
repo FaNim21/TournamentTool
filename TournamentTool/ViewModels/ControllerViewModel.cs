@@ -102,6 +102,7 @@ public class ControllerViewModel : SelectableViewModel
 
     public ControllerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
+        CanBeDestroyed = true;
         MainScene = new(this);
         PreviewScene = new(this);
 

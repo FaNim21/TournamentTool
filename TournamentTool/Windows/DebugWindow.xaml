@@ -79,10 +79,15 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
+                            <StackPanel.Margin>
+                                <MultiBinding Converter="{StaticResource IndentConverter}">
+                                    <Binding Path="IndentLevel" />
+                                </MultiBinding>
+                            </StackPanel.Margin>
                             <Button Width="20"
                                     Background="Transparent"
                                     BorderBrush="Transparent"
-                                    Foreground="NavajoWhite"
+                                    Foreground="Cyan"
                                     FontSize="16"
                                     Padding="0 -5 2 0"
                                     Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -90,16 +95,14 @@
                                     Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                     CommandParameter="{Binding}">
                             </Button>
+                            <TextBlock Text="{Binding Name, Mode=OneWay}"
+                                       Foreground="Wheat">
+                            </TextBlock>
                             <TextBlock>
-                                <Run Text="{Binding Name}"
+                                <Run Text=":"
                                      Foreground="Wheat" />
-                                <Run Text="{Binding Value}"
+                                <Run Text="{Binding Value, Mode=OneWay}"
                                      Foreground="White" />
-                                <TextBlock.Margin>
-                                    <MultiBinding Converter="{StaticResource IndentConverter}">
-                                        <Binding Path="IndentLevel" />
-                                    </MultiBinding>
-                                </TextBlock.Margin>
                             </TextBlock>
                         </StackPanel>
                     </DataTemplate>

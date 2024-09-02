@@ -24,11 +24,10 @@ public class DebugVariable : BaseViewModel
         get => _name;
         set
         {
-            if (_name != value)
-            {
-                _name = value;
-                OnPropertyChanged(nameof(Name));
-            }
+            if (_name == value) return;
+
+            _name = value;
+            OnPropertyChanged(nameof(Name));
         }
     }
 
@@ -43,8 +42,27 @@ public class DebugVariable : BaseViewModel
         }
     }
 
-    public int IndentLevel { get; set; }
-    public bool IsExpandable { get; set; }
+    private int _indentLevel;
+    public int IndentLevel
+    {
+        get => _indentLevel;
+        set
+        {
+            _indentLevel = value;
+            OnPropertyChanged(nameof(IndentLevel));
+        }
+    }
+
+    private bool _isExpandable;
+    public bool IsExpandable
+    {
+        get => _isExpandable;
+        set
+        {
+            _isExpandable = value;
+            OnPropertyChanged(nameof(IsExpandable));
+        }
+    }
 }
 
 public class DebugWindowViewModel : BaseViewModel
@@ -98,6 +116,7 @@ public class DebugWindowViewModel : BaseViewModel
     }
 
     private Dictionary<object, List<DebugVariable>> _viewModelToVariablesMap = new();
+    private HashSet<object> _visitedInstances = [];
 
     public ICommand ToggleExpandCommand { get; set; }
 
@@ -126,6 +145,7 @@ public class DebugWindowViewModel : BaseViewModel
     private void InitializeVariables()
     {
         Variables.Clear();
+        _visitedInstances.Clear();
 
         if (SelectedViewModel == null) return;
         AddVariables(SelectedViewModel, "", true);
@@ -134,6 +154,10 @@ public class DebugWindowViewModel : BaseViewModel
     private void AddVariables(object viewModel, string parentName, bool isFirstLevel)
     {
         if (viewModel == null) return;
+
+        _visitedInstances ??= [];
+        if (_visitedInstances.Contains(viewModel)) return;
+        _visitedInstances.Add(viewModel);
 
         var properties = viewModel.GetType().GetProperties();
         foreach (var prop in properties)
@@ -150,7 +174,7 @@ public class DebugWindowViewModel : BaseViewModel
             var existingVariable = Variables.FirstOrDefault(v => v.Name.StartsWith(variableName));
             if (existingVariable != null)
             {
-                existingVariable.Name = $"{variableName}: {displayValue}";
+                existingVariable.Value = displayValue;
                 continue;
             }
 
@@ -165,7 +189,7 @@ public class DebugWindowViewModel : BaseViewModel
 
             Variables.Add(debugVariable);
 
-            if (!isExpandable) continue;
+            if (!isExpandable || value == null) continue;
 
             if (value is INotifyPropertyChanged notifyingVM)
             {
@@ -197,6 +221,9 @@ public class DebugWindowViewModel : BaseViewModel
         var parentViewModel = FindViewModelByVariableName(SelectedViewModel, parentName);
         if (parentViewModel == null) return;
 
+        if(!_visitedInstances.Contains(parentViewModel)) 
+            _visitedInstances.Add(parentViewModel);
+
         var properties = parentViewModel.GetType().GetProperties();
         foreach (var prop in properties)
         {
@@ -208,26 +235,25 @@ public class DebugWindowViewModel : BaseViewModel
 
             int indentLevel = parentVariable.IndentLevel + 1;
             bool isExpandable = value != null && typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType);
-            if (isExpandable) continue;
-            //TODO: 0 tutaj dac feature do wyswietlania observablecollection
+            if (isExpandable && _visitedInstances.Contains(value)) continue;
 
             var debugVariable = new DebugVariable
             {
                 Name = variableName,
                 Value = displayValue,
                 IndentLevel = indentLevel,
-                IsExpandable = false,
+                IsExpandable = isExpandable,
                 IsExpanded = false
             };
 
             Variables.Insert(++parentIndex, debugVariable);
 
-            if (value is INotifyPropertyChanged notifyingVM)
+            if (isExpandable && value is INotifyPropertyChanged notifyingVM)
             {
                 notifyingVM.PropertyChanged += OnNestedViewModelPropertyChanged;
                 if (!_viewModelToVariablesMap.ContainsKey(notifyingVM))
                 {
-                    _viewModelToVariablesMap[notifyingVM] = new List<DebugVariable>();
+                    _viewModelToVariablesMap[notifyingVM] = [];
                 }
                 _viewModelToVariablesMap[notifyingVM].Add(debugVariable);
             }
@@ -253,7 +279,7 @@ public class DebugWindowViewModel : BaseViewModel
         }
     }
 
-    private void OnSelectedViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void OnSelectedViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         var property = _selectedViewModel.GetType().GetProperty(e.PropertyName);
         if (property == null) return;
@@ -261,7 +287,7 @@ public class DebugWindowViewModel : BaseViewModel
         var value = property.GetValue(_selectedViewModel)?.ToString() ?? "null";
         UpdateVariable(e.PropertyName, value);
     }
-    private void OnNestedViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void OnNestedViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         var nestedViewModel = sender;
         if (nestedViewModel == null || !_viewModelToVariablesMap.ContainsKey(nestedViewModel)) return;

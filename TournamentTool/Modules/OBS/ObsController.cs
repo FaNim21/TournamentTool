@@ -76,6 +76,9 @@ public class ObsController : BaseViewModel
     private bool _startedTransition;
 
 
+    /// <summary>
+    /// Zrobic w niedalekiej przyszlosci logike, ktora zapobiegnie czyszczeniu czegokolwiek z polaczen, a tylko bedzie to robic przy zmianie presetu - mozna to jeszcze lepiej rozwinac
+    /// </summary>
     public ObsController(ControllerViewModel controller)
     {
         Controller = controller;
@@ -187,6 +190,7 @@ public class ObsController : BaseViewModel
         while (Client.ConnectionState != ConnectionState.Disconnected)
             await Task.Delay(100);
         Client = new();
+        IsConnectedToWebSocket = false;
     }
  
     public async Task Refresh()
@@ -313,6 +317,8 @@ public class ObsController : BaseViewModel
         if (e.PropertyName == "ConnectionState")
         {
             bool option = Client!.ConnectionState == ConnectionState.Connected;
+            if (option == IsConnectedToWebSocket) return;
+            Trace.WriteLine("Connection with obs changed");
 
             Application.Current?.Dispatcher.Invoke(async delegate
             {

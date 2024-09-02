@@ -74,7 +74,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        CanBeDestroyed = true;
+        //CanBeDestroyed = true;
 
         LoadAllPresets();
 

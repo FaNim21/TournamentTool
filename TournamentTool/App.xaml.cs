@@ -3,7 +3,6 @@ using System.Windows.Input;
 using TournamentTool.Components;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
-using TournamentTool.Windows;
 
 namespace TournamentTool;
 

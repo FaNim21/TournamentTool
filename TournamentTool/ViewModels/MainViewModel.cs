@@ -29,8 +29,6 @@ public class MainViewModel : BaseViewModel
         set
         {
             _selectedViewModel = value;
-            if (DebugWindow != null)
-                ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = value;
             OnPropertyChanged(nameof(SelectedViewModel));
         }
     }
@@ -108,13 +106,14 @@ public class MainViewModel : BaseViewModel
             viewModel = (T)Activator.CreateInstance(typeof(T), this)!;
             wasCreated = true;
         }
+
         if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
         if (!viewModel.CanEnable(Configuration!)) return;
 
+        UpdateDebugWindowViewModel(viewModel);
         object? parameter = SelectedViewModel?.parameterForNextSelectable;
 
         if (wasCreated) baseViewModels.Add(viewModel);
-
         if (SelectedViewModel != null && SelectedViewModel.CanBeDestroyed)
         {
             baseViewModels.Remove(SelectedViewModel);
@@ -183,6 +182,11 @@ public class MainViewModel : BaseViewModel
         NewUpdate = isNewUpdate;
     }
 
+    private void UpdateDebugWindowViewModel(SelectableViewModel viewModel)
+    {
+        if (DebugWindow == null) return;
+        ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = viewModel;
+    }
     public void SwitchDebugWindow()
     {
         if (DebugWindow == null)
