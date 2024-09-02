@@ -74,11 +74,9 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        //CanBeDestroyed = true;
-
         LoadAllPresets();
 
-        OpenControllerCommand = new RelayCommand(MainViewModel.Open<ControllerViewModel>);
+        OpenControllerCommand = new RelayCommand(() => MainViewModel.SelectViewModel("Controller"));
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(SavePreset);
@@ -159,13 +157,13 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         if (CurrentChosen == null) return;
 
-        MainViewModel.Open<ControllerViewModel>();
+        //MainViewModel.Open<ControllerViewModel>();
     }
     private void OpenPlayerManagerWindow()
     {
         if (CurrentChosen == null) return;
 
-        MainViewModel.Open<PlayerManagerViewModel>();
+        //MainViewModel.Open<PlayerManagerViewModel>();
     }
 
     public bool IsPresetNameUnique(string name)

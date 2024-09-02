@@ -28,18 +28,18 @@ public partial class MainWindow : Window
     {
         if (DataContext is not MainViewModel mainViewModel) return;
 
-        if (mainViewModel.SelectedViewModel != null && mainViewModel.SelectedViewModel is not PresetManagerViewModel)
+        if (mainViewModel.NavigationService.SelectedView != null && mainViewModel.NavigationService.SelectedView is not PresetManagerViewModel)
         {
             var option = DialogBox.Show($"Are you sure you want to exit from here?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (option == MessageBoxResult.Yes)
             {
-                if (mainViewModel.SelectedViewModel != null && !mainViewModel.SelectedViewModel.OnDisable()) return;
+                if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
                 Close();
             }
             return;
         }
 
-        if (mainViewModel.SelectedViewModel != null && !mainViewModel.SelectedViewModel.OnDisable()) return;
+        if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
         Close();
     }
 

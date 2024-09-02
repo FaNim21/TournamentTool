@@ -1,6 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Input;
-using TournamentTool.Components;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
@@ -8,83 +8,48 @@ namespace TournamentTool;
 
 public partial class App : Application
 {
-    public MainViewModel MainViewModel { get; set; }
+    private readonly ServiceProvider _serviceProvider;
 
-    public App() { }
+
+    public App()
+    {
+        IServiceCollection services = new ServiceCollection();
+
+        services.AddSingleton<MainWindow>(provider => new MainWindow
+        {
+            DataContext = provider.GetRequiredService<MainViewModel>()
+        });
+
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<ControllerViewModel>();
+        services.AddSingleton<PresetManagerViewModel>();
+        services.AddSingleton<PlayerManagerViewModel>();
+
+        services.AddSingleton<UpdatesViewModel>();
+        services.AddSingleton<SettingsViewModel>();
+
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
+
+        _serviceProvider = services.BuildServiceProvider();
+    }
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        base.OnStartup(e);
+        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
 
-        MainWindow window = new();
-        MainViewModel = new MainViewModel();
-        window.DataContext = MainViewModel;
+        mainViewModel.NavigationService.NavigateTo<PresetManagerViewModel>(mainViewModel.Configuration!);
+        mainWindow.Show();
 
         InputController.Instance.Initialize();
-        HotkeySetup();
+        mainViewModel.HotkeySetup();
 
-        window.Show();
-
-        MainWindow = window;
+        base.OnStartup(e);
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
         base.OnExit(e);
-    }
-
-    private void HotkeySetup()
-    {
-        var renameTextBox = new Hotkey
-        {
-            Key = Key.F2,
-            ModifierKeys = ModifierKeys.None,
-            Description = "Triggers renaming elements for now mainly in preset panel",
-            Action = () =>
-            {
-                var textBlock = Helper.GetFocusedUIElement<EditableTextBlock>();
-                if (textBlock is { IsEditable: true })
-                    textBlock.IsInEditMode = true;
-            }
-        };
-
-        var toggleHamburgerMenu = new Hotkey
-        {
-            Key = Key.F1,
-            ModifierKeys = ModifierKeys.None,
-            Description = "Toggle visibility for hamburger menu",
-            Action = () =>
-            {
-                MainViewModel.IsHamburgerMenuOpen = !MainViewModel.IsHamburgerMenuOpen;
-            }
-        };
-
-        var toggleStudioMode = new Hotkey
-        {
-            Key = Key.S,
-            ModifierKeys = ModifierKeys.None,
-            Description = "Toggle Sudio Mode in controller panel",
-            Action = () =>
-            {
-                if (MainViewModel.SelectedViewModel is not ControllerViewModel controller) return;
-                controller.OBS.SwitchStudioModeCommand.Execute(null);
-            }
-        };
-
-        var toggleDebugWindow = new Hotkey
-        {
-            Key = Key.F12,
-            ModifierKeys = ModifierKeys.None,
-            Description = "Toggle mode for debug window for specific selected view model",
-            Action = () =>
-            {
-                MainViewModel.SwitchDebugWindow();
-            }
-        };
-
-        InputController.Instance.AddHotkey(renameTextBox);
-        InputController.Instance.AddHotkey(toggleHamburgerMenu);
-        InputController.Instance.AddHotkey(toggleStudioMode);
-        InputController.Instance.AddHotkey(toggleDebugWindow);
     }
 }

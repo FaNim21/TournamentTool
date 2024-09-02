@@ -144,25 +144,7 @@
 
         <!--BODY-->
         <ContentControl Grid.Row="1"
-                        Content="{Binding SelectedViewModel}">
-            <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type vm:PresetManagerViewModel}">
-                    <views:PresetManagerView OnListItemClickCommand="{Binding OnItemListClickCommand}" />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:PlayerManagerViewModel}">
-                    <views:PlayerManagerView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:ControllerViewModel}">
-                    <views:ControllerView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-                    <views:SettingsView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
-                    <views:UpdatesView />
-                </DataTemplate>
-            </ContentControl.Resources>
-        </ContentControl>
+                        Content="{Binding NavigationService.SelectedView}" />
 
         <components:HamburgerMenu Grid.Row="1"
                                   IsOpen="{Binding IsHamburgerMenuOpen}">

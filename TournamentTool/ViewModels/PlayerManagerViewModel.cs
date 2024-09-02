@@ -83,13 +83,9 @@ public class PlayerManagerViewModel : SelectableViewModel
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
 
-    public ICommand GoBackCommand { get; set; }
-
 
     public PlayerManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        CanBeDestroyed = true;
-
         SavePlayerCommand = new RelayCommand(async ()=> { await SavePlayer(); });
 
         EditPlayerCommand = new EditPlayerCommand(this);
@@ -101,8 +97,6 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
-
-        GoBackCommand = new RelayCommand(GoBack);
     }
 
     public override bool CanEnable(Tournament tournament)
@@ -272,10 +266,5 @@ public class PlayerManagerViewModel : SelectableViewModel
     public void SavePreset()
     {
         MainViewModel.SavePreset();
-    }
-
-    public void GoBack()
-    {
-        MainViewModel.Open<PresetManagerViewModel>();
     }
 }

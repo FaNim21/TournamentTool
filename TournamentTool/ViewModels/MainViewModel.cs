@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Components;
 using TournamentTool.Models;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.Windows;
 
@@ -14,7 +16,7 @@ public class MainViewModel : BaseViewModel
 {
     private readonly JsonSerializerOptions _serializerOptions;
 
-    public DebugWindow DebugWindow { get; set; }
+    public DebugWindow? DebugWindow { get; set; }
 
     public string VersionText { get; set; }
 
@@ -22,14 +24,14 @@ public class MainViewModel : BaseViewModel
 
     public Tournament? Configuration { get; set; }
 
-    private SelectableViewModel? _selectedViewModel;
-    public SelectableViewModel? SelectedViewModel
+    private INavigationService? _navigationService;
+    public INavigationService NavigationService
     {
-        get => _selectedViewModel;
+        get => _navigationService;
         set
         {
-            _selectedViewModel = value;
-            OnPropertyChanged(nameof(SelectedViewModel));
+            _navigationService = value;
+            OnPropertyChanged(nameof(NavigationService));
         }
     }
 
@@ -39,7 +41,7 @@ public class MainViewModel : BaseViewModel
         get => _isHamburgerMenuOpen;
         set
         {
-            if (SelectedViewModel is UpdatesViewModel updates && updates.Downloading) return;
+            if (NavigationService.SelectedView is UpdatesViewModel updates && updates.Downloading) return;
             if (_isHamburgerMenuOpen == value) return;
 
             _isHamburgerMenuOpen = value;
@@ -62,8 +64,10 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; set; }
 
 
-    public MainViewModel()
+    public MainViewModel(INavigationService navigationService)
     {
+        NavigationService = navigationService;
+
         if (!Directory.Exists(Consts.PresetsPath))
             Directory.CreateDirectory(Consts.PresetsPath);
 
@@ -75,80 +79,23 @@ public class MainViewModel : BaseViewModel
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
 
-        Task.Factory.StartNew(async () => await CheckForUpdate());
-
-        Open<PresetManagerViewModel>();
-    }
-
-    public T? GetViewModel<T>() where T : SelectableViewModel
-    {
-        for (int i = 0; i < baseViewModels.Count; i++)
+        Task.Factory.StartNew(async () =>
         {
-            var current = baseViewModels[i];
-
-            string currentTypeName = current.GetType().Name.ToLower();
-            string genericName = typeof(T).Name.ToLower();
-            if (currentTypeName.Equals(genericName))
-                return (T)current;
-        }
-
-        return null;
-    }
-
-    public void Open<T>() where T : SelectableViewModel
-    {
-        if (SelectedViewModel != null && typeof(T) == SelectedViewModel.GetType()) return;
-
-        T? viewModel = GetViewModel<T>();
-        bool wasCreated = false;
-        if (viewModel == null)
-        {
-            viewModel = (T)Activator.CreateInstance(typeof(T), this)!;
-            wasCreated = true;
-        }
-
-        if (SelectedViewModel != null && !SelectedViewModel.OnDisable()) return;
-        if (!viewModel.CanEnable(Configuration!)) return;
-
-        UpdateDebugWindowViewModel(viewModel);
-        object? parameter = SelectedViewModel?.parameterForNextSelectable;
-
-        if (wasCreated) baseViewModels.Add(viewModel);
-        if (SelectedViewModel != null && SelectedViewModel.CanBeDestroyed)
-        {
-            baseViewModels.Remove(SelectedViewModel);
-
-            if (SelectedViewModel is IDisposable disposableViewModel)
-            {
-                disposableViewModel.Dispose();
-            }
-        }
-
-        SelectedViewModel = viewModel;
-        SelectedViewModel?.OnEnable(parameter);
-        IsHamburgerMenuOpen = false;
+            await CheckForUpdate();
+        });
     }
 
     public void SelectViewModel(string viewModelName)
     {
         switch (viewModelName)
         {
-            case "Presets":
-                Open<PresetManagerViewModel>();
-                break;
-            case "Whitelist":
-                Open<PlayerManagerViewModel>();
-                break;
-            case "Controller":
-                Open<ControllerViewModel>();
-                break;
-            case "Updates":
-                Open<UpdatesViewModel>();
-                break;
-            case "Settings":
-                Open<SettingsViewModel>();
-                break;
+            case "Presets": NavigationService.NavigateTo<PresetManagerViewModel>(Configuration!); break;
+            case "Whitelist": NavigationService.NavigateTo<PlayerManagerViewModel>(Configuration!); break;
+            case "Controller": NavigationService.NavigateTo<ControllerViewModel>(Configuration!); break;
+            case "Updates": NavigationService.NavigateTo<UpdatesViewModel>(Configuration!); break;
+            case "Settings": NavigationService.NavigateTo<SettingsViewModel>(Configuration!); break;
         }
+        IsHamburgerMenuOpen = false;
     }
 
     public void SavePreset(Tournament? configuration = null)
@@ -161,7 +108,7 @@ public class MainViewModel : BaseViewModel
         string path = configuration.GetPath();
         File.WriteAllText(path, data);
 
-        if (SelectedViewModel is not PresetManagerViewModel presetManager) return;
+        if (NavigationService.SelectedView is not PresetManagerViewModel presetManager) return;
         presetManager.PresetIsSaved();
     }
 
@@ -182,6 +129,61 @@ public class MainViewModel : BaseViewModel
         NewUpdate = isNewUpdate;
     }
 
+    public void HotkeySetup()
+    {
+        var renameTextBox = new Hotkey
+        {
+            Key = Key.F2,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Triggers renaming elements for now mainly in preset panel",
+            Action = () =>
+            {
+                var textBlock = Helper.GetFocusedUIElement<EditableTextBlock>();
+                if (textBlock is { IsEditable: true })
+                    textBlock.IsInEditMode = true;
+            }
+        };
+
+        var toggleHamburgerMenu = new Hotkey
+        {
+            Key = Key.F1,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Toggle visibility for hamburger menu",
+            Action = () =>
+            {
+                IsHamburgerMenuOpen = !IsHamburgerMenuOpen;
+            }
+        };
+
+        var toggleStudioMode = new Hotkey
+        {
+            Key = Key.S,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Toggle Sudio Mode in controller panel",
+            Action = () =>
+            {
+                if (NavigationService.SelectedView is not ControllerViewModel controller) return;
+                controller.OBS.SwitchStudioModeCommand.Execute(null);
+            }
+        };
+
+        var toggleDebugWindow = new Hotkey
+        {
+            Key = Key.F12,
+            ModifierKeys = ModifierKeys.None,
+            Description = "Toggle mode for debug window for specific selected view model",
+            Action = () =>
+            {
+                SwitchDebugWindow();
+            }
+        };
+
+        InputController.Instance.AddHotkey(renameTextBox);
+        InputController.Instance.AddHotkey(toggleHamburgerMenu);
+        InputController.Instance.AddHotkey(toggleStudioMode);
+        InputController.Instance.AddHotkey(toggleDebugWindow);
+    }
+
     private void UpdateDebugWindowViewModel(SelectableViewModel viewModel)
     {
         if (DebugWindow == null) return;
@@ -193,7 +195,7 @@ public class MainViewModel : BaseViewModel
         {
             DebugWindowViewModel viewModel = new()
             {
-                SelectedViewModel = SelectedViewModel,
+                SelectedViewModel = NavigationService.SelectedView,
             };
             DebugWindow = new DebugWindow()
             {

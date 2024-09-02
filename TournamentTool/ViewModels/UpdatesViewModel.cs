@@ -113,7 +113,6 @@ public class UpdatesViewModel : SelectableViewModel
 
     public UpdatesViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        CanBeDestroyed = false;
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
         DownloadCommand = new RelayCommand(() =>

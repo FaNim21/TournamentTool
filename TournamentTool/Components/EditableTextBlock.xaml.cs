@@ -104,7 +104,7 @@ public partial class EditableTextBlock : UserControl
                 //TODO: 2 Zrobic w przyszlosci interface do tego zeby sprawdzac unique name dla edytowanego elementu
                 if (DataContext is Tournament)
                 {
-                    PresetManagerViewModel? presetManager = main!.SelectedViewModel as PresetManagerViewModel;
+                    PresetManagerViewModel? presetManager = main!.NavigationService.SelectedView as PresetManagerViewModel;
                     isUnique = presetManager!.IsPresetNameUnique(textBlock.Text);
                     if (!isUnique)
                         ShowPopup($"Preset item named '{textBlock.Text}' already exists", 2);

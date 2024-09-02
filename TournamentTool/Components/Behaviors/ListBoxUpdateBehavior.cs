@@ -1,12 +1,11 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Components.Behaviors;
 
-public class ListBoxUpdateBehavior : Behavior<ListBox>
+public class ListBoxUpdateBehavior : BehaviorBase<ListBox>
 {
     private static readonly List<ListBox> attachedListBoxes = [];
 
@@ -19,9 +18,9 @@ public class ListBoxUpdateBehavior : Behavior<ListBox>
         attachedListBoxes.Add(AssociatedObject);
     }
 
-    protected override void OnDetaching()
+    protected override void OnCleanup()
     {
-        base.OnDetaching();
+        base.OnCleanup();
 
         AssociatedObject.SelectionChanged -= OnSelectionChanged;
         attachedListBoxes.Remove(AssociatedObject);

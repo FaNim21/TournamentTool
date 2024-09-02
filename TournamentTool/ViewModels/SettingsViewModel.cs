@@ -22,7 +22,7 @@ public class SettingsViewModel : SelectableViewModel
 
     public SettingsViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        CanBeDestroyed = true;
+
     }
 
     public override bool CanEnable(Tournament tournament)

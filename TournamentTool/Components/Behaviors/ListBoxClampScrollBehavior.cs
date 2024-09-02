@@ -1,12 +1,11 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Components.Behaviors;
 
-public class ListBoxClampScrollBehavior : Behavior<ListBox>
+public class ListBoxClampScrollBehavior : BehaviorBase<ListBox>
 {
     protected override void OnAttached()
     {
@@ -14,9 +13,9 @@ public class ListBoxClampScrollBehavior : Behavior<ListBox>
         AssociatedObject.PreviewMouseWheel += OnPreviewMouseWheel;
     }
 
-    protected override void OnDetaching()
+    protected override void OnCleanup()
     {
-        base.OnDetaching();
+        base.OnCleanup();
         AssociatedObject.PreviewMouseWheel -= OnPreviewMouseWheel;
     }
 

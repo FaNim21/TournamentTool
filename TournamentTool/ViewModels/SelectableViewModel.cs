@@ -5,7 +5,6 @@ namespace TournamentTool.ViewModels;
 public class SelectableViewModel : BaseViewModel
 {
     protected MainViewModel MainViewModel { get; set; }
-    public bool CanBeDestroyed { get; set; } = false;
 
     public object? parameterForNextSelectable;
 

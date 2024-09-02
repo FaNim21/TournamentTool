@@ -23,6 +23,23 @@
         <converters:IndentConverter x:Key="IndentConverter" />
         <converters:ExpandCollapseConverter x:Key="ExpandCollapseConverter" />
 
+        <DataTemplate DataType="{x:Type viewModels:PresetManagerViewModel}">
+            <views:PresetManagerView OnListItemClickCommand="{Binding OnItemListClickCommand}" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:PlayerManagerViewModel}">
+            <views:PlayerManagerView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:ControllerViewModel}">
+            <views:ControllerView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
+            <views:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:UpdatesViewModel}">
+            <views:UpdatesView />
+        </DataTemplate>
+
+
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">
             <Setter Property="Template">
