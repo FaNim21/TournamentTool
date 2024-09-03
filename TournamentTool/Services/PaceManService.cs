@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Windows.Data;
 using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;

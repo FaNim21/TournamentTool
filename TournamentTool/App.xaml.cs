@@ -38,8 +38,9 @@ public partial class App : Application
     {
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+        var navigationService = _serviceProvider.GetService<INavigationService>();
 
-        mainViewModel.NavigationService.NavigateTo<PresetManagerViewModel>(mainViewModel.Configuration!);
+        mainViewModel.NavigationService.Startup(mainViewModel);
         mainWindow.Show();
 
         InputController.Instance.Initialize();

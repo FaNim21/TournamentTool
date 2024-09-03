@@ -73,10 +73,19 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
             _splitType = value;
             SplitName = value.ToString().Replace('_', ' ').CaptalizeAll();
             OnPropertyChanged(nameof(SplitType));
+        }
+    }
+
+    private string? _splitName;
+    public string? SplitName
+    {
+        get => _splitName;
+        set
+        {
+            _splitName = value;
             OnPropertyChanged(nameof(SplitName));
         }
     }
-    public string? SplitName { get; set; }
 
     private long _currentSplitTimeMiliseconds;
     public long CurrentSplitTimeMiliseconds
@@ -155,7 +164,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         {
             ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
             ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if ((estimatedPearls > 0 || estimatedRods > 0) && !Inventory.DisplayItems) Inventory.DisplayItems = true;
+            if (splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
 
             Inventory.BlazeRodsCount = estimatedRods;
             Inventory.PearlsCount = estimatedPearls;
@@ -166,7 +175,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
             if (splits[^2].SplitName.Equals("enter_nether"))
                 SplitType = SplitType.structure_1;
             else
-                SplitType = SplitType.structure_1;
+                SplitType = SplitType.structure_2;
         }
         else
             SplitType = (SplitType)Enum.Parse(typeof(SplitType), lastSplit.SplitName);

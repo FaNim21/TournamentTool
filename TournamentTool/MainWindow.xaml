@@ -154,17 +154,17 @@
                         <components:HamburgerMenuItem Text="Presets"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Presets"
-                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PresetManagerViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PresetManagerViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Whitelist"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Whitelist"
-                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PlayerManagerViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PlayerManagerViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Controller"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Controller"
-                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
 
@@ -173,7 +173,7 @@
                             <components:HamburgerMenuItem Text="Updates"
                                                           Command="{Binding SelectViewModelCommand}"
                                                           CommandParameter="Updates"
-                                                          IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:UpdatesViewModel}}"
+                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:UpdatesViewModel}}"
                                                           GroupName="MenuItem" />
                             <Border Visibility="{Binding NewUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Background="Red"
@@ -193,7 +193,7 @@
                         <components:HamburgerMenuItem Text="Settings"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Settings"
-                                                      IsChecked="{Binding SelectedViewModel, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SettingsViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SettingsViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
                 </Grid>

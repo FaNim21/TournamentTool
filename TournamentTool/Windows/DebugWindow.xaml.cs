@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 
 namespace TournamentTool.Windows;
 
@@ -13,5 +14,11 @@ public partial class DebugWindow : Window
     private void ExitButtonClick(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        ((IDisposable)DataContext).Dispose();
+        base.OnClosing(e);
     }
 }

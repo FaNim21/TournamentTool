@@ -27,7 +27,7 @@ public class MainViewModel : BaseViewModel
     private INavigationService? _navigationService;
     public INavigationService NavigationService
     {
-        get => _navigationService;
+        get => _navigationService!;
         set
         {
             _navigationService = value;
@@ -49,7 +49,7 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    private bool _newUpdate { get; set; }
+    private bool _newUpdate; 
     public bool NewUpdate
     {
         get => _newUpdate;
@@ -79,21 +79,18 @@ public class MainViewModel : BaseViewModel
         VersionText = Consts.Version;
         OnPropertyChanged(nameof(VersionText));
 
-        Task.Factory.StartNew(async () =>
-        {
-            await CheckForUpdate();
-        });
+        Task.Factory.StartNew(async () => { await CheckForUpdate(); });
     }
 
     public void SelectViewModel(string viewModelName)
     {
         switch (viewModelName)
         {
-            case "Presets": NavigationService.NavigateTo<PresetManagerViewModel>(Configuration!); break;
-            case "Whitelist": NavigationService.NavigateTo<PlayerManagerViewModel>(Configuration!); break;
-            case "Controller": NavigationService.NavigateTo<ControllerViewModel>(Configuration!); break;
-            case "Updates": NavigationService.NavigateTo<UpdatesViewModel>(Configuration!); break;
-            case "Settings": NavigationService.NavigateTo<SettingsViewModel>(Configuration!); break;
+            case "Presets": NavigationService.NavigateTo<PresetManagerViewModel>(); break;
+            case "Whitelist": NavigationService.NavigateTo<PlayerManagerViewModel>(); break;
+            case "Controller": NavigationService.NavigateTo<ControllerViewModel>(); break;
+            case "Updates": NavigationService.NavigateTo<UpdatesViewModel>(); break;
+            case "Settings": NavigationService.NavigateTo<SettingsViewModel>(); break;
         }
         IsHamburgerMenuOpen = false;
     }
@@ -184,12 +181,12 @@ public class MainViewModel : BaseViewModel
         InputController.Instance.AddHotkey(toggleDebugWindow);
     }
 
-    private void UpdateDebugWindowViewModel(SelectableViewModel viewModel)
+    public void UpdateDebugWindowViewModel(SelectableViewModel viewModel)
     {
         if (DebugWindow == null) return;
         ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = viewModel;
     }
-    public void SwitchDebugWindow()
+    private void SwitchDebugWindow()
     {
         if (DebugWindow == null)
         {

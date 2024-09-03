@@ -334,4 +334,13 @@ public class DebugWindowViewModel : BaseViewModel
             _notifyingSelectedViewModel = null;
         }
     }
+
+    public override void Dispose()
+    {
+        SelectedViewModelName = null;
+
+        UnsubscribeFromAllViewModels();
+        Variables.Clear();
+        _visitedInstances.Clear();
+    }
 }
