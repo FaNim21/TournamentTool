@@ -90,7 +90,7 @@
                                     Foreground="Cyan"
                                     FontSize="16"
                                     Padding="0 -5 2 0"
-                                    Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverterHidden}}"
                                     Content="{Binding IsExpanded, Converter={StaticResource ExpandCollapseConverter}}"
                                     Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                     CommandParameter="{Binding}">

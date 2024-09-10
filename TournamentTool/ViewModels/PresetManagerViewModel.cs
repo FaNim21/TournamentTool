@@ -62,15 +62,13 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SavePresetCommand { get; set; }
     public ICommand OnItemListClickCommand { get; set; }
 
-    public ICommand OpenPlayerManagerCommand { get; set; }
-    public ICommand OpenCommand { get; set; }
-
     public ICommand ClearCurrentPresetCommand { get; set; }
     public ICommand DuplicateCurrentPresetCommand { get; set; }
     public ICommand RenameItemCommand { get; set; }
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
     public ICommand SetRankedDataPathCommand { get; set; }
+
 
     public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
@@ -86,9 +84,6 @@ public class PresetManagerViewModel : SelectableViewModel
         DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this);
         RenameItemCommand = new RenamePresetCommand(this);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
-
-        OpenCommand = new RelayCommand(OpenPresetControlPanel);
-        OpenPlayerManagerCommand = new RelayCommand(OpenPlayerManagerWindow);
 
         SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
 
@@ -127,6 +122,7 @@ public class PresetManagerViewModel : SelectableViewModel
     }
     private void LoadAllPresets()
     {
+        //TODO: 0 ladowac tylko nazwy i przy ladowaniu presetu ladowac jego kontent itp itd
         var presets = Directory.GetFiles(Consts.PresetsPath, "*.json", SearchOption.TopDirectoryOnly).AsSpan();
         for (int i = presets.Length - 1; i >= 0; i--)
         {
@@ -151,19 +147,6 @@ public class PresetManagerViewModel : SelectableViewModel
             }
             catch { }
         }
-    }
-
-    private void OpenPresetControlPanel()
-    {
-        if (CurrentChosen == null) return;
-
-        //MainViewModel.Open<ControllerViewModel>();
-    }
-    private void OpenPlayerManagerWindow()
-    {
-        if (CurrentChosen == null) return;
-
-        //MainViewModel.Open<PlayerManagerViewModel>();
     }
 
     public bool IsPresetNameUnique(string name)

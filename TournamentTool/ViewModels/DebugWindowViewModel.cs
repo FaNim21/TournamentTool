@@ -1,5 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using TournamentTool.Commands;
 
@@ -67,6 +70,8 @@ public class DebugVariable : BaseViewModel
 
 public class DebugWindowViewModel : BaseViewModel
 {
+    public MainViewModel MainViewModel { get; set; }
+
     private INotifyPropertyChanged? _notifyingSelectedViewModel;
 
     private SelectableViewModel _selectedViewModel = new(null!);
@@ -115,14 +120,16 @@ public class DebugWindowViewModel : BaseViewModel
         }
     }
 
-    private Dictionary<object, List<DebugVariable>> _viewModelToVariablesMap = new();
+    private Dictionary<object, List<DebugVariable>> _viewModelToVariablesMap = [];
     private HashSet<object> _visitedInstances = [];
 
     public ICommand ToggleExpandCommand { get; set; }
 
 
-    public DebugWindowViewModel()
+    public DebugWindowViewModel(MainViewModel mainViewModel)
     {
+        MainViewModel = mainViewModel;
+
         Variables = [];
         ToggleExpandCommand = new RelayCommand<DebugVariable>(ToggleExpand);
     }
@@ -150,16 +157,21 @@ public class DebugWindowViewModel : BaseViewModel
         if (SelectedViewModel == null) return;
         AddVariables(SelectedViewModel, "", true);
     }
+    private void UpdateVariable(string variableName, string newValue)
+    {
+        var variable = Variables.FirstOrDefault(v => v.Name == variableName);
+        if (variable == null) return;
+
+        variable.Value = newValue;
+    }
 
     private void AddVariables(object viewModel, string parentName, bool isFirstLevel)
     {
-        if (viewModel == null) return;
+        if (viewModel == null || _visitedInstances.Contains(viewModel)) return;
 
-        _visitedInstances ??= [];
-        if (_visitedInstances.Contains(viewModel)) return;
         _visitedInstances.Add(viewModel);
-
         var properties = viewModel.GetType().GetProperties();
+
         foreach (var prop in properties)
         {
             if (typeof(ICommand).IsAssignableFrom(prop.PropertyType)) continue;
@@ -169,14 +181,7 @@ public class DebugWindowViewModel : BaseViewModel
             var variableName = string.IsNullOrEmpty(parentName) ? prop.Name : $"{parentName}.{prop.Name}";
 
             int indentLevel = string.IsNullOrEmpty(parentName) ? 0 : 1;
-            bool isExpandable = isFirstLevel && value != null && typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType);
-
-            var existingVariable = Variables.FirstOrDefault(v => v.Name.StartsWith(variableName));
-            if (existingVariable != null)
-            {
-                existingVariable.Value = displayValue;
-                continue;
-            }
+            bool isExpandable = value != null && (typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType) || typeof(INotifyCollectionChanged).IsAssignableFrom(prop.PropertyType));
 
             var debugVariable = new DebugVariable
             {
@@ -189,9 +194,7 @@ public class DebugWindowViewModel : BaseViewModel
 
             Variables.Add(debugVariable);
 
-            if (!isExpandable || value == null) continue;
-
-            if (value is INotifyPropertyChanged notifyingVM)
+            if (isExpandable && value is INotifyPropertyChanged notifyingVM)
             {
                 notifyingVM.PropertyChanged += OnNestedViewModelPropertyChanged;
                 if (!_viewModelToVariablesMap.ContainsKey(notifyingVM))
@@ -200,19 +203,8 @@ public class DebugWindowViewModel : BaseViewModel
                 }
                 _viewModelToVariablesMap[notifyingVM].Add(debugVariable);
             }
-
-            if (!debugVariable.IsExpanded) continue;
-            AddVariables(value, variableName, false);
         }
     }
-    private void UpdateVariable(string variableName, string newValue)
-    {
-        var variable = Variables.FirstOrDefault(v => v.Name == variableName);
-        if (variable == null) return;
-
-        variable.Value = newValue;
-    }
-
     private void AddNestedVariables(DebugVariable parentVariable)
     {
         var parentIndex = Variables.IndexOf(parentVariable);
@@ -221,9 +213,32 @@ public class DebugWindowViewModel : BaseViewModel
         var parentViewModel = FindViewModelByVariableName(SelectedViewModel, parentName);
         if (parentViewModel == null) return;
 
-        if(!_visitedInstances.Contains(parentViewModel)) 
+        if (!_visitedInstances.Contains(parentViewModel))
             _visitedInstances.Add(parentViewModel);
 
+        var property = parentViewModel.GetType();
+        if(property.Name.StartsWith("ObservableCollection"))
+        {
+            var prop = parentViewModel.GetType().GetProperties()[1];
+            var collection = parentViewModel as IEnumerable;
+            if (collection != null)
+            {
+                var collectionName = $"{parentName}.{prop.Name}";
+                AddCollectionItems(collection.Cast<object>().ToList(), collectionName, parentVariable.IndentLevel + 1, parentIndex, true);
+
+                if (collection is INotifyCollectionChanged notifyCollection)
+                {
+                    Trace.WriteLine($"Added Collection changed to: {collectionName}");
+                    notifyCollection.CollectionChanged += OnCollectionChanged;
+                    if (!_viewModelToVariablesMap.ContainsKey(notifyCollection))
+                    {
+                        _viewModelToVariablesMap[notifyCollection] = [];
+                    }
+                    _viewModelToVariablesMap[notifyCollection].Add(parentVariable);
+                }
+            }
+            return;
+        }
         var properties = parentViewModel.GetType().GetProperties();
         foreach (var prop in properties)
         {
@@ -234,7 +249,7 @@ public class DebugWindowViewModel : BaseViewModel
             var variableName = $"{parentName}.{prop.Name}";
 
             int indentLevel = parentVariable.IndentLevel + 1;
-            bool isExpandable = value != null && typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType);
+            bool isExpandable = value != null && (typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType) || typeof(INotifyCollectionChanged).IsAssignableFrom(prop.PropertyType));
             if (isExpandable && _visitedInstances.Contains(value)) continue;
 
             var debugVariable = new DebugVariable
@@ -248,6 +263,12 @@ public class DebugWindowViewModel : BaseViewModel
 
             Variables.Insert(++parentIndex, debugVariable);
 
+            if (value is INotifyCollectionChanged collection)
+            {
+                Trace.WriteLine($"Added Collection changed to: {variableName}");
+                collection.CollectionChanged += OnCollectionChanged;
+            }
+
             if (isExpandable && value is INotifyPropertyChanged notifyingVM)
             {
                 notifyingVM.PropertyChanged += OnNestedViewModelPropertyChanged;
@@ -259,6 +280,7 @@ public class DebugWindowViewModel : BaseViewModel
             }
         }
     }
+
     private void RemoveNestedVariables(DebugVariable parentVariable)
     {
         var parentIndex = Variables.IndexOf(parentVariable);
@@ -267,15 +289,27 @@ public class DebugWindowViewModel : BaseViewModel
         for (int i = parentIndex + 1; i < Variables.Count && Variables[i].IndentLevel > indentLevel;)
         {
             var variableToRemove = Variables[i];
-            Variables.RemoveAt(i);
+            var nestedViewModel = FindViewModelByVariableName(SelectedViewModel, variableToRemove.Name);
 
-            var parentName = variableToRemove.Name;
-            var nestedViewModel = FindViewModelByVariableName(SelectedViewModel, parentName);
+            _visitedInstances.Remove(nestedViewModel!);
+
             if (nestedViewModel is INotifyPropertyChanged notifyingVM && _viewModelToVariablesMap.ContainsKey(notifyingVM))
             {
                 notifyingVM.PropertyChanged -= OnNestedViewModelPropertyChanged;
                 _viewModelToVariablesMap.Remove(notifyingVM);
             }
+
+            if (nestedViewModel is INotifyCollectionChanged collection)
+            {
+                collection.CollectionChanged -= OnCollectionChanged;
+            }
+
+            if (variableToRemove.IsExpanded)
+            {
+                RemoveNestedVariables(variableToRemove);
+            }
+
+            Variables.RemoveAt(i);
         }
     }
 
@@ -300,18 +334,116 @@ public class DebugWindowViewModel : BaseViewModel
             UpdateVariable(variableName, value);
         }
     }
+    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (sender is not IEnumerable collection) return;
+        if (!_viewModelToVariablesMap.TryGetValue(sender, out var parentVariables)) return;
+
+        var parent = parentVariables[0];
+        if (!parent.IsExpanded) return;
+
+        var parentIndex = Variables.IndexOf(parent);
+
+        var parentName = parentVariables.FirstOrDefault()?.Name + ".Item" ?? string.Empty;
+        var parentIndentLevel = parentVariables.FirstOrDefault()?.IndentLevel ?? 0;
+
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems != null)
+                {
+                    AddCollectionItems(e.NewItems, parentName, parentIndentLevel + 1, parentIndex);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems != null)
+                {
+                    RemoveCollectionItems(e.OldItems, parentName);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Reset:
+                IList variables = Variables.Where(v => v.Name.StartsWith(parentName)).ToList();
+                RemoveCollectionItems(variables, parentName);
+                break;
+
+                // case NotifyCollectionChangedAction.Move:
+                // case NotifyCollectionChangedAction.Replace:
+        }
+    }
+
+    private void AddCollectionItems(IList? newItems, string parentName, int indentLevel, int parentIndex, bool isExpanding = false)
+    {
+        if (newItems == null) return;
+
+        int lastChildIndex = parentIndex;
+        if (!isExpanding)
+        {
+            for (int i = parentIndex + 1; i < Variables.Count; i++)
+            {
+                if (Variables[i].IndentLevel != indentLevel) break;
+                lastChildIndex = i;
+            }
+        }
+
+        int index = lastChildIndex - parentIndex;
+        foreach (var item in newItems)
+        {
+            var itemName = $"{parentName}[{index++}]";
+            var displayValue = item?.ToString() ?? "null";
+
+            var debugVariable = new DebugVariable
+            {
+                Name = itemName,
+                Value = displayValue,
+                IndentLevel = indentLevel,
+                IsExpandable = item != null && typeof(BaseViewModel).IsAssignableFrom(item.GetType()),
+                IsExpanded = false
+            };
+
+            Variables.Insert(++lastChildIndex, debugVariable);
+        }
+    }
+    private void RemoveCollectionItems(IList? oldItems, string parentName)
+    {
+        if (oldItems == null) return;
+
+        for (int i = 0; i < oldItems.Count; i++)
+        {
+            var itemName = $"{parentName}[{i}]";
+            var variableToRemove = Variables.FirstOrDefault(v => v.Name == itemName);
+            if (variableToRemove == null) continue;
+
+            Variables.Remove(variableToRemove);
+        }
+    }
 
     private object? FindViewModelByVariableName(object rootViewModel, string variableName)
     {
-        var parts = variableName.Split('.');
+        var parts = variableName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
         object? currentViewModel = rootViewModel;
 
         foreach (var part in parts)
         {
             if (currentViewModel == null) return null;
 
-            var prop = currentViewModel.GetType().GetProperty(part);
-            currentViewModel = prop?.GetValue(currentViewModel);
+            var indexStart = part.IndexOf('[');
+            if (indexStart > 0)
+            {
+                var propertyName = part.Substring(0, indexStart);
+                var indexEnd = part.IndexOf(']');
+                if (indexEnd > indexStart && int.TryParse(part.AsSpan(indexStart + 1, indexEnd - indexStart - 1), out int index))
+                {
+                    if (currentViewModel is not IList collection) return null;
+                    currentViewModel = collection[index];
+                }
+            }
+            else
+            {
+                var prop = currentViewModel.GetType().GetProperty(part);
+                currentViewModel = prop?.GetValue(currentViewModel);
+            }
         }
 
         return currentViewModel;
@@ -325,6 +457,13 @@ public class DebugWindowViewModel : BaseViewModel
             {
                 notifyingVM.PropertyChanged -= OnNestedViewModelPropertyChanged;
             }
+
+            if (kvp.Key is INotifyCollectionChanged collection)
+            {
+                Trace.WriteLine($"Cleared Collection changed in: {kvp.Key}");
+                collection.CollectionChanged -= OnCollectionChanged;
+            }
+
         }
         _viewModelToVariablesMap.Clear();
 
@@ -342,5 +481,6 @@ public class DebugWindowViewModel : BaseViewModel
         UnsubscribeFromAllViewModels();
         Variables.Clear();
         _visitedInstances.Clear();
+        GC.SuppressFinalize(this);
     }
 }

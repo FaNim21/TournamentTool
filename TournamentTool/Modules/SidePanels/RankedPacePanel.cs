@@ -275,7 +275,7 @@ public class RankedPacePanel : SidePanel
     private void UpdateAPI()
     {
         API.UpdateFileContent(_rankedPlayerCountFileName, Paces.Count);
-        API.UpdateFileContent(_rankedCompletedCountFileName, CompletedRunsCount); //TODO: 0 count completions
+        API.UpdateFileContent(_rankedCompletedCountFileName, CompletedRunsCount);
     }
 
     private async Task LoadJsonFileAsync()

@@ -17,6 +17,7 @@ public class MainViewModel : BaseViewModel
     private readonly JsonSerializerOptions _serializerOptions;
 
     public DebugWindow? DebugWindow { get; set; }
+    public bool IsDebugWindowOpened { get; set; }
 
     public string VersionText { get; set; }
 
@@ -188,9 +189,9 @@ public class MainViewModel : BaseViewModel
     }
     private void SwitchDebugWindow()
     {
-        if (DebugWindow == null)
+        if (!IsDebugWindowOpened)
         {
-            DebugWindowViewModel viewModel = new()
+            DebugWindowViewModel viewModel = new(this)
             {
                 SelectedViewModel = NavigationService.SelectedView,
             };
@@ -200,11 +201,11 @@ public class MainViewModel : BaseViewModel
             };
             DebugWindow.Show();
             Application.Current.MainWindow.Focus();
+            IsDebugWindowOpened = true;
         }
         else
         {
-            ((DebugWindowViewModel)DebugWindow.DataContext).SelectedViewModel = null;
-            DebugWindow.Close();
+            DebugWindow?.Close();
             DebugWindow = null;
         }
     }

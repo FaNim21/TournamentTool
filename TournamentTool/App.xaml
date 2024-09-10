@@ -11,6 +11,9 @@
         <converters:BoolToVisibilityConverter x:Key="ReverseBoolToVisibilityConverter"
                                               TrueValue="Collapsed"
                                               FalseValue="Visible" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverterHidden"
+                                              TrueValue="Visible"
+                                              FalseValue="Hidden" />
         <converters:BoolReverseConverter x:Key="BoolReverseConverter" />
         <converters:EmptyStringConverter x:Key="EmptyStringConverter" />
         <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
