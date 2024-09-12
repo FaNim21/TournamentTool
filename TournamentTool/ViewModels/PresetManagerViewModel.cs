@@ -12,25 +12,37 @@ namespace TournamentTool.ViewModels;
 
 public class PresetManagerViewModel : SelectableViewModel
 {
-    public ObservableCollection<Tournament> Presets { get; set; } = [];
+    public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
-    private Tournament? _currentChosen;
-    public Tournament? CurrentChosen
+    private TournamentPreset? _currentChosen;
+    public TournamentPreset? CurrentChosen
     {
         get => _currentChosen;
         set
         {
             _currentChosen = value;
-            if (_currentChosen != null)
+
+            bool isEmpty = _currentChosen == null;
+            if (!isEmpty)
             {
-                _currentChosen.UpdatePlayers();
-                Properties.Settings.Default.LastOpenedPresetName = _currentChosen!.Name;
-                Properties.Settings.Default.Save();
+                SaveLastOpened(_currentChosen!.Name);
             }
 
-            IsPresetOpened = _currentChosen != null;
-            MainViewModel.Configuration = _currentChosen;
+            IsPresetOpened = !isEmpty;
+            LoadCurrentPreset(isEmpty ? string.Empty : _currentChosen!.Name);
             OnPropertyChanged(nameof(CurrentChosen));
+        }
+    }
+
+    private Tournament? _loadedPreset;
+    public Tournament? LoadedPreset
+    {
+        get => _loadedPreset;
+        set
+        {
+            _loadedPreset = value;
+            MainViewModel.Configuration = _loadedPreset;
+            OnPropertyChanged(nameof(LoadedPreset));
         }
     }
 
@@ -72,22 +84,22 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        LoadAllPresets();
+        LoadPresetsList();
 
         OpenControllerCommand = new RelayCommand(() => MainViewModel.SelectViewModel("Controller"));
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
-        SavePresetCommand = new RelayCommand(SavePreset);
+        SavePresetCommand = new RelayCommand(() => SavePreset());
         OnItemListClickCommand = new OnItemListClickCommand(this);
 
         ClearCurrentPresetCommand = new ClearPresetCommand(this);
-        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this);
+        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, mainViewModel);
         RenameItemCommand = new RenamePresetCommand(this);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
 
         SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
 
-        LoadCurrentPreset();
+        LoadStartupPreset();
     }
 
     public override bool CanEnable(Tournament tournament)
@@ -104,25 +116,36 @@ public class PresetManagerViewModel : SelectableViewModel
         return true;
     }
 
-    private void LoadCurrentPreset()
+    private void LoadStartupPreset()
     {
         string lastOpened = Properties.Settings.Default.LastOpenedPresetName;
-        if (string.IsNullOrEmpty(lastOpened)) return;
-
         for (int i = 0; i < Presets.Count; i++)
         {
-            var current = Presets[i];
-            if (current.Name.Equals(lastOpened, StringComparison.OrdinalIgnoreCase))
+            if (Presets[i].Name.Equals(lastOpened))
             {
-                CurrentChosen = current;
-                CurrentChosen!.UpdateGoodPacesTexts();
-                return;
+                CurrentChosen = Presets[i];
             }
         }
     }
-    private void LoadAllPresets()
+    private void LoadCurrentPreset(string opened)
     {
-        //TODO: 0 ladowac tylko nazwy i przy ladowaniu presetu ladowac jego kontent itp itd
+        if (string.IsNullOrEmpty(opened)) return;
+
+        string filePath = Path.Combine(Consts.PresetsPath, opened + ".json");
+        string text = File.ReadAllText(filePath) ?? string.Empty;
+        try
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
+            if (data == null) return;
+            data.Validate();
+
+            LoadedPreset = data;
+        }
+        catch { }
+    }
+    private void LoadPresetsList()
+    {
         var presets = Directory.GetFiles(Consts.PresetsPath, "*.json", SearchOption.TopDirectoryOnly).AsSpan();
         for (int i = presets.Length - 1; i >= 0; i--)
         {
@@ -130,19 +153,11 @@ public class PresetManagerViewModel : SelectableViewModel
             try
             {
                 if (string.IsNullOrEmpty(text)) continue;
-                Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
+
+                TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
                 if (data == null) continue;
-                data.Validate();
-                for (int j = 0; j < data.Players.Count; j++)
-                {
-                    var current = data.Players[j];
-                    if (!string.IsNullOrEmpty(current.TwitchName))
-                    {
-                        current.StreamData.Main = current.TwitchName;
-                        current.TwitchName = string.Empty;
-                    }
-                }
-                data.MainViewModel = this;
+
+                data.Setup(this);
                 Presets.Add(data);
             }
             catch { }
@@ -159,10 +174,15 @@ public class PresetManagerViewModel : SelectableViewModel
         return true;
     }
 
-    public void AddItem(Tournament item)
+    public void AddItem(TournamentPreset item, bool save = true)
     {
-        MainViewModel.SavePreset(item);
+        if (save) MainViewModel.SavePreset(item);
+        item.Setup(this);
         Presets.Add(item);
+    }
+    public void RemoveItem(TournamentPreset item)
+    {
+        Presets.Remove(item);
     }
 
     public void SetPresetAsNotSaved()
@@ -179,11 +199,16 @@ public class PresetManagerViewModel : SelectableViewModel
         string path = DialogBox.ShowOpenFolder();
         if (string.IsNullOrEmpty(path)) return;
 
-        CurrentChosen!.RankedRoomDataPath = path;
+        LoadedPreset!.RankedRoomDataPath = path;
     }
 
-    public void SavePreset()
+    public void SavePreset(IPreset? preset = null)
     {
-        MainViewModel.SavePreset();
+        MainViewModel.SavePreset(preset);
+    }
+    public void SaveLastOpened(string presetName)
+    {
+        Properties.Settings.Default.LastOpenedPresetName = presetName;
+        Properties.Settings.Default.Save();
     }
 }

@@ -74,20 +74,20 @@
                                     Margin="0 0 0 5" />
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding CurrentChosen.IsUsingTwitchAPI}"
+                                <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTwitchAPI}"
                                           Content="Use Twitch API"
                                           Foreground="White" />
                             </WrapPanel>
                             <WrapPanel Orientation="Horizontal"
-                                       Visibility="{Binding CurrentChosen.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       Visibility="{Binding LoadedPreset.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}"
                                        Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding CurrentChosen.ShowLiveOnlyForMinecraftCategory}"
+                                <CheckBox IsChecked="{Binding LoadedPreset.ShowLiveOnlyForMinecraftCategory}"
                                           Content="Show LIVE only for Minecraft category"
                                           Foreground="White" />
                             </WrapPanel>
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding CurrentChosen.IsAlwaysOnTop}"
+                                <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
                                           Content="Always On Top"
                                           Foreground="White" />
                             </WrapPanel>
@@ -98,20 +98,20 @@
                                 <RadioButton GroupName="ControllerMode"
                                              Foreground="White"
                                              Content="None"
-                                             IsChecked="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
+                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
                                 <RadioButton GroupName="ControllerMode"
                                              Foreground="White"
                                              Content="PaceMan"
-                                             IsChecked="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
+                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
                                 <RadioButton GroupName="ControllerMode"
                                              Foreground="White"
                                              Content="Ranked"
-                                             IsChecked="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
+                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
                             </WrapPanel>
 
                             <!-- PACEMAN -->
                             <WrapPanel Orientation="Vertical"
-                                       Visibility="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
+                                       Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
                                 <Label  Content="Paceman"
                                         Foreground="Wheat"
                                         FontWeight="SemiBold"
@@ -120,7 +120,7 @@
                                         Margin="0 10 0 5" />
                                 <WrapPanel Orientation="Horizontal"
                                            Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding CurrentChosen.IsUsingWhitelistOnPaceMan}"
+                                    <CheckBox IsChecked="{Binding LoadedPreset.IsUsingWhitelistOnPaceMan}"
                                               Content="Use Whitelist on Paceman"
                                               Foreground="White" />
                                 </WrapPanel>
@@ -129,7 +129,7 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.PaceManRefreshRateMiliseconds}"
+                                             Text="{Binding LoadedPreset.PaceManRefreshRateMiliseconds}"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
@@ -151,12 +151,12 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding LoadedPreset.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewTextInput="NumberValidationTextBox"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
-                                    <Label Content="{Binding CurrentChosen.Structure2ToText}"
+                                    <Label Content="{Binding LoadedPreset.Structure2ToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -168,12 +168,12 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding LoadedPreset.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewTextInput="NumberValidationTextBox"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
-                                    <Label Content="{Binding CurrentChosen.FirstPortalToText}"
+                                    <Label Content="{Binding LoadedPreset.FirstPortalToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -185,12 +185,12 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding LoadedPreset.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewTextInput="NumberValidationTextBox"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
-                                    <Label Content="{Binding CurrentChosen.EnterStrongholdToText}"
+                                    <Label Content="{Binding LoadedPreset.EnterStrongholdToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -203,12 +203,12 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding LoadedPreset.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewTextInput="NumberValidationTextBox"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
-                                    <Label Content="{Binding CurrentChosen.EnterEndToText}"
+                                    <Label Content="{Binding LoadedPreset.EnterEndToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -220,12 +220,12 @@
                                     <TextBox TextWrapping="Wrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding LoadedPreset.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                              PreviewTextInput="NumberValidationTextBox"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
-                                    <Label Content="{Binding CurrentChosen.CreditsToText}"
+                                    <Label Content="{Binding LoadedPreset.CreditsToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -236,7 +236,7 @@
 
                             <!-- RANKED -->
                             <WrapPanel Orientation="Vertical"
-                                       Visibility="{Binding CurrentChosen.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
+                                       Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
                                 <Label  Content="Ranked"
                                         Foreground="Wheat"
                                         FontSize="24"
@@ -250,7 +250,7 @@
                                              Width="220"
                                              Height="20"
                                              IsReadOnly="True"
-                                             Text="{Binding CurrentChosen.RankedRoomDataPath}"
+                                             Text="{Binding LoadedPreset.RankedRoomDataPath}"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
@@ -270,7 +270,7 @@
                                     <TextBox TextWrapping="NoWrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.RankedRoomDataName}"
+                                             Text="{Binding LoadedPreset.RankedRoomDataName}"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
@@ -286,7 +286,7 @@
                                     <TextBox TextWrapping="NoWrap"
                                              Width="120"
                                              Height="20"
-                                             Text="{Binding CurrentChosen.RankedRoomUpdateFrequency}"
+                                             Text="{Binding LoadedPreset.RankedRoomUpdateFrequency}"
                                              Background="#9E9E9E"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Top" />
@@ -326,7 +326,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="50"
                                          Height="20"
-                                         Text="{Binding CurrentChosen.Port}"
+                                         Text="{Binding LoadedPreset.Port}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 2 0 0"
                                          Background="#9E9E9E"
@@ -343,7 +343,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding CurrentChosen.Password}"
+                                         Text="{Binding LoadedPreset.Password}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -359,7 +359,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding CurrentChosen.SceneCollection}"
+                                         Text="{Binding LoadedPreset.SceneCollection}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -383,7 +383,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding CurrentChosen.FilterNameAtStartForSceneItems}"
+                                         Text="{Binding LoadedPreset.FilterNameAtStartForSceneItems}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -398,13 +398,13 @@
                                        Margin="0 0 0 5">
                                 <WrapPanel Orientation="Horizontal"
                                            Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding CurrentChosen.SetPovHeadsInBrowser}"
+                                    <CheckBox IsChecked="{Binding LoadedPreset.SetPovHeadsInBrowser}"
                                               Content="Use skin heads"
                                               Foreground="White" />
                                 </WrapPanel>
                                 <WrapPanel Orientation="Horizontal"
                                            Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding CurrentChosen.SetPovPBText}"
+                                    <CheckBox IsChecked="{Binding LoadedPreset.SetPovPBText}"
                                               Content="Use personal best text"
                                               Foreground="White" />
                                 </WrapPanel>
@@ -415,19 +415,19 @@
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="None"
-                                             IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
+                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Twitch"
-                                             IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
+                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Ign"
-                                             IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
+                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Whitelist"
-                                             IsChecked="{Binding CurrentChosen.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
+                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                             </WrapPanel>
                         </WrapPanel>
                     </Grid>

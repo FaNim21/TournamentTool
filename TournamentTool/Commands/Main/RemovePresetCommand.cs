@@ -8,22 +8,23 @@ namespace TournamentTool.Commands.Main;
 
 public class RemovePresetCommand : BaseCommand
 {
-    public PresetManagerViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel PresetManager { get; set; }
 
-    public RemovePresetCommand(PresetManagerViewModel mainViewModel)
+    public RemovePresetCommand(PresetManagerViewModel presetManager)
     {
-        MainViewModel = mainViewModel;
+        PresetManager = presetManager;
     }
 
     public override void Execute(object? parameter)
     {
         if (parameter == null) return;
-        if (parameter is not Tournament tournament) return;
+        if (parameter is not TournamentPreset tournament) return;
 
         var result = DialogBox.Show($"Are you sure you want to delete: {tournament.Name}", "Deleting", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
         {
-            MainViewModel.Presets.Remove(tournament);
+            PresetManager.RemoveItem(tournament);
+            PresetManager.LoadedPreset = null;
             File.Delete(tournament.GetPath());
         }
     }

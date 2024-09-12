@@ -245,18 +245,6 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
-    private string? _twitchName = string.Empty;
-    public string? TwitchName
-    {
-        get => _twitchName;
-        set
-        {
-            if (string.IsNullOrEmpty(value)) return;
-            _twitchName = value;
-            OnPropertyChanged(nameof(TwitchName));
-        }
-    }
-
     private string? _personalBest = string.Empty;
     public string? PersonalBest
     {

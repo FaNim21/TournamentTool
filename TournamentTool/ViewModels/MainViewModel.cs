@@ -96,16 +96,16 @@ public class MainViewModel : BaseViewModel
         IsHamburgerMenuOpen = false;
     }
 
-    public void SavePreset(Tournament? configuration = null)
+    public void SavePreset(IPreset? preset = null)
     {
-        configuration ??= Configuration;
-        if (configuration == null) return;
+        preset ??= Configuration!;
+        if (preset == null) return;
 
-        var data = JsonSerializer.Serialize<object>(configuration, _serializerOptions);
-
-        string path = configuration.GetPath();
+        var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
+        string path = preset.GetPath();
         File.WriteAllText(path, data);
 
+        if (preset != Configuration) return;
         if (NavigationService.SelectedView is not PresetManagerViewModel presetManager) return;
         presetManager.PresetIsSaved();
     }

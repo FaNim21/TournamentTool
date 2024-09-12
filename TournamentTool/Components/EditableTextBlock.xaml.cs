@@ -102,7 +102,7 @@ public partial class EditableTextBlock : UserControl
                 bool isUnique = true;
                 MainViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as MainViewModel;
                 //TODO: 2 Zrobic w przyszlosci interface do tego zeby sprawdzac unique name dla edytowanego elementu
-                if (DataContext is Tournament)
+                if (DataContext is IPreset)
                 {
                     PresetManagerViewModel? presetManager = main!.NavigationService.SelectedView as PresetManagerViewModel;
                     isUnique = presetManager!.IsPresetNameUnique(textBlock.Text);

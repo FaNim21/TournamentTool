@@ -6,22 +6,22 @@ namespace TournamentTool.Commands.Main;
 
 public class AddNewPresetCommand : BaseCommand
 {
-    public PresetManagerViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel PresetManager { get; set; }
 
-    public AddNewPresetCommand(PresetManagerViewModel mainViewModel)
+    public AddNewPresetCommand(PresetManagerViewModel presetManager)
     {
-        MainViewModel = mainViewModel;
+        PresetManager = presetManager;
     }
 
     public override void Execute(object? parameter)
     {
-        if (MainViewModel == null) return;
+        if (PresetManager == null) return;
 
         string name = "New Preset";
-        name = Helper.GetUniqueName(name, name, MainViewModel.IsPresetNameUnique);
+        name = Helper.GetUniqueName(name, name, PresetManager.IsPresetNameUnique);
 
-        var newPreset = new Tournament(MainViewModel, name);
-        MainViewModel.AddItem(newPreset);
-        MainViewModel.SetPresetAsNotSaved();
+        var newPreset = new TournamentPreset(name);
+        PresetManager.AddItem(newPreset);
+        PresetManager.SetPresetAsNotSaved();
     }
 }

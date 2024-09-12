@@ -24,14 +24,78 @@ public enum ControllerMode
     Ranked,
 }
 
-public class Tournament : BaseViewModel, IRenameItem
+public interface IPreset
 {
-    public string Name { get; set; } = string.Empty;
+    string Name { get; set; }
+
+    string GetPath();
+}
+
+public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
+{
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            OnPropertyChanged(nameof(Name));
+        }
+    } 
+
+    private PresetManagerViewModel? PresetViewModel;
+
+
+    [JsonConstructor]
+    public TournamentPreset(string name)
+    {
+        Name = name;
+    }
+
+    public void Setup(PresetManagerViewModel presetManagerViewModel)
+    {
+        PresetViewModel = presetManagerViewModel;
+    }
+
+    public void ChangeName(string name)
+    {
+        if (PresetViewModel == null) return;
+        if (string.IsNullOrEmpty(name) || Name.Equals(name)) return;
+
+        var jsonName = name + ".json";
+        var path = Path.Combine(Consts.PresetsPath, Name + ".json");
+
+        var directoryName = Path.GetDirectoryName(path)!;
+        var newPath = Path.Combine(directoryName, jsonName);
+
+        File.Move(path, newPath);
+        Name = name;
+        PresetViewModel.LoadedPreset!.Name = name;
+        PresetViewModel.SaveLastOpened(name);
+        PresetViewModel.SavePreset();
+    }
+
+    public string GetPath()
+    {
+        return Path.Combine(Consts.PresetsPath, Name + ".json");
+    }
+}
+
+public class Tournament : BaseViewModel, IPreset
+{
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            OnPropertyChanged(nameof(Name));
+        }
+    } 
 
     public ObservableCollection<Player> Players { get; set; } = [];
-
-    [JsonIgnore]
-    public PresetManagerViewModel? MainViewModel;
 
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
@@ -247,17 +311,13 @@ public class Tournament : BaseViewModel, IRenameItem
     {
         Name = name;
     }
-    public Tournament(PresetManagerViewModel mainViewModel, string name = "")
-    {
-        MainViewModel = mainViewModel;
-        Name = name;
-    }
 
     public void UpdatePlayers()
     {
         for (int i = 0; i < Players.Count; i++)
         {
-            Players[i].LoadHead();
+            var player = Players[i];
+            player.LoadHead();
         }
     }
     public void UpdateGoodPacesTexts()
@@ -281,31 +341,16 @@ public class Tournament : BaseViewModel, IRenameItem
 
     public void Validate()
     {
+        //TODO: 0 Trzeba zrobic baze do tego zeby przy zmianie danych presetu validowac dane
+        UpdatePlayers();
+        UpdateGoodPacesTexts();
+
         if (PaceManRefreshRateMiliseconds < 3000)
         {
             PaceManRefreshRateMiliseconds = 3000;
         }
 
         //TODO: 9 add some validations or change it to some cleaner version
-    }
-
-    public void ChangeName(string name)
-    {
-        var jsonName = name + ".json";
-        var path = GetPath();
-
-        var directoryName = Path.GetDirectoryName(path)!;
-        var newPath = Path.Combine(directoryName, jsonName);
-
-        File.Move(path, newPath);
-        Name = name;
-        OnPropertyChanged(nameof(Name));
-        MainViewModel!.SavePresetCommand.Execute(this);
-    }
-
-    public string GetPath()
-    {
-        return Path.Combine(Consts.PresetsPath, Name + ".json");
     }
 
     public void AddPlayer(Player player)
@@ -385,5 +430,10 @@ public class Tournament : BaseViewModel, IRenameItem
         EnterStrongholdGoodPaceMiliseconds = 450000;
         EnterEndGoodPaceMiliseconds = 480000;
         CreditsGoodPaceMiliseconds = 600000;
+    }
+
+    public string GetPath()
+    {
+        return Path.Combine(Consts.PresetsPath, Name + ".json");
     }
 }

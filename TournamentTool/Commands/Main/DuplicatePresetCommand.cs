@@ -8,33 +8,38 @@ namespace TournamentTool.Commands.Main;
 
 public class DuplicatePresetCommand : BaseCommand
 {
-    public PresetManagerViewModel MainViewModel { get; set; }
+    public PresetManagerViewModel PresetManager { get; set; }
+    public MainViewModel MainViewModel { get; set; }
 
-    public DuplicatePresetCommand(PresetManagerViewModel mainViewModel)
+    public DuplicatePresetCommand(PresetManagerViewModel presetManager, MainViewModel mainViewModel)
     {
+        PresetManager = presetManager;
         MainViewModel = mainViewModel;
     }
 
     public override void Execute(object? parameter)
     {
         if (parameter == null) return;
-        if (parameter is not Tournament tournament) return;
+        if (parameter is not TournamentPreset tournament) return;
 
         string name = tournament.Name;
-        name = Helper.GetUniqueName(name, name, MainViewModel.IsPresetNameUnique);
-        string newPath = Path.Combine(Consts.PresetsPath, name + ".json");
+        name = Helper.GetUniqueName(name, name, PresetManager.IsPresetNameUnique);
 
-        File.Copy(tournament.GetPath(), newPath);
+        string duplicatePath = Path.Combine(Consts.PresetsPath, name + ".json");
+        string originalPath = tournament.GetPath();
+        File.Copy(originalPath, duplicatePath);
 
-        string text = File.ReadAllText(newPath) ?? string.Empty;
+        string text = File.ReadAllText(duplicatePath) ?? string.Empty;
         try
         {
             if (string.IsNullOrEmpty(text)) return;
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
             data.Name = name;
+            MainViewModel.SavePreset(data);
 
-            MainViewModel.AddItem(data);
+            TournamentPreset preset = new(name);
+            PresetManager.AddItem(preset, false);
         }
         catch { }
     }

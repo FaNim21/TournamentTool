@@ -37,7 +37,7 @@ public partial class PresetManagerView : UserControl
 
         //Consts.IsSwitchingBetweenOpensInSettings = true;
         Keyboard.Focus((IInputElement)sender);
-        OnListItemClickCommand?.Execute((Tournament)item.DataContext);
+        OnListItemClickCommand?.Execute((TournamentPreset)item.DataContext);
     }
 
     private void ListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
