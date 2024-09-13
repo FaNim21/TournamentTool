@@ -2,8 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using TournamentTool.Models;
+using TournamentTool.Utils;
 
 namespace TournamentTool.Views;
 
@@ -35,14 +35,13 @@ public partial class PresetManagerView : UserControl
     {
         if (sender is not ListViewItem item) return;
 
-        //Consts.IsSwitchingBetweenOpensInSettings = true;
         Keyboard.Focus((IInputElement)sender);
         OnListItemClickCommand?.Execute((TournamentPreset)item.DataContext);
     }
 
     private void ListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        ListViewItem? listViewItem = GetViewItemFromMousePosition<ListViewItem, ListView>(sender as ListView, e.GetPosition(sender as IInputElement));
+        ListViewItem? listViewItem = Helper.GetViewItemFromMousePosition<ListViewItem, ListView>(sender as ListView, e.GetPosition(sender as IInputElement));
         if (listViewItem == null) return;
 
         var contextMenu = (ContextMenu)FindResource("ListViewContextMenu");
@@ -54,16 +53,5 @@ public partial class PresetManagerView : UserControl
                 menuItem.CommandParameter = currentItem;
 
         listViewItem.ContextMenu ??= contextMenu;
-    }
-
-    private T? GetViewItemFromMousePosition<T, U>(U? view, Point mousePosition) where T : Control where U : ItemsControl
-    {
-        HitTestResult hitTestResult = VisualTreeHelper.HitTest(view, mousePosition);
-        DependencyObject? target = hitTestResult?.VisualHit;
-
-        while (target != null && target is not T)
-            target = VisualTreeHelper.GetParent(target);
-
-        return target as T;
     }
 }

@@ -46,7 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Controller\" />
     <Folder Include="Modules\Updates\" />
   </ItemGroup>
 

@@ -3,11 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Components"
+             xmlns:models="clr-namespace:TournamentTool.Models"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:utils="clr-namespace:TournamentTool.Utils"
              xmlns:obs="clr-namespace:TournamentTool.Modules.OBS"
              d:DataContext="{d:DesignInstance Type=obs:Scene}"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <ContextMenu x:Key="POVContextMenu">
+            <MenuItem Header="Info"
+                      Command="{Binding }" />
+            <MenuItem Header="Clear"
+                      Command="{Binding ClearPOVCommand}" />
+        </ContextMenu>
+    </UserControl.Resources>
     <Border Background="Transparent"
             BorderBrush="Black"
             BorderThickness="1">
@@ -46,12 +57,14 @@
                                     BorderThickness="0.8"
                                     CornerRadius="5"
                                     Drop="Border_Drop"
-                                    PreviewMouseLeftButtonDown="CanvasBorder_PreviewMouseLeftButtonDown"
-                                    PreviewMouseRightButtonDown="CanvasItem_RightMouseButtonDown"
-                                    MouseDown="CanvasBorder_MouseDown"
+                                    PreviewMouseLeftButtonDown="PointOfView_PreviewMouseLeftButtonDown"
+                                    PreviewMouseRightButtonDown="PointOfView_PreviewMouseRightButtonDown"
                                     MouseEnter="CanvasItem_MouseEnter"
                                     MouseLeave="CanvasItem_MouseLeave">
-                                <Grid>
+                                <i:Interaction.Behaviors>
+                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type models:PointOfView}"/>
+                                </i:Interaction.Behaviors>
+                                <Grid IsHitTestVisible="False">
                                     <TextBlock Text="{Binding SceneItemName, Mode=OneWay}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"

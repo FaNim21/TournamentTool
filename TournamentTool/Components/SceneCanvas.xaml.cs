@@ -13,12 +13,12 @@ public partial class SceneCanvas : UserControl
         InitializeComponent();
     }
 
-    private void CanvasBorder_MouseDown(object sender, MouseEventArgs e)
+    private void PointOfView_DragDrop(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;
 
-        DragDrop.DoDragDrop(border, border.DataContext, DragDropEffects.Move);
+        DragDrop.DoDragDrop(border, new DataObject(typeof(PointOfView), border.DataContext), DragDropEffects.Move);
     }
 
     private void Border_Drop(object sender, DragEventArgs e)
@@ -46,7 +46,7 @@ public partial class SceneCanvas : UserControl
         //viewModel.ResizeCanvas();
     }
 
-    private void CanvasBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void PointOfView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is not Scene scene) return;
         if (sender is not Border clickedBorder) return;
@@ -54,14 +54,19 @@ public partial class SceneCanvas : UserControl
 
         scene.OnPOVClick(pov);
     }
-
-    private void CanvasItem_RightMouseButtonDown(object sender, MouseButtonEventArgs e)
+    private void PointOfView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not Scene) return;
-        if (sender is not Border clickedBorder) return;
-        if (clickedBorder!.DataContext is not PointOfView pov) return;
+        if (sender is not Border border) return;
 
-        pov.Clear();
+        var contextMenu = (ContextMenu)FindResource("POVContextMenu");
+        contextMenu.DataContext ??= DataContext;
+
+        var currentItem = border.DataContext;
+        foreach (var item in contextMenu.Items)
+            if (item is MenuItem menuItem)
+                menuItem.CommandParameter = currentItem;
+
+        border.ContextMenu ??= contextMenu;
     }
 
     private void CanvasItem_MouseEnter(object sender, MouseEventArgs e)

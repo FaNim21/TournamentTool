@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Modules.SidePanels"
+             xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:local2="clr-namespace:TournamentTool.Components"
@@ -37,7 +38,7 @@
                         BorderThickness="1"
                         Width="263" >
                     <i:Interaction.Behaviors>
-                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" />
+                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" DragDataType="{x:Type models:IPlayer}"/>
                     </i:Interaction.Behaviors>
                     <Grid>
                         <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"

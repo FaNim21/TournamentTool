@@ -197,8 +197,10 @@ public class MainViewModel : BaseViewModel
             };
             DebugWindow = new DebugWindow()
             {
-                DataContext = viewModel
+                DataContext = viewModel,
+                Owner = Application.Current.MainWindow,
             };
+
             DebugWindow.Show();
             Application.Current.MainWindow.Focus();
             IsDebugWindowOpened = true;

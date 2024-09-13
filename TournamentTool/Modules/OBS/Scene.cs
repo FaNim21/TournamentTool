@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Input;
+using TournamentTool.Commands.Controller;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -76,9 +78,13 @@ public class Scene : BaseViewModel
         }
     }
 
+    public ICommand ClearPOVCommand { get; set; }
+
 
     public Scene(ControllerViewModel controllerViewModel)
     {
+        ClearPOVCommand = new ClearPOVCommand();
+
         Type = SceneType.Main;
         Controller = controllerViewModel;
 

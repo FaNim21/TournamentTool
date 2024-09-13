@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Net.Http;
 using TournamentTool.Components.Controls;
+using System.Windows.Controls;
 
 namespace TournamentTool.Utils;
 
@@ -73,6 +74,17 @@ public static class Helper
         IInputElement focusedControl = Keyboard.FocusedElement;
         T? result = FindChild<T>((DependencyObject)focusedControl);
         return result;
+    }
+
+    public static T? GetViewItemFromMousePosition<T, U>(U? view, Point mousePosition) where T : Control where U : ItemsControl
+    {
+        HitTestResult hitTestResult = VisualTreeHelper.HitTest(view, mousePosition);
+        DependencyObject? target = hitTestResult?.VisualHit;
+
+        while (target != null && target is not T)
+            target = VisualTreeHelper.GetParent(target);
+
+        return target as T;
     }
 
     public static string GetUniqueName(string oldName, string newName, Func<string, bool> CheckIfUnique)
