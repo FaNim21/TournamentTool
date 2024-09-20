@@ -250,7 +250,7 @@ public class DebugWindowViewModel : BaseViewModel
         var properties = parentViewModel.GetType().GetProperties();
         foreach (var prop in properties)
         {
-            if (typeof(ICommand).IsAssignableFrom(prop.PropertyType)) continue;
+            if (typeof(ICommand).IsAssignableFrom(prop.PropertyType) || typeof(ICollection).IsAssignableFrom(prop.PropertyType)) continue;
 
             var value = prop.GetValue(parentViewModel);
             var displayValue = value?.ToString() ?? "null";
