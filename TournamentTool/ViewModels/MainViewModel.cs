@@ -156,7 +156,7 @@ public class MainViewModel : BaseViewModel
         var toggleStudioMode = new Hotkey
         {
             Key = Key.S,
-            ModifierKeys = ModifierKeys.None,
+            ModifierKeys = ModifierKeys.Shift,
             Description = "Toggle Sudio Mode in controller panel",
             Action = () =>
             {
@@ -201,6 +201,7 @@ public class MainViewModel : BaseViewModel
                 Owner = Application.Current.MainWindow,
             };
 
+            InputController.Instance.InitializeNewWindow(DebugWindow);
             DebugWindow.Show();
             Application.Current.MainWindow.Focus();
             IsDebugWindowOpened = true;

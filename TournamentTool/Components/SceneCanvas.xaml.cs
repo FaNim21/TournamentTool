@@ -13,15 +13,7 @@ public partial class SceneCanvas : UserControl
         InitializeComponent();
     }
 
-    private void PointOfView_DragDrop(object sender, MouseEventArgs e)
-    {
-        if (e.LeftButton != MouseButtonState.Pressed) return;
-        if (sender is not Border border) return;
-
-        DragDrop.DoDragDrop(border, new DataObject(typeof(PointOfView), border.DataContext), DragDropEffects.Move);
-    }
-
-    private void Border_Drop(object sender, DragEventArgs e)
+    private void PointOfView_Drop(object sender, DragEventArgs e)
     {
         if (sender is not Border droppedBorder) return;
         if (DataContext is not Scene scene) return;
@@ -69,11 +61,11 @@ public partial class SceneCanvas : UserControl
         border.ContextMenu ??= contextMenu;
     }
 
-    private void CanvasItem_MouseEnter(object sender, MouseEventArgs e)
+    private void PointOfView_MouseEnter(object sender, MouseEventArgs e)
     {
         Mouse.OverrideCursor = Cursors.Hand;
     }
-    private void CanvasItem_MouseLeave(object sender, MouseEventArgs e)
+    private void PointOfView_MouseLeave(object sender, MouseEventArgs e)
     {
         Mouse.OverrideCursor = null;
     }

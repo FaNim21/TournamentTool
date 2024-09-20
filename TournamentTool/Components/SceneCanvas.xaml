@@ -56,11 +56,11 @@
                                     BorderBrush="#1E90FF"
                                     BorderThickness="0.8"
                                     CornerRadius="5"
-                                    Drop="Border_Drop"
+                                    Drop="PointOfView_Drop"
                                     PreviewMouseLeftButtonDown="PointOfView_PreviewMouseLeftButtonDown"
                                     PreviewMouseRightButtonDown="PointOfView_PreviewMouseRightButtonDown"
-                                    MouseEnter="CanvasItem_MouseEnter"
-                                    MouseLeave="CanvasItem_MouseLeave">
+                                    MouseEnter="PointOfView_MouseEnter"
+                                    MouseLeave="PointOfView_MouseLeave">
                                 <i:Interaction.Behaviors>
                                     <behaviors:BorderDragDropBehavior DragDataType="{x:Type models:PointOfView}"/>
                                 </i:Interaction.Behaviors>

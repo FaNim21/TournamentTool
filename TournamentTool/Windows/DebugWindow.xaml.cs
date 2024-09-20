@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using TournamentTool.Properties;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Windows;
@@ -40,6 +41,7 @@ public partial class DebugWindow : Window
 
         Settings.Default.Save();
         ((DebugWindowViewModel)DataContext).MainViewModel.IsDebugWindowOpened = false;
+        InputController.Instance.CleanupWindow(this);
 
         base.OnClosed(e);
     }

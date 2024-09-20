@@ -30,6 +30,13 @@ public class InputController
         Application.Current.MainWindow!.KeyDown += HandleKeyDown;
         Application.Current.MainWindow.KeyUp += HandleKeyUp;
     }
+    public void InitializeNewWindow(Window window)
+    {
+        if (window == null) return;   
+
+        window.KeyDown += HandleKeyDown;
+        window.KeyUp += HandleKeyUp;
+    }
 
     private void HandleKeyDown(object sender, KeyEventArgs e)
     {
@@ -50,6 +57,11 @@ public class InputController
         return _pressedKeys.Contains(key) && !_previousKeys.Contains(key);
     }
 
+    public void CleanupWindow(Window window)
+    {
+        window.KeyDown -= HandleKeyDown;
+        window.KeyUp -= HandleKeyUp;
+    }
     public void Cleanup()
     {
         Application.Current.MainWindow!.KeyDown -= HandleKeyDown;
