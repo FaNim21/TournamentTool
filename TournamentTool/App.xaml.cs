@@ -36,6 +36,9 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.DisableStylusAndTouchSupport", true);
+        AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
         var navigationService = _serviceProvider.GetService<INavigationService>();

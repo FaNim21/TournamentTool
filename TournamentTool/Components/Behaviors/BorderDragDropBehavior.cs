@@ -24,16 +24,16 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
     protected override void OnAttached()
     {
         base.OnAttached();
-        AssociatedObject.MouseMove += OnMouseMove;
+        AssociatedObject.MouseEnter += MouseEnter;
     }
 
     protected override void OnCleanup()
     {
         base.OnCleanup();
-        AssociatedObject.MouseMove -= OnMouseMove;
+        AssociatedObject.MouseEnter += MouseEnter;
     }
 
-    private void OnMouseMove(object sender, MouseEventArgs e)
+    private void MouseEnter(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
         if (sender is not Border border) return;
@@ -44,6 +44,7 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         }
 
         var datatype = DragDataType ?? typeof(object);
+
         DragDrop.DoDragDrop(border, new DataObject(datatype, border.DataContext), DragDropEffects.Move);
     }
 }

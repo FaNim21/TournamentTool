@@ -37,6 +37,7 @@
                     <Border BorderBrush="#7e8691"
                             BorderThickness="1"
                             Width="263"
+                            IsHitTestVisible="True"
                             Background="Transparent">
                         <i:Interaction.Behaviors>
                             <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" DragDataType="{x:Type models:IPlayer}"/>
