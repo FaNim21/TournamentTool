@@ -24,27 +24,40 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
     protected override void OnAttached()
     {
         base.OnAttached();
-        AssociatedObject.MouseEnter += MouseEnter;
+        AssociatedObject.MouseMove += OnMouseMove;
+        //AssociatedObject.MouseEnter += MouseEnter;
     }
 
     protected override void OnCleanup()
     {
         base.OnCleanup();
-        AssociatedObject.MouseEnter += MouseEnter;
+        AssociatedObject.MouseMove -= OnMouseMove;
+        //AssociatedObject.MouseEnter -= MouseEnter;
     }
 
-    private void MouseEnter(object sender, MouseEventArgs e)
+    private void OnMouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
-        if (sender is not Border border) return;
 
-        if(OnCommand != null && OnCommand.CanExecute(null))
+        if (OnCommand != null && OnCommand.CanExecute(null))
         {
             OnCommand.Execute(null);
         }
-
         var datatype = DragDataType ?? typeof(object);
 
-        DragDrop.DoDragDrop(border, new DataObject(datatype, border.DataContext), DragDropEffects.Move);
+        DragDrop.DoDragDrop(AssociatedObject, new DataObject(datatype, AssociatedObject.DataContext), DragDropEffects.Move);
     }
+
+    /*private void MouseEnter(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed) return;
+
+        if (OnCommand != null && OnCommand.CanExecute(null))
+        {
+            OnCommand.Execute(null);
+        }
+        var datatype = DragDataType ?? typeof(object);
+
+        DragDrop.DoDragDrop(AssociatedObject, new DataObject(datatype, AssociatedObject.DataContext), DragDropEffects.Move);
+    }*/
 }
