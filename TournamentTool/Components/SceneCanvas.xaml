@@ -10,13 +10,17 @@
              xmlns:utils="clr-namespace:TournamentTool.Utils"
              xmlns:obs="clr-namespace:TournamentTool.Modules.OBS"
              d:DataContext="{d:DesignInstance Type=obs:Scene}"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             Unloaded="UserControl_Unloaded">
     <UserControl.Resources>
         <ContextMenu x:Key="POVContextMenu">
             <MenuItem Header="Info"
-                      Command="{Binding }" />
+                      Command="{Binding ShowInfoWindowCommand}" />
+            <MenuItem Header="Refresh"
+                      Command="{Binding RefreshPOVCommand}" />
             <MenuItem Header="Clear"
-                      Command="{Binding ClearPOVCommand}" />
+                      Command="{Binding ClearPOVCommand}" 
+                      ToolTip="Ctrl + left mouse on pov"/>
         </ContextMenu>
     </UserControl.Resources>
     <Border Background="Transparent"
@@ -70,13 +74,40 @@
                                                VerticalAlignment="Top"
                                                FontSize="{Binding DataContext.FontSizeSceneName, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
                                                Foreground="#E0E0E0" />
-
                                     <TextBlock Text="{Binding DisplayedPlayer, Mode=OneWay}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                FontSize="{Binding Width, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FontSizeConverter}}"
                                                FontWeight="Bold"
                                                Foreground="#373737" />
+
+                                    <Image Width="16"
+                                           Height="16"
+                                           VerticalAlignment="Bottom"
+                                           HorizontalAlignment="Left"
+                                           Margin="3 0 0 0">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source">
+                                                    <Setter.Value>
+                                                        <BitmapImage DecodePixelWidth="16"
+                                                                     UriSource="/Resources/muted.png" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMuted}"
+                                                                 Value="True">
+                                                        <Setter Property="Source">
+                                                            <Setter.Value>
+                                                                <BitmapImage DecodePixelWidth="16"
+                                                                             UriSource="/Resources/audio.png" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
                                 </Grid>
                             </Border>
                         </DataTemplate>

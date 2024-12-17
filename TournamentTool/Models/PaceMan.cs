@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
-using TournamentTool.ViewModels;
 using System.Windows;
-using TournamentTool.Utils;
 using System.Windows.Media;
 using System.ComponentModel;
+using TournamentTool.ViewModels;
+using TournamentTool.Utils;
 
 namespace TournamentTool.Models;
 

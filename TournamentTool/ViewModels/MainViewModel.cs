@@ -201,7 +201,6 @@ public class MainViewModel : BaseViewModel
                 Owner = Application.Current.MainWindow,
             };
 
-            InputController.Instance.InitializeNewWindow(DebugWindow);
             DebugWindow.Show();
             Application.Current.MainWindow.Focus();
             IsDebugWindowOpened = true;

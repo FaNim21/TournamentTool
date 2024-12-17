@@ -11,6 +11,7 @@ public partial class DebugWindow : Window
     public DebugWindow()
     {
         InitializeComponent();
+        InputController.Instance.InitializeNewWindow(this);
 
         if (Settings.Default.DebugWindowTop == -1 && Settings.Default.DebugWindowLeft == -1)
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -23,10 +24,7 @@ public partial class DebugWindow : Window
     }
 
     private void MinimizeButtonsClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-    private void ExitButtonClick(object sender, RoutedEventArgs e)
-    {
-        Close();
-    }
+    private void ExitButtonClick(object sender, RoutedEventArgs e) => Close();
 
     protected override void OnClosing(CancelEventArgs e)
     {

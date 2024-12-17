@@ -1,0 +1,128 @@
+﻿<Window x:Class="TournamentTool.Windows.POVInformationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+        xmlns:local="clr-namespace:TournamentTool.Components.Buttons"
+        xmlns:vm="clr-namespace:TournamentTool.ViewModels"
+        xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
+        xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+        xmlns:views="clr-namespace:TournamentTool.Views"
+        d:DataContext="{d:DesignInstance Type=vm:POVInformationViewModel}"
+        mc:Ignorable="d"
+        Title="POV Informations"
+        Height="160"
+        Width="250"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Topmost="True"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E1E">
+    <Border BorderThickness="1" BorderBrush="Black">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="29" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Background="#000D14">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <local:ButtonTaskbar Width="30"
+                                         Height="30"
+                                         FontSize="20"
+                                         WindowChrome.IsHitTestVisibleInChrome="True"
+                                         HorizontalAlignment="Right"
+                                         ColorBrush="#ff000f"
+                                         ContentText="X"
+                                         Padding="1"
+                                         Click="ExitButtonClick" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <StackPanel Margin="10 10 0 0">
+                    <TextBlock>
+                    <Run Text="Item: "
+                         FontSize="12"
+                         Foreground="White" />
+                    <Run Text="{Binding PointOfView.SceneItemName}"
+                         Foreground="White"
+                         FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock>
+                    <Run Text="Text Item: "
+                         FontSize="12"
+                         Foreground="White" />
+                    <Run Text="{Binding PointOfView.TextFieldItemName}"
+                         Foreground="White"
+                         FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock>
+                    <Run Text="PB Item: "
+                         FontSize="12"
+                         Foreground="White" />
+                    <Run Text="{Binding PointOfView.PersonalBestItemName}"
+                         Foreground="White"
+                         FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock>
+                    <Run Text="Head Item: "
+                         FontSize="12"
+                         Foreground="White" />
+                    <Run Text="{Binding PointOfView.HeadItemName}"
+                         Foreground="White"
+                         FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock>
+                    <Run Text="Player: "
+                         FontSize="12"
+                         Foreground="White" />
+                    <Run Text="{Binding PointOfView.DisplayedPlayer}"
+                         Foreground="Cyan" />
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0 5 0 0">
+                        <components:ButtonNormal Width="45"
+                                                 Height="25"
+                                                 ContentText="Apply"
+                                                 OnCommand="{Binding PointOfView.ApplyVolumeCommand}" />
+                        <Grid>
+                            <Slider Width="150"
+                                    Height="20"
+                                    Margin="5 5 0 0"
+                                    Opacity="0.5"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    TickFrequency="0.01"
+                                    Value="{Binding PointOfView.Volume}" />
+
+                            <Slider Width="150"
+                                    Height="20"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding PointOfView.NewVolume}"
+                                    TickFrequency="0.01"
+                                    SmallChange="0.01"
+                                    LargeChange="0"
+                                    Margin="5 5 0 0">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:SliderPreviewMouseLeftButtonBehavior />
+                                </i:Interaction.Behaviors>
+                            </Slider>
+                        </Grid>
+                        <Label Content="{Binding PointOfView.TextVolume}"
+                               FontWeight="Bold"
+                               Foreground="Wheat"
+                               Padding="0"
+                               Margin="1 5 0 0" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

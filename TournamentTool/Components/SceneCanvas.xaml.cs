@@ -8,16 +8,28 @@ namespace TournamentTool.Components;
 
 public partial class SceneCanvas : UserControl
 {
+    private readonly List<Border> _subscribedBorders = [];
+
+
     public SceneCanvas()
     {
         InitializeComponent();
+    }
+
+    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+        foreach (var border in _subscribedBorders)
+        {
+            border.ContextMenuOpening -= Border_ContextMenuOpening;
+        }
+        _subscribedBorders.Clear();
     }
 
     private void PointOfView_Drop(object sender, DragEventArgs e)
     {
         if (sender is not Border droppedBorder) return;
         if (DataContext is not Scene scene) return;
-        if (droppedBorder!.DataContext is not PointOfView pov) return;
+        if (droppedBorder.DataContext is not PointOfView pov) return;
 
         if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
         {
@@ -59,6 +71,24 @@ public partial class SceneCanvas : UserControl
                 menuItem.CommandParameter = currentItem;
 
         border.ContextMenu ??= contextMenu;
+
+        if (!_subscribedBorders.Contains(border))
+        {
+            border.ContextMenuOpening += Border_ContextMenuOpening;
+            _subscribedBorders.Add(border);
+        }
+    }
+
+    private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (sender is not Border border) return;
+
+        if (Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            if (border.DataContext is not PointOfView pov) return;
+            pov.Clear();
+            e.Handled = true;
+        }
     }
 
     private void PointOfView_MouseEnter(object sender, MouseEventArgs e)

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
@@ -88,6 +89,18 @@ public class PointOfView : BaseViewModel
     public float Volume { get; set; } = 0;
     public string TextVolume { get => $"{(int)(NewVolume * 100)}%"; }
 
+    private bool _isMuted;
+    public bool IsMuted
+    {
+        get => _isMuted;
+        set
+        {
+            Trace.WriteLine(value + " muted");
+            _isMuted = value;
+            OnPropertyChanged(nameof(IsMuted));
+        }
+    }
+
     private float _newVolume;
     public float NewVolume
     {
@@ -125,6 +138,7 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(HeadItemName));
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(Volume));
+        IsMuted = Volume != 0f;
     }
     public void UpdateTransform(float proportion)
     {
@@ -315,5 +329,10 @@ public class PointOfView : BaseViewModel
         ClearPersonalBestTextField();
 
         Update();
+    }
+
+    public bool IsEmpty()
+    {
+        return player == null;
     }
 }

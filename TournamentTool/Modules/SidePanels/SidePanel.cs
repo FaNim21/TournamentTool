@@ -31,14 +31,8 @@ public abstract class SidePanel : BaseViewModel
         Trace.WriteLine("Constructor: " + GetType().Name);
     }
 
-    public override void OnEnable(object? parameter)
-    {
-    }
-
-    public override bool OnDisable()
-    {
-        return true;
-    }
+    public override void OnEnable(object? parameter) { }
+    public override bool OnDisable() { return true; }
 
     public void ClearSelectedPlayer()
     {

@@ -7,6 +7,7 @@ using TournamentTool.Commands.Controller;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.Windows;
 
 namespace TournamentTool.Modules.OBS;
 
@@ -23,7 +24,16 @@ public class Scene : BaseViewModel
 
     public ControllerViewModel Controller;
 
-    public ObservableCollection<PointOfView> POVs { get; set; } = [];
+    private ObservableCollection<PointOfView> _povs = [];
+    public ObservableCollection<PointOfView> POVs
+    {
+        get => _povs; 
+        set
+        { 
+            _povs = value;
+            OnPropertyChanged(nameof(POVs));
+        }
+    }
 
     public string SceneName { get; set; } = string.Empty;
 
@@ -79,11 +89,15 @@ public class Scene : BaseViewModel
     }
 
     public ICommand ClearPOVCommand { get; set; }
+    public ICommand RefreshPOVCommand { get; set; }
+    public ICommand ShowInfoWindowCommand { get; set; }
 
 
     public Scene(ControllerViewModel controllerViewModel)
     {
         ClearPOVCommand = new ClearPOVCommand();
+        RefreshPOVCommand = new RefreshPOVCommand();
+        ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(this);
 
         Type = SceneType.Main;
         Controller = controllerViewModel;
@@ -263,7 +277,7 @@ public class Scene : BaseViewModel
     {
         await GetCurrentSceneItems(SceneName!, true, false);
     }
-    public async Task RefreshPovs()
+    public async Task RefreshPovs() 
     {
         for (int i = 0; i < POVs.Count; i++)
         {
@@ -333,6 +347,18 @@ public class Scene : BaseViewModel
             CanvasWidth = calculatedWidth;
         else
             CanvasHeight = calculatedHeight;
+    }
+
+    public void OpenPOVInfoWindow(PointOfView pov)
+    {
+        POVInformationViewModel viewModel = new(pov);
+        POVInformationWindow window = new()
+        {
+            DataContext = viewModel,
+            Owner = Application.Current.MainWindow
+        };
+
+        window.ShowDialog();
     }
 
     public void Clear()
