@@ -25,11 +25,13 @@
              HorizontalAlignment="Left"
              VirtualizingPanel.IsVirtualizing="True"
              VirtualizingPanel.VirtualizationMode="Recycling"
+             SelectionMode="Multiple"
              AllowDrop="True"
              ItemsSource="{Binding GroupedPaceManPlayers}"
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}" >
         <i:Interaction.Behaviors>
             <behaviors:ListBoxUpdateBehavior />
+            <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
             <behaviors:ListBoxClampScrollBehavior />
         </i:Interaction.Behaviors>
         <ListBox.ItemTemplate>

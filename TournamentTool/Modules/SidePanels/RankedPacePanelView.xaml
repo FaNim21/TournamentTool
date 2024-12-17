@@ -15,6 +15,7 @@
              d:DesignHeight="450"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=sidePanels:RankedPacePanel}">
+
     <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
              Background="Transparent"
@@ -24,11 +25,13 @@
              HorizontalAlignment="Left"
              VirtualizingPanel.IsVirtualizing="True"
              VirtualizingPanel.VirtualizationMode="Recycling"
+             SelectionMode="Multiple"
              AllowDrop="True"
              ItemsSource="{Binding GroupedRankedPaces}"
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}">
         <i:Interaction.Behaviors>
             <behaviors:ListBoxUpdateBehavior />
+            <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
             <behaviors:ListBoxClampScrollBehavior />
         </i:Interaction.Behaviors>
         <ListBox.ItemTemplate>
@@ -37,8 +40,7 @@
                         BorderThickness="1"
                         Width="263" >
                     <i:Interaction.Behaviors>
-                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}"
-                                                          DragDataType="{x:Type models:IPlayer}" />
+                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" DragDataType="{x:Type models:IPlayer}" />
                     </i:Interaction.Behaviors>
                     <Grid>
                         <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"

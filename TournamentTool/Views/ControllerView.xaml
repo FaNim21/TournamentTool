@@ -325,12 +325,14 @@
                          HorizontalAlignment="Left"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
+                         SelectionMode="Multiple"
                          AllowDrop="True"
                          ItemsSource="{Binding FilteredPlayers}"
                          SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
                          Margin="6 0 0 0">
                     <i:Interaction.Behaviors>
                         <behaviors:ListBoxUpdateBehavior />
+                        <behaviors:ListBoxSelectionBehavior ClickSelection="True"/>
                         <behaviors:ListBoxClampScrollBehavior />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
