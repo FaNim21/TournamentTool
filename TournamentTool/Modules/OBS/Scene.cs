@@ -237,7 +237,6 @@ public class Scene : BaseViewModel
         pov.UpdateTransform(ProportionsRatio);
 
         (string? currentName, float volume) = await Controller.OBS.GetBrowserURLTwitchName(pov.SceneItemName);
-        pov.ChangeVolume(volume);
 
         foreach (var additional in additionals)
         {
@@ -256,6 +255,7 @@ public class Scene : BaseViewModel
         }
 
         pov.Clear();
+        pov.ChangeVolume(volume);
 
         if (!string.IsNullOrEmpty(currentName))
         {

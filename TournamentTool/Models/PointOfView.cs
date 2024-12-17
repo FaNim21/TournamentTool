@@ -138,7 +138,6 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(HeadItemName));
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(Volume));
-        IsMuted = Volume != 0f;
     }
     public void UpdateTransform(float proportion)
     {
@@ -239,10 +238,12 @@ public class PointOfView : BaseViewModel
 
         if (NewVolume == volume) return;
         NewVolume = Volume;
+        IsMuted = Volume != 0f;
     }
     public void ApplyVolume()
     {
         Volume = NewVolume;
+        IsMuted = Volume != 0f;
         Update();
 
         _obs.SetBrowserURL(this);
