@@ -20,7 +20,8 @@
                       Command="{Binding RefreshPOVCommand}" />
             <MenuItem Header="Clear"
                       Command="{Binding ClearPOVCommand}" 
-                      ToolTip="Ctrl + left mouse on pov"/>
+                      ToolTip="Ctrl + left mouse on pov"
+                      ToolTipService.InitialShowDelay="500"/>
         </ContextMenu>
     </UserControl.Resources>
     <Border Background="Transparent"

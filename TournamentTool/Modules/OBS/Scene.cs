@@ -212,12 +212,22 @@ public class Scene : BaseViewModel
         float positionX = item.SceneItemTransform.PositionX;
         float positionY = item.SceneItemTransform.PositionY;
 
+        float width = item.SceneItemTransform.Width;
+        float height = item.SceneItemTransform.Height;
+
         string groupName = string.Empty;
         if (group != null)
         {
             groupName = group.SourceName;
+
+            positionX *= group.SceneItemTransform.ScaleX;
+            positionY *= group.SceneItemTransform.ScaleY;
+
             positionX += group.SceneItemTransform.PositionX;
             positionY += group.SceneItemTransform.PositionY;
+
+            width *= group.SceneItemTransform.ScaleX;
+            height *= group.SceneItemTransform.ScaleY;
         }
 
         PointOfView pov = new(Controller.OBS, this, groupName)
@@ -229,8 +239,8 @@ public class Scene : BaseViewModel
             OriginX = (int)positionX,
             OriginY = (int)positionY,
 
-            OriginWidth = (int)item.SceneItemTransform.Width,
-            OriginHeight = (int)item.SceneItemTransform.Height,
+            OriginWidth = (int)width,
+            OriginHeight = (int)height,
 
             Text = item.SourceName
         };
