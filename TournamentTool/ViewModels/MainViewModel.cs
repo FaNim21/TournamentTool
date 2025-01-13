@@ -72,6 +72,9 @@ public class MainViewModel : BaseViewModel
         if (!Directory.Exists(Consts.PresetsPath))
             Directory.CreateDirectory(Consts.PresetsPath);
 
+        if (!Directory.Exists(Consts.LogsPath))
+            Directory.CreateDirectory(Consts.LogsPath);
+
         _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
         OnHamburegerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });

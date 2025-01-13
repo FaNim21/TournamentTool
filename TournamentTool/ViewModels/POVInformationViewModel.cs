@@ -15,6 +15,8 @@ public class POVInformationViewModel : BaseViewModel
         }
     }
 
+    //TODO: 9 jakies rzeczy typu rozdzielczosc pova, skala, itp itd
+
 
     public POVInformationViewModel(PointOfView pov)
     {

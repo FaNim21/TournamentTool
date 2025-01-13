@@ -11,6 +11,21 @@ namespace TournamentTool.Utils;
 
 public static class Helper
 {
+    public static void SaveLog(string output, string logName = "log")
+    {
+        string date = DateTime.Now.ToString("yyyy-MM-dd_HH.mm");
+        string fileName = $"{logName} {date}.txt";
+
+        int count = 1;
+        while (File.Exists(Consts.LogsPath + "\\" + fileName))
+        {
+            fileName = $"{logName} {date} [{count}].txt";
+            count++;
+        }
+
+        File.WriteAllText(Consts.LogsPath + "\\" + fileName, output);
+    }
+
     public static string CaptalizeAll(this string text)
     {
         string[] words = text.Split(' ');

@@ -9,9 +9,6 @@ namespace TournamentTool.Views;
 
 public partial class PresetManagerView : UserControl
 {
-    [GeneratedRegex("[^0-9]+")]
-    private static partial Regex NumberRegex();
-
     public ICommand OnListItemClickCommand
     {
         get { return (ICommand)GetValue(OnListItemClickCommandProperty); }
@@ -27,7 +24,7 @@ public partial class PresetManagerView : UserControl
 
     private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
     {
-        Regex regex = NumberRegex();
+        Regex regex = RegexPatterns.NumbersPattern();
         e.Handled = regex.IsMatch(e.Text);
     }
 

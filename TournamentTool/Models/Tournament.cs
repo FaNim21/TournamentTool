@@ -296,8 +296,8 @@ public class Tournament : BaseViewModel, IPreset
         get => _rankedRoomUpdateFrequency;
         set
         {
-            if (value < 500)
-                _rankedRoomUpdateFrequency = 500;
+            if (value < 1000)
+                _rankedRoomUpdateFrequency = 1000;
             else
                 _rankedRoomUpdateFrequency = value;
 
@@ -310,6 +310,15 @@ public class Tournament : BaseViewModel, IPreset
     public Tournament(string name = "")
     {
         Name = name;
+    }
+
+    public void ClearPlayerStreamData()
+    {
+        for (int i = 0; i < Players.Count; i++)
+        {
+            var player = Players[i];
+            player.StreamData.LiveData.Clear(false);
+        }
     }
 
     public void UpdatePlayers()

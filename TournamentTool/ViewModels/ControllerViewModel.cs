@@ -153,16 +153,11 @@ public class ControllerViewModel : SelectableViewModel
 
         if (!Configuration.IsUsingTwitchAPI)
         {
-            foreach (var player in Configuration.Players)
-                player.StreamData.LiveData.Clear(false);
-
+            Configuration.ClearPlayerStreamData();
             return;
         }
 
-        Task.Factory.StartNew(async () =>
-        {
-            await _twitch.ConnectTwitchAPIAsync();
-        });
+        Task.Factory.StartNew(async () => { await _twitch.ConnectTwitchAPIAsync(); });
     }
     public override bool OnDisable()
     {
