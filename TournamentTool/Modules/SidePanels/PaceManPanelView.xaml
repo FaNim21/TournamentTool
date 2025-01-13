@@ -15,156 +15,162 @@
              d:DesignHeight="450"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=sidePanels:PaceManPanel}">
+    <Grid>
+        <TextBlock Text="{Binding EmptyRunsTitle}"
+                   Background="Transparent"
+                   TextWrapping="Wrap"
+                   Width="200"
+                   Height="300"
+                   FontSize="32"
+                   Foreground="Wheat"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Center"
+                   Margin="5 30 0 0" />
+        <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 Width="273"
+                 VerticalAlignment="Top"
+                 HorizontalAlignment="Left"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling"
+                 SelectionMode="Multiple"
+                 AllowDrop="True"
+                 ItemsSource="{Binding GroupedPaceManPlayers}"
+                 SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}">
+            <i:Interaction.Behaviors>
+                <behaviors:ListBoxUpdateBehavior />
+                <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
+                <behaviors:ListBoxClampScrollBehavior />
+            </i:Interaction.Behaviors>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="models:PaceMan">
+                    <Border BorderBrush="#7e8691"
+                            BorderThickness="1"
+                            Width="263">
+                        <i:Interaction.Behaviors>
+                            <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}"
+                                                              DragDataType="{x:Type models:IPlayer}" />
+                        </i:Interaction.Behaviors>
+                        <Grid>
+                            <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                     Width="7"
+                                     Height="7"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Top"
+                                     Fill="Red"
+                                     Margin="5" />
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="5 5 0 5">
+                                    <Image Source="{Binding HeadImage, Mode=OneWay}"
+                                           Width="30"
+                                           Height="30"
+                                           Opacity="{Binding HeadImageOpacity, Mode=OneWay}" />
 
-    <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-             Background="Transparent"
-             BorderThickness="0"
-             Width="273"
-             VerticalAlignment="Top"
-             HorizontalAlignment="Left"
-             VirtualizingPanel.IsVirtualizing="True"
-             VirtualizingPanel.VirtualizationMode="Recycling"
-             SelectionMode="Multiple"
-             AllowDrop="True"
-             ItemsSource="{Binding GroupedPaceManPlayers}"
-             SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}" >
-        <i:Interaction.Behaviors>
-            <behaviors:ListBoxUpdateBehavior />
-            <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
-            <behaviors:ListBoxClampScrollBehavior />
-        </i:Interaction.Behaviors>
-        <ListBox.ItemTemplate>
-            <DataTemplate DataType="models:PaceMan">
-                <Border BorderBrush="#7e8691"
-                        BorderThickness="1"
-                        Width="263" >
-                    <i:Interaction.Behaviors>
-                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" DragDataType="{x:Type models:IPlayer}"/>
-                    </i:Interaction.Behaviors>
-                    <Grid>
-                        <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
-                                 Width="7"
-                                 Height="7"
-                                 HorizontalAlignment="Right"
-                                 VerticalAlignment="Top"
-                                 Fill="Red"
-                                 Margin="5" />
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="5 5 0 5">
-                                <Image Source="{Binding HeadImage, Mode=OneWay}"
-                                       Width="30"
-                                       Height="30"
-                                       Opacity="{Binding HeadImageOpacity, Mode=OneWay}" />
-                                <TextBlock Text="{Binding Nickname, Mode=OneWay}"
-                                           Width="67"
-                                           Height="20"
-                                           FontSize="12"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Left"
-                                           Foreground="White"
-                                           Padding="0"
+                                    <TextBlock Text="{Binding Nickname, Mode=OneWay}"
+                                               Width="67"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"
+                                               TextAlignment="Left"
+                                               Foreground="White"
+                                               Padding="0"
+                                               FontWeight="Bold"
+                                               Margin="5 0 0 0" />
+
+                                    <TextBlock Foreground="{Binding PaceSplitTimeColor, Mode=OneWay}"
+                                               Text="{Binding CurrentSplitTime, Mode=OneWay}"
+                                               FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
+                                               FontSize="23"
+                                               Width="70"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Margin="3 0 0 0" />
+
+                                    <TextBlock Foreground="FloralWhite"
+                                               Text="{Binding IGTTime, Mode=OneWay}"
+                                               FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
+                                               FontSize="23"
+                                               Width="80"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Margin="0 0 0 0" />
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                            Orientation="Horizontal"
+                                            Margin="2 -4 0 1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Width="18">
+                                            <Image.Source>
+                                                <BitmapImage DecodePixelWidth="18"
+                                                             UriSource="/Resources/pearlIcon.png" />
+                                            </Image.Source>
+                                        </Image>
+                                        <TextBlock Background="Transparent"
+                                                   Foreground="White"
+                                                   FontSize="14"
+                                                   Text="{Binding Inventory.PearlsCount, Mode=OneWay}" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10 0 0 0"
+                                                Orientation="Horizontal">
+                                        <Image Width="16">
+                                            <Image.Source>
+                                                <BitmapImage DecodePixelWidth="16"
+                                                             UriSource="/Resources/blazeRodIcon.png" />
+                                            </Image.Source>
+                                        </Image>
+                                        <TextBlock Background="Transparent"
+                                                   Foreground="White"
+                                                   FontSize="14"
+                                                   Text="{Binding Inventory.BlazeRodsCount, Mode=OneWay}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="1"
+                                    BorderBrush="#7e8691"
+                                    Background="#7e8691"
+                                    Padding="1"
+                                    Margin="6 10 2 0">
+                                <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}, Mode=OneWay}"
+                                           Foreground="#1e1e1e"
+                                           HorizontalAlignment="Center"
                                            FontWeight="Bold"
-                                           Margin="5 6 0 0" />
-
-                                <TextBlock Foreground="{Binding PaceSplitTimeColor, Mode=OneWay}"
-                                           Width="70"
-                                           Height="30"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           Margin="3 0 0 0">
-                                                <Run Text="{Binding CurrentSplitTime, Mode=OneWay}"
-                                                     FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
-                                                     FontSize="23" />
-                                </TextBlock>
-
-                                <TextBlock Foreground="FloralWhite"
-                                           Width="80"
-                                           Height="30"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           Margin="0 0 0 0">
-                                                <Run Text="{Binding IGTTime, Mode=OneWay}"
-                                                     FontWeight="{Binding PaceFontWeight, Mode=OneWay}"
-                                                     FontSize="23" />
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
-                                        Orientation="Horizontal"
-                                        Margin="2 -4 0 1">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Width="18">
-                                        <Image.Source>
-                                            <BitmapImage DecodePixelWidth="18"
-                                                         UriSource="/Resources/pearlIcon.png" />
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBox Background="Transparent"
-                                             Foreground="White"
-                                             BorderThickness="0"
-                                             FontSize="14"
-                                             Text="{Binding Inventory.PearlsCount, Mode=OneWay}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="10 0 0 0"
-                                            Orientation="Horizontal">
-                                    <Image Width="16">
-                                        <Image.Source>
-                                            <BitmapImage DecodePixelWidth="16"
-                                                         UriSource="/Resources/blazeRodIcon.png" />
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBox Background="Transparent"
-                                             Foreground="White"
-                                             BorderThickness="0"
-                                             FontSize="14"
-                                             Text="{Binding Inventory.BlazeRodsCount, Mode=OneWay}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-        <ListBox.GroupStyle>
-            <GroupStyle>
-                <GroupStyle.HeaderTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="1"
-                                BorderBrush="#7e8691"
-                                Background="#7e8691"
-                                Padding="1"
-                                Margin="6 10 2 0">
-                            <TextBlock Text="{Binding Converter={StaticResource GroupHeaderConverter}, Mode=OneWay}"
-                                       Foreground="#1e1e1e"
-                                       HorizontalAlignment="Center"
-                                       FontWeight="Bold"
-                                       FontSize="18" />
-                        </Border>
-                    </DataTemplate>
-                </GroupStyle.HeaderTemplate>
-                <GroupStyle.Panel>
-                    <ItemsPanelTemplate>
-                        <StackPanel />
-                    </ItemsPanelTemplate>
-                </GroupStyle.Panel>
-            </GroupStyle>
-        </ListBox.GroupStyle>
-        <ListBox.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel Orientation="Vertical" />
-            </ItemsPanelTemplate>
-        </ListBox.ItemsPanel>
-        <ListBox.ItemContainerStyle>
-            <Style TargetType="ListBoxItem">
-                <Setter Property="Margin"
-                        Value="0 -1 0 -1" />
-                <Setter Property="Padding"
-                        Value="0" />
-            </Style>
-        </ListBox.ItemContainerStyle>
-    </ListBox>
+                                           FontSize="18" />
+                            </Border>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                    <GroupStyle.Panel>
+                        <ItemsPanelTemplate>
+                            <StackPanel />
+                        </ItemsPanelTemplate>
+                    </GroupStyle.Panel>
+                </GroupStyle>
+            </ListBox.GroupStyle>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Margin"
+                            Value="0 -1 0 -1" />
+                    <Setter Property="Padding"
+                            Value="0" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+    </Grid>
 </UserControl>

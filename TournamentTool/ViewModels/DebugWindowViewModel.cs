@@ -260,7 +260,7 @@ public class DebugWindowViewModel : BaseViewModel
             int indentLevel = parentVariable.IndentLevel + 1;
             bool isViewModel = value != null && typeof(BaseViewModel).IsAssignableFrom(prop.PropertyType);
             bool isExpandable = isViewModel || typeof(INotifyCollectionChanged).IsAssignableFrom(prop.PropertyType);
-            if (isExpandable && _visitedInstances.Contains(value)) continue;
+            if (isExpandable && _visitedInstances.Contains(value!)) continue;
 
             var debugVariable = new DebugVariable
             {
@@ -348,11 +348,11 @@ public class DebugWindowViewModel : BaseViewModel
 
     private void OnSelectedViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        var property = _selectedViewModel.GetType().GetProperty(e.PropertyName);
+        var property = _selectedViewModel.GetType().GetProperty(e.PropertyName!);
         if (property == null) return;
 
         var value = property.GetValue(_selectedViewModel)?.ToString() ?? "null";
-        UpdateVariable(e.PropertyName, value);
+        UpdateVariable(e.PropertyName!, value);
     }
     private void OnNestedViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -363,7 +363,7 @@ public class DebugWindowViewModel : BaseViewModel
         foreach (var variable in variables)
         {
             var variableName = $"{variable.Name}.{e.PropertyName}";
-            var value = nestedViewModel.GetType().GetProperty(e.PropertyName)?.GetValue(nestedViewModel)?.ToString() ?? "null";
+            var value = nestedViewModel.GetType().GetProperty(e.PropertyName!)?.GetValue(nestedViewModel)?.ToString() ?? "null";
             UpdateVariable(variableName, value);
         }
     }
@@ -567,7 +567,7 @@ public class DebugWindowViewModel : BaseViewModel
 
     public override void Dispose()
     {
-        SelectedViewModelName = null;
+        SelectedViewModelName = string.Empty;
 
         UnsubscribeFromAllViewModels();
         Variables.Clear();

@@ -56,7 +56,7 @@ public static class DialogBox
                 window.ShowDialog();
             });
         }
-        catch (Exception ex)
+        catch 
         {
             //StartViewModel.Log(ex.Message);
         }

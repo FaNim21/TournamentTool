@@ -47,7 +47,7 @@ public sealed partial class DialogBoxWindow : Window
 
     private void SetupTextWidth()
     {
-        if (Icon.Source != null) return;
+        if (DialogIcon.Source != null) return;
 
         TextGrid.Margin = new Thickness(-60, 0, 5, 0);
         TextGrid.HorizontalAlignment = HorizontalAlignment.Center;

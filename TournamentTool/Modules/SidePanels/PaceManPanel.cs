@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Data;
 using TournamentTool.Models;
@@ -11,7 +12,20 @@ public class PaceManPanel : SidePanel
 {
     private readonly PaceManService _paceManService;
 
+    private string _emptyRunsTitle = string.Empty;
+    public string EmptyRunsTitle
+    {
+        get => _emptyRunsTitle;
+        set
+        {
+            _emptyRunsTitle = value;
+            OnPropertyChanged(nameof(EmptyRunsTitle));
+        }
+    }
+
     public ICollectionView? GroupedPaceManPlayers { get; set; }
+
+    private bool _lastOutput;
 
 
     public PaceManPanel(ControllerViewModel controller) : base(controller)
@@ -50,8 +64,12 @@ public class PaceManPanel : SidePanel
         GroupedPaceManPlayers = collectionViewSource.View;
     }
 
-    public void RefreshGroup()
+    public void RefreshGroup(bool isEmpty)
     {
         Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
+
+        if (isEmpty == _lastOutput) return;
+        EmptyRunsTitle = isEmpty ? "No active pace or stream" : string.Empty;
+        _lastOutput = isEmpty;
     }
 }

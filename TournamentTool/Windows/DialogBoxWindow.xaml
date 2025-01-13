@@ -55,7 +55,7 @@
 
             <!-- Icon -->
             <Grid Grid.Column="0">
-                <Image x:Name="Icon"
+                <Image x:Name="DialogIcon"
                        Stretch="Uniform"
                        Height="32">
                     <Image.Style>

@@ -27,7 +27,7 @@ public class PaceManService : BaseViewModel
         }
     }
 
-    public event Action? OnRefreshGroup;
+    public event Action<bool>? OnRefreshGroup;
 
     public PaceManService(ControllerViewModel controllerViewModel)
     {
@@ -86,6 +86,7 @@ public class PaceManService : BaseViewModel
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
         if (paceMan == null) return;
 
+        bool isPacemanEmpty = true;
         List<PaceMan> currentPaces = new(PaceManPlayers);
 
         for (int i = 0; i < paceMan.Count; i++)
@@ -101,6 +102,7 @@ public class PaceManService : BaseViewModel
                 if (pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase))
                 {
                     wasPaceFound = true;
+                    isPacemanEmpty = false;
                     currentPace.Update(pace);
                     currentPaces.Remove(currentPace);
                     break;
@@ -114,7 +116,7 @@ public class PaceManService : BaseViewModel
             {
                 var current = Controller.Configuration.Players[j];
 
-                if (current.StreamData.ExistName(pace.User.TwitchName))
+                if (current.StreamData.ExistName(pace.User.TwitchName!))
                 {
                     pace.Player = current;
                     break;
@@ -125,12 +127,13 @@ public class PaceManService : BaseViewModel
 
             pace.Initialize(Controller, pace.Splits);
             AddPaceMan(pace);
+            isPacemanEmpty = false;
         }
 
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
 
-        OnRefreshGroup?.Invoke();
+        OnRefreshGroup?.Invoke(isPacemanEmpty);
     }
 
     public void AddPaceMan(PaceMan paceMan)
@@ -146,7 +149,7 @@ public class PaceManService : BaseViewModel
             if (player.InGameName!.Equals(paceMan.Nickname, StringComparison.OrdinalIgnoreCase))
             {
                 updatedPlayer = true;
-                player.StreamData.SetName(paceMan.User.TwitchName);
+                player.StreamData.SetName(paceMan.User.TwitchName!);
             }
         }
 

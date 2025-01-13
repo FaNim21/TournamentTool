@@ -216,11 +216,11 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
     }
     public string GetTwitchName()
     {
-        return User.TwitchName;
+        return User.TwitchName!;
     }
     public string GetHeadViewParametr()
     {
-        return Player == null ? User.UUID : Player.GetHeadViewParametr();
+        return Player == null ? User.UUID! : Player.GetHeadViewParametr();
     }
     public bool IsFromWhiteList()
     {
@@ -303,10 +303,10 @@ public class PaceSplitsList
 public class PaceManUser
 {
     [JsonPropertyName("uuid")]
-    public string UUID { get; set; }
+    public string? UUID { get; set; }
 
     [JsonPropertyName("liveAccount")]
-    public string TwitchName { get; set; }
+    public string? TwitchName { get; set; }
 }
 
 public struct PaceManStreamData

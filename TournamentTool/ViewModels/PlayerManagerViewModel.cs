@@ -226,7 +226,7 @@ public class PlayerManagerViewModel : SelectableViewModel
                 if (player.UUID == twitch.uuid)
                 {
                     player.StreamData.Main = twitch.liveAccount ?? string.Empty;
-                    player.PersonalBest = "Unk";
+                    player.PersonalBest = string.Empty;
                     await player.CompleteData();
                     player.Name = twitch.liveAccount ?? player.InGameName;
                     Tournament!.AddPlayer(player);

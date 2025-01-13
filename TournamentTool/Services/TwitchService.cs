@@ -65,7 +65,7 @@ public class TwitchService
     {
         var allStreams = new List<Stream>();
         const int batchSize = 100;
-        string cursor = null;
+        string cursor = string.Empty;
 
         try
         {
@@ -77,7 +77,7 @@ public class TwitchService
 
             foreach (var batch in loginBatches)
             {
-                cursor = null;
+                cursor = string.Empty;
 
                 do
                 {
@@ -96,9 +96,9 @@ public class TwitchService
         return allStreams.DistinctBy(stream => stream.UserId).ToList();
     }
 
-    public async Task<CreatedClipResponse> CreateClipAsync(string broadcasterID)
+    public async Task<CreatedClipResponse?> CreateClipAsync(string broadcasterID)
     {
-        CreatedClipResponse response = null;
+        CreatedClipResponse? response = null;
         try
         {
 

@@ -38,9 +38,10 @@
             <DataTemplate DataType="models:RankedPace">
                 <Border BorderBrush="#7e8691"
                         BorderThickness="1"
-                        Width="263" >
+                        Width="263">
                     <i:Interaction.Behaviors>
-                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}" DragDataType="{x:Type models:IPlayer}" />
+                        <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}"
+                                                          DragDataType="{x:Type models:IPlayer}" />
                     </i:Interaction.Behaviors>
                     <Grid>
                         <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -56,35 +57,26 @@
                                        Width="30"
                                        Height="30"
                                        Margin="5" />
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel Orientation="Vertical"
-                                                Width="140">
-                                        <TextBlock Text="{Binding InGameName}"
-                                                   FontSize="15"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="LightCyan" />
-                                        <TextBlock Text="{Binding LastTimeline}"
-                                                   FontSize="15"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="Gold" />
-                                    </StackPanel>
-                                    <Grid>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding SplitDifferenceTime}"
-                                                       FontSize="13"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Left"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#d43f3f" />
-                                            <TextBlock Text="{Binding CurrentSplitTime}"
-                                                       FontSize="17"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Left"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="White" />
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
+                                <TextBlock FontSize="15"
+                                           Width="140"
+                                           FontWeight="SemiBold">
+                                    <Run Text="{Binding InGameName}"
+                                         Foreground="LightCyan" />
+                                    <LineBreak />
+                                    <Run Text="{Binding LastTimeline}"
+                                         Foreground="Gold" />
+                                </TextBlock>
+                                <TextBlock VerticalAlignment="Center"
+                                           HorizontalAlignment="Left"
+                                           FontWeight="SemiBold">
+                                    <Run Text="{Binding SplitDifferenceTime}"
+                                         FontSize="13"
+                                         Foreground="#d43f3f" />
+                                    <LineBreak />
+                                    <Run Text="{Binding CurrentSplitTime}"
+                                         FontSize="17"
+                                         Foreground="White" />
+                                </TextBlock>
                             </StackPanel>
 
                             <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
