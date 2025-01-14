@@ -34,5 +34,4 @@ public partial class ControllerView : UserControl
         Regex regex = RegexPatterns.NumbersPattern();
         e.Handled = regex.IsMatch(e.Text);
     }
-
 }

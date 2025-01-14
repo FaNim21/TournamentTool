@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
@@ -30,6 +31,7 @@ public class ControllerViewModel : SelectableViewModel
     public ObsController OBS { get; set; }
 
     public SidePanel? SidePanel { get; set; }
+    public ManagementPanel? ManagementPanel { get; set; }
 
     public Tournament Configuration { get; private set; } = new();
 
@@ -122,7 +124,9 @@ public class ControllerViewModel : SelectableViewModel
     public override void OnEnable(object? parameter)
     {
         foreach (var player in Configuration.Players)
+        {
             player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
+        }
 
         switch(Configuration.ControllerMode)
         {
@@ -130,25 +134,35 @@ public class ControllerViewModel : SelectableViewModel
                 UseSidePanel = false;
 
                 if (SidePanel != null)
+                {
                     SidePanel = null;
+                    ManagementPanel = null;
+                }
                 break;
             case ControllerMode.PaceMan:
                 UseSidePanel = true;
 
                 if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(PaceManPanel))))
+                {
                     SidePanel = new PaceManPanel(this);
+                    ManagementPanel = null;
+                }
                 break;
             case ControllerMode.Ranked:
                 UseSidePanel = true;
 
                 if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(RankedPacePanel))))
+                {
                     SidePanel = new RankedPacePanel(this);
+                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
+                }
                 break;
         }
 
         FilterItems();
 
         SidePanel?.OnEnable(null);
+        ManagementPanel?.OnEnable(null);
         OBS.OnEnable(null);
 
         if (!Configuration.IsUsingTwitchAPI)

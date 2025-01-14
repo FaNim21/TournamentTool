@@ -5,5 +5,4 @@ namespace TournamentTool.Modules.ManagementPanels;
 public class ManagementPanel : BaseViewModel
 {
 
-
 }

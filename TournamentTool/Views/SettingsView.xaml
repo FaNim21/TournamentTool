@@ -31,16 +31,14 @@
                                 BorderThickness="1"
                                 Width="594"
                                 Height="40">
-                            <StackPanel Margin="3 2 0 0">
-                                <TextBlock Foreground="White">
+                            <TextBlock Foreground="White"
+                                       Margin="3 2 0 0">
                                 <Run Text="Key: " />
                                 <Run Text="{Binding ., Converter={StaticResource HotkeyConverter}, Mode=OneWay}" />
-                                </TextBlock>
-                                <TextBlock Foreground="White">
-                                    <Run Text="Description: " />
-                                    <Run Text="{Binding Description}" />
-                                </TextBlock>
-                            </StackPanel>
+                                <LineBreak />
+                                <Run Text="Description: " />
+                                <Run Text="{Binding Description}" />
+                            </TextBlock>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -65,21 +63,21 @@
         </Grid>
 
         <Grid Grid.Column="1">
-            <Label Content="Hotkey Configurator"
-                   Foreground="White"
-                   FontSize="50"
-                   Margin="0" />
+            <TextBlock Text="Hotkey Configurator"
+                       Foreground="White"
+                       FontSize="50"
+                       Margin="0" />
 
             <Grid Margin="0 75 0 0">
                 <StackPanel Orientation="Horizontal"
                             VerticalAlignment="Top"
                             HorizontalAlignment="Center"
                             Background="LightCoral">
-                    <Label Content="{Binding SelectedHotkey, Converter={StaticResource HotkeyConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                           Width="50"
-                           Height="40"
-                           FontSize="25"
-                           Foreground="White" />
+                    <TextBlock Text="{Binding SelectedHotkey, Converter={StaticResource HotkeyConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                               Width="50"
+                               Height="40"
+                               FontSize="25"
+                               Foreground="White" />
 
                     <Button Width="100"
                             Height="40"
@@ -88,15 +86,13 @@
 
             </Grid>
         </Grid>
-        <!--
-        -->
 
         <Grid Grid.ColumnSpan="2">
-            <Label Content="WORK IN PROGRESS..."
-                   Foreground="White"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="100" />
+            <TextBlock Text="WORK IN PROGRESS..."
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="100" />
         </Grid>
     </Grid>
 </UserControl>

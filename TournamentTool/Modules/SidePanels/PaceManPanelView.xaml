@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
-             xmlns:local="clr-namespace:TournamentTool.Modules.SidePanels"
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"

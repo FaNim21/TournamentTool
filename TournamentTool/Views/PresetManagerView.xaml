@@ -59,268 +59,261 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <WrapPanel Orientation="Vertical"
-                                   Margin="20 10 20 20"
-                                   HorizontalAlignment="Left"
-                                   VerticalAlignment="Top">
+                    <WrapPanel Orientation="Vertical"
+                               Grid.Column="0"
+                               Margin="20 10 20 20"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Top">
 
-                            <!-- GENERAL -->
-                            <Label  Content="General"
+                        <!-- GENERAL -->
+                        <TextBlock  Text="General"
                                     Foreground="Wheat"
                                     FontSize="24"
                                     FontWeight="SemiBold"
                                     Padding="0"
                                     Margin="0 0 0 5" />
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTwitchAPI}"
-                                          Content="Use Twitch API"
-                                          Foreground="White" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Visibility="{Binding LoadedPreset.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}"
-                                       Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding LoadedPreset.ShowLiveOnlyForMinecraftCategory}"
-                                          Content="Show LIVE only for Minecraft category"
-                                          Foreground="White" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
-                                          Content="Always On Top"
-                                          Foreground="White" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Vertical">
-                                <Label Content="Controller Mode"
+                        <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTwitchAPI}"
+                                  Content="Use Twitch API"
+                                  Foreground="White"
+                                  Margin="0 0 0 5" />
+                        <CheckBox IsChecked="{Binding LoadedPreset.ShowLiveOnlyForMinecraftCategory}"
+                                  Visibility="{Binding LoadedPreset.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}"
+                                  Content="Show LIVE only for Minecraft category"
+                                  Foreground="White"
+                                  Margin="0 0 0 5" />
+                        <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
+                                  Content="Always On Top"
+                                  Foreground="White"
+                                  Margin="0 0 0 5" />
+
+                        <WrapPanel Orientation="Vertical">
+                            <TextBlock Text="Controller Mode"
                                        Foreground="White"
                                        Padding="0" />
-                                <RadioButton GroupName="ControllerMode"
-                                             Foreground="White"
-                                             Content="None"
-                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
-                                <RadioButton GroupName="ControllerMode"
-                                             Foreground="White"
-                                             Content="PaceMan"
-                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
-                                <RadioButton GroupName="ControllerMode"
-                                             Foreground="White"
-                                             Content="Ranked"
-                                             IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
-                            </WrapPanel>
+                            <RadioButton GroupName="ControllerMode"
+                                         Foreground="White"
+                                         Content="None"
+                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
+                            <RadioButton GroupName="ControllerMode"
+                                         Foreground="White"
+                                         Content="PaceMan"
+                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
+                            <RadioButton GroupName="ControllerMode"
+                                         Foreground="White"
+                                         Content="Ranked"
+                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
+                        </WrapPanel>
 
-                            <!-- PACEMAN -->
-                            <WrapPanel Orientation="Vertical"
-                                       Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
-                                <Label  Content="Paceman"
+                        <!-- PACEMAN -->
+                        <WrapPanel Orientation="Vertical"
+                                   Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
+                            <TextBlock  Text="Paceman"
                                         Foreground="Wheat"
                                         FontWeight="SemiBold"
                                         FontSize="24"
                                         Padding="0"
                                         Margin="0 10 0 5" />
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding LoadedPreset.IsUsingWhitelistOnPaceMan}"
-                                              Content="Use Whitelist on Paceman"
-                                              Foreground="White" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.PaceManRefreshRateMiliseconds}"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="PaceMan refresh (ms)"
+                            <CheckBox IsChecked="{Binding LoadedPreset.IsUsingWhitelistOnPaceMan}"
+                                      Content="Use Whitelist on Paceman"
+                                      Foreground="White"
+                                      Margin="0 0 0 5" />
+
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.PaceManRefreshRateMiliseconds}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="PaceMan refresh (ms)"
                                            Foreground="White"
                                            Height="20"
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                                </WrapPanel>
-
-                                <Label  Content="Good Pace Splits (ms)"
-                                        Foreground="White"
-                                        FontSize="24"
-                                        Padding="0"
-                                        Margin="0 0 0 5" />
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewTextInput="NumberValidationTextBox"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="{Binding LoadedPreset.Structure2ToText}"
-                                           Foreground="White"
-                                           Height="23"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 0" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewTextInput="NumberValidationTextBox"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="{Binding LoadedPreset.FirstPortalToText}"
-                                           Foreground="White"
-                                           Height="23"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 0" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewTextInput="NumberValidationTextBox"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="{Binding LoadedPreset.EnterStrongholdToText}"
-                                           Foreground="White"
-                                           Height="23"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 0" />
-
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewTextInput="NumberValidationTextBox"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="{Binding LoadedPreset.EnterEndToText}"
-                                           Foreground="White"
-                                           Height="23"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 0" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="Wrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                             PreviewTextInput="NumberValidationTextBox"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="{Binding LoadedPreset.CreditsToText}"
-                                           Foreground="White"
-                                           Height="23"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 0" />
-                                </WrapPanel>
                             </WrapPanel>
 
-                            <!-- RANKED -->
-                            <WrapPanel Orientation="Vertical"
-                                       Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
-                                <Label  Content="Ranked"
-                                        Foreground="Wheat"
-                                        FontSize="24"
-                                        FontWeight="SemiBold"
-                                        Padding="0"
-                                        Margin="0 10 0 5" />
+                            <TextBlock Text="Good Pace Splits (ms)"
+                                       Foreground="White"
+                                       FontSize="24"
+                                       Padding="0"
+                                       Margin="0 0 0 5" />
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="{Binding LoadedPreset.Structure2ToText}"
+                                           Foreground="White"
+                                           Height="23"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 0" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="{Binding LoadedPreset.FirstPortalToText}"
+                                           Foreground="White"
+                                           Height="23"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 0" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="{Binding LoadedPreset.EnterStrongholdToText}"
+                                           Foreground="White"
+                                           Height="23"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 0" />
 
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="NoWrap"
-                                             Width="220"
-                                             Height="20"
-                                             IsReadOnly="True"
-                                             Text="{Binding LoadedPreset.RankedRoomDataPath}"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <components:ButtonNormal ContentText="SET"
-                                                             Width="35"
-                                                             Margin="5 0 0 3"
-                                                             OnCommand="{Binding SetRankedDataPathCommand}" />
-                                    <Label Content="Spectator Path"
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="{Binding LoadedPreset.EnterEndToText}"
                                            Foreground="White"
-                                           Height="20"
+                                           Height="23"
                                            FontSize="16"
                                            Padding="0"
-                                           Margin="5 0 0 3" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="NoWrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.RankedRoomDataName}"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="Data name"
+                                           Margin="5 0 0 0" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <TextBlock Text="{Binding LoadedPreset.CreditsToText}"
                                            Foreground="White"
-                                           Height="20"
+                                           Height="23"
                                            FontSize="16"
                                            Padding="0"
-                                           Margin="5 0 0 3" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <TextBox TextWrapping="NoWrap"
-                                             Width="120"
-                                             Height="20"
-                                             Text="{Binding LoadedPreset.RankedRoomUpdateFrequency}"
-                                             Background="#9E9E9E"
-                                             HorizontalAlignment="Left"
-                                             VerticalAlignment="Top" />
-                                    <Label Content="Spectator update frequency (ms)"
-                                           Foreground="White"
-                                           Height="20"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 3" />
-                                </WrapPanel>
+                                           Margin="5 0 0 0" />
                             </WrapPanel>
                         </WrapPanel>
-                    </Grid>
 
-                    <Grid Grid.Column="1"
-                          Background="Transparent">
+                        <!-- RANKED -->
+                        <WrapPanel Orientation="Vertical"
+                                   Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
+                            <Label  Content="Ranked"
+                                    Foreground="Wheat"
+                                    FontSize="24"
+                                    FontWeight="SemiBold"
+                                    Padding="0"
+                                    Margin="0 10 0 5" />
+
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="NoWrap"
+                                         Width="220"
+                                         Height="20"
+                                         IsReadOnly="True"
+                                         Text="{Binding LoadedPreset.RankedRoomDataPath}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <components:ButtonNormal ContentText="SET"
+                                                         Width="35"
+                                                         Margin="5 0 0 3"
+                                                         OnCommand="{Binding SetRankedDataPathCommand}" />
+                                <Label Content="Spectator Path"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="NoWrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.RankedRoomDataName}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <Label Content="Data name"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Horizontal"
+                                       Margin="0 0 0 5">
+                                <TextBox TextWrapping="NoWrap"
+                                         Width="120"
+                                         Height="20"
+                                         Text="{Binding LoadedPreset.RankedRoomUpdateFrequency}"
+                                         Background="#9E9E9E"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top" />
+                                <Label Content="Spectator update frequency (ms)"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                            </WrapPanel>
+                        </WrapPanel>
+                    </WrapPanel>
+
+                    <WrapPanel Grid.Column="1"
+                               Background="Transparent">
                         <components:ButtonNormal ContentText="Controller"
                                                  Width="350"
                                                  Height="90"
                                                  FontSize="45"
                                                  VerticalAlignment="Top"
                                                  OnCommand="{Binding OpenControllerCommand}"
-                                                 Margin="30" />
+                                                 Margin="30 30 30 20" />
 
                         <WrapPanel Orientation="Vertical"
-                                   Margin="40 140 0 0">
+                                   Margin="40 0 0 0">
 
                             <!-- OBS CONNECTION -->
-                            <Label  Content="OBS Connection"
-                                    Foreground="Wheat"
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Padding="0"
-                                    Margin="0 0 0 5" />
+                            <TextBlock Text="OBS Connection"
+                                       Foreground="Wheat"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Padding="0"
+                                       Margin="0 0 0 5" />
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
@@ -331,12 +324,12 @@
                                          Padding="0 2 0 0"
                                          Background="#9E9E9E"
                                          MaxLength="5" />
-                                <Label Content="Port"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                <TextBlock Text="Port"
+                                           Foreground="White"
+                                           Height="18"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </WrapPanel>
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
@@ -347,12 +340,12 @@
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <Label Content="Password"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                <TextBlock Text="Password"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </WrapPanel>
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
@@ -363,21 +356,21 @@
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <Label Content="Scene Collection"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                <TextBlock Text="Scene Collection"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </WrapPanel>
 
                             <!--POV MANAGEMENT-->
-                            <Label  Content="Pov management"
-                                    Foreground="Wheat"
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Padding="0"
-                                    Margin="0 10 0 5" />
+                            <TextBlock Text="Pov management"
+                                       Foreground="Wheat"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Padding="0"
+                                       Margin="0 10 0 5" />
                             <WrapPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
@@ -387,31 +380,27 @@
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <Label Content="POV filter name"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                <TextBlock Text="POV filter name"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </WrapPanel>
                             <WrapPanel Orientation="Vertical"
                                        Margin="0 0 0 5">
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding LoadedPreset.SetPovHeadsInBrowser}"
-                                              Content="Use skin heads"
-                                              Foreground="White" />
-                                </WrapPanel>
-                                <WrapPanel Orientation="Horizontal"
-                                           Margin="0 0 0 5">
-                                    <CheckBox IsChecked="{Binding LoadedPreset.SetPovPBText}"
-                                              Content="Use personal best text"
-                                              Foreground="White" />
-                                </WrapPanel>
+                                <CheckBox IsChecked="{Binding LoadedPreset.SetPovHeadsInBrowser}"
+                                          Content="Use skin heads"
+                                          Foreground="White"
+                                          Margin="0 0 0 5" />
+                                <CheckBox IsChecked="{Binding LoadedPreset.SetPovPBText}"
+                                          Content="Use personal best text"
+                                          Foreground="White"
+                                          Margin="0 0 0 5" />
 
-                                <Label Content="Use names for povs"
-                                       Foreground="White"
-                                       Padding="0" />
+                                <TextBlock Text="Use names for povs"
+                                           Foreground="White"
+                                           Padding="0" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="None"
@@ -430,7 +419,7 @@
                                              IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                             </WrapPanel>
                         </WrapPanel>
-                    </Grid>
+                    </WrapPanel>
                 </Grid>
             </ScrollViewer>
         </Grid>

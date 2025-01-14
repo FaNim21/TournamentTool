@@ -11,6 +11,7 @@
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
+             xmlns:managementPanels="clr-namespace:TournamentTool.Modules.ManagementPanels"
              d:DataContext="{d:DesignInstance Type=viewmodels:ControllerViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="576"
@@ -205,90 +206,16 @@
                               Y2="2000"
                               StrokeThickness="5"
                               Stroke="#000d14" />
-                        <WrapPanel Orientation="Vertical"
-                                   Margin="10 10 0 0">
 
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <Label Content="Text:"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0" 
-                                       Margin="0 0 0 5"/>
-                                <TextBox TextWrapping="Wrap"
-                                         Width="175"
-                                         Height="20"
-                                         Text="{Binding MainScene.SceneName}"
-                                         PreviewTextInput="NumberValidationTextBox"
-                                         Background="#9E9E9E"
-                                         MaxLength="5"
-                                         Margin="5 0 10 0"/>
-                            </WrapPanel>
-
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <Label Content="Round:"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0" 
-                                       Margin="0 0 0 5"/>
-                                <TextBox TextWrapping="Wrap"
-                                         Width="50"
-                                         Height="20"
-                                         Text="{Binding MainScene.SceneName}"
-                                         PreviewTextInput="NumberValidationTextBox"
-                                         Background="#9E9E9E"
-                                         MaxLength="5"
-                                         Margin="5 0 10 0"/>
-
-                                <components:ButtonNormal ContentText="-"
-                                                         FontSize="15"
-                                                         Width="30"
-                                                         Height="20"
-                                                         OnCommand="{Binding RefreshPOVsCommand}" 
-                                                         Margin="0 0 5 0"/>
-
-                                <components:ButtonNormal ContentText="+"
-                                                         FontSize="15"
-                                                         Width="30"
-                                                         Height="20"
-                                                         OnCommand="{Binding RefreshPOVsCommand}" />
-
-                            </WrapPanel>
-
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <Label Content="Players:"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="0 0 0 5" />
-                                <Label Content="12"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="3 0 0 5" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <Label Content="Completes:"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="0 0 0 5" />
-                                <Label Content="2"
-                                       Foreground="White"
-                                       Height="18"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="3 0 0 5" />
-                            </WrapPanel>
-                        </WrapPanel>
+                        <ScrollViewer>
+                            <ContentControl Content="{Binding ManagementPanel}">
+                                <ContentControl.Resources>
+                                    <DataTemplate DataType="{x:Type managementPanels:RankedManagementPanel}">
+                                        <managementPanels:RankedManagementPanelView />
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                            </ContentControl>
+                        </ScrollViewer>
                     </Grid>
                 </Grid>
             </Grid>
