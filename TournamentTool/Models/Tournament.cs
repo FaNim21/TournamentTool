@@ -82,6 +82,17 @@ public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
     }
 }
 
+[JsonDerivedType(typeof(ManagementTest), typeDiscriminator: "Test")]
+public class ManagementBaseTest
+{
+
+}
+
+public class ManagementTest : ManagementBaseTest
+{
+    public int JakiesGowno { get; set; } = 1234;
+}
+
 public class Tournament : BaseViewModel, IPreset
 {
     private string _name = string.Empty;
@@ -93,7 +104,9 @@ public class Tournament : BaseViewModel, IPreset
             _name = value;
             OnPropertyChanged(nameof(Name));
         }
-    } 
+    }
+
+    public ManagementBaseTest ManagementData { get; set; }
 
     public ObservableCollection<Player> Players { get; set; } = [];
 
@@ -157,6 +170,20 @@ public class Tournament : BaseViewModel, IPreset
     }
 
     public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
+
+    private int _apiRefreshRateMiliseconds = 1000;
+    public int ApiRefreshRateMiliseconds
+    {
+        get => _apiRefreshRateMiliseconds;
+        set
+        {
+            if (value < 1000)
+                _apiRefreshRateMiliseconds = 1000;
+            else
+                _apiRefreshRateMiliseconds = value;
+            OnPropertyChanged(nameof(ApiRefreshRateMiliseconds));
+        }
+    }
 
     private int _paceManRefreshRateMiliseconds = 3000;
     public int PaceManRefreshRateMiliseconds
@@ -310,6 +337,9 @@ public class Tournament : BaseViewModel, IPreset
     public Tournament(string name = "")
     {
         Name = name;
+
+        ManagementData = new ManagementTest();
+
     }
 
     public void ClearPlayerStreamData()

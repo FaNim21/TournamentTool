@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
@@ -7,13 +8,17 @@ using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
+using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
 
 public class ControllerViewModel : SelectableViewModel
 {
     private readonly TwitchService _twitch;
+    private readonly APIDataSaver _api;
 
+    private BackgroundWorker? _apiWorker;
+    private CancellationTokenSource? _cancellationTokenSource;
     public Scene MainScene { get; set; }
     public PreviewScene PreviewScene { get; set; }
 
@@ -104,6 +109,8 @@ public class ControllerViewModel : SelectableViewModel
 
     public ControllerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
+        _api = new();
+
         MainScene = new(this);
         PreviewScene = new(this);
 
@@ -165,6 +172,11 @@ public class ControllerViewModel : SelectableViewModel
         ManagementPanel?.OnEnable(null);
         OBS.OnEnable(null);
 
+        _cancellationTokenSource = new();
+        _apiWorker = new() { WorkerSupportsCancellation = true };
+        _apiWorker.DoWork += UpdateAPI;
+        _apiWorker.RunWorkerAsync();
+
         if (!Configuration.IsUsingTwitchAPI)
         {
             Configuration.ClearPlayerStreamData();
@@ -179,6 +191,13 @@ public class ControllerViewModel : SelectableViewModel
         OBS.OnDisable();
         _twitch?.OnDisable();
 
+        _apiWorker?.CancelAsync();
+        _cancellationTokenSource?.Cancel();
+        _apiWorker?.Dispose();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+        _apiWorker = null;
+
         Configuration.ClearFromController();
 
         MainScene.Clear();
@@ -190,6 +209,34 @@ public class ControllerViewModel : SelectableViewModel
         CurrentChosenPlayer = null;
 
         return true;
+    }
+
+    private async void UpdateAPI(object? sender, DoWorkEventArgs e)
+    {
+        if (ManagementPanel == null) return;
+
+        ManagementPanel.InitializeAPI(_api);
+
+        var cancellationToken = _cancellationTokenSource!.Token;
+
+        while (!_apiWorker!.CancellationPending && !cancellationToken.IsCancellationRequested)
+        {
+            ManagementPanel.UpdateAPI(_api);
+
+            /*try
+            {
+            }
+            catch (Exception ex)
+            {
+                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }*/
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(Configuration.ApiRefreshRateMiliseconds), cancellationToken);
+            }
+            catch (TaskCanceledException) { break; }
+        }
     }
 
     public void FilterItems()

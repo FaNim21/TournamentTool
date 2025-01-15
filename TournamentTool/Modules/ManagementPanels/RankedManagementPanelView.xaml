@@ -1,8 +1,8 @@
 ﻿<UserControl x:Class="TournamentTool.Modules.ManagementPanels.RankedManagementPanelView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Modules.ManagementPanels"
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:models="clr-namespace:TournamentTool.Models"
@@ -12,89 +12,70 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance Type=local:RankedManagementPanel}">
-    <StackPanel>
-        <WrapPanel Orientation="Vertical"
-                   Margin="10 10 0 0">
+             d:DataContext="{d:DesignInstance Type=local:RankedManagementPanel}"
+             Margin="10 10 0 0">
+    <StackPanel Orientation="Vertical" >
 
-            <WrapPanel Orientation="Horizontal"
-                       Margin="0 0 0 5">
-                <TextBlock Text="Custom text:"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="0 0 0 5" />
-                <TextBox TextWrapping="Wrap"
-                         Width="225"
-                         Height="20"
-                         Text="{Binding CustomText, Mode=TwoWay}"
-                         Background="#9E9E9E"
-                         Margin="0 0 10 0" />
-            </WrapPanel>
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 0 0 4">
+            <TextBlock Text="Custom text:"
+                       Foreground="White"
+                       Height="18"
+                       FontSize="16"
+                       Padding="0"
+                       Margin="0 -6 0 0" />
+            <TextBox TextWrapping="Wrap"
+                     Width="110"
+                     Height="20"
+                     Text="{Binding CustomText, Mode=TwoWay}"
+                     Background="#9E9E9E"
+                     Margin="5 0 0 0" />
+        </StackPanel>
 
-            <WrapPanel Orientation="Horizontal"
-                       Margin="0 0 0 5">
-                <TextBlock Text="Round:"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="0 0 0 5" />
-                <TextBox TextWrapping="Wrap"
-                         Width="50"
-                         Height="20"
-                         Text="{Binding Rounds, Mode=TwoWay}"
-                         PreviewTextInput="NumberValidationTextBox"
-                         Background="#9E9E9E"
-                         MaxLength="5"
-                         Margin="5 0 10 0" />
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Round:"
+                       Foreground="White"
+                       Height="18"
+                       FontSize="16"
+                       Padding="0"
+                       Margin="0 -1 0 5" />
+            <TextBox TextWrapping="Wrap"
+                     Width="50"
+                     Height="20"
+                     Text="{Binding Rounds, Mode=TwoWay}"
+                     PreviewTextInput="NumberValidationTextBox"
+                     Background="#9E9E9E"
+                     MaxLength="5"
+                     Margin="5 0 0 0" />
 
-                <components:ButtonNormal ContentText="-"
-                                         FontSize="15"
-                                         Width="30"
-                                         Height="20"
-                                         OnCommand="{Binding SubstractRoundCommand}"
-                                         Margin="0 0 5 0" />
+            <components:ButtonNormal ContentText="-"
+                                     FontSize="15"
+                                     Width="30"
+                                     Height="20"
+                                     OnCommand="{Binding SubstractRoundCommand}"
+                                     Margin="5 0 5 0" />
 
-                <components:ButtonNormal ContentText="+"
-                                         FontSize="15"
-                                         Width="30"
-                                         Height="20"
-                                         OnCommand="{Binding AddRoundCommand}" />
+            <components:ButtonNormal ContentText="+"
+                                     FontSize="15"
+                                     Width="30"
+                                     Height="20"
+                                     OnCommand="{Binding AddRoundCommand}" />
 
-            </WrapPanel>
+        </StackPanel>
 
-            <WrapPanel Orientation="Horizontal"
-                       Margin="0 0 0 5">
-                <TextBlock Text="Players:"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="0 0 0 5" />
-                <TextBlock Text="12"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="3 0 0 5" />
-            </WrapPanel>
-            <WrapPanel Orientation="Horizontal"
-                       Margin="0 0 0 5">
-                <TextBlock Text="Completes:"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="0 0 0 5" />
-                <TextBlock Text="2"
-                           Foreground="White"
-                           Height="18"
-                           FontSize="16"
-                           Padding="0"
-                           Margin="3 0 0 5" />
-            </WrapPanel>
-        </WrapPanel>
+        <TextBlock Foreground="White"
+                   Height="22"
+                   FontSize="16">
+                <Run Text="Players: " />
+                <Run Text="{Binding Players, Mode=OneWay}" />
+        </TextBlock>
+
+        <TextBlock Foreground="White"
+                   Height="22"
+                   FontSize="16">
+                <Run Text="Completions: " />
+                <Run Text="{Binding Completions, Mode=OneWay}" />
+        </TextBlock>
+
     </StackPanel>
 </UserControl>

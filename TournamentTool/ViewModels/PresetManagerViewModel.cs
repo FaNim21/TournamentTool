@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows.Input;
@@ -72,6 +73,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public ICommand AddNewPresetCommand { get; set; }
     public ICommand SavePresetCommand { get; set; }
+    public ICommand OpenPresetFolderCommand { get; set; }
     public ICommand OnItemListClickCommand { get; set; }
 
     public ICommand ClearCurrentPresetCommand { get; set; }
@@ -90,6 +92,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(() => SavePreset());
+        OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
         OnItemListClickCommand = new OnItemListClickCommand(this);
 
         ClearCurrentPresetCommand = new ClearPresetCommand(this);
@@ -200,6 +203,16 @@ public class PresetManagerViewModel : SelectableViewModel
         if (string.IsNullOrEmpty(path)) return;
 
         LoadedPreset!.RankedRoomDataPath = path;
+    }
+
+    private void OpenPresetFolder()
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = Consts.PresetsPath,
+            UseShellExecute = true,
+            Verb = "open"
+        });
     }
 
     public void SavePreset(IPreset? preset = null)

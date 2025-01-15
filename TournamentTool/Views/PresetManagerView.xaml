@@ -10,8 +10,8 @@
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=viewmodels:PresetManagerViewModel}"
              mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="800"
+             d:DesignWidth="1024"
+             d:DesignHeight="601"
              Background="#1E1E1E">
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
@@ -72,6 +72,23 @@
                                     FontWeight="SemiBold"
                                     Padding="0"
                                     Margin="0 0 0 5" />
+
+                        <WrapPanel Orientation="Horizontal"
+                                   Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="40"
+                                     Height="20"
+                                     Text="{Binding LoadedPreset.ApiRefreshRateMiliseconds}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 1 0 0"
+                                     Background="#9E9E9E"
+                                     MaxLength="5" />
+                            <TextBlock Text="Main application API refresh rate (ms)"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       Margin="5 0 0 3" />
+                        </WrapPanel>
+
                         <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTwitchAPI}"
                                   Content="Use Twitch API"
                                   Foreground="White"
@@ -302,7 +319,16 @@
                                                  FontSize="45"
                                                  VerticalAlignment="Top"
                                                  OnCommand="{Binding OpenControllerCommand}"
-                                                 Margin="30 30 30 20" />
+                                                 Margin="30 30 30 5" />
+
+                        <!-- Tutaj chyba dam panel do zarzadzania opcjami do ustawiania punktow za ukonczenie itp itd???? -->
+                        <components:ButtonNormal ContentText="Work in progress"
+                                                 Width="350"
+                                                 Height="40"
+                                                 FontSize="25"
+                                                 VerticalAlignment="Top"
+                                                 OnCommand=""
+                                                 Margin="30 0 30 20" />
 
                         <WrapPanel Orientation="Vertical"
                                    Margin="40 0 0 0">
@@ -477,13 +503,22 @@
                                           OnConsoleCommand="{Binding AddNewPresetCommand}"
                                           Margin="5 0 0 0" />
 
-                <components:ButtonNormal Width="80"
+                <components:ButtonNormal Width="71"
+                                         Height="30"
+                                         HorizontalAlignment="Right"
+                                         Margin="0 0 70 0"
+                                         ContentText="FOLDER"
+                                         ContentMargin="0 0 0 2"
+                                         FontSize="17"
+                                         OnCommand="{Binding OpenPresetFolderCommand}" />
+
+                <components:ButtonNormal Width="60"
                                          Height="30"
                                          HorizontalAlignment="Right"
                                          Margin="0 0 5 0"
                                          ContentText="SAVE"
                                          ContentMargin="0 0 0 2"
-                                         FontSize="19"
+                                         FontSize="17"
                                          OnCommand="{Binding SavePresetCommand}" />
             </Grid>
         </Grid>

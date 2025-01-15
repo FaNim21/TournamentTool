@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Data;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
-using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.SidePanels;
@@ -154,7 +153,6 @@ public class RankedBestSplit()
 
 public class RankedPacePanel : SidePanel
 {
-    private readonly APIDataSaver API;
     private readonly JsonSerializerOptions _options;
 
     private CancellationTokenSource? _cancellationTokenSource;
@@ -189,9 +187,6 @@ public class RankedPacePanel : SidePanel
 
     public ICollectionView? GroupedRankedPaces { get; set; }
 
-    private string _rankedPlayerCountFileName = "Ranked_players_count";
-    private string _rankedCompletedCountFileName = "Ranked_completes_count";
-
 
     public RankedPacePanel(ControllerViewModel controller) : base(controller)
     {
@@ -200,10 +195,6 @@ public class RankedPacePanel : SidePanel
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
             PropertyNameCaseInsensitive = true
         };
-
-        API = new APIDataSaver();
-        API.CheckFile(_rankedPlayerCountFileName);
-        API.CheckFile(_rankedCompletedCountFileName);
     }
 
     public override void OnEnable(object? parameter)
@@ -257,7 +248,6 @@ public class RankedPacePanel : SidePanel
             try
             {
                 await LoadJsonFileAsync();
-                UpdateAPI();
             }
             catch (Exception ex)
             {
@@ -270,12 +260,6 @@ public class RankedPacePanel : SidePanel
             }
             catch (TaskCanceledException) { break; }
         }
-    }
-
-    private void UpdateAPI()
-    {
-        API.UpdateFileContent(_rankedPlayerCountFileName, Paces.Count);
-        API.UpdateFileContent(_rankedCompletedCountFileName, CompletedRunsCount);
     }
 
     private async Task LoadJsonFileAsync()

@@ -11,10 +11,21 @@ public class APIDataSaver
             Directory.CreateDirectory(Consts.AppAPIPath);
     }
 
-    public void CheckFile(string fileName)
+    public string CheckFile(string fileName)
     {
         string path = Path.Combine(Consts.AppAPIPath, fileName + ".txt");
-        if (!File.Exists(path)) File.Create(path);
+        string output = string.Empty;
+
+        if (!File.Exists(path))
+        {
+            File.Create(path);
+        }
+        else
+        {
+            output = File.ReadAllText(path);
+        }
+
+        return output;
     }
     public void UpdateFileContent(string fileName, object content)
     {
