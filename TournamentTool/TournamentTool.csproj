@@ -14,6 +14,7 @@
     <None Remove="Resources\bedIcon.png" />
     <None Remove="Resources\blazeRodIcon.png" />
     <None Remove="Resources\enderEyeIcon.png" />
+    <None Remove="Resources\kofi.png" />
     <None Remove="Resources\muted.png" />
     <None Remove="Resources\obsidianIcon.png" />
     <None Remove="Resources\pearlIcon.png" />
@@ -56,6 +57,7 @@
     <Resource Include="Resources\bedIcon.png" />
     <Resource Include="Resources\blazeRodIcon.png" />
     <Resource Include="Resources\enderEyeIcon.png" />
+    <Resource Include="Resources\kofi.png" />
     <Resource Include="Resources\muted.png" />
     <Resource Include="Resources\obsidianIcon.png" />
     <Resource Include="Resources\pearlIcon.png">
