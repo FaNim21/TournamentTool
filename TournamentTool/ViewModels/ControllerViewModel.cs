@@ -166,16 +166,16 @@ public class ControllerViewModel : SelectableViewModel
                 break;
         }
 
+        _cancellationTokenSource = new();
+        _apiWorker = new() { WorkerSupportsCancellation = true };
+        _apiWorker.DoWork += UpdateAPI;
+        _apiWorker.RunWorkerAsync();
+
         FilterItems();
 
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
         OBS.OnEnable(null);
-
-        _cancellationTokenSource = new();
-        _apiWorker = new() { WorkerSupportsCancellation = true };
-        _apiWorker.DoWork += UpdateAPI;
-        _apiWorker.RunWorkerAsync();
 
         if (!Configuration.IsUsingTwitchAPI)
         {
@@ -190,6 +190,7 @@ public class ControllerViewModel : SelectableViewModel
         SidePanel?.OnDisable();
         OBS.OnDisable();
         _twitch?.OnDisable();
+        ManagementPanel?.OnDisable();
 
         _apiWorker?.CancelAsync();
         _cancellationTokenSource?.Cancel();
@@ -207,6 +208,8 @@ public class ControllerViewModel : SelectableViewModel
         CurrentChosenPOV = null;
         SelectedWhitelistPlayer = null;
         CurrentChosenPlayer = null;
+
+        SavePreset();
 
         return true;
     }

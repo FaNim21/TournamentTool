@@ -322,7 +322,7 @@
                                                  Margin="30 30 30 5" />
 
                         <!-- Tutaj chyba dam panel do zarzadzania opcjami do ustawiania punktow za ukonczenie itp itd???? -->
-                        <components:ButtonNormal ContentText="Work in progress"
+                        <components:ButtonNormal ContentText="Leaderboard manager (WIP)"
                                                  Width="350"
                                                  Height="40"
                                                  FontSize="25"

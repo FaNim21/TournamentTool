@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Models;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -10,6 +11,7 @@ public class RankedManagementPanel : ManagementPanel
 {
     private ControllerViewModel Controller { get; set; }
     private RankedPacePanel RankedPacePanel { get; set; }
+    private RankedManagementData? RankedManagementData { get; set; }
 
 
     private string _customText = string.Empty;
@@ -72,27 +74,32 @@ public class RankedManagementPanel : ManagementPanel
 
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubstractRoundCommand = new RelayCommand(() => { Rounds--; });
+
+        RankedManagementData = (RankedManagementData)controller.Configuration.ManagementData!;
+    }
+
+    public override void OnEnable(object? parameter) { }
+    public override bool OnDisable()
+    {
+        if (RankedManagementData == null) return true;
+
+        RankedManagementData.Rounds = Rounds;
+        RankedManagementData.CustomText = CustomText;
+
+        return true;
     }
 
     public override void InitializeAPI(APIDataSaver api)
     {
-        //TODO: 0 zamiast tryparse to zapisywac co potrzeba w presecie
-        if(int.TryParse(api.CheckFile(_rankedPlayerCountFileName), out int players))
-        {
-            Players = players;
-        }
+        if (int.TryParse(api.CheckFile(_rankedPlayerCountFileName), out int players)) { Players = players; }
+        if (int.TryParse(api.CheckFile(_rankedCompletedCountFileName), out int completions)) { Completions = completions; }
 
-        if (int.TryParse(api.CheckFile(_rankedCompletedCountFileName), out int completions))
-        {
-            Completions = completions;
-        }
+        api.CheckFile(_rankedRoundsFileName);
+        api.CheckFile(_rankedCustomTextFileName);
 
-        if(int.TryParse(api.CheckFile(_rankedRoundsFileName), out int rounds))
-        {
-            Rounds = rounds;
-        }
-
-        CustomText = api.CheckFile(_rankedCustomTextFileName);
+        if (RankedManagementData == null) return;
+        Rounds = RankedManagementData.Rounds;
+        CustomText = RankedManagementData.CustomText;
     }
 
     public override void UpdateAPI(APIDataSaver api)

@@ -82,15 +82,18 @@ public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
     }
 }
 
-[JsonDerivedType(typeof(ManagementTest), typeDiscriminator: "Test")]
-public class ManagementBaseTest
-{
+[JsonDerivedType(typeof(RankedManagementData), typeDiscriminator: "Ranked")]
+public abstract class ManagementData { }
 
+public class RankedManagementData : ManagementData
+{
+    public string CustomText { get; set; } = string.Empty;
+    public int Rounds { get; set; } = 0;
 }
 
-public class ManagementTest : ManagementBaseTest
+public class PacemanManagementData : ManagementData
 {
-    public int JakiesGowno { get; set; } = 1234;
+    //TODO: 1 dane od api i rzeczy z zarzadzania pacemanem w kontrolerze
 }
 
 public class Tournament : BaseViewModel, IPreset
@@ -106,7 +109,7 @@ public class Tournament : BaseViewModel, IPreset
         }
     }
 
-    public ManagementBaseTest ManagementData { get; set; }
+    public ManagementData? ManagementData { get; set; }
 
     public ObservableCollection<Player> Players { get; set; } = [];
 
@@ -291,6 +294,13 @@ public class Tournament : BaseViewModel, IPreset
         set
         {
             _controllerMode = value;
+            if (_controllerMode == value) return;
+
+            if (value == ControllerMode.Ranked)
+                ManagementData = new RankedManagementData();
+            else if (value == ControllerMode.PaceMan)
+                ManagementData = new PacemanManagementData();
+
             OnPropertyChanged(nameof(ControllerMode));
         }
     }
@@ -337,9 +347,6 @@ public class Tournament : BaseViewModel, IPreset
     public Tournament(string name = "")
     {
         Name = name;
-
-        ManagementData = new ManagementTest();
-
     }
 
     public void ClearPlayerStreamData()
