@@ -1,6 +1,6 @@
 # MCSR Tournament Tool  
 
-**MCSR Tournament Tool** is a desktop application designed to streamline the management of Points of View (POVs) in OBS during **Minecraft Speedrunning** tournaments. This tool is tailored for streamers and tournament organizers, providing a wide range of features to simplify configuration and enhance gameplay monitoring.  
+**MCSR Tournament Tool** is a desktop application designed to streamline the management of Points of View (POVs) in OBS during **Minecraft Speedrunning** tournaments. This tool is tailored for streamers and tournament organizers, providing a wide range of features to simplify configuration and enhance gameplay monitoring.
 
 ![Start app view](Images/StartView.png)
 
@@ -28,4 +28,7 @@
 
 1. Download the application from the [GitHub repository](https://github.com/FaNim21/TournamentTool/releases).  
 2. Configure initial settings for OBS, such as scene items and WebSocket connections, and add players to the whitelist.  
-3. Select the desired preset and start your tournament!  
+3. Select the desired preset and start your tournament!
+
+You can contact me on discord #fanim
+
