@@ -27,7 +27,7 @@
             <TextBox TextWrapping="Wrap"
                      Width="110"
                      Height="20"
-                     Text="{Binding CustomText, Mode=TwoWay}"
+                     Text="{Binding CustomText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Background="#9E9E9E"
                      Margin="5 0 0 0" />
         </StackPanel>

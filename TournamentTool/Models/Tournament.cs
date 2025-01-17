@@ -294,14 +294,14 @@ public class Tournament : BaseViewModel, IPreset
         set
         {
             _controllerMode = value;
+            OnPropertyChanged(nameof(ControllerMode));
+
             if (_controllerMode == value) return;
 
             if (value == ControllerMode.Ranked)
                 ManagementData = new RankedManagementData();
             else if (value == ControllerMode.PaceMan)
                 ManagementData = new PacemanManagementData();
-
-            OnPropertyChanged(nameof(ControllerMode));
         }
     }
 
