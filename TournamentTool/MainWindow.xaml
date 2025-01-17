@@ -104,19 +104,34 @@
 
             <Grid Grid.Column="1"
                   Background="#000D14">
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="TournamentTool by FaNim"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Left"
-                           FontSize="14"
-                           Margin="0 0 0 0"
-                           Foreground="LightCyan" />
-                    <Label Content="{Binding VersionText}"
-                           FontWeight="Bold"
-                           FontSize="10"
-                           HorizontalAlignment="Left"
-                           Margin="-5 4 0 0"
-                           Foreground="LightCyan" />
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="TournamentTool by FaNim"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Left"
+                               FontSize="14"
+                               Foreground="LightCyan" />
+                    <TextBlock Text="{Binding VersionText}"
+                               FontWeight="Bold"
+                               FontSize="10"
+                               HorizontalAlignment="Left"
+                               Margin="5 4 0 0"
+                               Foreground="LightCyan" />
+                    <Border Visibility="{Binding NewUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Grid.Row="0"
+                            Background="Red"
+                            CornerRadius="10"
+                            Width="19"
+                            Height="19"
+                            Padding="1"
+                            Margin="5 0 0 0">
+                        <TextBlock Foreground="White"
+                                   FontWeight="Bold"
+                                   Padding="0"
+                                   Text="!"
+                                   FontSize="18"
+                                   Margin="5 -5" />
+                    </Border>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal"
@@ -184,12 +199,12 @@
                                     Height="19"
                                     Padding="1"
                                     Margin="35 5 0 0">
-                                <Label Foreground="White"
-                                       FontWeight="Bold"
-                                       Padding="0"
-                                       Content="!"
-                                       FontSize="18"
-                                       Margin="5 -5" />
+                                <TextBlock Foreground="White"
+                                           FontWeight="Bold"
+                                           Padding="0"
+                                           Text="!"
+                                           FontSize="18"
+                                           Margin="5 -5" />
                             </Border>
                         </Grid>
                         <components:HamburgerMenuItem Text="Settings"
