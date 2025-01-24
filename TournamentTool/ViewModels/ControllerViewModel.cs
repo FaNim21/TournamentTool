@@ -226,14 +226,6 @@ public class ControllerViewModel : SelectableViewModel
         {
             ManagementPanel.UpdateAPI(_api);
 
-            /*try
-            {
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-            }*/
-
             try
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(Configuration.ApiRefreshRateMiliseconds), cancellationToken);

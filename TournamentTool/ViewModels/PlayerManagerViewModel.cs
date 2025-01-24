@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Win32;
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -60,14 +61,14 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
-    private PaceManEvent? _choosenEvent;
-    public PaceManEvent? ChoosenEvent
+    private PaceManEvent? _chosenEvent;
+    public PaceManEvent? ChosenEvent
     {
-        get { return _choosenEvent; }
+        get { return _chosenEvent; }
         set
         {
-            _choosenEvent = value;
-            OnPropertyChanged(nameof(ChoosenEvent));
+            _chosenEvent = value;
+            OnPropertyChanged(nameof(ChosenEvent));
         }
     }
 
@@ -75,6 +76,9 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public ICommand EditPlayerCommand { get; set; }
     public ICommand RemovePlayerCommand { get; set; }
+
+    public ICommand ImportPlayersCommand { get; set; }
+    public ICommand ExportPlayersCommand { get; set; }
 
     public ICommand LoadFromPaceManCommand { get; set; }
     public ICommand LoadFromCSVCommand { get; set; }
@@ -91,12 +95,31 @@ public class PlayerManagerViewModel : SelectableViewModel
         EditPlayerCommand = new EditPlayerCommand(this);
         RemovePlayerCommand = new RemovePlayerCommand(this);
 
-        LoadFromPaceManCommand = new RelayCommand(async () => { await LoadDataFromPaceManAsync(); });
+        ImportPlayersCommand = new RelayCommand(ImportPlayers);
+        ExportPlayersCommand = new RelayCommand(ExportPlayers);
+
+        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this);
         LoadFromCSVCommand = new GetCSVPlayersDataCommand(this);
         LoadFromJSONCommand = new GetJSONPlayersDataCommand(this);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
+
+        Task.Run(async () =>
+        {
+            PaceManEvent[]? eventsData = null;
+            try
+            {
+                string result = await Helper.MakeRequestAsString("https://paceman.gg/api/cs/eventlist");
+                eventsData = JsonSerializer.Deserialize<PaceManEvent[]>(result);
+            }
+            catch { }
+
+            if (eventsData == null) return;
+
+            PaceManEvents = new(eventsData);
+            OnPropertyChanged(nameof(PaceManEvents));
+        });
     }
 
     public override bool CanEnable(Tournament tournament)
@@ -109,16 +132,6 @@ public class PlayerManagerViewModel : SelectableViewModel
     public override void OnEnable(object? parameter)
     {
         Player = new();
-
-        Task.Run(async () =>
-        {
-            string result = await Helper.MakeRequestAsString("https://paceman.gg/api/cs/eventlist");
-            PaceManEvent[]? eventsData = JsonSerializer.Deserialize<PaceManEvent[]>(result);
-            if (eventsData == null) return;
-
-            PaceManEvents = new(eventsData);
-            OnPropertyChanged(nameof(PaceManEvents));
-        });
     }
     public override bool OnDisable()
     {
@@ -129,10 +142,21 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
 
         Player = null;
-        ChoosenEvent = null;
+        ChosenEvent = null;
 
-        PaceManEvents.Clear();
         return true;
+    }
+
+    private void ImportPlayers()
+    {
+        OpenFileDialog openFileDialog = new() { Filter = "All Files (*.json)|*.json", };
+        string path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
+        if (string.IsNullOrEmpty(path)) return;
+    }
+
+    public void ExportPlayers()
+    {
+
     }
 
     private async Task SavePlayer()
@@ -180,63 +204,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
         Player = new();
         SavePreset();
-    }
-
-    private async Task LoadDataFromPaceManAsync()
-    {
-        if (ChoosenEvent == null) return;
-
-        using HttpClient client = new();
-
-        var requestData = new { uuids = ChoosenEvent!.WhiteList };
-        string jsonContent = JsonSerializer.Serialize(requestData);
-
-        List<Player> eventPlayers = [];
-        for (int i = 0; i < ChoosenEvent!.WhiteList!.Length; i++)
-        {
-            var current = ChoosenEvent!.WhiteList[i];
-            Player player = new() { UUID = current };
-            eventPlayers.Add(player);
-        }
-
-        HttpContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync(Consts.PaceManTwitchAPI, content);
-
-        if (!response.IsSuccessStatusCode) return;
-        string responseContent = await response.Content.ReadAsStringAsync();
-        List<PaceManTwitchResponse>? twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent);
-        if (twitchNames == null) return;
-
-        for (int i = 0; i < twitchNames.Count; i++)
-        {
-            var current = twitchNames[i];
-            if (Tournament!.IsNameDuplicate(current.liveAccount))
-            {
-                twitchNames.RemoveAt(i);
-                i--;
-            }
-        }
-
-        for (int i = 0; i < eventPlayers.Count; i++)
-        {
-            var player = eventPlayers[i];
-            for (int j = 0; j < twitchNames.Count; j++)
-            {
-                var twitch = twitchNames[j];
-                if (player.UUID == twitch.uuid)
-                {
-                    player.StreamData.Main = twitch.liveAccount ?? string.Empty;
-                    player.PersonalBest = string.Empty;
-                    await player.CompleteData();
-                    player.Name = twitch.liveAccount ?? player.InGameName;
-                    Tournament!.AddPlayer(player);
-                    break;
-                }
-            }
-        }
-
-        SavePreset();
-        DialogBox.Show("Done loading data from paceman event");
     }
 
     private void RemoveAllPlayers()

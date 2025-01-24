@@ -10,8 +10,8 @@
              xmlns:models="clr-namespace:TournamentTool.Models"
              d:DataContext="{d:DesignInstance Type=viewmodels:PlayerManagerViewModel}"
              mc:Ignorable="d"
-             d:DesignHeight="550"
-             d:DesignWidth="970"
+             d:DesignHeight="576"
+             d:DesignWidth="1024"
              Background="#1E1E1E">
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
@@ -28,23 +28,12 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            <TextBlock Text="WHITELIST"
-                       FontSize="38"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       Height="50"
-                       Width="225"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Top"
-                       TextAlignment="Center"
-                       Margin="0 0 0 0" />
-
             <Grid Background="#2d2d2d"
                   Width="300"
                   Height="240"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Top"
-                  Margin="0 60 0 0">
+                  Margin="0 24 0 0">
                 <Grid.Resources>
                     <Style TargetType="{x:Type StackPanel}">
                         <Setter Property="Margin"
@@ -158,150 +147,149 @@
 
             <Grid Background="#2d2d2d"
                   Width="350"
-                  Height="225"
+                  Height="275"
                   VerticalAlignment="Bottom">
-                <StackPanel Margin="10 5 10 90"
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0"
                             Orientation="Horizontal"
                             VerticalAlignment="Top"
                             HorizontalAlignment="Center">
-                    <StackPanel.Resources>
-                        <Style TargetType="{x:Type components:ButtonNormal}">
-                            <Setter Property="Margin"
-                                    Value="10" />
-                        </Style>
-                    </StackPanel.Resources>
                     <components:ButtonNormal ContentText="Remove all players"
                                              FontSize="15"
                                              Width="150"
                                              Height="30"
-                                             OnCommand="{Binding RemoveAllPlayerCommand}" />
+                                             OnCommand="{Binding RemoveAllPlayerCommand}"
+                                             Margin="10" />
 
                     <components:ButtonNormal ContentText="Fix players heads"
                                              FontSize="15"
                                              Width="150"
                                              Height="30"
-                                             OnCommand="{Binding FixPlayersHeadsCommand}" />
+                                             OnCommand="{Binding FixPlayersHeadsCommand}"
+                                             Margin="10" />
                 </StackPanel>
 
-                <ComboBox Style="{StaticResource ComboBoxTest2}"
-                          HorizontalAlignment="Left"
-                          VerticalAlignment="Bottom"
-                          DisplayMemberPath="Name"
-                          ItemsSource="{Binding PaceManEvents, Mode=OneWay}"
-                          SelectedValue="{Binding Path=ChoosenEvent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Width="120"
-                          Height="20"
-                          Margin="32 0 0 50">
-                </ComboBox>
+                <Grid Grid.Row="1">
+                    <StackPanel Orientation="Vertical">
+                        <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                  DisplayMemberPath="Name"
+                                  ItemsSource="{Binding PaceManEvents, Mode=OneWay}"
+                                  SelectedValue="{Binding Path=ChosenEvent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Width="150"
+                                  Height="20" />
 
-                <StackPanel Orientation="Horizontal"
-                            Width="165"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            Margin="0 0 -2 50">
-                    <components:ButtonNormal ContentText="Load from JSON"
-                                             FontSize="14"
-                                             Width="125"
-                                             Height="30"
-                                             OnCommand="{Binding LoadFromJSONCommand}" />
-
-                    <Border BorderBrush="Gray"
-                            BorderThickness="0.75"
-                            CornerRadius="5"
-                            Background="#1b1d1f"
-                            Width="25"
-                            Height="30"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            ToolTipService.InitialShowDelay="0"
-                            ToolTipService.ShowDuration="60000"
-                            Margin="0 0 0 0">
-                        <Border.ToolTip>
-                            <ToolTip>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="HEADERS: "
-                                               FontWeight="Bold"
-                                               Foreground="Wheat"
-                                               FontSize="20"
-                                               VerticalAlignment="Center" />
-                                    <TextBlock Text="(Array of players with those variables) -- ign | twitch_username | display_name"
-                                               Margin="5,3,0,0"
-                                               VerticalAlignment="Center" />
-                                </StackPanel>
-                            </ToolTip>
-                        </Border.ToolTip>
-
-                        <TextBlock Text="?"
-                                   FontWeight="Bold"
-                                   Foreground="White"
-                                   FontSize="22"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Bottom">
-                    <StackPanel.Resources>
-                        <Style TargetType="{x:Type components:ButtonNormal}">
-                            <Setter Property="Margin"
-                                    Value="10" />
-                        </Style>
-                    </StackPanel.Resources>
-                    <components:ButtonNormal ContentText="Load PaceMan event"
-                                             FontSize="14"
-                                             Width="150"
-                                             Height="30"
-                                             OnCommand="{Binding LoadFromPaceManCommand}" />
-                    <StackPanel Orientation="Horizontal"
-                                Width="165">
-                        <components:ButtonNormal ContentText="Load from CSV"
+                        <components:ButtonNormal ContentText="Load PaceMan event"
                                                  FontSize="14"
-                                                 Width="125"
+                                                 Width="150"
                                                  Height="30"
-                                                 OnCommand="{Binding LoadFromCSVCommand}" />
-
-                        <Border BorderBrush="Gray"
-                                BorderThickness="0.75"
-                                CornerRadius="5"
-                                Background="#1b1d1f"
-                                Width="25"
-                                Height="30"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                ToolTipService.InitialShowDelay="0"
-                                ToolTipService.ShowDuration="60000"
-                                Margin="-10 0 0 0">
-                            <Border.ToolTip>
-                                <ToolTip>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="HEADERS: "
-                                                   FontWeight="Bold"
-                                                   Foreground="Wheat"
-                                                   FontSize="20"
-                                                   VerticalAlignment="Center" />
-                                        <TextBlock Text="Name | IGN | UUID | PB | Twitch-Main(Optional) | Twitch-Alt(Optional)"
-                                                   Margin="5,3,0,0"
-                                                   VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </ToolTip>
-                            </Border.ToolTip>
-
-                            <TextBlock Text="?"
-                                       FontWeight="Bold"
-                                       Foreground="White"
-                                       FontSize="22"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
-                        </Border>
+                                                 OnCommand="{Binding LoadFromPaceManCommand}" />
                     </StackPanel>
-                </StackPanel>
+
+                    <StackPanel Orientation="Vertical"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Center"
+                                Margin="0">
+                        <StackPanel Orientation="Horizontal">
+                            <components:ButtonNormal ContentText="Load from JSON"
+                                                     FontSize="14"
+                                                     Width="125"
+                                                     Height="30"
+                                                     OnCommand="{Binding LoadFromJSONCommand}" />
+
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="0.75"
+                                    CornerRadius="5"
+                                    Background="#1b1d1f"
+                                    Width="25"
+                                    Height="30"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    ToolTipService.InitialShowDelay="0"
+                                    ToolTipService.ShowDuration="60000"
+                                    Margin="0 0 0 0">
+                                <Border.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="HEADERS: "
+                                                       FontWeight="Bold"
+                                                       Foreground="Wheat"
+                                                       FontSize="20"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="(Array of players with those variables) -- ign | twitch_username | display_name"
+                                                       Margin="5,3,0,0"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Border.ToolTip>
+
+                                <TextBlock Text="?"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           FontSize="22"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <components:ButtonNormal ContentText="Load from CSV"
+                                                     FontSize="14"
+                                                     Width="125"
+                                                     Height="30"
+                                                     OnCommand="{Binding LoadFromCSVCommand}" />
+
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="0.75"
+                                    CornerRadius="5"
+                                    Background="#1b1d1f"
+                                    Width="25"
+                                    Height="30"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    ToolTipService.InitialShowDelay="0"
+                                    ToolTipService.ShowDuration="60000"
+                                    Margin="0 0 0 0">
+                                <Border.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="HEADERS: "
+                                                       FontWeight="Bold"
+                                                       Foreground="Wheat"
+                                                       FontSize="20"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="Name | IGN | UUID | PB | Twitch-Main(Optional) | Twitch-Alt(Optional)"
+                                                       Margin="5,3,0,0"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Border.ToolTip>
+
+                                <TextBlock Text="?"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           FontSize="22"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
 
-        <ListBox Grid.Column="1"
-                 ScrollViewer.VerticalScrollBarVisibility="Visible"
+        <Grid Grid.Column="1">
+            <Line X1="0"
+                  Y1="0"
+                  X2="0"
+                  Y2="2000"
+                  Stroke="#000D14"
+                  StrokeThickness="3"/>
+
+            <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  Background="Transparent"
                  BorderThickness="0"
@@ -374,5 +362,6 @@
                 </Style>
             </ListBox.ItemContainerStyle>
         </ListBox>
+        </Grid>
     </Grid>
 </UserControl>
