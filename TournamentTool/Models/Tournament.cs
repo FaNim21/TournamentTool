@@ -172,7 +172,7 @@ public class Tournament : BaseViewModel, IPreset
         }
     }
 
-    public bool ShowLiveOnlyForMinecraftCategory { get; set; } = true;
+    public bool ShowStreamCategory { get; set; } = true;
 
     private int _apiRefreshRateMiliseconds = 1000;
     public int ApiRefreshRateMiliseconds
@@ -467,7 +467,7 @@ public class Tournament : BaseViewModel, IPreset
         DisplayedNameType = DisplayedNameType.None;
         ControllerMode = ControllerMode.None;
 
-        ShowLiveOnlyForMinecraftCategory = true;
+        ShowStreamCategory = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
 

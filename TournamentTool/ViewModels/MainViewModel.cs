@@ -61,6 +61,17 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    private bool _isWindowBlocked;
+    public bool IsWindowBlocked
+    {
+        get=> _isWindowBlocked;
+        set
+        {
+            _isWindowBlocked = value;
+            OnPropertyChanged(nameof(IsWindowBlocked));
+        }
+    }
+
     public ICommand OnHamburegerClick { get; set; }
     public ICommand SelectViewModelCommand { get; set; }
 
@@ -183,6 +194,15 @@ public class MainViewModel : BaseViewModel
         InputController.Instance.AddHotkey(toggleHamburgerMenu);
         InputController.Instance.AddHotkey(toggleStudioMode);
         InputController.Instance.AddHotkey(toggleDebugWindow);
+    }
+
+    public void BlockWindow()
+    {
+        IsWindowBlocked = true;
+    }
+    public void UnBlockWindow()
+    {
+        IsWindowBlocked = false;
     }
 
     public void UpdateDebugWindowViewModel(SelectableViewModel viewModel)

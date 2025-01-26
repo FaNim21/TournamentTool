@@ -111,8 +111,8 @@ public class ControllerViewModel : SelectableViewModel
     {
         _api = new();
 
-        MainScene = new(this);
-        PreviewScene = new(this);
+        MainScene = new(this, mainViewModel);
+        PreviewScene = new(this, mainViewModel);
 
         OBS = new(this);
         _twitch = new(this);
@@ -132,7 +132,7 @@ public class ControllerViewModel : SelectableViewModel
     {
         foreach (var player in Configuration.Players)
         {
-            player.ShowCategory(!Configuration.ShowLiveOnlyForMinecraftCategory && Configuration.IsUsingTwitchAPI);
+            player.ShowCategory(Configuration.ShowStreamCategory && Configuration.IsUsingTwitchAPI);
         }
 
         switch(Configuration.ControllerMode)

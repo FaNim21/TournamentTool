@@ -10,7 +10,7 @@
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Closed="OnClosed"
-        Width="1024"
+        Width="1082"
         Height="601"
         Title="Tournament Tool"
         BorderThickness="0.75"
@@ -18,7 +18,7 @@
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
-        MinWidth="1080"
+        MinWidth="1082"
         MinHeight="601"
         MaxHeight="{Binding Source={x:Static SystemParameters.MaximizedPrimaryScreenHeight}}"
         Background="#383A3f">
@@ -217,19 +217,9 @@
             </components:HamburgerMenu.HamburgerContent>
         </components:HamburgerMenu>
 
-        <!--
-        <Grid Grid.Row="1">
-            <Border Background="Red"
-                    CornerRadius="999"
-                    Width="19"
-                    Height="19"
-                    Padding="1">
-                <Label Foreground="White"
-                       FontWeight="Bold"
-                       Padding="0"
-                       FontSize="12">12</Label>
-            </Border>
-        </Grid>
-        -->
+        <Border Grid.Row="1"
+                Visibility="{Binding IsWindowBlocked, Converter={StaticResource BoolToVisibilityConverter}}"
+                Background="Black"
+                Opacity="0.5" />
     </Grid>
 </Window>

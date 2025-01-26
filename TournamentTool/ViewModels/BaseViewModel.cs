@@ -11,10 +11,7 @@ public class BaseViewModel : INotifyPropertyChanged, IDisposable
     public virtual void OnEnable(object? parameter) { }
     public virtual bool OnDisable() { return true; }
 
-    public virtual void Dispose()
-    {
-
-    }
+    public virtual void Dispose() { }
 
     protected void OnPropertyChanged(string propertyName)
     {

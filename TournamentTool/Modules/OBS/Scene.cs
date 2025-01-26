@@ -24,6 +24,8 @@ public class Scene : BaseViewModel
 
     public ControllerViewModel Controller;
 
+    private MainViewModel _mainViewModel;
+
     private ObservableCollection<PointOfView> _povs = [];
     public ObservableCollection<PointOfView> POVs
     {
@@ -93,8 +95,10 @@ public class Scene : BaseViewModel
     public ICommand ShowInfoWindowCommand { get; set; }
 
 
-    public Scene(ControllerViewModel controllerViewModel)
+    public Scene(ControllerViewModel controllerViewModel, MainViewModel mainViewModel)
     {
+        this._mainViewModel = mainViewModel;
+
         ClearPOVCommand = new ClearPOVCommand();
         RefreshPOVCommand = new RefreshPOVCommand();
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(this);
@@ -368,7 +372,9 @@ public class Scene : BaseViewModel
             Owner = Application.Current.MainWindow
         };
 
+        _mainViewModel.BlockWindow();
         window.ShowDialog();
+        _mainViewModel.UnBlockWindow();
     }
 
     public void Clear()

@@ -27,7 +27,6 @@ public class EditPlayerCommand : BaseCommand
         newPlayer.StreamData.Main = player.StreamData.Main ?? string.Empty;
         newPlayer.StreamData.Alt = player.StreamData.Alt ?? string.Empty;
 
-        PlayerManagerViewModel.IsEditing = true;
-        PlayerManagerViewModel.Player = newPlayer;
+        PlayerManagerViewModel.AddPlayer(newPlayer);
     }
 }

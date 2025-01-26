@@ -14,6 +14,18 @@
              d:DesignHeight="601"
              Background="#1E1E1E">
     <UserControl.Resources>
+        <Style x:Key="enCheck" TargetType="CheckBox">
+            <Setter Property="Foreground"
+                    Value="White" />
+            <Style.Triggers>
+                <Trigger Property="IsEnabled"
+                         Value="False">
+                    <Setter Property="Foreground"
+                            Value="Gray" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Clear"
                       Command="{Binding ClearCurrentPresetCommand}" />
@@ -93,10 +105,10 @@
                                   Content="Use Twitch API"
                                   Foreground="White"
                                   Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding LoadedPreset.ShowLiveOnlyForMinecraftCategory}"
-                                  Visibility="{Binding LoadedPreset.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}"
-                                  Content="Show LIVE only for Minecraft category"
-                                  Foreground="White"
+                        <CheckBox IsChecked="{Binding LoadedPreset.ShowStreamCategory}"
+                                  IsEnabled="{Binding LoadedPreset.IsUsingTwitchAPI}"
+                                  Style="{StaticResource enCheck}"
+                                  Content="Show stream category"
                                   Margin="0 0 0 5" />
                         <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
                                   Content="Always On Top"

@@ -170,7 +170,7 @@ public class TwitchService
         for (int i = 0; i < streams.Count; i++)
         {
             var current = streams[i];
-            if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && Controller.Configuration.ShowLiveOnlyForMinecraftCategory) continue;
+            //if (!current.GameName.Equals("minecraft", StringComparison.OrdinalIgnoreCase) && Controller.Configuration.ShowStreamCategory) continue;
 
             for (int j = 0; j < notLivePlayers.Count; j++)
             {

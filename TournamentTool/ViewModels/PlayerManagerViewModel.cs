@@ -9,6 +9,7 @@ using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
+using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
 
@@ -27,40 +28,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
-    private Player? _player;
-    public Player? Player
-    {
-        get => _player;
-        set
-        {
-            _player = value;
-            OnPropertyChanged(nameof(Player));
-        }
-    }
-
-    private bool _isEditing;
-    public bool IsEditing
-    {
-        get => _isEditing;
-        set
-        {
-            _isEditing = value;
-            SaveButtonText = value ? "Save" : "Add";
-            OnPropertyChanged(nameof(IsEditing));
-        }
-    }
-
-    private string _saveButtonText = "Add";
-    public string SaveButtonText
-    {
-        get => _saveButtonText;
-        set
-        {
-            _saveButtonText = value;
-            OnPropertyChanged(nameof(SaveButtonText));
-        }
-    }
-
     private PaceManEvent? _chosenEvent;
     public PaceManEvent? ChosenEvent
     {
@@ -72,8 +39,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
-    public ICommand SavePlayerCommand { get; set; }
-
+    public ICommand AddPlayerCommand { get; set; }
     public ICommand EditPlayerCommand { get; set; }
     public ICommand RemovePlayerCommand { get; set; }
 
@@ -90,8 +56,7 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public PlayerManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
     {
-        SavePlayerCommand = new RelayCommand(async ()=> { await SavePlayer(); });
-
+        AddPlayerCommand = new RelayCommand(AddPlayer);
         EditPlayerCommand = new EditPlayerCommand(this);
         RemovePlayerCommand = new RemovePlayerCommand(this);
 
@@ -129,22 +94,29 @@ public class PlayerManagerViewModel : SelectableViewModel
         Tournament = tournament;
         return true;
     }
-    public override void OnEnable(object? parameter)
-    {
-        Player = new();
-    }
+    public override void OnEnable(object? parameter) { }
     public override bool OnDisable()
     {
-        if (IsEditing)
-        {
-            DialogBox.Show("Finish editing before closing the window", "Editing");
-            return false;
-        }
-
-        Player = null;
         ChosenEvent = null;
 
         return true;
+    }
+
+    private void AddPlayer()
+    {
+        AddPlayer(null);
+    }
+    public void AddPlayer(Player? player = null)
+    {
+        WhitelistPlayerWindowViewModel viewModel = new(this, player);
+        WhitelistPlayerWindow window = new(viewModel)
+        {
+            Owner = Application.Current.MainWindow
+        };
+
+        MainViewModel.BlockWindow();
+        window.ShowDialog();
+        MainViewModel.UnBlockWindow();
     }
 
     private void ImportPlayers()
@@ -152,66 +124,65 @@ public class PlayerManagerViewModel : SelectableViewModel
         OpenFileDialog openFileDialog = new() { Filter = "All Files (*.json)|*.json", };
         string path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
         if (string.IsNullOrEmpty(path)) return;
+        //TODO: 0 zrobic import
+    }
+    private void ExportPlayers()
+    {
+        //TODO: 0 zrobic export
     }
 
-    public void ExportPlayers()
+    public async Task<bool> SavePlayer(Player player, bool isEditing)
     {
+        if (string.IsNullOrEmpty(player.Name) || string.IsNullOrEmpty(player.InGameName)) return false;
 
-    }
-
-    private async Task SavePlayer()
-    {
-        if (Player == null) return;
-        if (string.IsNullOrEmpty(Player.Name) || string.IsNullOrEmpty(Player.InGameName)) return;
-
-        if (IsEditing)
+        if (isEditing)
         {
             for (int i = 0; i < Tournament!.Players.Count; i++)
             {
                 var current = Tournament!.Players[i];
-                if (current.Id.Equals(Player.Id))
+                if (current.Id.Equals(player.Id))
                 {
-                    current.Name = Player.Name;
-                    current.InGameName = Player.InGameName;
-                    current.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
-                    current.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
-                    current.PersonalBest = Player.PersonalBest;
+                    //TODO: 0 Tu zrobic weryfikacje duplikatow nazw twitch
+
+                    current.Name = player.Name;
+                    current.InGameName = player.InGameName;
+                    current.StreamData.Main = player.StreamData.Main.ToLower().Trim();
+                    current.StreamData.Alt = player.StreamData.Alt.ToLower().Trim();
+                    current.PersonalBest = player.PersonalBest;
                     await current.UpdateHeadImage();
                 }
             }
-
-            IsEditing = false;
         }
         else
         {
-            Player newPlayer = new() { Name = Player.Name, InGameName = Player.InGameName, PersonalBest = Player.PersonalBest };
-            newPlayer.StreamData.Main = Player.StreamData.Main.ToLower().Trim();
-            newPlayer.StreamData.Alt = Player.StreamData.Alt.ToLower().Trim();
+            Player newplayer = new() { Name = player.Name, InGameName = player.InGameName, PersonalBest = player.PersonalBest };
+            newplayer.StreamData.Main = player.StreamData.Main.ToLower().Trim();
+            newplayer.StreamData.Alt = player.StreamData.Alt.ToLower().Trim();
 
-            if (Tournament!.IsNameDuplicate(newPlayer.StreamData.Main))
+            if (Tournament!.IsNameDuplicate(newplayer.StreamData.Main))
             {
-                DialogBox.Show($"{newPlayer.StreamData.Main} main twitch name exist in whitelist");
-                return;
+                DialogBox.Show($"The name \"{newplayer.StreamData.Main}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
             }
-            else if (Tournament.IsNameDuplicate(newPlayer.StreamData.Alt))
+            else if (Tournament.IsNameDuplicate(newplayer.StreamData.Alt))
             {
-                DialogBox.Show($"{newPlayer.StreamData.Alt} alt twitch name exist in whitelist");
-                return;
+                DialogBox.Show($"The name \"{newplayer.StreamData.Alt}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
             }
 
-            await newPlayer.UpdateHeadImage();
-            Tournament!.AddPlayer(newPlayer);
+            await newplayer.UpdateHeadImage();
+            Tournament!.AddPlayer(newplayer);
         }
-        Player = new();
         SavePreset();
+        return true;
     }
 
     private void RemoveAllPlayers()
     {
         MessageBoxResult result = DialogBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result == MessageBoxResult.Yes)
-            Tournament!.Players.Clear();
+        if (result != MessageBoxResult.Yes) return;
 
+        Tournament!.Players.Clear();
         SavePreset();
     }
 

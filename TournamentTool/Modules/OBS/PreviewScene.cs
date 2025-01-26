@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.OBS;
@@ -9,7 +8,7 @@ public class PreviewScene : Scene
     public string TransitionSceneName { get; set; } = string.Empty;
 
 
-    public PreviewScene(ControllerViewModel controllerViewModel) : base(controllerViewModel)
+    public PreviewScene(ControllerViewModel controllerViewModel, MainViewModel mainViewModel) : base(controllerViewModel, mainViewModel)
     {
         Type = SceneType.Preview;
     }
