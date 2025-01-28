@@ -66,7 +66,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         for (int i = 0; i < twitchNames.Count; i++)
         {
             var current = twitchNames[i];
-            if (PlayerManager.Tournament!.IsNameDuplicate(current.liveAccount))
+            if (PlayerManager.Tournament!.IsStreamNameDuplicate(current.liveAccount))
             {
                 twitchNames.RemoveAt(i);
                 i--;

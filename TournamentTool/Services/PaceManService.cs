@@ -150,6 +150,7 @@ public class PaceManService : BaseViewModel
             {
                 updatedPlayer = true;
                 player.StreamData.SetName(paceMan.User.TwitchName!);
+                Controller.FilterItems();
             }
         }
 

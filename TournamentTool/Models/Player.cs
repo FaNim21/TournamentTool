@@ -47,6 +47,8 @@ public class StreamData : BaseViewModel
         }
     }
 
+    private StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+
 
     public void SetName(string name)
     {
@@ -64,7 +66,8 @@ public class StreamData : BaseViewModel
 
     public bool ExistName(string name)
     {
-        return Main.Equals(name, StringComparison.OrdinalIgnoreCase) || Alt.Equals(name, StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrEmpty(name)) return false;
+        return Main.Equals(name, _ordinalIgnoreCaseComparison) || Alt.Equals(name, _ordinalIgnoreCaseComparison);
     }
 
     public string GetCorrectName()
@@ -72,6 +75,22 @@ public class StreamData : BaseViewModel
         if (string.IsNullOrEmpty(Main))
             return Alt;
         return Main;
+    }
+
+    public bool Equals(StreamData data)
+    {
+        if (ExistName(data.Main))
+        {
+            DialogBox.Show($"Twitch name \"{data.Main}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+        if (ExistName(data.Alt))
+        {
+            DialogBox.Show($"Twitch name \"{data.Alt}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+
+        return false;
     }
 
     public bool IsMainEmpty()
@@ -280,6 +299,8 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
+    private StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+
 
     [JsonConstructor]
     public Player(string name = "")
@@ -372,5 +393,24 @@ public class Player : BaseViewModel, IPlayer
     public bool IsFromWhiteList()
     {
         return true;
+    }
+
+    public bool Equals(Player player)
+    {
+        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison))
+        {
+            DialogBox.Show($"Player with name \"{player.Name}\" already exists", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+
+        if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison))
+        {
+            DialogBox.Show($"Player with in game name \"{player.InGameName}\" already exists", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+
+        if (StreamData.Equals(player.StreamData)) return true;
+
+        return false;
     }
 }

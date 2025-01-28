@@ -52,7 +52,7 @@ public class GetCSVPlayersDataCommand : BaseCommand
                     data.StreamData.SetName(fields[5].ToLower().Trim());
             }
 
-            if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.StreamData.Main)) continue;
+            if (PlayerManagerViewModel.Tournament!.IsStreamNameDuplicate(data.StreamData.Main)) continue;
             await data.CompleteData();
             PlayerManagerViewModel.Tournament!.AddPlayer(data);
         }

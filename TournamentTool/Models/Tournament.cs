@@ -1,6 +1,5 @@
 ﻿using MultiOpener.Entities.Interfaces;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.IO;
 using System.Text.Json.Serialization;
 using System.Windows;
@@ -407,21 +406,26 @@ public class Tournament : BaseViewModel, IPreset
         });
     }
 
-    public bool IsNameDuplicate(string? twitchName)
+    public bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null)
     {
-        if (string.IsNullOrEmpty(twitchName)) return false;
-        int n = Players.Count;
-        for (int i = 0; i < n; i++)
+        foreach (var player in Players)
         {
-            var current = Players[i];
-            if (current.StreamData.Main.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
-                return true;
+            if (excludeID.HasValue && player.Id == excludeID.Value) continue;
+            if (player.Equals(findPlayer)) return true;
+        }
 
-            if (current.StreamData.Alt.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
-                return true;
+        return false;
+    }
+    public bool IsStreamNameDuplicate(string twitchName)
+    {
+        //TODO: 0 Pozbyc sie tego
+        if (string.IsNullOrEmpty(twitchName)) return false;
+
+        foreach (var player in Players)
+        {
+            if (player.StreamData.ExistName(twitchName)) return true;
         }
         return false;
-        //return Players.Any(player => player.TwitchName!.Equals(twitchName, StringComparison.OrdinalIgnoreCase));
     }
 
     public Player? GetPlayerByTwitchName(string twitchName)

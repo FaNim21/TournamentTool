@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
-using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
@@ -109,10 +108,7 @@ public class PlayerManagerViewModel : SelectableViewModel
     public void AddPlayer(Player? player = null)
     {
         WhitelistPlayerWindowViewModel viewModel = new(this, player);
-        WhitelistPlayerWindow window = new(viewModel)
-        {
-            Owner = Application.Current.MainWindow
-        };
+        WhitelistPlayerWindow window = new(viewModel) { Owner = Application.Current.MainWindow };
 
         MainViewModel.BlockWindow();
         window.ShowDialog();
@@ -133,47 +129,66 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public async Task<bool> SavePlayer(Player player, bool isEditing)
     {
-        if (string.IsNullOrEmpty(player.Name) || string.IsNullOrEmpty(player.InGameName)) return false;
+        if (string.IsNullOrEmpty(player.Name))
+        {
+            DialogBox.Show($"Name cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(player.InGameName))
+        {
+            DialogBox.Show($"InGameName cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
 
         if (isEditing)
         {
-            for (int i = 0; i < Tournament!.Players.Count; i++)
-            {
-                var current = Tournament!.Players[i];
-                if (current.Id.Equals(player.Id))
-                {
-                    //TODO: 0 Tu zrobic weryfikacje duplikatow nazw twitch
-
-                    current.Name = player.Name;
-                    current.InGameName = player.InGameName;
-                    current.StreamData.Main = player.StreamData.Main.ToLower().Trim();
-                    current.StreamData.Alt = player.StreamData.Alt.ToLower().Trim();
-                    current.PersonalBest = player.PersonalBest;
-                    await current.UpdateHeadImage();
-                }
-            }
+            if (!await EditPlayer(player)) return false;
         }
         else
         {
-            Player newplayer = new() { Name = player.Name, InGameName = player.InGameName, PersonalBest = player.PersonalBest };
-            newplayer.StreamData.Main = player.StreamData.Main.ToLower().Trim();
-            newplayer.StreamData.Alt = player.StreamData.Alt.ToLower().Trim();
-
-            if (Tournament!.IsNameDuplicate(newplayer.StreamData.Main))
-            {
-                DialogBox.Show($"The name \"{newplayer.StreamData.Main}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-            else if (Tournament.IsNameDuplicate(newplayer.StreamData.Alt))
-            {
-                DialogBox.Show($"The name \"{newplayer.StreamData.Alt}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
-            await newplayer.UpdateHeadImage();
-            Tournament!.AddPlayer(newplayer);
+            if (!await AddPlayerToWhitelist(player)) return false;
         }
+
         SavePreset();
+        return true;
+    }
+
+    private async Task<bool> EditPlayer(Player player)
+    {
+        for (int i = 0; i < Tournament!.Players.Count; i++)
+        {
+            var current = Tournament!.Players[i];
+            if (current.Id.Equals(player.Id))
+            {
+                bool success = await UpdatePlayerData(current, player, player.Id);
+                return success;
+            }
+        }
+        return true;
+    }
+
+    private async Task<bool> AddPlayerToWhitelist(Player player)
+    {
+        Player newplayer = new() { };
+        bool success = await UpdatePlayerData(newplayer, player);
+        if (!success) return false;
+
+        Tournament!.AddPlayer(newplayer);
+        return true;
+    }
+
+    private async Task<bool> UpdatePlayerData(Player player, Player windowsData, Guid? excludeID = null)
+    {
+        if (Tournament.ContainsDuplicates(windowsData, excludeID)) return false;
+
+        player.Name = windowsData.Name;
+        player.InGameName = windowsData.InGameName;
+        player.PersonalBest = windowsData.PersonalBest;
+        player.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
+        player.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
+
+        await player.UpdateHeadImage();
         return true;
     }
 

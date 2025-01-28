@@ -59,7 +59,7 @@ public class GetJSONPlayersDataCommand : BaseCommand
                 };
                 data.StreamData.SetName(player.Twitch.Trim());
 
-                if (PlayerManagerViewModel.Tournament!.IsNameDuplicate(data.StreamData.Main)) continue;
+                if (PlayerManagerViewModel.Tournament!.IsStreamNameDuplicate(data.StreamData.Main)) continue;
                 await data.UpdateHeadImage();
                 PlayerManagerViewModel.Tournament!.AddPlayer(data);
             }
