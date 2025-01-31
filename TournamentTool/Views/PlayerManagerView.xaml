@@ -28,12 +28,12 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0"
-              Background="#2d2d2d" >
+              Background="#2d2d2d">
             <Grid.RowDefinitions>
                 <RowDefinition />
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="75"/>
+                <RowDefinition Height="80" />
+                <RowDefinition Height="100" />
+                <RowDefinition Height="75" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0"
@@ -47,14 +47,14 @@
                                          Height="30"
                                          Background="Green"
                                          OnCommand="{Binding AddPlayerCommand}"
-                                         Margin="0 5 0 0"/>
+                                         Margin="0 5 0 0" />
 
                 <components:ButtonNormal ContentText="Fix players heads"
                                          FontSize="15"
                                          Width="150"
                                          Height="30"
                                          OnCommand="{Binding FixPlayersHeadsCommand}"
-                                         Margin="0 10 0 0"/>
+                                         Margin="0 10 0 0" />
 
                 <components:ButtonNormal ContentText="Remove all players"
                                          FontSize="15"
@@ -62,7 +62,7 @@
                                          Height="30"
                                          Background="Red"
                                          OnCommand="{Binding RemoveAllPlayerCommand}"
-                                         Margin="0 10 0 0"/>
+                                         Margin="0 10 0 0" />
             </StackPanel>
 
             <StackPanel Grid.Row="1"
@@ -80,7 +80,7 @@
                                          Width="150"
                                          Height="30"
                                          OnCommand="{Binding LoadFromPaceManCommand}"
-                                         Margin="0 3 0 0"/>
+                                         Margin="0 3 0 0" />
             </StackPanel>
 
             <StackPanel Grid.Row="2"
@@ -270,81 +270,81 @@
                   X2="0"
                   Y2="2000"
                   Stroke="#000D14"
-                  StrokeThickness="3"/>
+                  StrokeThickness="3" />
 
             <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 PreviewMouseRightButtonDown="List_PreviewMouseRightButtonDown"
-                 VerticalAlignment="Top"
-                 HorizontalAlignment="Left"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
-                 ItemsSource="{Binding Tournament.Players}"
-                 Margin="5 0 0 0">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="models:Player">
-                    <Border BorderBrush="Gray"
-                            BorderThickness="1"
-                            Width="110">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Name}"
-                                       Foreground="Wheat"
-                                       Background="Transparent"
-                                       FontSize="14"
-                                       Width="100"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Top"
-                                       TextAlignment="Center"
-                                       Margin="0 4 0 0" />
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding PersonalBest}"
-                                           Foreground="White"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     PreviewMouseRightButtonDown="List_PreviewMouseRightButtonDown"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     ItemsSource="{Binding Tournament.Players}"
+                     Margin="5 0 0 0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="models:Player">
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                Width="110">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}"
+                                           Foreground="Wheat"
                                            Background="Transparent"
-                                           FontSize="21"
-                                           Width="64"
-                                           Height="30"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Center"
+                                           FontSize="14"
+                                           Width="100"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Top"
                                            TextAlignment="Center"
-                                           Margin="5 5 0 0" />
-                                <Image Width="30"
-                                       Height="30"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Top"
-                                       Margin="0 5 0 0"
-                                       Source="{Binding Image}" />
-                            </StackPanel>
+                                           Margin="0 4 0 0" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding PersonalBest}"
+                                               Foreground="White"
+                                               Background="Transparent"
+                                               FontSize="21"
+                                               Width="64"
+                                               Height="30"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Margin="5 5 0 0" />
+                                    <Image Width="30"
+                                           Height="30"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Margin="0 5 0 0"
+                                           Source="{Binding Image}" />
+                                </StackPanel>
 
-                            <TextBlock FontSize="12"
-                                       VerticalAlignment="Bottom"
-                                       Background="Transparent"
-                                       TextAlignment="Center"
-                                       Foreground="#8f8067"
-                                       Margin="0 1 0 2">
+                                <TextBlock FontSize="12"
+                                           VerticalAlignment="Bottom"
+                                           Background="Transparent"
+                                           TextAlignment="Center"
+                                           Foreground="#8f8067"
+                                           Margin="0 1 0 2">
                                         <Run Text="{Binding StreamData.Main}" />
                                         <LineBreak />
                                         <Run Text="{Binding StreamData.Alt}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="Margin"
-                            Value="0" />
-                    <Setter Property="Padding"
-                            Value="0" />
-                </Style>
-            </ListBox.ItemContainerStyle>
-        </ListBox>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
     </Grid>
 </UserControl>

@@ -410,7 +410,6 @@ public class Player : BaseViewModel, IPlayer
         }
 
         if (StreamData.Equals(player.StreamData)) return true;
-
         return false;
     }
 }

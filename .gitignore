@@ -10,6 +10,23 @@
 *.userosscache
 *.sln.docstates
 
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/.idea.MultiOpener.iml
+/modules.xml
+/projectSettingsUpdater.xml
+/contentModel.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+.idea/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

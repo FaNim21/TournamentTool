@@ -7,12 +7,9 @@ using System.Windows.Media.Imaging;
 
 namespace TournamentTool.Converters;
 
-public class IconToBitmapSourceConverter
-    : IValueConverter
+public class IconToBitmapSourceConverter : IValueConverter
 {
-    public static IconToBitmapSourceConverter Instance = new();
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value == null || value == DependencyProperty.UnsetValue)
             return null!;
@@ -21,8 +18,8 @@ public class IconToBitmapSourceConverter
         return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        return null!;
     }
 }

@@ -339,7 +339,6 @@
                                                  Height="40"
                                                  FontSize="25"
                                                  VerticalAlignment="Top"
-                                                 OnCommand=""
                                                  Margin="30 0 30 20" />
 
                         <WrapPanel Orientation="Vertical"

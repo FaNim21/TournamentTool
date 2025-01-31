@@ -153,7 +153,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         SavePreset();
         return true;
     }
-
     private async Task<bool> EditPlayer(Player player)
     {
         for (int i = 0; i < Tournament!.Players.Count; i++)
@@ -167,7 +166,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
         return true;
     }
-
     private async Task<bool> AddPlayerToWhitelist(Player player)
     {
         Player newplayer = new() { };
@@ -177,7 +175,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         Tournament!.AddPlayer(newplayer);
         return true;
     }
-
     private async Task<bool> UpdatePlayerData(Player player, Player windowsData, Guid? excludeID = null)
     {
         if (Tournament.ContainsDuplicates(windowsData, excludeID)) return false;

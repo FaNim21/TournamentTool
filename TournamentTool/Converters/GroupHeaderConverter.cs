@@ -6,7 +6,7 @@ namespace TournamentTool.Converters;
 
 public class GroupHeaderConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is CollectionViewGroup group && group.ItemCount > 0)
         {
@@ -16,8 +16,8 @@ public class GroupHeaderConverter : IValueConverter
         return string.Empty;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        return null!;
     }
 }
