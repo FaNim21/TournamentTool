@@ -26,11 +26,7 @@
 /dataSources.local.xml
 
 .idea/
-TournamentTool/FodyWeavers.xml
-TournamentTool/FodyWeavers.xsd
-TournamentTool/TT.ico
-
-
+ 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -384,3 +380,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /TournamentTool/Utils/Consts.cs
 /TournamentTool/Properties/Settings.settings
+/TournamentTool/TT.ico
+/TournamentTool/FodyWeavers.xml
+/TournamentTool/FodyWeavers.xsd
