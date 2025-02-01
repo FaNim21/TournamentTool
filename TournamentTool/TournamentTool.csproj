@@ -18,6 +18,7 @@
     <None Remove="Resources\muted.png" />
     <None Remove="Resources\obsidianIcon.png" />
     <None Remove="Resources\pearlIcon.png" />
+    <None Remove="FodyWeavers.xml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -238,12 +238,12 @@ public class ControllerViewModel : SelectableViewModel
     {
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
-
+        
         IEnumerable<Player> playersToAdd = [];
 
         playersToAdd = Configuration.Players
-                       .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
-                       .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
+            .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
+            .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
 
         foreach (var player in playersToAdd)
             Application.Current.Dispatcher.Invoke(() => FilteredPlayers.Add(player));
