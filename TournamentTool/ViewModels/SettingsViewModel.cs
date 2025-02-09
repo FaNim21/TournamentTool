@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using TournamentTool.Models;
+using TournamentTool.Modules;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
@@ -20,10 +21,7 @@ public class SettingsViewModel : SelectableViewModel
     }
 
 
-    public SettingsViewModel(MainViewModel mainViewModel) : base(mainViewModel)
-    {
-
-    }
+    public SettingsViewModel(MainViewModelCoordinator coordinator) : base(coordinator) { }
 
     public override bool CanEnable(Tournament tournament)
     {

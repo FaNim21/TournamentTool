@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands.Controller;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -22,9 +23,9 @@ public class Scene : BaseViewModel
     private readonly object _lock = new();
     public SceneType Type { get; protected set; }
 
-    public ControllerViewModel Controller;
+    public readonly ControllerViewModel Controller;
 
-    private MainViewModel _mainViewModel;
+    private readonly IDialogWindow _dialogWindow;
 
     private ObservableCollection<PointOfView> _povs = [];
     public ObservableCollection<PointOfView> POVs
@@ -95,16 +96,15 @@ public class Scene : BaseViewModel
     public ICommand ShowInfoWindowCommand { get; set; }
 
 
-    public Scene(ControllerViewModel controllerViewModel, MainViewModel mainViewModel)
+    public Scene(ControllerViewModel controllerViewModel, IDialogWindow dialogWindow)
     {
-        this._mainViewModel = mainViewModel;
-
+        Controller = controllerViewModel;
+        _dialogWindow = dialogWindow;
+        Type = SceneType.Main;
+        
         ClearPOVCommand = new ClearPOVCommand();
         RefreshPOVCommand = new RefreshPOVCommand();
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(this);
-
-        Type = SceneType.Main;
-        Controller = controllerViewModel;
 
         CanvasWidth = 426;
         CanvasHeight = 239.625f;
@@ -366,15 +366,9 @@ public class Scene : BaseViewModel
     public void OpenPOVInfoWindow(PointOfView pov)
     {
         POVInformationViewModel viewModel = new(pov);
-        POVInformationWindow window = new()
-        {
-            DataContext = viewModel,
-            Owner = Application.Current.MainWindow
-        };
+        POVInformationWindow window = new() { DataContext = viewModel };
 
-        _mainViewModel.BlockWindow();
-        window.ShowDialog();
-        _mainViewModel.UnBlockWindow();
+        _dialogWindow.ShowDialog(window);
     }
 
     public void Clear()

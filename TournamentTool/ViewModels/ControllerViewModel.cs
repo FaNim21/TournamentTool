@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Modules;
 using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
@@ -107,21 +108,21 @@ public class ControllerViewModel : SelectableViewModel
     public ICommand UnSelectItemsCommand { get; set; }
 
 
-    public ControllerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
+    public ControllerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
     {
-        _api = new();
+        _api = new APIDataSaver();
 
-        MainScene = new(this, mainViewModel);
-        PreviewScene = new(this, mainViewModel);
+        MainScene = new Scene(this, coordinator);
+        PreviewScene = new PreviewScene(this, coordinator);
 
-        OBS = new(this);
-        _twitch = new(this);
+        OBS = new ObsController(this);
+        _twitch = new TwitchService(this);
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
 
-    public override bool CanEnable(Tournament tournament)
+    public override bool CanEnable(Tournament? tournament)
     {
         if (tournament is null) return false;
 
@@ -239,7 +240,7 @@ public class ControllerViewModel : SelectableViewModel
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
         
-        IEnumerable<Player> playersToAdd = [];
+        IEnumerable<Player> playersToAdd;
 
         playersToAdd = Configuration.Players
             .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
@@ -286,7 +287,7 @@ public class ControllerViewModel : SelectableViewModel
 
     public void SavePreset()
     {
-        MainViewModel.SavePreset();
+        Coordinator.SavePreset();
     }
 
     public void ClearScenes()

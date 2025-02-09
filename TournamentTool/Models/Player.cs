@@ -77,6 +77,13 @@ public class StreamData : BaseViewModel
         return Main;
     }
 
+    public bool EqualsNoDialog(StreamData data)
+    {
+        if (ExistName(data.Main)) return true;
+        if (ExistName(data.Alt)) return true;
+        return false;
+    }
+    
     public bool Equals(StreamData data)
     {
         if (ExistName(data.Main))
@@ -218,9 +225,9 @@ public class TwitchStreamData : BaseViewModel
 
 public class Player : BaseViewModel, IPlayer
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
 
-    public string? UUID { get; set; }
+    public string UUID { get; set; } = string.Empty;
 
     [JsonIgnore]
     private BitmapImage? _image;
@@ -357,6 +364,11 @@ public class Player : BaseViewModel, IPlayer
         ImageStream = stream;
         return Helper.LoadImageFromStream(stream);
     }
+    public void UpdateHeadBitmap()
+    {
+        if (ImageStream == null) return;
+        Image = Helper.LoadImageFromStream(ImageStream);
+    }
 
     public void Clear()
     {
@@ -395,6 +407,14 @@ public class Player : BaseViewModel, IPlayer
         return true;
     }
 
+    public bool EqualsNoDialog(Player player)
+    {
+        if (!string.IsNullOrEmpty(UUID) && !string.IsNullOrEmpty(player.UUID) && UUID.Equals(player.UUID)) return true;
+        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison)) return true;
+        if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison)) return true;
+        return StreamData.EqualsNoDialog(player.StreamData);
+    }
+    
     public bool Equals(Player player)
     {
         if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison))

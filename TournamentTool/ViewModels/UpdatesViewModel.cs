@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.Modules;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
@@ -111,7 +112,7 @@ public class UpdatesViewModel : SelectableViewModel
     private bool canDownloadUpdate;
 
 
-    public UpdatesViewModel(MainViewModel mainViewModel) : base(mainViewModel)
+    public UpdatesViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
     {
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
@@ -140,7 +141,7 @@ public class UpdatesViewModel : SelectableViewModel
 
     private async Task Setup()
     {
-        if (!MainViewModel.NewUpdate)
+        if (!Coordinator.MainViewModel.NewUpdate)
         {
             HeaderText = "NO NEW UPDATES";
             BodyText = "";

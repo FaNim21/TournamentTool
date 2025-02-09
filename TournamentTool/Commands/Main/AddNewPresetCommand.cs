@@ -6,7 +6,7 @@ namespace TournamentTool.Commands.Main;
 
 public class AddNewPresetCommand : BaseCommand
 {
-    public PresetManagerViewModel PresetManager { get; set; }
+    private PresetManagerViewModel PresetManager { get; }
 
     public AddNewPresetCommand(PresetManagerViewModel presetManager)
     {
@@ -15,8 +15,6 @@ public class AddNewPresetCommand : BaseCommand
 
     public override void Execute(object? parameter)
     {
-        if (PresetManager == null) return;
-
         string name = "New Preset";
         name = Helper.GetUniqueName(name, name, PresetManager.IsPresetNameUnique);
 

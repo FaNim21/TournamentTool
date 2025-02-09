@@ -50,7 +50,7 @@
                     </TextBlock>
 
                     <components:ButtonNormal Margin="145 0 0 0"
-                        ContentText="Switch"
+                                             ContentText="Switch"
                                              Width="50"
                                              OnCommand="{Binding OBS.SwitchStudioModeCommand}" />
                 </Grid>
@@ -244,7 +244,7 @@
                          Margin="6 0 0 0">
                     <i:Interaction.Behaviors>
                         <behaviors:ListBoxUpdateBehavior />
-                        <behaviors:ListBoxSelectionBehavior ClickSelection="True"/>
+                        <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
                         <behaviors:ListBoxClampScrollBehavior />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
@@ -253,16 +253,19 @@
                                     BorderThickness="1"
                                     Width="110">
                                 <i:Interaction.Behaviors>
-                                    <behaviors:BorderDragDropBehavior OnCommand="{Binding DataContext.UnSelectItemsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" DragDataType="{x:Type models:IPlayer}"/>
+                                    <behaviors:BorderDragDropBehavior
+                                        OnCommand="{Binding DataContext.UnSelectItemsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        DragDataType="{x:Type models:IPlayer}" />
                                 </i:Interaction.Behaviors>
                                 <Grid Margin="0 0 0 5">
-                                    <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
-                                             Width="7"
-                                             Height="7"
-                                             HorizontalAlignment="Right"
-                                             VerticalAlignment="Top"
-                                             Fill="Red"
-                                             Margin="5" />
+                                    <Ellipse
+                                        Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                        Width="7"
+                                        Height="7"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Fill="Red"
+                                        Margin="5" />
                                     <StackPanel Orientation="Vertical"
                                                 Width="100">
                                         <TextBlock Text="{Binding Name}"
@@ -295,7 +298,8 @@
                                                    Margin="0 0 5 0"
                                                    Source="{Binding Image}" />
                                         </StackPanel>
-                                        <StackPanel Visibility="{Binding StreamData.LiveData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <StackPanel
+                                            Visibility="{Binding StreamData.LiveData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBlock FontSize="12"
                                                        VerticalAlignment="Bottom"
                                                        Background="Transparent"
@@ -325,7 +329,8 @@
                 </ListBox>
             </Grid>
 
-            <Grid Grid.Column="2" Visibility="{Binding UseSidePanel, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Grid.Column="2"
+                  Visibility="{Binding UseSidePanel, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Line X1="2"
                       X2="2"
                       Y1="0"

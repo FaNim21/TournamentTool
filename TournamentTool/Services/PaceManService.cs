@@ -82,6 +82,7 @@ public class PaceManService : BaseViewModel
     }
     private async Task RefreshPaceManAsync()
     {
+        //TODO: 0 Uzyc IProgress do raportowania zmian na UI
         string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
         if (paceMan == null) return;
@@ -99,14 +100,13 @@ public class PaceManService : BaseViewModel
             for (int j = 0; j < currentPaces.Count; j++)
             {
                 var currentPace = currentPaces[j];
-                if (pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase))
-                {
-                    wasPaceFound = true;
-                    isPacemanEmpty = false;
-                    currentPace.Update(pace);
-                    currentPaces.Remove(currentPace);
-                    break;
-                }
+                if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
+                
+                wasPaceFound = true;
+                isPacemanEmpty = false;
+                currentPace.Update(pace);
+                currentPaces.Remove(currentPace);
+                break;
             }
 
             if (wasPaceFound) continue;
@@ -115,12 +115,10 @@ public class PaceManService : BaseViewModel
             for (int j = 0; j < n; j++)
             {
                 var current = Controller.Configuration.Players[j];
-
-                if (current.StreamData.ExistName(pace.User.TwitchName!))
-                {
-                    pace.Player = current;
-                    break;
-                }
+                if (!current.StreamData.ExistName(pace.User.TwitchName!)) continue;
+                
+                pace.Player = current;
+                break;
             }
 
             if (Controller.Configuration.IsUsingWhitelistOnPaceMan && pace.Player == null) continue;

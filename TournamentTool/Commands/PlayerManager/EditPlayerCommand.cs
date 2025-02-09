@@ -5,16 +5,16 @@ namespace TournamentTool.Commands.PlayerManager;
 
 public class EditPlayerCommand : BaseCommand
 {
-    public PlayerManagerViewModel PlayerManagerViewModel { get; set; }
+    private PlayerManagerViewModel PlayerManager { get; }
 
-    public EditPlayerCommand(PlayerManagerViewModel playerManagerViewModel)
+
+    public EditPlayerCommand(PlayerManagerViewModel playerManager)
     {
-        PlayerManagerViewModel = playerManagerViewModel;
+        PlayerManager = playerManager;
     }
 
     public override void Execute(object? parameter)
     {
-        if (parameter == null || PlayerManagerViewModel == null) return;
         if (parameter is not Player player) return;
 
         Player newPlayer = new()
@@ -27,6 +27,6 @@ public class EditPlayerCommand : BaseCommand
         newPlayer.StreamData.Main = player.StreamData.Main ?? string.Empty;
         newPlayer.StreamData.Alt = player.StreamData.Alt ?? string.Empty;
 
-        PlayerManagerViewModel.AddPlayer(newPlayer);
+        PlayerManager.AddPlayer(newPlayer);
     }
 }

@@ -7,6 +7,7 @@ using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.Modules;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels;
@@ -42,7 +43,7 @@ public class PresetManagerViewModel : SelectableViewModel
         set
         {
             _loadedPreset = value;
-            MainViewModel.Configuration = _loadedPreset;
+            Coordinator.MainViewModel.Configuration = _loadedPreset;
             OnPropertyChanged(nameof(LoadedPreset));
         }
     }
@@ -84,11 +85,11 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SetRankedDataPathCommand { get; set; }
 
 
-    public PresetManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
+    public PresetManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
     {
         LoadPresetsList();
 
-        OpenControllerCommand = new RelayCommand(() => MainViewModel.SelectViewModel("Controller"));
+        OpenControllerCommand = new RelayCommand(() => Coordinator.MainViewModel.SelectViewModel("Controller"));
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(() => SavePreset());
@@ -96,7 +97,7 @@ public class PresetManagerViewModel : SelectableViewModel
         OnItemListClickCommand = new OnItemListClickCommand(this);
 
         ClearCurrentPresetCommand = new ClearPresetCommand(this);
-        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, mainViewModel);
+        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, coordinator);
         RenameItemCommand = new RenamePresetCommand(this);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
 
@@ -105,14 +106,8 @@ public class PresetManagerViewModel : SelectableViewModel
         LoadStartupPreset();
     }
 
-    public override bool CanEnable(Tournament tournament)
-    {
-        return true;
-    }
-    public override void OnEnable(object? parameter)
-    {
-
-    }
+    public override bool CanEnable(Tournament tournament) { return true; }
+    public override void OnEnable(object? parameter) { }
     public override bool OnDisable()
     {
         SavePreset();
@@ -179,7 +174,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public void AddItem(TournamentPreset item, bool save = true)
     {
-        if (save) MainViewModel.SavePreset(item);
+        if (save) Coordinator.SavePreset(item);
         item.Setup(this);
         Presets.Add(item);
     }
@@ -217,7 +212,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public void SavePreset(IPreset? preset = null)
     {
-        MainViewModel.SavePreset(preset);
+        Coordinator.SavePreset(preset);
     }
     public void SaveLastOpened(string presetName)
     {

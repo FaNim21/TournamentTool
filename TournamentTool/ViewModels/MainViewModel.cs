@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Components;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Services;
 using TournamentTool.Utils;
@@ -16,14 +17,8 @@ public class MainViewModel : BaseViewModel
 {
     private readonly JsonSerializerOptions _serializerOptions;
 
-    public DebugWindow? DebugWindow { get; set; }
-    public bool IsDebugWindowOpened { get; set; }
-
-    public string VersionText { get; set; }
-
-    public List<SelectableViewModel> baseViewModels = [];
-
     public Tournament? Configuration { get; set; }
+    public DebugWindow? DebugWindow { get; set; }
 
     private INavigationService? _navigationService;
     public INavigationService NavigationService
@@ -72,7 +67,10 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    public ICommand OnHamburegerClick { get; set; }
+    public bool IsDebugWindowOpened { get; set; }
+    public string VersionText { get; }
+    
+    public ICommand OnHamburgerClick { get; set; }
     public ICommand SelectViewModelCommand { get; set; }
 
 
@@ -88,7 +86,7 @@ public class MainViewModel : BaseViewModel
 
         _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
-        OnHamburegerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
+        OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
 
         VersionText = Consts.Version;
@@ -113,7 +111,6 @@ public class MainViewModel : BaseViewModel
     public void SavePreset(IPreset? preset = null)
     {
         preset ??= Configuration!;
-        if (preset == null) return;
 
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
         string path = preset.GetPath();
@@ -171,7 +168,7 @@ public class MainViewModel : BaseViewModel
         {
             Key = Key.S,
             ModifierKeys = ModifierKeys.Shift,
-            Description = "Toggle Sudio Mode in controller panel",
+            Description = "Toggle Studio Mode in controller panel",
             Action = () =>
             {
                 if (NavigationService.SelectedView is not ControllerViewModel controller) return;
@@ -184,10 +181,7 @@ public class MainViewModel : BaseViewModel
             Key = Key.F12,
             ModifierKeys = ModifierKeys.None,
             Description = "Toggle mode for debug window for specific selected view model",
-            Action = () =>
-            {
-                SwitchDebugWindow();
-            }
+            Action = SwitchDebugWindow
         };
 
         InputController.Instance.AddHotkey(renameTextBox);
@@ -225,7 +219,7 @@ public class MainViewModel : BaseViewModel
             };
 
             DebugWindow.Show();
-            Application.Current.MainWindow.Focus();
+            Application.Current.MainWindow?.Focus();
             IsDebugWindowOpened = true;
         }
         else

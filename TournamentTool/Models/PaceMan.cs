@@ -95,7 +95,7 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         {
             _currentSplitTimeMiliseconds = value;
             TimeSpan time = TimeSpan.FromMilliseconds(_currentSplitTimeMiliseconds);
-            CurrentSplitTime = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            CurrentSplitTime = $"{time.Minutes:D2}:{time.Seconds:D2}";
             OnPropertyChanged(nameof(CurrentSplitTime));
         }
     }
@@ -150,14 +150,15 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         IsCheated = paceman.IsCheated;
         IsHidden = paceman.IsHidden;
 
-        if (Splits == null || Splits.Count == 0) return;
+        if (Splits.Count == 0) return;
         UpdateTime(Splits);
     }
 
     private void UpdateTime(List<PaceSplitsList> splits)
     {
-        for (int i = 0; i < splits.Count; i++)
-            splits[i].SplitName = splits[i].SplitName.Replace("rsg.", "");
+        foreach (var t in splits)
+            t.SplitName = t.SplitName.Replace("rsg.", "");
+
         PaceSplitsList lastSplit = splits[^1];
 
         if (ItemsData.EstimatedCounts != null)
@@ -172,13 +173,12 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
 
         if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
         {
-            if (splits[^2].SplitName.Equals("enter_nether"))
-                SplitType = SplitType.structure_1;
-            else
-                SplitType = SplitType.structure_2;
+            SplitType = splits[^2].SplitName.Equals("enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
         }
         else
+        {
             SplitType = (SplitType)Enum.Parse(typeof(SplitType), lastSplit.SplitName);
+        }
 
         CheckForGoodPace(lastSplit);
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
@@ -7,6 +6,7 @@ using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.Modules;
 using TournamentTool.Utils;
 using TournamentTool.Windows;
 
@@ -27,10 +27,10 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
-    private PaceManEvent? _chosenEvent;
+    private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
     {
-        get { return _chosenEvent; }
+        get => _chosenEvent;
         set
         {
             _chosenEvent = value;
@@ -46,28 +46,24 @@ public class PlayerManagerViewModel : SelectableViewModel
     public ICommand ExportPlayersCommand { get; set; }
 
     public ICommand LoadFromPaceManCommand { get; set; }
-    public ICommand LoadFromCSVCommand { get; set; }
-    public ICommand LoadFromJSONCommand { get; set; }
 
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
 
 
-    public PlayerManagerViewModel(MainViewModel mainViewModel) : base(mainViewModel)
+    public PlayerManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
     {
         AddPlayerCommand = new RelayCommand(AddPlayer);
         EditPlayerCommand = new EditPlayerCommand(this);
-        RemovePlayerCommand = new RemovePlayerCommand(this);
+        RemovePlayerCommand = new RemovePlayerCommand(coordinator.MainViewModel.Configuration!, coordinator);
 
-        ImportPlayersCommand = new RelayCommand(ImportPlayers);
-        ExportPlayersCommand = new RelayCommand(ExportPlayers);
+        ImportPlayersCommand = new ImportWhitelistCommand(coordinator.MainViewModel.Configuration!, coordinator, coordinator);
+        ExportPlayersCommand = new ExportWhitelistCommand(coordinator.MainViewModel.Configuration!);
 
-        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this);
-        LoadFromCSVCommand = new GetCSVPlayersDataCommand(this);
-        LoadFromJSONCommand = new GetJSONPlayersDataCommand(this);
+        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
-        FixPlayersHeadsCommand = new RelayCommand(FixPlayersHeads);
+        FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
         Task.Run(async () =>
         {
@@ -77,16 +73,19 @@ public class PlayerManagerViewModel : SelectableViewModel
                 string result = await Helper.MakeRequestAsString("https://paceman.gg/api/cs/eventlist");
                 eventsData = JsonSerializer.Deserialize<PaceManEvent[]>(result);
             }
-            catch { }
+            catch
+            {
+                DialogBox.Show("Can't load paceman events", "Error", MessageBoxButton.OK, MessageBoxImage.Warning); 
+            }
 
             if (eventsData == null) return;
 
-            PaceManEvents = new(eventsData);
+            PaceManEvents = new ObservableCollection<PaceManEvent>(eventsData);
             OnPropertyChanged(nameof(PaceManEvents));
         });
     }
 
-    public override bool CanEnable(Tournament tournament)
+    public override bool CanEnable(Tournament? tournament)
     {
         if (tournament is null) return false;
 
@@ -105,26 +104,12 @@ public class PlayerManagerViewModel : SelectableViewModel
     {
         AddPlayer(null);
     }
-    public void AddPlayer(Player? player = null)
+    public void AddPlayer(Player? player)
     {
         WhitelistPlayerWindowViewModel viewModel = new(this, player);
-        WhitelistPlayerWindow window = new(viewModel) { Owner = Application.Current.MainWindow };
+        WhitelistPlayerWindow window = new(viewModel);
 
-        MainViewModel.BlockWindow();
-        window.ShowDialog();
-        MainViewModel.UnBlockWindow();
-    }
-
-    private void ImportPlayers()
-    {
-        OpenFileDialog openFileDialog = new() { Filter = "All Files (*.json)|*.json", };
-        string path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
-        if (string.IsNullOrEmpty(path)) return;
-        //TODO: 0 zrobic import
-    }
-    private void ExportPlayers()
-    {
-        //TODO: 0 zrobic export
+        Coordinator.ShowDialog(window);
     }
 
     public async Task<bool> SavePlayer(Player player, bool isEditing)
@@ -155,20 +140,20 @@ public class PlayerManagerViewModel : SelectableViewModel
     }
     private async Task<bool> EditPlayer(Player player)
     {
-        for (int i = 0; i < Tournament!.Players.Count; i++)
+        int n = Tournament!.Players.Count;
+        for (int i = 0; i < n; i++)
         {
             var current = Tournament!.Players[i];
-            if (current.Id.Equals(player.Id))
-            {
-                bool success = await UpdatePlayerData(current, player, player.Id);
-                return success;
-            }
+            if (!current.Id.Equals(player.Id)) continue;
+            
+            bool success = await UpdatePlayerData(current, player, player.Id);
+            return success;
         }
         return true;
     }
     private async Task<bool> AddPlayerToWhitelist(Player player)
     {
-        Player newplayer = new() { };
+        Player newplayer = new();
         bool success = await UpdatePlayerData(newplayer, player);
         if (!success) return false;
 
@@ -198,23 +183,25 @@ public class PlayerManagerViewModel : SelectableViewModel
         SavePreset();
     }
 
-    private void FixPlayersHeads()
+    private async Task FixPlayersHeads(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        Task.Run(async () =>
+        int count = Tournament.Players.Count;
+        for (int i = 0; i < count; i++)
         {
-            for (int i = 0; i < Tournament!.Players.Count; i++)
-            {
-                var current = Tournament!.Players[i];
-                await current.ForceUpdateHeadImage();
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            var current = Tournament!.Players[i];
+            progress.Report((float)i / count);
+            logProgress.Report($"({i+1}/{count}) Checking skin to update player head for {current.InGameName}");
+            await current.ForceUpdateHeadImage();
+        }
 
-            DialogBox.Show("Done fixing players head skins");
-            SavePreset();
-        });
+        DialogBox.Show("Done fixing players head skins");
+        SavePreset();
     }
 
     public void SavePreset()
     {
-        MainViewModel.SavePreset();
+        Coordinator.SavePreset();
     }
 }

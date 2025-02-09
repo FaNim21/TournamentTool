@@ -1,17 +1,18 @@
 ﻿using TournamentTool.Models;
+using TournamentTool.Modules;
 
 namespace TournamentTool.ViewModels;
 
 public class SelectableViewModel : BaseViewModel
 {
-    protected MainViewModel MainViewModel { get; set; }
+    protected MainViewModelCoordinator Coordinator { get; }
 
     public object? parameterForNextSelectable;
 
 
-    public SelectableViewModel(MainViewModel mainViewModel)
+    public SelectableViewModel(MainViewModelCoordinator coordinator)
     {
-        MainViewModel = mainViewModel;
+        Coordinator = coordinator;
     }
 
     public virtual bool CanEnable(Tournament tournament)

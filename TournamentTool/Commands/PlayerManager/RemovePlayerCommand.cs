@@ -1,23 +1,25 @@
-﻿using TournamentTool.Models;
-using TournamentTool.ViewModels;
+﻿using TournamentTool.Interfaces;
+using TournamentTool.Models;
 
 namespace TournamentTool.Commands.PlayerManager;
 
 public class RemovePlayerCommand : BaseCommand
 {
-    public PlayerManagerViewModel PlayerManagerViewModel { get; set; }
+    private readonly ITournamentManager _tournamentManager;
+    private readonly IPresetSaver _presetSaver;
 
-    public RemovePlayerCommand(PlayerManagerViewModel playerManagerViewModel)
+    
+    public RemovePlayerCommand(ITournamentManager tournamentManager, IPresetSaver presetSaver)
     {
-        PlayerManagerViewModel = playerManagerViewModel;
+        _tournamentManager = tournamentManager;
+        _presetSaver = presetSaver;
     }
 
     public override void Execute(object? parameter)
     {
-        if (parameter == null || PlayerManagerViewModel == null) return;
         if (parameter is not Player player) return;
 
-        PlayerManagerViewModel.Tournament!.Players.Remove(player);
-        PlayerManagerViewModel.SavePreset();
+        _tournamentManager.RemovePlayer(player);
+        _presetSaver.SavePreset();
     }
 }

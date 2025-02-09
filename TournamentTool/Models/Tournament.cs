@@ -83,7 +83,7 @@ public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
 }
 
 [JsonDerivedType(typeof(RankedManagementData), typeDiscriminator: "Ranked")]
-public abstract class ManagementData { }
+public abstract class ManagementData;
 
 public class RankedManagementData : ManagementData
 {
@@ -96,7 +96,7 @@ public class PacemanManagementData : ManagementData
     //TODO: 1 dane od api i rzeczy z zarzadzania pacemanem w kontrolerze
 }
 
-public class Tournament : BaseViewModel, IPreset
+public class Tournament : BaseViewModel, ITournamentManager
 {
     private string _name = string.Empty;
     public string Name
@@ -126,7 +126,7 @@ public class Tournament : BaseViewModel, IPreset
             _isAlwaysOnTop = value;
             Application.Current?.Dispatcher.Invoke(() =>
             {
-                Application.Current.MainWindow.Topmost = value;
+                Application.Current.MainWindow!.Topmost = value;
             });
             OnPropertyChanged(nameof(IsAlwaysOnTop));
         }
@@ -145,7 +145,7 @@ public class Tournament : BaseViewModel, IPreset
         }
     }
 
-    private bool _isUsingTwitchAPI = true;
+    private bool _isUsingTwitchAPI = false;
     public bool IsUsingTwitchAPI
     {
         get => _isUsingTwitchAPI;
@@ -396,7 +396,7 @@ public class Tournament : BaseViewModel, IPreset
             PaceManRefreshRateMiliseconds = 3000;
         }
 
-        //TODO: 9 add some validations or change it to some cleaner version
+        //Add some validations or change it to some cleaner version
     }
 
     public void AddPlayer(Player player)
@@ -404,6 +404,13 @@ public class Tournament : BaseViewModel, IPreset
         Application.Current.Dispatcher.Invoke(() =>
         {
             Players.Add(player);
+        });
+    }
+    public void RemovePlayer(Player player)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Players.Remove(player);
         });
     }
 
@@ -414,21 +421,20 @@ public class Tournament : BaseViewModel, IPreset
             if (excludeID.HasValue && player.Id == excludeID.Value) continue;
             if (player.Equals(findPlayer)) return true;
         }
-
+ 
         return false;
     }
-    public bool IsStreamNameDuplicate(string twitchName)
+    public bool ContainsDuplicatesNoDialog(Player findPlayer, Guid? excludeID = null)
     {
-        //TODO: 0 Pozbyc sie tego
-        if (string.IsNullOrEmpty(twitchName)) return false;
-
         foreach (var player in Players)
         {
-            if (player.StreamData.ExistName(twitchName)) return true;
+            if (excludeID.HasValue && player.Id == excludeID.Value) continue;
+            if (player.EqualsNoDialog(findPlayer)) return true;
         }
+
         return false;
     }
-
+    
     public Player? GetPlayerByTwitchName(string twitchName)
     {
         int n = Players.Count;
@@ -446,7 +452,6 @@ public class Tournament : BaseViewModel, IPreset
         for (int i = 0; i < Players.Count; i++)
             Players[i].ClearFromController();
     }
-
     public void ClearPlayersFromPOVS()
     {
         for (int i = 0; i < Players.Count; i++)
@@ -455,7 +460,6 @@ public class Tournament : BaseViewModel, IPreset
             Players[i].IsUsedInPreview = false;
         }
     }
-
     public void Clear()
     {
         Port = 4455;
@@ -464,15 +468,15 @@ public class Tournament : BaseViewModel, IPreset
 
         Players = [];
         FilterNameAtStartForSceneItems = "pov";
-        IsUsingTwitchAPI = true;
-        IsUsingWhitelistOnPaceMan = true;
+        IsUsingTwitchAPI = false;
+        ShowStreamCategory = true;
 
         SetPovHeadsInBrowser = false;
         SetPovPBText = false;
         DisplayedNameType = DisplayedNameType.None;
         ControllerMode = ControllerMode.None;
 
-        ShowStreamCategory = true;
+        IsUsingWhitelistOnPaceMan = true;
         PaceManRefreshRateMiliseconds = 10000;
         IsAlwaysOnTop = true;
 

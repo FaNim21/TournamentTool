@@ -8,7 +8,7 @@ namespace TournamentTool.Commands.Main;
 
 public class RemovePresetCommand : BaseCommand
 {
-    public PresetManagerViewModel PresetManager { get; set; }
+    private PresetManagerViewModel PresetManager { get; }
 
     public RemovePresetCommand(PresetManagerViewModel presetManager)
     {
@@ -21,11 +21,10 @@ public class RemovePresetCommand : BaseCommand
         if (parameter is not TournamentPreset tournament) return;
 
         var result = DialogBox.Show($"Are you sure you want to delete: {tournament.Name}", "Deleting", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result == MessageBoxResult.Yes)
-        {
-            PresetManager.RemoveItem(tournament);
-            PresetManager.LoadedPreset = null;
-            File.Delete(tournament.GetPath());
-        }
+        if (result != MessageBoxResult.Yes) return;
+        
+        PresetManager.RemoveItem(tournament);
+        PresetManager.LoadedPreset = null;
+        File.Delete(tournament.GetPath());
     }
 }

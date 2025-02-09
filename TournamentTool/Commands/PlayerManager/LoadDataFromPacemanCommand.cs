@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
 using TournamentTool.Components.Controls;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -9,66 +10,86 @@ namespace TournamentTool.Commands.PlayerManager;
 
 public class LoadDataFromPacemanCommand : BaseCommand
 {
-    private PlayerManagerViewModel PlayerManager { get; set; }
+    private PlayerManagerViewModel PlayerManager { get; }
 
+    private readonly ITournamentManager _tournamentManager;
+    private readonly IPresetSaver _presetSaver;
+    private readonly ILoadingDialog _loadingDialog;
 
-    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager)
+    private List<PaceManTwitchResponse>? _twitchNames;
+    private List<Player> eventPlayers = [];
+
+    private PaceManEvent? _chosenEvent;
+
+    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
     {
         PlayerManager = playerManager;
+        _tournamentManager = tournamentManager;
+        _presetSaver = presetSaver;
+        _loadingDialog = loadingDialog;
     }
 
     public override void Execute(object? parameter)
     {
-        Task.Run(async () => { await LoadDataFromPaceManAsync(PlayerManager.ChosenEvent); });
+        _chosenEvent = PlayerManager.ChosenEvent;
+        _loadingDialog.ShowLoading(LoadDataFromPaceManAsync);
     }
 
-    private async Task LoadDataFromPaceManAsync(PaceManEvent? choosenEvent)
+    private async Task LoadDataFromPaceManAsync(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        if (choosenEvent == null) return;
+        if (_chosenEvent == null) return;
 
         using HttpClient client = new();
 
-        var requestData = new { uuids = choosenEvent!.WhiteList };
+        var requestData = new { uuids = _chosenEvent!.WhiteList };
         string jsonContent = JsonSerializer.Serialize(requestData);
 
-        List<Player> eventPlayers = [];
-        for (int i = 0; i < choosenEvent!.WhiteList!.Length; i++)
+        eventPlayers.Clear();
+        logProgress.Report("Setting up players from paceman");
+        for (int i = 0; i < _chosenEvent!.WhiteList!.Length; i++)
         {
-            var current = choosenEvent!.WhiteList[i];
-            Player player = new() { UUID = current };
+            var current = _chosenEvent!.WhiteList[i];
+            Player player = new() { UUID = current ?? string.Empty };
             eventPlayers.Add(player);
         }
 
-        List<PaceManTwitchResponse>? twitchNames = null;
+        _twitchNames?.Clear();
+        _twitchNames = null;
         try
         {
+            logProgress.Report("Getting twitch names from paceman api from the uuids");
             HttpContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await client.PostAsync(Consts.PaceManTwitchAPI, content);
+            HttpResponseMessage response = await client.PostAsync(Consts.PaceManTwitchAPI, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode) return;
-            string responseContent = await response.Content.ReadAsStringAsync();
-            twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent);
+            string responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            _twitchNames = JsonSerializer.Deserialize<List<PaceManTwitchResponse>>(responseContent);
         }
         catch (Exception ex)
         {
             DialogBox.Show(ex.Message);
         }
 
-        if (twitchNames == null) return;
-        await UpdateWhitelist(eventPlayers, twitchNames);
+        if (_twitchNames == null) return;
+        cancellationToken.ThrowIfCancellationRequested();
+        await UpdateWhitelist(progress, logProgress, cancellationToken);
 
-        PlayerManager.SavePreset();
+        _presetSaver.SavePreset();
         DialogBox.Show("Done loading data from paceman event");
     }
 
-    private async Task UpdateWhitelist(List<Player> eventPlayers, List<PaceManTwitchResponse> twitchNames)
+    private async Task UpdateWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        for (int i = 0; i < twitchNames.Count; i++)
+        logProgress.Report("Removes duplicates from event with whitelist (stream data names)");
+        for (int i = 0; i < _twitchNames!.Count; i++)
         {
-            var current = twitchNames[i];
-            if (PlayerManager.Tournament!.IsStreamNameDuplicate(current.liveAccount))
+            var current = _twitchNames[i];
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (var player in _tournamentManager.Players)
             {
-                twitchNames.RemoveAt(i);
+                if (!player.StreamData.ExistName(current.liveAccount)) continue;
+                
+                _twitchNames.RemoveAt(i);
                 i--;
             }
         }
@@ -76,18 +97,22 @@ public class LoadDataFromPacemanCommand : BaseCommand
         for (int i = 0; i < eventPlayers.Count; i++)
         {
             var player = eventPlayers[i];
-            for (int j = 0; j < twitchNames.Count; j++)
+            cancellationToken.ThrowIfCancellationRequested();
+            for (int j = 0; j < _twitchNames.Count; j++)
             {
-                var twitch = twitchNames[j];
-                if (player.UUID == twitch.uuid)
-                {
-                    player.StreamData.Main = twitch.liveAccount ?? string.Empty;
-                    player.PersonalBest = string.Empty;
-                    await player.CompleteData();
-                    player.Name = twitch.liveAccount ?? player.InGameName;
-                    PlayerManager.Tournament!.AddPlayer(player);
-                    break;
-                }
+                var twitch = _twitchNames[j];
+                if (player.UUID != twitch.uuid) continue;
+                
+                progress.Report((float)i / eventPlayers.Count);
+                player.StreamData.Main = twitch.liveAccount ?? string.Empty;
+                player.PersonalBest = string.Empty;
+                if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+                
+                await player.CompleteData();
+                logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from paceman for player: {player.InGameName}");
+                player.Name = twitch.liveAccount ?? player.InGameName;
+                _tournamentManager.AddPlayer(player);
+                break;
             }
         }
     }
