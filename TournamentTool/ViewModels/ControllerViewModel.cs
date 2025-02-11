@@ -167,8 +167,8 @@ public class ControllerViewModel : SelectableViewModel
                 break;
         }
 
-        _cancellationTokenSource = new();
-        _apiWorker = new() { WorkerSupportsCancellation = true };
+        _cancellationTokenSource = new CancellationTokenSource();
+        _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _apiWorker.DoWork += UpdateAPI;
         _apiWorker.RunWorkerAsync();
 
@@ -239,10 +239,8 @@ public class ControllerViewModel : SelectableViewModel
     {
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
-        
-        IEnumerable<Player> playersToAdd;
 
-        playersToAdd = Configuration.Players
+        IEnumerable<Player> playersToAdd = Configuration.Players
             .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
             .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
 

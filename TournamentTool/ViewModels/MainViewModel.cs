@@ -111,6 +111,7 @@ public class MainViewModel : BaseViewModel
     public void SavePreset(IPreset? preset = null)
     {
         preset ??= Configuration!;
+        if (preset == null) return;
 
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
         string path = preset.GetPath();

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
@@ -32,13 +33,12 @@ public class LoadDataFromPacemanCommand : BaseCommand
     public override void Execute(object? parameter)
     {
         _chosenEvent = PlayerManager.ChosenEvent;
+        if (_chosenEvent == null || string.IsNullOrEmpty(_chosenEvent.ID)) return;
         _loadingDialog.ShowLoading(LoadDataFromPaceManAsync);
     }
 
     private async Task LoadDataFromPaceManAsync(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        if (_chosenEvent == null) return;
-
         using HttpClient client = new();
 
         var requestData = new { uuids = _chosenEvent!.WhiteList };
@@ -74,6 +74,8 @@ public class LoadDataFromPacemanCommand : BaseCommand
         cancellationToken.ThrowIfCancellationRequested();
         await UpdateWhitelist(progress, logProgress, cancellationToken);
 
+        logProgress.Report("Loading complete");
+        progress.Report(1);
         _presetSaver.SavePreset();
         DialogBox.Show("Done loading data from paceman event");
     }
@@ -101,17 +103,16 @@ public class LoadDataFromPacemanCommand : BaseCommand
             for (int j = 0; j < _twitchNames.Count; j++)
             {
                 var twitch = _twitchNames[j];
-                if (player.UUID != twitch.uuid) continue;
-                
                 progress.Report((float)i / eventPlayers.Count);
+                if (player.UUID != twitch.uuid) continue;
                 player.StreamData.Main = twitch.liveAccount ?? string.Empty;
                 player.PersonalBest = string.Empty;
-                if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
                 
                 await player.CompleteData();
-                logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from paceman for player: {player.InGameName}");
+                if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+                logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
                 player.Name = twitch.liveAccount ?? player.InGameName;
-                _tournamentManager.AddPlayer(player);
+                Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
                 break;
             }
         }

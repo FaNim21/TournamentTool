@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
+using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
@@ -12,9 +13,27 @@ using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
 
+public enum PlayerSortingType
+{
+    Name,
+    IGN,
+    Stream
+}
+
 public class PlayerManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
+     
+    private ObservableCollection<Player> _filteredPlayers = [];
+    public ObservableCollection<Player> FilteredPlayers
+    {
+        get => _filteredPlayers;
+        set
+        {
+            _filteredPlayers = value;
+            OnPropertyChanged(nameof(FilteredPlayers));
+        }
+    }
 
     private Tournament _tournament = new();
     public Tournament Tournament
@@ -38,9 +57,44 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
+    private string _searchText = string.Empty;
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            OnPropertyChanged(nameof(SearchText));
+        }
+    }
+    
+    private PlayerSortingType _sortingType = PlayerSortingType.Name;
+    public PlayerSortingType SortingType
+    {
+        get => _sortingType;
+        set
+        {
+            if (value == _sortingType) return;
+            _sortingType = value;
+            OnPropertyChanged(nameof(SortingType));
+        }
+    }
+
+    private string _informationCount = string.Empty;
+    public string InformationCount
+    {
+        get => _informationCount;
+        set
+        {
+            _informationCount = value;
+            OnPropertyChanged(nameof(InformationCount));
+        }
+    }
+    
     public ICommand AddPlayerCommand { get; set; }
     public ICommand EditPlayerCommand { get; set; }
     public ICommand RemovePlayerCommand { get; set; }
+    public ICommand FixPlayerHeadCommand { get; set; }
 
     public ICommand ImportPlayersCommand { get; set; }
     public ICommand ExportPlayersCommand { get; set; }
@@ -49,15 +103,20 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     public ICommand RemoveAllPlayerCommand { get; set; }
     public ICommand FixPlayersHeadsCommand { get; set; }
+    
+    public ICommand SubmitSearchCommand { get; set; }
+
+    private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
 
     public PlayerManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
     {
         AddPlayerCommand = new RelayCommand(AddPlayer);
         EditPlayerCommand = new EditPlayerCommand(this);
-        RemovePlayerCommand = new RemovePlayerCommand(coordinator.MainViewModel.Configuration!, coordinator);
+        RemovePlayerCommand = new RemovePlayerCommand(this, coordinator);
+        FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, coordinator);
 
-        ImportPlayersCommand = new ImportWhitelistCommand(coordinator.MainViewModel.Configuration!, coordinator, coordinator);
+        ImportPlayersCommand = new ImportWhitelistCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
         ExportPlayersCommand = new ExportWhitelistCommand(coordinator.MainViewModel.Configuration!);
 
         LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
@@ -65,8 +124,9 @@ public class PlayerManagerViewModel : SelectableViewModel
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
-        Task.Run(async () =>
-        {
+        SubmitSearchCommand = new RelayCommand(FilterWhitelist);
+        
+        Task.Run(async () => {
             PaceManEvent[]? eventsData = null;
             try
             {
@@ -92,7 +152,10 @@ public class PlayerManagerViewModel : SelectableViewModel
         Tournament = tournament;
         return true;
     }
-    public override void OnEnable(object? parameter) { }
+    public override void OnEnable(object? parameter)
+    {
+        FilterWhitelist();
+    }
     public override bool OnDisable()
     {
         ChosenEvent = null;
@@ -100,6 +163,74 @@ public class PlayerManagerViewModel : SelectableViewModel
         return true;
     }
 
+    public void Add(Player player)
+    {
+        bool wasSearched = false;
+        switch (SortingType)
+        {
+            case PlayerSortingType.Name:
+                if (player.Name!.Contains(SearchText, _comparison)) wasSearched = true;
+                break;
+            case PlayerSortingType.IGN:
+                if (player.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
+                break;
+            case PlayerSortingType.Stream:
+                if (player.StreamData.Main!.Contains(SearchText, _comparison) ||
+                    player.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
+                break;
+        }
+            
+        if (wasSearched) FilteredPlayers.Add(player);
+        Tournament.AddPlayer(player);
+    }
+    public void Remove(Player player)
+    {
+        FilteredPlayers.Remove(player);
+        Tournament.RemovePlayer(player);
+    }
+    
+    public void FilterWhitelist()
+    {
+        if (string.IsNullOrEmpty(SearchText))
+        {
+            FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
+            InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+            return;
+        }
+        
+        Coordinator.ShowLoading(FilterWhitelist);
+    }
+    private Task FilterWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
+    {
+        logProgress.Report("Filtering for results");
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            FilteredPlayers.Clear();
+        });
+        var filtered = SortingType switch
+        {
+            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Contains(SearchText, _comparison)),
+            PlayerSortingType.IGN => Tournament.Players.Where(p => p.InGameName!.Contains(SearchText, _comparison)),
+            PlayerSortingType.Stream => Tournament.Players.Where(p =>
+                p.StreamData.Main!.Contains(SearchText, _comparison) ||
+                p.StreamData.Alt.Contains(SearchText, _comparison)),
+            _ => []
+        };
+
+        progress.Report(0.5f);
+        logProgress.Report("Applying results");
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            foreach (var player in filtered)
+            {
+                FilteredPlayers.Add(player);
+            }
+        });
+        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+        progress.Report(1);
+        return Task.CompletedTask;
+    }
+    
     private void AddPlayer()
     {
         AddPlayer(null);
@@ -153,11 +284,11 @@ public class PlayerManagerViewModel : SelectableViewModel
     }
     private async Task<bool> AddPlayerToWhitelist(Player player)
     {
-        Player newplayer = new();
-        bool success = await UpdatePlayerData(newplayer, player);
+        Player newPlayer = new();
+        bool success = await UpdatePlayerData(newPlayer, player);
         if (!success) return false;
 
-        Tournament!.AddPlayer(newplayer);
+        Add(newPlayer);
         return true;
     }
     private async Task<bool> UpdatePlayerData(Player player, Player windowsData, Guid? excludeID = null)
@@ -180,6 +311,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         if (result != MessageBoxResult.Yes) return;
 
         Tournament!.Players.Clear();
+        FilteredPlayers.Clear();
+        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
         SavePreset();
     }
 
@@ -192,7 +325,7 @@ public class PlayerManagerViewModel : SelectableViewModel
             
             var current = Tournament!.Players[i];
             progress.Report((float)i / count);
-            logProgress.Report($"({i+1}/{count}) Checking skin to update player head for {current.InGameName}");
+            logProgress.Report($"({i+1}/{count}) Checking skin to update {current.InGameName} head");
             await current.ForceUpdateHeadImage();
         }
 

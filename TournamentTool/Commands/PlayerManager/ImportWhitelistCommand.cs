@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -22,15 +23,19 @@ public class ImportWhitelistCommand : BaseCommand
         [JsonPropertyName("display_name")]
         public string DisplayName { get; set; }
     }
-    
+
+    private PlayerManagerViewModel PlayerManager { get; }
+
     private readonly ITournamentManager _tournamentManager;
     private readonly IPresetSaver _presetSaver;
     private readonly ILoadingDialog _loadingDialog;
     private string _path = string.Empty;
 
     
-    public ImportWhitelistCommand(ITournamentManager tournamentManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver)
+    public ImportWhitelistCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver)
     {
+        PlayerManager = playerManager;
+        
         _loadingDialog = loadingDialog;
         _tournamentManager = tournamentManager;
         _presetSaver = presetSaver;
@@ -56,6 +61,8 @@ public class ImportWhitelistCommand : BaseCommand
                 break;
         }
         _presetSaver.SavePreset();
+        //TODO:
+        PlayerManager.FilterWhitelist();
     }
 
     private async Task ImportMain(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -75,13 +82,17 @@ public class ImportWhitelistCommand : BaseCommand
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
-
-            logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
             progress.Report((float)i/players.Count);
+            logProgress.Report($"({i+1}/{players.Count}) Checking for duplicates for player: {player.InGameName}");
+            if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+            logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
+
             player.UpdateHeadBitmap();
             _tournamentManager.AddPlayer(player);
         }
+        
+        logProgress.Report("Loading complete");
+        progress.Report(1);
         DialogBox.Show("Done loading data from .json whitelist file");
     }
     private async Task ImportCSV(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -131,7 +142,6 @@ public class ImportWhitelistCommand : BaseCommand
         
         logProgress.Report("Loading complete");
         progress.Report(1);
-        _presetSaver.SavePreset();
         DialogBox.Show("Done loading data from .csv file");
     }
     private async Task ImportRanked(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -163,6 +173,7 @@ public class ImportWhitelistCommand : BaseCommand
                 _tournamentManager.AddPlayer(data);
             }
      
+            logProgress.Report("Loading complete");
             progress.Report(1);
             DialogBox.Show("Done loading data from .ranked file");
         }
