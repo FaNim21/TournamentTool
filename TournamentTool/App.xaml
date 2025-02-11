@@ -56,7 +56,7 @@
                                     <ControlTemplate>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="5*" />
+                                                <ColumnDefinition Width="7*" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <Border x:Name="Border"
@@ -75,6 +75,7 @@
                                                   Fill="Black"
                                                   HorizontalAlignment="Center"
                                                   VerticalAlignment="Center"
+                                                  Margin="-2 0 0 0"
                                                   Data="M 0 0 L 4 4 L 8 0 Z" />
                                         </Grid>
                                         <ControlTemplate.Triggers>

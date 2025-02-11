@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Windows;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
 using TournamentTool.Components.Controls;
@@ -61,8 +62,6 @@ public class ImportWhitelistCommand : BaseCommand
                 break;
         }
         _presetSaver.SavePreset();
-        //TODO:
-        PlayerManager.FilterWhitelist();
     }
 
     private async Task ImportMain(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -88,7 +87,7 @@ public class ImportWhitelistCommand : BaseCommand
             logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
 
             player.UpdateHeadBitmap();
-            _tournamentManager.AddPlayer(player);
+            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
         }
         
         logProgress.Report("Loading complete");
@@ -136,7 +135,7 @@ public class ImportWhitelistCommand : BaseCommand
                     
             logProgress.Report($"({count+1}/{totalLines}) Completing data for {data.InGameName}");
             await data.CompleteData();
-            _tournamentManager.AddPlayer(data);
+            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(data); });
             count++;
         }
         
@@ -168,9 +167,9 @@ public class ImportWhitelistCommand : BaseCommand
                 data.StreamData.SetName(player.Twitch.Trim());
                 if (_tournamentManager.ContainsDuplicatesNoDialog(data)) continue;
                      
-                logProgress.Report($"({i+1}/{length}) Updating head image for {data.InGameName}");
+                logProgress.Report($"({i+1}/{length}) Completing data for {data.InGameName}");
                 await data.UpdateHeadImage();
-                _tournamentManager.AddPlayer(data);
+                Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(data); });
             }
      
             logProgress.Report("Loading complete");

@@ -20,30 +20,4 @@ public partial class PlayerManagerView : UserControl
         Regex regex = NumberRegex();
         e.Handled = regex.IsMatch(e.Text);
     }
-
-    private void List_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        ListBoxItem? listViewItem = GetViewItemFromMousePosition<ListBoxItem, ListBox>(sender as ListBox, e.GetPosition(sender as IInputElement));
-        if (listViewItem == null) return;
-
-        var contextMenu = (ContextMenu)FindResource("ListViewContextMenu");
-        contextMenu.DataContext ??= DataContext;
-
-        var currentItem = listViewItem.DataContext;
-        foreach (var item in contextMenu.Items)
-            if (item is MenuItem menuItem)
-                menuItem.CommandParameter = currentItem;
-
-        listViewItem.ContextMenu ??= contextMenu;
-    }
-    private T? GetViewItemFromMousePosition<T, U>(U? view, Point mousePosition) where T : Control where U : ItemsControl
-    {
-        HitTestResult hitTestResult = VisualTreeHelper.HitTest(view, mousePosition);
-        DependencyObject? target = hitTestResult?.VisualHit;
-
-        while (target != null && target is not T)
-            target = VisualTreeHelper.GetParent(target);
-
-        return target as T;
-    }
 }

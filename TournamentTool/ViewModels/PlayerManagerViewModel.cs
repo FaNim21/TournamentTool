@@ -46,6 +46,17 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
+    private Player? _selectedPlayer;
+    public Player? SelectedPlayer
+    {
+        get => _selectedPlayer;
+        set
+        {
+            _selectedPlayer = value;
+            OnPropertyChanged(nameof(SelectedPlayer));
+        }
+    }
+
     private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
     {
@@ -90,11 +101,24 @@ public class PlayerManagerViewModel : SelectableViewModel
             OnPropertyChanged(nameof(InformationCount));
         }
     }
+
+    private bool _isSearchEnabled = true;
+    public bool IsSearchEnabled
+    {
+        get => _isSearchEnabled;
+        set
+        {
+            _isSearchEnabled = value;
+            OnPropertyChanged(nameof(IsSearchEnabled));
+        }
+    }
     
     public ICommand AddPlayerCommand { get; set; }
     public ICommand EditPlayerCommand { get; set; }
     public ICommand RemovePlayerCommand { get; set; }
     public ICommand FixPlayerHeadCommand { get; set; }
+    
+    public ICommand RemoveSelectedPlayerCommand { get; set; }
 
     public ICommand ImportPlayersCommand { get; set; }
     public ICommand ExportPlayersCommand { get; set; }
@@ -107,6 +131,7 @@ public class PlayerManagerViewModel : SelectableViewModel
     public ICommand SubmitSearchCommand { get; set; }
 
     private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
+    private string _lastFilterSearch = "filter";
 
 
     public PlayerManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
@@ -116,6 +141,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         RemovePlayerCommand = new RemovePlayerCommand(this, coordinator);
         FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, coordinator);
 
+        RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
+
         ImportPlayersCommand = new ImportWhitelistCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
         ExportPlayersCommand = new ExportWhitelistCommand(coordinator.MainViewModel.Configuration!);
 
@@ -124,7 +151,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
-        SubmitSearchCommand = new RelayCommand(FilterWhitelist);
+        SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist();});
         
         Task.Run(async () => {
             PaceManEvent[]? eventsData = null;
@@ -154,7 +181,7 @@ public class PlayerManagerViewModel : SelectableViewModel
     }
     public override void OnEnable(object? parameter)
     {
-        FilterWhitelist();
+        _ = FilterWhitelist();
     }
     public override bool OnDisable()
     {
@@ -166,43 +193,57 @@ public class PlayerManagerViewModel : SelectableViewModel
     public void Add(Player player)
     {
         bool wasSearched = false;
-        switch (SortingType)
+        if (!string.IsNullOrEmpty(SearchText))
         {
-            case PlayerSortingType.Name:
-                if (player.Name!.Contains(SearchText, _comparison)) wasSearched = true;
-                break;
-            case PlayerSortingType.IGN:
-                if (player.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
-                break;
-            case PlayerSortingType.Stream:
-                if (player.StreamData.Main!.Contains(SearchText, _comparison) ||
-                    player.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
-                break;
+            switch (SortingType)
+            {
+                case PlayerSortingType.Name:
+                    if (player.Name!.Contains(SearchText, _comparison)) wasSearched = true;
+                    break;
+                case PlayerSortingType.IGN:
+                    if (player.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
+                    break;
+                case PlayerSortingType.Stream:
+                    if (player.StreamData.Main!.Contains(SearchText, _comparison) ||
+                        player.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
+                    break;
+            }
         }
-            
+        else wasSearched = true;
+        
         if (wasSearched) FilteredPlayers.Add(player);
         Tournament.AddPlayer(player);
+        
+        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
     }
     public void Remove(Player player)
     {
         FilteredPlayers.Remove(player);
         Tournament.RemovePlayer(player);
+        
+        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
     }
     
-    public void FilterWhitelist()
+    public async Task FilterWhitelist()
     {
+        if (_lastFilterSearch.Equals(SearchText, _comparison)) return;
+        
+        _lastFilterSearch = SearchText;
+        IsSearchEnabled = false;
+        
         if (string.IsNullOrEmpty(SearchText))
         {
+            InformationCount = $"Restoring... ?/{Tournament.Players.Count}";
+            await Task.Delay(100); //xd
+            
             FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
             InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+            IsSearchEnabled = true;
             return;
         }
+        InformationCount = $"Filtering... ?/{Tournament.Players.Count}";
+        await Task.Delay(100); //xd
         
-        Coordinator.ShowLoading(FilterWhitelist);
-    }
-    private Task FilterWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
-    {
-        logProgress.Report("Filtering for results");
         Application.Current.Dispatcher.Invoke(() =>
         {
             FilteredPlayers.Clear();
@@ -217,8 +258,6 @@ public class PlayerManagerViewModel : SelectableViewModel
             _ => []
         };
 
-        progress.Report(0.5f);
-        logProgress.Report("Applying results");
         Application.Current.Dispatcher.Invoke(() =>
         {
             foreach (var player in filtered)
@@ -226,9 +265,9 @@ public class PlayerManagerViewModel : SelectableViewModel
                 FilteredPlayers.Add(player);
             }
         });
+        
         InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
-        progress.Report(1);
-        return Task.CompletedTask;
+        IsSearchEnabled = true;
     }
     
     private void AddPlayer()
@@ -331,6 +370,12 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         DialogBox.Show("Done fixing players head skins");
         SavePreset();
+    }
+
+    private void RemoveSelectedPlayer()
+    {
+        if (SelectedPlayer == null) return;
+        Remove(SelectedPlayer);
     }
 
     public void SavePreset()

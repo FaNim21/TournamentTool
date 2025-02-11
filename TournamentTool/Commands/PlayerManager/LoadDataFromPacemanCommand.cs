@@ -95,7 +95,8 @@ public class LoadDataFromPacemanCommand : BaseCommand
                 i--;
             }
         }
-
+        
+        logProgress.Report($"Adding non-duplicated players to whitelist");
         for (int i = 0; i < eventPlayers.Count; i++)
         {
             var player = eventPlayers[i];

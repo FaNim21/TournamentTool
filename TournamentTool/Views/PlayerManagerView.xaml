@@ -14,11 +14,18 @@
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Edit"
-                      Command="{Binding EditPlayerCommand}" />
+                      Command="{Binding DataContext.EditPlayerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                      CommandParameter="{Binding}"/>
             <MenuItem Header="Fix head"
-                      Command="{Binding FixPlayerHeadCommand}" />
+                      Command="{Binding DataContext.FixPlayerHeadCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      CommandParameter="{Binding}"/>
             <MenuItem Header="Delete"
-                      Command="{Binding RemovePlayerCommand}" />
+                      Command="{Binding DataContext.RemovePlayerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      CommandParameter="{Binding}"/>
+        </ContextMenu>
+        <ContextMenu x:Key="ListViewContextMenuPanel">
+            <MenuItem Header="Add player"
+                      Command="{Binding AddPlayerCommand}" />
         </ContextMenu>
     </UserControl.Resources>
     <Grid>
@@ -213,6 +220,7 @@
                     </TextBox>
                     <components:ButtonNormal ContentText="Search"
                                              FontSize="12"
+                                             IsEnabled="{Binding IsSearchEnabled}"
                                              Width="45"
                                              Height="20"
                                              OnCommand="{Binding SubmitSearchCommand}"
@@ -237,13 +245,18 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      Background="Transparent"
                      BorderThickness="0"
-                     PreviewMouseRightButtonDown="List_PreviewMouseRightButtonDown"
+                     ContextMenu="{StaticResource ListViewContextMenuPanel}"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
                      VirtualizingPanel.IsVirtualizing="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"
                      ItemsSource="{Binding FilteredPlayers}"
+                     SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
                      Margin="5 0 0 0">
+                <ListBox.InputBindings>
+                    <KeyBinding Key="Delete"
+                                Command="{Binding RemoveSelectedPlayerCommand}" />
+                </ListBox.InputBindings>
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="models:Player">
                         <Border BorderBrush="Gray"
@@ -303,6 +316,7 @@
                                 Value="0" />
                         <Setter Property="Padding"
                                 Value="0" />
+                        <Setter Property="ContextMenu" Value="{StaticResource ListViewContextMenu}"/>
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>
