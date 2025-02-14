@@ -5,6 +5,9 @@
 Start app view as preset menu (view is WIP)
 ![Start app view as preset menu (view is WIP)](Images/PresetMenu.png)
 
+Whitelist menu view
+![Whitelist panel view](Images/Whitelist.png)
+
 Controller menu view with controller mode for Paceman (view is WIP)
 ![Controller menu view with controller mode for Paceman (view is WIP)](Images/ControllerMenu-Mode_Paceman.png)
 
@@ -24,7 +27,6 @@ Controller menu view with controller mode for Paceman (view is WIP)
 
 ## Planned Enhancements  
 
-- Whitelist import/export functionality.
 - A Built-in leaderboard for tracking player performance.
 - Support for displaying player statistics from MCSR Ranked and Paceman.
 - Automated processes for creating and managing POVs in OBS.
