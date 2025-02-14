@@ -159,14 +159,14 @@ public class Tournament : BaseViewModel, ITournamentManager
         }
     }
 
-    private bool _displayTeamNamesInController = false;
-    public bool DisplayTeamNamesInController
+    private bool _isUsingTeamNames = false;
+    public bool IsUsingTeamNames
     {
-        get => _displayTeamNamesInController;
+        get => _isUsingTeamNames;
         set
         {
-            _displayTeamNamesInController = value;
-            OnPropertyChanged(nameof(DisplayTeamNamesInController));
+            _isUsingTeamNames = value;
+            OnPropertyChanged(nameof(IsUsingTeamNames));
         }
     }
     

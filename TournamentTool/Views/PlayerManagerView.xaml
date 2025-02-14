@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
+             xmlns:converters="clr-namespace:TournamentTool.Converters"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:models="clr-namespace:TournamentTool.Models"
@@ -186,40 +187,46 @@
             </StackPanel>
             
             <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0 0 0 5">
-                <StackPanel Orientation="Horizontal" Margin="8 0 0 5">
-                    <RadioButton GroupName="PlayerSorting"
-                                 Foreground="White"
-                                 Content="Name"
-                                 Padding="-1 -1 0 0"
-                                 Margin="0 0 5 0"
-                                 IsChecked="{Binding SortingType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static viewmodels:PlayerSortingType.Name}}" />
-                    <RadioButton GroupName="PlayerSorting"
-                                 Foreground="White"
-                                 Content="IGN"
-                                 Padding="-1 -1 0 0"
-                                 Margin="0 0 5 0"
-                                 IsChecked="{Binding SortingType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static viewmodels:PlayerSortingType.IGN}}" />
-                    <RadioButton GroupName="PlayerSorting"
-                                 Foreground="White"
-                                 Content="Stream"
-                                 Padding="-1 -1 0 0"
-                                 Margin="0 0 5 0"
-                                 IsChecked="{Binding SortingType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static viewmodels:PlayerSortingType.Stream}}" />
+                <StackPanel Orientation="Horizontal"
+                            Margin="6 0 0 5">
+                    <Grid>
+                        <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="128"
+                                 Height="20"
+                                 Background="#9E9E9E"
+                                 HorizontalAlignment="Center"
+                                 Margin="0 0 0 0">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter"
+                                            Command="{Binding SubmitSearchCommand}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <TextBlock Visibility="{Binding IsSearchEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   Foreground="Black"
+                                   Opacity="0.4"
+                                   IsHitTestVisible="False"
+                                   Padding="2"
+                                   Margin="1 0 0 0"
+                                   Text="Search players..." />
+                    </Grid>
+
+                    <components:ButtonNormal ContentText="X"
+                                             FontSize="12"
+                                             Width="20"
+                                             Height="21"
+                                             OnCommand="{Binding ClearSearchFieldCommand}"
+                                             Margin="3 0 0 0" />
                 </StackPanel>
+                
                 <StackPanel Orientation="Horizontal"
                             Margin="5 0 0 0">
-                    <TextBox
-                        Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Height="20"
-                        Background="#9E9E9E"
-                        HorizontalAlignment="Center"
-                        Margin="0 0 0 0">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Enter"
-                                        Command="{Binding SubmitSearchCommand}" />
-                        </TextBox.InputBindings>
-                    </TextBox>
+                <ComboBox Style="{StaticResource ComboBoxTest2}"
+                          DisplayMemberPath="DisplayName"
+                          SelectedValuePath="Value"
+                          ItemsSource="{Binding Path=SortingType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
+                          SelectedValue="{Binding Path=SortingType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Width="105"
+                          Height="20" />
                     <components:ButtonNormal ContentText="Search"
                                              FontSize="12"
                                              IsEnabled="{Binding IsSearchEnabled}"

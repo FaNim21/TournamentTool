@@ -134,7 +134,7 @@ public class ControllerViewModel : SelectableViewModel
         foreach (var player in Configuration.Players)
         {
             player.ShowCategory(Configuration.ShowStreamCategory && Configuration.IsUsingTwitchAPI);
-            player.ShowTeamName(Configuration.DisplayTeamNamesInController);
+            player.ShowTeamName(Configuration.IsUsingTeamNames);
         }
 
         switch(Configuration.ControllerMode)

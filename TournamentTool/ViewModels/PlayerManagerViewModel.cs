@@ -15,9 +15,9 @@ namespace TournamentTool.ViewModels;
 
 public enum PlayerSortingType
 {
-    None,
     Name,
-    IGN,
+    InGameName,
+    TeamName,
     Stream
 }
 
@@ -88,6 +88,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         {
             _searchText = value;
             OnPropertyChanged(nameof(SearchText));
+
+            IsSearchEmpty = string.IsNullOrEmpty(SearchText);
         }
     }
     
@@ -125,6 +127,18 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
     
+    private bool _isSearchEmpty = true;
+    public bool IsSearchEmpty
+    {
+        get => _isSearchEmpty;
+        set
+        {
+            if (IsSearchEmpty == value) return;
+            _isSearchEmpty = value;
+            OnPropertyChanged(nameof(IsSearchEmpty));
+        }
+    }
+    
     public ICommand AddPlayerCommand { get; set; }
     public ICommand EditPlayerCommand { get; set; }
     public ICommand RemovePlayerCommand { get; set; }
@@ -141,10 +155,11 @@ public class PlayerManagerViewModel : SelectableViewModel
     public ICommand FixPlayersHeadsCommand { get; set; }
     
     public ICommand SubmitSearchCommand { get; set; }
+    public ICommand ClearSearchFieldCommand { get; set; }
 
     private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
     private string _lastFilterSearch = "filter";
-    private PlayerSortingType _lastSortingType = PlayerSortingType.None;
+    private PlayerSortingType _lastSortingType;
     private string _lastTournamentName = string.Empty;
     private bool _isRestartingWhitelist;
 
@@ -167,6 +182,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
         SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist();});
+        ClearSearchFieldCommand = new RelayCommand(ClearFilters);
         
         Task.Run(async () => {
             PaceManEvent[]? eventsData = null;
@@ -212,7 +228,7 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         foreach (var player in Tournament.Players)
         {
-            player.ShowTeamName(Tournament.DisplayTeamNamesInController);
+            player.ShowTeamName(Tournament.IsUsingTeamNames);
         }
         return true;
     }
@@ -238,8 +254,11 @@ public class PlayerManagerViewModel : SelectableViewModel
                 case PlayerSortingType.Name:
                     if (player.Name!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
-                case PlayerSortingType.IGN:
+                case PlayerSortingType.InGameName:
                     if (player.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
+                    break;
+                case PlayerSortingType.TeamName:
+                    if (player.TeamName!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
                 case PlayerSortingType.Stream:
                     if (player.StreamData.Main!.Contains(SearchText, _comparison) ||
@@ -288,7 +307,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         var filtered = SortingType switch
         {
             PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Trim().Contains(SearchText.Trim(), _comparison)),
-            PlayerSortingType.IGN => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText.Trim(), _comparison)),
+            PlayerSortingType.InGameName => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText.Trim(), _comparison)),
+            PlayerSortingType.TeamName => Tournament.Players.Where(p => p.TeamName!.Trim().Contains(SearchText.Trim(), _comparison)),
             PlayerSortingType.Stream => Tournament.Players.Where(p =>
                 p.StreamData.Main!.Trim().Contains(SearchText.Trim(), _comparison) ||
                 p.StreamData.Alt.Trim().Contains(SearchText.Trim(), _comparison)),
@@ -428,6 +448,13 @@ public class PlayerManagerViewModel : SelectableViewModel
         SavePreset();
     }
 
+    private void ClearFilters()
+    {
+        SearchText = string.Empty;
+        SortingType = PlayerSortingType.Name;
+        _ = FilterWhitelist();
+    }
+    
     public void SavePreset()
     {
         Coordinator.SavePreset();

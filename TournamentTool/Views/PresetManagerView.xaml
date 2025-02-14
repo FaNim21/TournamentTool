@@ -110,8 +110,8 @@
                                   Style="{StaticResource enCheck}"
                                   Content="Show stream category"
                                   Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding LoadedPreset.DisplayTeamNamesInController}"
-                                  Content="Display team names in controller"
+                        <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTeamNames}"
+                                  Content="Use team names"
                                   Foreground="White"
                                   Margin="0 0 0 5" />
                         <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
