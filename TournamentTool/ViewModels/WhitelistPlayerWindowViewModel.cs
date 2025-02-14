@@ -48,7 +48,7 @@ public class WhitelistPlayerWindowViewModel : BaseViewModel
             return;
         }
 
-        Player = new();
+        Player = new Player();
     }
 
     private async Task Save()

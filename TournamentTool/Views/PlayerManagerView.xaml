@@ -1,8 +1,10 @@
 ﻿<UserControl x:Class="TournamentTool.Views.PlayerManagerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:models="clr-namespace:TournamentTool.Models"
@@ -233,7 +235,9 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1"
+              Background="Transparent"
+              ContextMenu="{StaticResource ListViewContextMenuPanel}">
             <Line X1="0"
                   Y1="0"
                   X2="0"
@@ -250,9 +254,13 @@
                      HorizontalAlignment="Left"
                      VirtualizingPanel.IsVirtualizing="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"
+                     behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
                      ItemsSource="{Binding FilteredPlayers}"
-                     SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}"
+                     SelectionMode="Extended"
                      Margin="5 0 0 0">
+                <i:Interaction.Behaviors>
+                    <behaviors:ListBoxExtendSelection />
+                </i:Interaction.Behaviors>
                 <ListBox.InputBindings>
                     <KeyBinding Key="Delete"
                                 Command="{Binding RemoveSelectedPlayerCommand}" />
@@ -263,6 +271,16 @@
                                 BorderThickness="1"
                                 Width="110">
                             <StackPanel>
+                                <TextBlock Text="{Binding TeamName}"
+                                           Foreground="#b3f5c8"
+                                           Background="Transparent"
+                                           Visibility="{Binding IsShowingTeamName, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           FontSize="12"
+                                           Width="100"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Top"
+                                           TextAlignment="Center"
+                                           Margin="0 4 0 0" />
                                 <TextBlock Text="{Binding Name}"
                                            Foreground="Wheat"
                                            Background="Transparent"
@@ -271,7 +289,7 @@
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            TextAlignment="Center"
-                                           Margin="0 4 0 0" />
+                                           Margin="0 2 0 0" />
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding PersonalBest}"
                                                Foreground="White"

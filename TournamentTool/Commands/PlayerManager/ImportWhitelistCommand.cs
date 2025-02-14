@@ -115,8 +115,8 @@ public class ImportWhitelistCommand : BaseCommand
         
             Player data = new() 
             {
-                Name = fields[0],
-                InGameName = fields[1],
+                Name = fields[0].Trim(),
+                InGameName = fields[1].Trim(),
                 UUID = fields[2],
                 PersonalBest = fields[3]
             };

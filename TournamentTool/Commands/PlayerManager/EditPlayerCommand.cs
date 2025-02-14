@@ -23,6 +23,7 @@ public class EditPlayerCommand : BaseCommand
             Name = player.Name,
             InGameName = player.InGameName,
             PersonalBest = player.PersonalBest,
+            TeamName = player.TeamName,
         };
         newPlayer.StreamData.Main = player.StreamData.Main ?? string.Empty;
         newPlayer.StreamData.Alt = player.StreamData.Alt ?? string.Empty;

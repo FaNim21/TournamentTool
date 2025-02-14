@@ -15,6 +15,7 @@ namespace TournamentTool.ViewModels;
 
 public enum PlayerSortingType
 {
+    None,
     Name,
     IGN,
     Stream
@@ -46,6 +47,17 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
+    private ObservableCollection<Player> _selectedPlayers = [];
+    public ObservableCollection<Player> SelectedPlayers
+    {
+        get => _selectedPlayers;
+        set
+        {
+            _selectedPlayers = value;
+            OnPropertyChanged(nameof(SelectedPlayers));
+        }
+    }
+    
     private Player? _selectedPlayer;
     public Player? SelectedPlayer
     {
@@ -132,6 +144,9 @@ public class PlayerManagerViewModel : SelectableViewModel
 
     private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
     private string _lastFilterSearch = "filter";
+    private PlayerSortingType _lastSortingType = PlayerSortingType.None;
+    private string _lastTournamentName = string.Empty;
+    private bool _isRestartingWhitelist;
 
 
     public PlayerManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
@@ -176,12 +191,35 @@ public class PlayerManagerViewModel : SelectableViewModel
     {
         if (tournament is null) return false;
 
+        if (!tournament.Name.Equals(_lastTournamentName))
+        {
+            SearchText = string.Empty;
+            SortingType = PlayerSortingType.Name;
+            
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                FilteredPlayers.Clear();
+            });
+            _isRestartingWhitelist = true;
+        }
+        else
+        {
+            _isRestartingWhitelist = false;
+        }
+        
         Tournament = tournament;
+        _lastTournamentName = tournament.Name;
+
+        foreach (var player in Tournament.Players)
+        {
+            player.ShowTeamName(Tournament.DisplayTeamNamesInController);
+        }
         return true;
     }
     public override void OnEnable(object? parameter)
     {
-        _ = FilterWhitelist();
+        if (!_isRestartingWhitelist) return;
+        _ = FilterWhitelist(true);
     }
     public override bool OnDisable()
     {
@@ -214,60 +252,64 @@ public class PlayerManagerViewModel : SelectableViewModel
         if (wasSearched) FilteredPlayers.Add(player);
         Tournament.AddPlayer(player);
         
-        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+        UpdateInformationCountText();
     }
     public void Remove(Player player)
     {
         FilteredPlayers.Remove(player);
         Tournament.RemovePlayer(player);
         
-        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+        UpdateInformationCountText();
     }
     
-    public async Task FilterWhitelist()
+    public async Task FilterWhitelist(bool forceFilter = false)
     {
-        if (_lastFilterSearch.Equals(SearchText, _comparison)) return;
-        
+        if (!forceFilter && _lastFilterSearch.Equals(SearchText, _comparison) && _lastSortingType.Equals(SortingType)) return;
+        if (!forceFilter && string.IsNullOrEmpty(SearchText) && string.IsNullOrEmpty(_lastFilterSearch)) return;
+
         _lastFilterSearch = SearchText;
+        _lastSortingType = SortingType;
         IsSearchEnabled = false;
         
         if (string.IsNullOrEmpty(SearchText))
         {
-            InformationCount = $"Restoring... ?/{Tournament.Players.Count}";
-            await Task.Delay(100); //xd
+            UpdateInformationCountText("Restoring...", "?");
+            await Task.Delay(1);
             
             FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
-            InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+            
+            UpdateInformationCountText();
             IsSearchEnabled = true;
             return;
         }
-        InformationCount = $"Filtering... ?/{Tournament.Players.Count}";
-        await Task.Delay(100); //xd
+        UpdateInformationCountText("Filtering...", "?");
+        await Task.Delay(1);
         
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            FilteredPlayers.Clear();
-        });
         var filtered = SortingType switch
         {
-            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Contains(SearchText, _comparison)),
-            PlayerSortingType.IGN => Tournament.Players.Where(p => p.InGameName!.Contains(SearchText, _comparison)),
+            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Trim().Contains(SearchText.Trim(), _comparison)),
+            PlayerSortingType.IGN => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText.Trim(), _comparison)),
             PlayerSortingType.Stream => Tournament.Players.Where(p =>
-                p.StreamData.Main!.Contains(SearchText, _comparison) ||
-                p.StreamData.Alt.Contains(SearchText, _comparison)),
+                p.StreamData.Main!.Trim().Contains(SearchText.Trim(), _comparison) ||
+                p.StreamData.Alt.Trim().Contains(SearchText.Trim(), _comparison)),
             _ => []
         };
 
         Application.Current.Dispatcher.Invoke(() =>
         {
-            foreach (var player in filtered)
-            {
-                FilteredPlayers.Add(player);
-            }
+            FilteredPlayers = new ObservableCollection<Player>(filtered);
         });
         
-        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+        UpdateInformationCountText();
         IsSearchEnabled = true;
+    }
+    
+    private void UpdateInformationCountText(string header = "Found", string filteredCount = "")
+    {
+        if (string.IsNullOrEmpty(filteredCount))
+            filteredCount = FilteredPlayers.Count.ToString();
+        
+        InformationCount = $"{header} {filteredCount}/{Tournament.Players.Count}";
     }
     
     private void AddPlayer()
@@ -334,9 +376,10 @@ public class PlayerManagerViewModel : SelectableViewModel
     {
         if (Tournament.ContainsDuplicates(windowsData, excludeID)) return false;
 
-        player.Name = windowsData.Name;
-        player.InGameName = windowsData.InGameName;
+        player.Name = windowsData.Name!.Trim();
+        player.InGameName = windowsData.InGameName!.Trim();
         player.PersonalBest = windowsData.PersonalBest;
+        player.TeamName = windowsData.TeamName?.Trim();
         player.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
         player.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
 
@@ -351,8 +394,21 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         Tournament!.Players.Clear();
         FilteredPlayers.Clear();
-        InformationCount = $"Found {FilteredPlayers.Count}/{Tournament.Players.Count}";
+        
+        UpdateInformationCountText();
         SavePreset();
+    }
+    private void RemoveSelectedPlayer()
+    {
+        if (SelectedPlayers == null) return;
+
+        int n = SelectedPlayers.Count;
+        for (int i = 0; i < n; i++)
+        {
+            Remove(SelectedPlayers[0]);
+        }
+
+        SelectedPlayers.Clear();
     }
 
     private async Task FixPlayersHeads(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -370,12 +426,6 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         DialogBox.Show("Done fixing players head skins");
         SavePreset();
-    }
-
-    private void RemoveSelectedPlayer()
-    {
-        if (SelectedPlayer == null) return;
-        Remove(SelectedPlayer);
     }
 
     public void SavePreset()

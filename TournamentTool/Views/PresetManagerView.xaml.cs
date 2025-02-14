@@ -1,7 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
+using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 
@@ -32,7 +35,7 @@ public partial class PresetManagerView : UserControl
     {
         if (sender is not ListViewItem item) return;
 
-        Keyboard.Focus((IInputElement)sender);
+        Keyboard.Focus(item);
         OnListItemClickCommand?.Execute((TournamentPreset)item.DataContext);
     }
 
@@ -50,5 +53,23 @@ public partial class PresetManagerView : UserControl
                 menuItem.CommandParameter = currentItem;
 
         listViewItem.ContextMenu ??= contextMenu;
+    }
+    
+    private void OpenDonateSite(object sender, RequestNavigateEventArgs e)
+    {
+        OpenKofiInBrowser(e.Uri.ToString());
+    }
+    private void OpenDonateSiteButton(object sender, RoutedEventArgs e)
+    {
+        OpenKofiInBrowser("https://ko-fi.com/fanim");
+    }
+    private void OpenKofiInBrowser(string uri)
+    {
+        var processStart = new ProcessStartInfo(uri)
+        {
+            UseShellExecute = true,
+            Verb = "open"
+        };
+        Process.Start(processStart);
     }
 }

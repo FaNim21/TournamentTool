@@ -53,32 +53,6 @@
             </Hyperlink>
         </TextBlock>
 
-        <TextBlock VerticalAlignment="Top"
-                   HorizontalAlignment="Right"
-                   Margin="10 10 40 10">
-            <Hyperlink NavigateUri="https://ko-fi.com/fanim"
-                       RequestNavigate="OpenDonateSite">
-                <Hyperlink.Style>
-                    <Style TargetType="Hyperlink"
-                           BasedOn="{StaticResource {x:Type Hyperlink}}">
-                        <Setter Property="Foreground"
-                                Value="LightSkyBlue" />
-                    </Style>
-                </Hyperlink.Style>
-                You can help me here
-            </Hyperlink>
-        </TextBlock>
-
-        <Image Width="28"
-               HorizontalAlignment="Right"
-               VerticalAlignment="Top"
-               Margin="5">
-            <Image.Source>
-                <BitmapImage DecodePixelWidth="28"
-                             UriSource="/Resources/kofi.png" />
-            </Image.Source>
-        </Image>
-
         <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
             <ProgressBar Height="40"
                          HorizontalAlignment="Stretch"

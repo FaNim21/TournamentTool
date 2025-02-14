@@ -23,7 +23,6 @@ public class ListBoxSelectionBehavior : BehaviorBase<ListBox>
         base.OnAttached();
         AssociatedObject.SelectionChanged += OnSelectionChanged;
     }
-
     protected override void OnCleanup()
     {
         base.OnCleanup();

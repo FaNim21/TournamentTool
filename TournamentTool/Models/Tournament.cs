@@ -126,7 +126,10 @@ public class Tournament : BaseViewModel, ITournamentManager
             _isAlwaysOnTop = value;
             Application.Current?.Dispatcher.Invoke(() =>
             {
-                Application.Current.MainWindow!.Topmost = value;
+                if (Application.Current.MainWindow != null)
+                {
+                    Application.Current.MainWindow.Topmost = value;
+                }
             });
             OnPropertyChanged(nameof(IsAlwaysOnTop));
         }
@@ -156,6 +159,17 @@ public class Tournament : BaseViewModel, ITournamentManager
         }
     }
 
+    private bool _displayTeamNamesInController = false;
+    public bool DisplayTeamNamesInController
+    {
+        get => _displayTeamNamesInController;
+        set
+        {
+            _displayTeamNamesInController = value;
+            OnPropertyChanged(nameof(DisplayTeamNamesInController));
+        }
+    }
+    
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
 
     public bool SetPovHeadsInBrowser { get; set; } = false;

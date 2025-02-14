@@ -268,6 +268,15 @@
                                         Margin="5" />
                                     <StackPanel Orientation="Vertical"
                                                 Width="100">
+                                        <StackPanel Visibility="{Binding IsShowingTeamName, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock FontSize="12"
+                                                       VerticalAlignment="Bottom"
+                                                       Background="Transparent"
+                                                       TextAlignment="Center"
+                                                       Foreground="#b3f5c8"
+                                                       Text="{Binding TeamName}"
+                                                       Margin="0 2 0 -2" />
+                                        </StackPanel>
                                         <TextBlock Text="{Binding Name}"
                                                    Foreground="{Binding StreamData.LiveData.StatusLabelColor}"
                                                    Background="Transparent"
@@ -298,8 +307,7 @@
                                                    Margin="0 0 5 0"
                                                    Source="{Binding Image}" />
                                         </StackPanel>
-                                        <StackPanel
-                                            Visibility="{Binding StreamData.LiveData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <StackPanel Visibility="{Binding StreamData.LiveData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBlock FontSize="12"
                                                        VerticalAlignment="Bottom"
                                                        Background="Transparent"

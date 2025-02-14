@@ -281,7 +281,30 @@ public class Player : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(PersonalBest));
         }
     }
+    
+    private string? _teamName = string.Empty;
+    public string? TeamName
+    {
+        get => _teamName;
+        set
+        {
+            _teamName = value;
+            OnPropertyChanged(nameof(TeamName));
+        }
+    }
 
+    [JsonIgnore] private bool _isShowingTeamName;
+    [JsonIgnore]
+    public bool IsShowingTeamName
+    {
+        get => _isShowingTeamName;
+        set
+        {
+            _isShowingTeamName = value;
+            OnPropertyChanged(nameof(IsShowingTeamName));
+        }
+    }
+    
     [JsonIgnore] private bool _isUsedInPov;
     [JsonIgnore]
     public bool IsUsedInPov
@@ -319,6 +342,10 @@ public class Player : BaseViewModel, IPlayer
     public void ShowCategory(bool option)
     {
         StreamData.LiveData.GameNameVisibility = option;
+    }
+    public void ShowTeamName(bool option)
+    {
+        IsShowingTeamName = option;
     }
 
     public async Task CompleteData()

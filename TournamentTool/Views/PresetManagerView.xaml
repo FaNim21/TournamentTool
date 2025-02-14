@@ -71,8 +71,8 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <WrapPanel Orientation="Vertical"
-                               Grid.Column="0"
+                    <WrapPanel Grid.Column="0"
+                               Orientation="Vertical"
                                Margin="20 10 20 20"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top">
@@ -109,6 +109,10 @@
                                   IsEnabled="{Binding LoadedPreset.IsUsingTwitchAPI}"
                                   Style="{StaticResource enCheck}"
                                   Content="Show stream category"
+                                  Margin="0 0 0 5" />
+                        <CheckBox IsChecked="{Binding LoadedPreset.DisplayTeamNamesInController}"
+                                  Content="Display team names in controller"
+                                  Foreground="White"
                                   Margin="0 0 0 5" />
                         <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
                                   Content="Always On Top"
@@ -459,6 +463,47 @@
                     </WrapPanel>
                 </Grid>
             </ScrollViewer>
+
+            <WrapPanel Grid.Row="1"
+                       Width="130"
+                       Height="30"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Bottom"
+                       Margin="0 0 0 0">
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Bottom"
+                           HorizontalAlignment="Right"
+                           Margin="0 0 0 0">
+                            <Hyperlink NavigateUri="https://ko-fi.com/fanim"
+                                       RequestNavigate="OpenDonateSite">
+                                <Hyperlink.Style>
+                                    <Style TargetType="Hyperlink"
+                                           BasedOn="{StaticResource {x:Type Hyperlink}}">
+                                        <Setter Property="Foreground"
+                                                Value="LightSkyBlue" />
+                                    </Style>
+                                </Hyperlink.Style>
+                                Support me here :)
+                            </Hyperlink>
+                </TextBlock>
+
+                <Button Click="OpenDonateSiteButton"
+                        Width="20"
+                        Height="20"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        BorderBrush="Transparent"
+                        Margin="5 3 0 0">
+                    <Image Width="20"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Top" >
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="20"
+                                         UriSource="/Resources/kofi.png" />
+                        </Image.Source>
+                    </Image>
+                </Button>
+            </WrapPanel>
         </Grid>
 
         <Grid Grid.Column="1"
