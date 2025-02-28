@@ -31,7 +31,7 @@
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}">
         <i:Interaction.Behaviors>
             <behaviors:ListBoxUpdateBehavior />
-            <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
+            <behaviors:ListBoxSelectionBehavior />
             <behaviors:ListBoxClampScrollBehavior />
         </i:Interaction.Behaviors>
         <ListBox.ItemTemplate>

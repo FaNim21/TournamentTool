@@ -102,6 +102,8 @@ public class MainViewModel : BaseViewModel
             case "Presets": NavigationService.NavigateTo<PresetManagerViewModel>(); break;
             case "Whitelist": NavigationService.NavigateTo<PlayerManagerViewModel>(); break;
             case "Controller": NavigationService.NavigateTo<ControllerViewModel>(); break;
+            case "Leaderboard": NavigationService.NavigateTo<LeaderboardViewModel>(); break;
+            case "SceneManagement": NavigationService.NavigateTo<SceneManagementViewModel>(); break;
             case "Updates": NavigationService.NavigateTo<UpdatesViewModel>(); break;
             case "Settings": NavigationService.NavigateTo<SettingsViewModel>(); break;
         }

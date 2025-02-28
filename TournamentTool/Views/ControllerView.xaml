@@ -244,7 +244,7 @@
                          Margin="6 0 0 0">
                     <i:Interaction.Behaviors>
                         <behaviors:ListBoxUpdateBehavior />
-                        <behaviors:ListBoxSelectionBehavior ClickSelection="True" />
+                        <behaviors:ListBoxSelectionBehavior />
                         <behaviors:ListBoxClampScrollBehavior />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
@@ -258,14 +258,6 @@
                                         DragDataType="{x:Type models:IPlayer}" />
                                 </i:Interaction.Behaviors>
                                 <Grid Margin="0 0 0 5">
-                                    <Ellipse
-                                        Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
-                                        Width="7"
-                                        Height="7"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Fill="Red"
-                                        Margin="5" />
                                     <StackPanel Orientation="Vertical"
                                                 Width="100">
                                         <StackPanel Visibility="{Binding IsShowingTeamName, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -317,6 +309,14 @@
                                                        Margin="0 2 0 -2" />
                                         </StackPanel>
                                     </StackPanel>
+                                    <Ellipse
+                                        Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                        Width="7"
+                                        Height="7"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Fill="Red"
+                                        Margin="5" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

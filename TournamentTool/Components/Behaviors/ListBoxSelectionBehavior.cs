@@ -6,18 +6,6 @@ namespace TournamentTool.Components.Behaviors;
 
 public class ListBoxSelectionBehavior : BehaviorBase<ListBox>
 {
-    public static readonly DependencyProperty ClickSelectionProperty = DependencyProperty.Register("ClickSelection", typeof(bool), typeof(ListBoxSelectionBehavior));
-
-
-    public static bool GetClickSelection(DependencyObject obj)
-    {
-        return (bool)obj.GetValue(ClickSelectionProperty);
-    }
-    public static void SetClickSelection(DependencyObject obj, bool value)
-    {
-        obj.SetValue(ClickSelectionProperty, value);
-    }
-
     protected override void OnAttached()
     {
         base.OnAttached();
@@ -31,16 +19,15 @@ public class ListBoxSelectionBehavior : BehaviorBase<ListBox>
 
     static void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (e.AddedItems.Count > 0)
+        if (e.AddedItems.Count <= 0) return;
+        if (sender is not ListBox listBox) return;
+        
+        var valid = e.AddedItems[0];
+        foreach (var item in new ArrayList(listBox.SelectedItems))
         {
-            ListBox listBox = sender as ListBox;
-            var valid = e.AddedItems[0];
-            foreach (var item in new ArrayList(listBox.SelectedItems))
+            if (item != valid)
             {
-                if (item != valid)
-                {
-                    listBox.SelectedItems.Remove(item);
-                }
+                listBox.SelectedItems.Remove(item);
             }
         }
     }

@@ -14,19 +14,37 @@
              d:DesignHeight="605"
              Background="#1E1E1E" >
     <Grid>
+        
         <ScrollViewer VerticalScrollBarVisibility="Visible">
-            <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Height="50"
-                           VerticalAlignment="Top"
-                           HorizontalAlignment="Center"
-                           Foreground="White"
-                           Text="{Binding HeaderText, Mode=OneWay}"
-                           FontSize="28"
-                           FontWeight="SemiBold"
-                           Margin="10 0 10 0" />
+            <Grid>
+                <TextBlock VerticalAlignment="Top"
+                           Margin="10">
+                    <Hyperlink NavigateUri="https://github.com/FaNim21/TournamentTool/releases"
+                               RequestNavigate="OpenVersionsSite">
+                        <Hyperlink.Style>
+                            <Style TargetType="Hyperlink"
+                                   BasedOn="{StaticResource {x:Type Hyperlink}}">
+                                <Setter Property="Foreground"
+                                        Value="LightSkyBlue" />
+                            </Style>
+                        </Hyperlink.Style>
+                        All releases here
+                    </Hyperlink>
+                </TextBlock>
 
-                <ContentControl Content="{Binding ParsedMarkdown}"
-                                Margin="10 25 10 50" />
+                <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Height="50"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Center"
+                               Foreground="White"
+                               Text="{Binding HeaderText, Mode=OneWay}"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Margin="10 0 10 0" />
+
+                    <ContentControl Content="{Binding ParsedMarkdown}"
+                                    Margin="10 25 10 50" />
+                </Grid>
             </Grid>
         </ScrollViewer>
 
@@ -37,21 +55,6 @@
                               FontSize="18"
                               Margin="0 0 0 10"
                               OnCommand="{Binding DownloadCommand}"/>
-
-        <TextBlock VerticalAlignment="Top"
-                   Margin="10">
-            <Hyperlink NavigateUri="https://github.com/FaNim21/TournamentTool/releases"
-                       RequestNavigate="OpenVersionsSite">
-                <Hyperlink.Style>
-                    <Style TargetType="Hyperlink"
-                           BasedOn="{StaticResource {x:Type Hyperlink}}">
-                        <Setter Property="Foreground"
-                                Value="LightSkyBlue" />
-                    </Style>
-                </Hyperlink.Style>
-                All releases here
-            </Hyperlink>
-        </TextBlock>
 
         <Grid Visibility="{Binding PatchNotesGrid, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
             <ProgressBar Height="40"

@@ -329,7 +329,7 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
-    private StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+    private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
 
 
     [JsonConstructor]

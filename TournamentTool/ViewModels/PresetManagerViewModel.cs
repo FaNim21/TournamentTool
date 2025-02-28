@@ -71,6 +71,7 @@ public class PresetManagerViewModel : SelectableViewModel
     }
 
     public ICommand OpenControllerCommand { get; set; }
+    public ICommand OpenLeaderboardCommand { get; set; }
 
     public ICommand AddNewPresetCommand { get; set; }
     public ICommand SavePresetCommand { get; set; }
@@ -90,6 +91,7 @@ public class PresetManagerViewModel : SelectableViewModel
         LoadPresetsList();
 
         OpenControllerCommand = new RelayCommand(() => Coordinator.MainViewModel.SelectViewModel("Controller"));
+        OpenLeaderboardCommand = new RelayCommand(() => Coordinator.MainViewModel.SelectViewModel("Leaderboard"));
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(() => SavePreset());
@@ -136,6 +138,7 @@ public class PresetManagerViewModel : SelectableViewModel
             if (string.IsNullOrEmpty(text)) return;
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
+            data.Initialize();
             data.Validate();
 
             LoadedPreset = data;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentTool.Modules;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -27,6 +28,9 @@ public partial class App : Application
         services.AddSingleton<ControllerViewModel>();
         services.AddSingleton<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>();
+        
+        services.AddSingleton<LeaderboardViewModel>();
+        services.AddSingleton<SceneManagementViewModel>();
 
         services.AddSingleton<UpdatesViewModel>();
         services.AddSingleton<SettingsViewModel>();

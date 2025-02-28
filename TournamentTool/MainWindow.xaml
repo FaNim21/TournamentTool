@@ -183,6 +183,16 @@
                                                       CommandParameter="Controller"
                                                       IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
                                                       GroupName="MenuItem" />
+                        <components:HamburgerMenuItem Text="Leaderboard"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Leaderboard"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:LeaderboardViewModel}}"
+                                                      GroupName="MenuItem" />
+                        <components:HamburgerMenuItem Text="Scene Config"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="SceneManagement"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SceneManagementViewModel}}"
+                                                      GroupName="MenuItem" />
                     </StackPanel>
 
                     <StackPanel VerticalAlignment="Bottom">

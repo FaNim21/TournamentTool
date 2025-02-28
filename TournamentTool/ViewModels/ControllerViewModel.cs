@@ -55,7 +55,7 @@ public class ControllerViewModel : SelectableViewModel
     private Player? _selectedWhitelistPlayer;
     public Player? SelectedWhitelistPlayer
     {
-        get { return _selectedWhitelistPlayer; }
+        get => _selectedWhitelistPlayer;
         set
         {
             SidePanel?.ClearSelectedPlayer();
@@ -131,12 +131,6 @@ public class ControllerViewModel : SelectableViewModel
     }
     public override void OnEnable(object? parameter)
     {
-        foreach (var player in Configuration.Players)
-        {
-            player.ShowCategory(Configuration.ShowStreamCategory && Configuration.IsUsingTwitchAPI);
-            player.ShowTeamName(Configuration.IsUsingTeamNames);
-        }
-
         switch(Configuration.ControllerMode)
         {
             case ControllerMode.None:

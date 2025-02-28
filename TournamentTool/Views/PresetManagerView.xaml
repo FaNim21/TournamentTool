@@ -338,11 +338,12 @@
                                                  Margin="30 30 30 5" />
 
                         <!-- Tutaj chyba dam panel do zarzadzania opcjami do ustawiania punktow za ukonczenie itp itd???? -->
-                        <components:ButtonNormal ContentText="Leaderboard manager (WIP)"
+                        <components:ButtonNormal ContentText="Leaderboard"
                                                  Width="350"
                                                  Height="40"
                                                  FontSize="25"
                                                  VerticalAlignment="Top"
+                                                 OnCommand="{Binding OpenLeaderboardCommand}"
                                                  Margin="30 0 30 20" />
 
                         <WrapPanel Orientation="Vertical"

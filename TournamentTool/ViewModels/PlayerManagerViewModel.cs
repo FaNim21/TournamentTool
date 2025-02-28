@@ -58,17 +58,6 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
     
-    private Player? _selectedPlayer;
-    public Player? SelectedPlayer
-    {
-        get => _selectedPlayer;
-        set
-        {
-            _selectedPlayer = value;
-            OnPropertyChanged(nameof(SelectedPlayer));
-        }
-    }
-
     private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
     {
@@ -225,11 +214,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         
         Tournament = tournament;
         _lastTournamentName = tournament.Name;
-
-        foreach (var player in Tournament.Players)
-        {
-            player.ShowTeamName(Tournament.IsUsingTeamNames);
-        }
+        
         return true;
     }
     public override void OnEnable(object? parameter)

@@ -154,8 +154,25 @@ public class Tournament : BaseViewModel, ITournamentManager
         get => _isUsingTwitchAPI;
         set
         {
+            if (_isUsingTwitchAPI == value) return;
+            
             _isUsingTwitchAPI = value;
             OnPropertyChanged(nameof(IsUsingTwitchAPI));
+            UpdateCategoryForPlayers();
+        }
+    }
+    
+    private bool _showStreamCategory = true;
+    public bool ShowStreamCategory
+    {
+        get => _showStreamCategory;
+        set
+        {
+            if (_showStreamCategory == value) return;
+            
+            _showStreamCategory = value;
+            OnPropertyChanged(nameof(ShowStreamCategory));
+            UpdateCategoryForPlayers();
         }
     }
 
@@ -165,15 +182,17 @@ public class Tournament : BaseViewModel, ITournamentManager
         get => _isUsingTeamNames;
         set
         {
+            if (_isUsingTeamNames == value) return;
+            
             _isUsingTeamNames = value;
             OnPropertyChanged(nameof(IsUsingTeamNames));
+            UpdateTeamNamesForPlayers();
         }
     }
     
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
-
-    public bool SetPovHeadsInBrowser { get; set; } = false;
-    public bool SetPovPBText { get; set; } = false;
+    public bool SetPovHeadsInBrowser { get; set; }
+    public bool SetPovPBText { get; set; }
 
     private DisplayedNameType _displayedNameType;
     public DisplayedNameType DisplayedNameType
@@ -186,18 +205,13 @@ public class Tournament : BaseViewModel, ITournamentManager
         }
     }
 
-    public bool ShowStreamCategory { get; set; } = true;
-
     private int _apiRefreshRateMiliseconds = 1000;
     public int ApiRefreshRateMiliseconds
     {
         get => _apiRefreshRateMiliseconds;
         set
         {
-            if (value < 1000)
-                _apiRefreshRateMiliseconds = 1000;
-            else
-                _apiRefreshRateMiliseconds = value;
+            _apiRefreshRateMiliseconds = value < 1000 ? 1000 : value;
             OnPropertyChanged(nameof(ApiRefreshRateMiliseconds));
         }
     }
@@ -208,10 +222,7 @@ public class Tournament : BaseViewModel, ITournamentManager
         get => _paceManRefreshRateMiliseconds;
         set
         {
-            if (value < 3000)
-                _paceManRefreshRateMiliseconds = 3000;
-            else
-                _paceManRefreshRateMiliseconds = value;
+            _paceManRefreshRateMiliseconds = value < 3000 ? 3000 : value;
             OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
         }
     }
@@ -363,6 +374,11 @@ public class Tournament : BaseViewModel, ITournamentManager
         Name = name;
     }
 
+    public void Initialize()
+    {
+        //TODO: 0 Zrobic kiedys inicjalizacje zwiazana z przyszlymi funkcjonalnosciami i usunac validate()
+    }
+
     public void ClearPlayerStreamData()
     {
         for (int i = 0; i < Players.Count; i++)
@@ -499,6 +515,21 @@ public class Tournament : BaseViewModel, ITournamentManager
         EnterStrongholdGoodPaceMiliseconds = 450000;
         EnterEndGoodPaceMiliseconds = 480000;
         CreditsGoodPaceMiliseconds = 600000;
+    }
+
+    private void UpdateCategoryForPlayers()
+    {
+        foreach (var player in Players)
+        {
+            player.ShowCategory(ShowStreamCategory && IsUsingTwitchAPI);
+        }
+    }
+    private void UpdateTeamNamesForPlayers()
+    {
+        foreach (var player in Players)
+        {
+            player.ShowTeamName(IsUsingTeamNames);
+        }
     }
 
     public string GetPath()
