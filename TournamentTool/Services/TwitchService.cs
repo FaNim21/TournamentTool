@@ -153,9 +153,9 @@ public class TwitchService
         List<string> logins = [];
         List<StreamData> notLivePlayers = [];
 
-        for (int i = 0; i < Controller.Configuration.Players.Count; i++)
+        for (int i = 0; i < Controller.TournamentViewModel.Players.Count; i++)
         {
-            var current = Controller.Configuration.Players[i];
+            var current = Controller.TournamentViewModel.Players[i];
             current.StreamData.LiveData.WasUpdated = false;
 
             if (!string.IsNullOrEmpty(current.StreamData.Main))

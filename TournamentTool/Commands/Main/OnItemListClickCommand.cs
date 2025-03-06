@@ -1,18 +1,18 @@
-﻿using TournamentTool.ViewModels;
+﻿using TournamentTool.Interfaces;
 
 namespace TournamentTool.Commands.Main;
 
 public class OnItemListClickCommand : BaseCommand
 {
-    public PresetManagerViewModel MainViewModel { get; set; }
+    public IPresetSaver PresetSaver { get; set; }
 
-    public OnItemListClickCommand(PresetManagerViewModel mainViewModel)
+    public OnItemListClickCommand(IPresetSaver presetSaver)
     {
-        MainViewModel = mainViewModel;
+        PresetSaver = presetSaver;
     }
 
     public override void Execute(object? parameter)
     {
-        MainViewModel.SavePresetCommand.Execute(parameter);
+        PresetSaver.SavePreset();
     }
 }

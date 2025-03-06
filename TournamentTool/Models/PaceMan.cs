@@ -239,19 +239,19 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         switch (SplitType)
         {
             case SplitType.structure_2:
-                SetPacePriority(Controller.Configuration.Structure2GoodPaceMiliseconds > lastSplit.IGT);
+                SetPacePriority(Controller.TournamentViewModel.Structure2GoodPaceMiliseconds > lastSplit.IGT);
                 break;
             case SplitType.first_portal:
-                SetPacePriority(Controller.Configuration.FirstPortalGoodPaceMiliseconds > lastSplit.IGT);
+                SetPacePriority(Controller.TournamentViewModel.FirstPortalGoodPaceMiliseconds > lastSplit.IGT);
                 break;
             case SplitType.enter_stronghold:
-                SetPacePriority(Controller.Configuration.EnterStrongholdGoodPaceMiliseconds > lastSplit.IGT);
+                SetPacePriority(Controller.TournamentViewModel.EnterStrongholdGoodPaceMiliseconds > lastSplit.IGT);
                 break;
             case SplitType.enter_end:
-                SetPacePriority(Controller.Configuration.EnterEndGoodPaceMiliseconds > lastSplit.IGT);
+                SetPacePriority(Controller.TournamentViewModel.EnterEndGoodPaceMiliseconds > lastSplit.IGT);
                 break;
             case SplitType.credits:
-                SetPacePriority(Controller.Configuration.CreditsGoodPaceMiliseconds > lastSplit.IGT);
+                SetPacePriority(Controller.TournamentViewModel.CreditsGoodPaceMiliseconds > lastSplit.IGT);
                 break;
             default:
                 SetPacePriority(false);

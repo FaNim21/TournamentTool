@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using TournamentTool.Interfaces;
 using TournamentTool.Modules;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool;
 
@@ -22,14 +24,17 @@ public partial class App : Application
             DataContext = provider.GetRequiredService<MainViewModel>()
         });
 
+        services.AddSingleton<TournamentViewModel>();
+        services.AddSingleton<IPresetSaver, PresetService>();
+        
         services.AddSingleton<MainViewModel>();
-        services.AddSingleton<MainViewModelCoordinator>();
+        services.AddSingleton<ICoordinator, MainViewModelCoordinator>();
         
         services.AddSingleton<ControllerViewModel>();
         services.AddSingleton<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>();
         
-        services.AddSingleton<LeaderboardViewModel>();
+        services.AddSingleton<LeaderboardPanelViewModel>();
         services.AddSingleton<SceneManagementViewModel>();
 
         services.AddSingleton<UpdatesViewModel>();

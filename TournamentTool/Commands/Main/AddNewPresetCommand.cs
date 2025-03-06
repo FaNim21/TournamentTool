@@ -20,6 +20,5 @@ public class AddNewPresetCommand : BaseCommand
 
         var newPreset = new TournamentPreset(name);
         PresetManager.AddItem(newPreset);
-        PresetManager.SetPresetAsNotSaved();
     }
 }

@@ -173,7 +173,7 @@ public class Scene : BaseViewModel
                     if (CheckForAdditionals(additionals, groupItem)) continue;
 
                     if (groupItem.InputKind!.Equals("browser_source") &&
-                        groupItem.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                        groupItem.SourceName.StartsWith(Controller.TournamentViewModel.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
                     {
                         povItems.Add((groupItem, item));
                     }
@@ -184,13 +184,13 @@ public class Scene : BaseViewModel
             if (CheckForAdditionals(additionals, item)) continue;
 
             if (item.InputKind!.Equals("browser_source") &&
-                item.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                item.SourceName.StartsWith(Controller.TournamentViewModel.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
             {
                 povItems.Add((item, null));
             }
         }
 
-        if (updatePlayersInPov) Controller.Configuration.ClearPlayersFromPOVS();
+        if (updatePlayersInPov) Controller.TournamentViewModel.ClearPlayersFromPOVS();
 
         povItems.Reverse();
         for (int i = 0; i < povItems.Count; i++)
@@ -273,7 +273,7 @@ public class Scene : BaseViewModel
 
         if (!string.IsNullOrEmpty(currentName))
         {
-            Player? player = Controller.Configuration.GetPlayerByTwitchName(currentName);
+            Player? player = Controller.TournamentViewModel.GetPlayerByTwitchName(currentName);
             if (player != null) pov.SetPOV(player);
         }
 

@@ -35,8 +35,8 @@
         <DataTemplate DataType="{x:Type viewModels:ControllerViewModel}">
             <views:ControllerView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:LeaderboardViewModel}">
-            <views:LeaderboardView />
+        <DataTemplate DataType="{x:Type viewModels:LeaderboardPanelViewModel}">
+            <views:LeaderboardPanelView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModels:SceneManagementViewModel}">
             <views:SceneManagementView />

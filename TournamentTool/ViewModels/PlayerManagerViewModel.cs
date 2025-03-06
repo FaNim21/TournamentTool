@@ -2,13 +2,15 @@
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
-using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
+using TournamentTool.Services;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
@@ -36,16 +38,8 @@ public class PlayerManagerViewModel : SelectableViewModel
         }
     }
 
-    private Tournament _tournament = new();
-    public Tournament Tournament
-    {
-        get => _tournament;
-        set
-        {
-            _tournament = value;
-            OnPropertyChanged(nameof(Tournament));
-        }
-    }
+    public TournamentViewModel Tournament { get; set; }
+    public IPresetSaver PresetService { get; }
 
     private ObservableCollection<Player> _selectedPlayers = [];
     public ObservableCollection<Player> SelectedPlayers
@@ -150,22 +144,24 @@ public class PlayerManagerViewModel : SelectableViewModel
     private string _lastFilterSearch = "filter";
     private PlayerSortingType _lastSortingType;
     private string _lastTournamentName = string.Empty;
-    private bool _isRestartingWhitelist;
 
 
-    public PlayerManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
+    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService) : base(coordinator)
     {
+        Tournament = tournament;
+        PresetService = presetService;
+
         AddPlayerCommand = new RelayCommand(AddPlayer);
         EditPlayerCommand = new EditPlayerCommand(this);
-        RemovePlayerCommand = new RemovePlayerCommand(this, coordinator);
-        FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, coordinator);
+        RemovePlayerCommand = new RemovePlayerCommand(this, PresetService);
+        FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, PresetService);
 
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
-        ImportPlayersCommand = new ImportWhitelistCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
-        ExportPlayersCommand = new ExportWhitelistCommand(coordinator.MainViewModel.Configuration!);
+        ImportPlayersCommand = new ImportWhitelistCommand(this, Tournament, coordinator, PresetService);
+        ExportPlayersCommand = new ExportWhitelistCommand(Tournament);
 
-        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, coordinator.MainViewModel.Configuration!, coordinator, coordinator);
+        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, Tournament, PresetService, coordinator);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
@@ -192,11 +188,13 @@ public class PlayerManagerViewModel : SelectableViewModel
         });
     }
 
-    public override bool CanEnable(Tournament? tournament)
+    public override bool CanEnable()
     {
-        if (tournament is null) return false;
-
-        if (!tournament.Name.Equals(_lastTournamentName))
+        return !Tournament.IsNullOrEmpty();
+    } 
+    public override void OnEnable(object? parameter)
+    {
+        if (!Tournament.Name.Equals(_lastTournamentName))
         {
             SearchText = string.Empty;
             SortingType = PlayerSortingType.Name;
@@ -205,22 +203,11 @@ public class PlayerManagerViewModel : SelectableViewModel
             {
                 FilteredPlayers.Clear();
             });
-            _isRestartingWhitelist = true;
-        }
-        else
-        {
-            _isRestartingWhitelist = false;
+            
+            _ = FilterWhitelist(true);
         }
         
-        Tournament = tournament;
-        _lastTournamentName = tournament.Name;
-        
-        return true;
-    }
-    public override void OnEnable(object? parameter)
-    {
-        if (!_isRestartingWhitelist) return;
-        _ = FilterWhitelist(true);
+        _lastTournamentName = Tournament.Name;
     }
     public override bool OnDisable()
     {
@@ -442,6 +429,6 @@ public class PlayerManagerViewModel : SelectableViewModel
     
     public void SavePreset()
     {
-        Coordinator.SavePreset();
+        PresetService.SavePreset();
     }
 }

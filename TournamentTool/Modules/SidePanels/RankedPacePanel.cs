@@ -202,12 +202,12 @@ public class RankedPacePanel : SidePanel
         base.OnEnable(parameter);
         SetupPaceManGrouping();
 
-        string dataName = Controller.Configuration.RankedRoomDataName;
+        string dataName = Controller.TournamentViewModel.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
             dataName = Path.Combine(dataName, ".json");
         }
-        FilePath = Path.Combine(Controller.Configuration.RankedRoomDataPath, dataName);
+        FilePath = Path.Combine(Controller.TournamentViewModel.RankedRoomDataPath, dataName);
         _cancellationTokenSource = new();
 
         if (!File.Exists(FilePath))
@@ -256,7 +256,7 @@ public class RankedPacePanel : SidePanel
 
             try
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(Controller.Configuration.RankedRoomUpdateFrequency), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(Controller.TournamentViewModel.RankedRoomUpdateFrequency), cancellationToken);
             }
             catch (TaskCanceledException) { break; }
         }
@@ -380,11 +380,11 @@ public class RankedPacePanel : SidePanel
         RankedPace pace = new(Controller, this);
         pace.Initialize(data.Player);
 
-        int n = Controller.Configuration.Players.Count;
+        int n = Controller.TournamentViewModel.Players.Count;
         bool found = false;
         for (int j = 0; j < n; j++)
         {
-            var current = Controller.Configuration.Players[j];
+            var current = Controller.TournamentViewModel.Players[j];
 
             if (current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase))
             {

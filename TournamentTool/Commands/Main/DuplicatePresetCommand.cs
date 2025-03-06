@@ -21,7 +21,6 @@ public class DuplicatePresetCommand : BaseCommand
 
     public override void Execute(object? parameter)
     {
-        if (parameter == null) return;
         if (parameter is not TournamentPreset tournament) return;
 
         string name = tournament.Name;

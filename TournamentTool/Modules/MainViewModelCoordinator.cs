@@ -1,26 +1,29 @@
 ﻿using System.Windows;
 using TournamentTool.Interfaces;
-using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Modules;
 
-public class MainViewModelCoordinator : IPresetSaver, ILoadingDialog, IDialogWindow
+public class MainViewModelCoordinator : ICoordinator
 {
-    public MainViewModel MainViewModel { get; }
-    
-    
+    private MainViewModel MainViewModel { get; }
+
+    public bool AvailableNewUpdate => MainViewModel.NewUpdate;
+
+    //Tu trzeba sie pozybc zaleznosci z zapisywaniem presetu i zrobic wszystkie zaleznosci zwiazane z oknami i tez popupami, ktore trzeba zrobic w formie informacyjnej
+    //zamiast poszczegolnych okien (typu popup prawy gorny rog okna wyswietlajacy sie chwilowo gdzie po kliknieciu znika z miejsca)
+
     public MainViewModelCoordinator(MainViewModel mainViewModel)
     {
         MainViewModel = mainViewModel;
     }
 
-    public void SavePreset(IPreset? preset = null)
+    public void SelectViewModel(string viewModelName)
     {
-        MainViewModel.SavePreset(preset);
+        MainViewModel?.SelectViewModel(viewModelName);
     }
-    
+
     public void ShowDialog(Window window)
     {
         MainViewModel.BlockWindow();

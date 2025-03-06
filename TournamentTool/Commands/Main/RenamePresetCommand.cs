@@ -1,4 +1,5 @@
 ﻿using TournamentTool.Components;
+using TournamentTool.Interfaces;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
@@ -6,16 +7,16 @@ namespace TournamentTool.Commands.Main;
 
 public class RenamePresetCommand : BaseCommand
 {
-    public PresetManagerViewModel MainViewModel { get; set; }
+    public IPresetSaver PresetSaver { get; }
 
-    public RenamePresetCommand(PresetManagerViewModel mainViewModel)
+    public RenamePresetCommand(IPresetSaver presetSaver)
     {
-        MainViewModel = mainViewModel;
+        PresetSaver = presetSaver;
     }
 
     public override void Execute(object? parameter)
     {
-        MainViewModel.SavePresetCommand.Execute(MainViewModel);
+        PresetSaver.SavePreset();
 
         EditableTextBlock? textBlock = Helper.GetFocusedUIElement<EditableTextBlock>();
         if (textBlock != null && textBlock.IsEditable)

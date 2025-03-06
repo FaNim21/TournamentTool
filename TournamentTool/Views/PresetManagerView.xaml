@@ -65,7 +65,7 @@
             </Grid>
 
             <ScrollViewer Grid.Row="1">
-                <Grid Visibility="{Binding IsPresetOpened, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid Visibility="{Binding TournamentViewModel.IsCurrentlyOpened, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition />
@@ -90,7 +90,7 @@
                             <TextBox TextWrapping="Wrap"
                                      Width="40"
                                      Height="20"
-                                     Text="{Binding LoadedPreset.ApiRefreshRateMiliseconds}"
+                                     Text="{Binding TournamentViewModel.ApiRefreshRateMiliseconds}"
                                      PreviewTextInput="NumberValidationTextBox"
                                      Padding="0 1 0 0"
                                      Background="#9E9E9E"
@@ -101,20 +101,20 @@
                                        Margin="5 0 0 3" />
                         </WrapPanel>
 
-                        <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTwitchAPI}"
+                        <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
                                   Content="Use Twitch API"
                                   Foreground="White"
                                   Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding LoadedPreset.ShowStreamCategory}"
-                                  IsEnabled="{Binding LoadedPreset.IsUsingTwitchAPI}"
+                        <CheckBox IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
+                                  IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
                                   Style="{StaticResource enCheck}"
                                   Content="Show stream category"
                                   Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding LoadedPreset.IsUsingTeamNames}"
+                        <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
                                   Content="Use team names"
                                   Foreground="White"
                                   Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding LoadedPreset.IsAlwaysOnTop}"
+                        <CheckBox IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
                                   Content="Always On Top"
                                   Foreground="White"
                                   Margin="0 0 0 5" />
@@ -126,27 +126,27 @@
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="None"
-                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="PaceMan"
-                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="Ranked"
-                                         IsChecked="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
                         </WrapPanel>
 
                         <!-- PACEMAN -->
                         <WrapPanel Orientation="Vertical"
-                                   Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
+                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
                             <TextBlock  Text="Paceman"
                                         Foreground="Wheat"
                                         FontWeight="SemiBold"
                                         FontSize="24"
                                         Padding="0"
                                         Margin="0 10 0 5" />
-                            <CheckBox IsChecked="{Binding LoadedPreset.IsUsingWhitelistOnPaceMan}"
+                            <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan}"
                                       Content="Use Whitelist on Paceman"
                                       Foreground="White"
                                       Margin="0 0 0 5" />
@@ -156,7 +156,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.PaceManRefreshRateMiliseconds}"
+                                         Text="{Binding TournamentViewModel.PaceManRefreshRateMiliseconds}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -178,12 +178,12 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding TournamentViewModel.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <TextBlock Text="{Binding LoadedPreset.Structure2ToText}"
+                                <TextBlock Text="{Binding TournamentViewModel.Structure2ToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -195,12 +195,12 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding TournamentViewModel.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <TextBlock Text="{Binding LoadedPreset.FirstPortalToText}"
+                                <TextBlock Text="{Binding TournamentViewModel.FirstPortalToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -212,12 +212,12 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding TournamentViewModel.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <TextBlock Text="{Binding LoadedPreset.EnterStrongholdToText}"
+                                <TextBlock Text="{Binding TournamentViewModel.EnterStrongholdToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -230,12 +230,12 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding TournamentViewModel.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <TextBlock Text="{Binding LoadedPreset.EnterEndToText}"
+                                <TextBlock Text="{Binding TournamentViewModel.EnterEndToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -247,12 +247,12 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
+                                         Text="{Binding TournamentViewModel.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
-                                <TextBlock Text="{Binding LoadedPreset.CreditsToText}"
+                                <TextBlock Text="{Binding TournamentViewModel.CreditsToText}"
                                            Foreground="White"
                                            Height="23"
                                            FontSize="16"
@@ -263,7 +263,7 @@
 
                         <!-- RANKED -->
                         <WrapPanel Orientation="Vertical"
-                                   Visibility="{Binding LoadedPreset.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
+                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
                             <Label  Content="Ranked"
                                     Foreground="Wheat"
                                     FontSize="24"
@@ -277,7 +277,7 @@
                                          Width="220"
                                          Height="20"
                                          IsReadOnly="True"
-                                         Text="{Binding LoadedPreset.RankedRoomDataPath}"
+                                         Text="{Binding TournamentViewModel.RankedRoomDataPath}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -297,7 +297,7 @@
                                 <TextBox TextWrapping="NoWrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.RankedRoomDataName}"
+                                         Text="{Binding TournamentViewModel.RankedRoomDataName}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -313,7 +313,7 @@
                                 <TextBox TextWrapping="NoWrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.RankedRoomUpdateFrequency}"
+                                         Text="{Binding TournamentViewModel.RankedRoomUpdateFrequency}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -361,7 +361,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="50"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.Port}"
+                                         Text="{Binding TournamentViewModel.Port}"
                                          PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 2 0 0"
                                          Background="#9E9E9E"
@@ -378,7 +378,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.Password}"
+                                         Text="{Binding TournamentViewModel.Password}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -394,7 +394,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.SceneCollection}"
+                                         Text="{Binding TournamentViewModel.SceneCollection}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -418,7 +418,7 @@
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding LoadedPreset.FilterNameAtStartForSceneItems}"
+                                         Text="{Binding TournamentViewModel.FilterNameAtStartForSceneItems}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
@@ -431,11 +431,11 @@
                             </WrapPanel>
                             <WrapPanel Orientation="Vertical"
                                        Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding LoadedPreset.SetPovHeadsInBrowser}"
+                                <CheckBox IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
                                           Content="Use skin heads"
                                           Foreground="White"
                                           Margin="0 0 0 5" />
-                                <CheckBox IsChecked="{Binding LoadedPreset.SetPovPBText}"
+                                <CheckBox IsChecked="{Binding TournamentViewModel.SetPovPBText}"
                                           Content="Use personal best text"
                                           Foreground="White"
                                           Margin="0 0 0 5" />
@@ -446,19 +446,19 @@
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="None"
-                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
+                                             IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Twitch"
-                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
+                                             IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Ign"
-                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
+                                             IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Whitelist"
-                                             IsChecked="{Binding LoadedPreset.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
+                                             IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                             </WrapPanel>
                         </WrapPanel>
                     </WrapPanel>

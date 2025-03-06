@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Utils;
@@ -112,7 +113,7 @@ public class UpdatesViewModel : SelectableViewModel
     private bool canDownloadUpdate;
 
 
-    public UpdatesViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
+    public UpdatesViewModel(ICoordinator coordinator) : base(coordinator)
     {
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
@@ -126,10 +127,7 @@ public class UpdatesViewModel : SelectableViewModel
         Task.Run(Setup);
     }
 
-    public override bool CanEnable(Tournament tournament)
-    {
-        return true;
-    }
+    public override bool CanEnable() => true;
     public override void OnEnable(object? parameter)
     {
         PatchNotesGrid = true;
@@ -141,7 +139,7 @@ public class UpdatesViewModel : SelectableViewModel
 
     private async Task Setup()
     {
-        if (!Coordinator.MainViewModel.NewUpdate)
+        if (!Coordinator.AvailableNewUpdate)
         {
             HeaderText = "NO NEW UPDATES";
             BodyText = "";

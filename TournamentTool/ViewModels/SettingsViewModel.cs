@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Utils;
@@ -21,16 +22,13 @@ public class SettingsViewModel : SelectableViewModel
     }
 
 
-    public SettingsViewModel(MainViewModelCoordinator coordinator) : base(coordinator) { }
+    public SettingsViewModel(ICoordinator coordinator) : base(coordinator) { }
 
-    public override bool CanEnable(Tournament tournament)
-    {
-        return true;
-    }
+    public override bool CanEnable() => true;
 
     public override void OnEnable(object? parameter)
     {
-        Hotkeys = new(InputController.Instance.GetHotkeys());
+        Hotkeys = new ObservableCollection<Hotkey>(InputController.Instance.GetHotkeys());
     }
 
     public override bool OnDisable()

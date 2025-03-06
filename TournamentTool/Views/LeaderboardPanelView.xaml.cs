@@ -2,9 +2,9 @@
 
 namespace TournamentTool.Views;
 
-public partial class LeaderboardView : UserControl
+public partial class LeaderboardPanelView : UserControl
 {
-    public LeaderboardView()
+    public LeaderboardPanelView()
     {
         InitializeComponent();
     }

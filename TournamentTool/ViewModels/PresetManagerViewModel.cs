@@ -6,15 +6,19 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Components.Controls;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Modules;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
 public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
+
+    public TournamentViewModel TournamentViewModel { get; }
+    public IPresetSaver PresetService { get; }
 
     private TournamentPreset? _currentChosen;
     public TournamentPreset? CurrentChosen
@@ -30,43 +34,9 @@ public class PresetManagerViewModel : SelectableViewModel
                 SaveLastOpened(_currentChosen!.Name);
             }
 
-            IsPresetOpened = !isEmpty;
+            TournamentViewModel.IsCurrentlyOpened = !isEmpty;
             LoadCurrentPreset(isEmpty ? string.Empty : _currentChosen!.Name);
             OnPropertyChanged(nameof(CurrentChosen));
-        }
-    }
-
-    private Tournament? _loadedPreset;
-    public Tournament? LoadedPreset
-    {
-        get => _loadedPreset;
-        set
-        {
-            _loadedPreset = value;
-            Coordinator.MainViewModel.Configuration = _loadedPreset;
-            OnPropertyChanged(nameof(LoadedPreset));
-        }
-    }
-
-    private bool _isCurrentPresetSaved;
-    public bool IsCurrentPresetSaved
-    {
-        get => _isCurrentPresetSaved;
-        set
-        {
-            _isCurrentPresetSaved = value;
-            OnPropertyChanged(nameof(IsCurrentPresetSaved));
-        }
-    }
-
-    private bool _isPresetOpened;
-    public bool IsPresetOpened
-    {
-        get => _isPresetOpened;
-        set
-        {
-            _isPresetOpened = value;
-            OnPropertyChanged(nameof(IsPresetOpened));
         }
     }
 
@@ -86,21 +56,24 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SetRankedDataPathCommand { get; set; }
 
 
-    public PresetManagerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService) : base(coordinator)
     {
+        TournamentViewModel = tournamentViewModel;
+        PresetService = presetService;
+        
         LoadPresetsList();
 
-        OpenControllerCommand = new RelayCommand(() => Coordinator.MainViewModel.SelectViewModel("Controller"));
-        OpenLeaderboardCommand = new RelayCommand(() => Coordinator.MainViewModel.SelectViewModel("Leaderboard"));
+        OpenControllerCommand = new RelayCommand(() => Coordinator.SelectViewModel("Controller"));
+        OpenLeaderboardCommand = new RelayCommand(() => Coordinator.SelectViewModel("Leaderboard"));
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
-        SavePresetCommand = new RelayCommand(() => SavePreset());
+        SavePresetCommand = new RelayCommand(() => PresetService.SavePreset());
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
-        OnItemListClickCommand = new OnItemListClickCommand(this);
+        OnItemListClickCommand = new OnItemListClickCommand(PresetService);
 
-        ClearCurrentPresetCommand = new ClearPresetCommand(this);
-        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, coordinator);
-        RenameItemCommand = new RenamePresetCommand(this);
+        ClearCurrentPresetCommand = new ClearPresetCommand(TournamentViewModel);
+        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, PresetService);
+        RenameItemCommand = new RenamePresetCommand(PresetService);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
 
         SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
@@ -108,11 +81,11 @@ public class PresetManagerViewModel : SelectableViewModel
         LoadStartupPreset();
     }
 
-    public override bool CanEnable(Tournament tournament) { return true; }
+    public override bool CanEnable() { return true; }
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable()
     {
-        SavePreset();
+        PresetService.SavePreset();
         return true;
     }
 
@@ -132,16 +105,16 @@ public class PresetManagerViewModel : SelectableViewModel
         if (string.IsNullOrEmpty(opened)) return;
 
         string filePath = Path.Combine(Consts.PresetsPath, opened + ".json");
+        if (!File.Exists(filePath)) return;
+            
         string text = File.ReadAllText(filePath) ?? string.Empty;
         try
         {
             if (string.IsNullOrEmpty(text)) return;
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
-            data.Initialize();
-            data.Validate();
-
-            LoadedPreset = data;
+            
+            TournamentViewModel.ChangeData(data);
         }
         catch { }
     }
@@ -158,7 +131,7 @@ public class PresetManagerViewModel : SelectableViewModel
                 TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
                 if (data == null) continue;
 
-                data.Setup(this);
+                data.Setup(TournamentViewModel, PresetService);
                 Presets.Add(data);
             }
             catch { }
@@ -177,22 +150,18 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public void AddItem(TournamentPreset item, bool save = true)
     {
-        if (save) Coordinator.SavePreset(item);
-        item.Setup(this);
+        if (save) PresetService.SavePreset(item);
+        item.Setup(TournamentViewModel, PresetService);
         Presets.Add(item);
     }
     public void RemoveItem(TournamentPreset item)
     {
         Presets.Remove(item);
-    }
-
-    public void SetPresetAsNotSaved()
-    {
-        IsCurrentPresetSaved = false;
-    }
-    public void PresetIsSaved()
-    {
-        IsCurrentPresetSaved = true;
+        if (TournamentViewModel.GetData().Name.Equals(item.Name))
+        {
+            TournamentViewModel.Delete();
+        }
+        File.Delete(item.GetPath());
     }
 
     public void SetRankedDataPath()
@@ -200,7 +169,7 @@ public class PresetManagerViewModel : SelectableViewModel
         string path = DialogBox.ShowOpenFolder();
         if (string.IsNullOrEmpty(path)) return;
 
-        LoadedPreset!.RankedRoomDataPath = path;
+        TournamentViewModel.RankedRoomDataPath = path;
     }
 
     private void OpenPresetFolder()
@@ -213,10 +182,6 @@ public class PresetManagerViewModel : SelectableViewModel
         });
     }
 
-    public void SavePreset(IPreset? preset = null)
-    {
-        Coordinator.SavePreset(preset);
-    }
     public void SaveLastOpened(string presetName)
     {
         Properties.Settings.Default.LastOpenedPresetName = presetName;

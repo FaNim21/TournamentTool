@@ -2,8 +2,10 @@
 
 namespace TournamentTool.Models;
 
-public interface ITournamentManager : IPreset
+public interface ITournamentManager
 {
+    string Name { get; set; }
+
     ObservableCollection<Player> Players { get; set; }
     
     bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null);

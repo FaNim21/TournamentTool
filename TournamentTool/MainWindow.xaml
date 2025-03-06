@@ -168,6 +168,12 @@
             <components:HamburgerMenu.HamburgerContent>
                 <Grid>
                     <StackPanel>
+                        <components:HamburgerMenuItem Text="Controller"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Controller"
+                                                      Foreground="Red"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
+                                                      GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Presets"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Presets"
@@ -178,15 +184,10 @@
                                                       CommandParameter="Whitelist"
                                                       IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PlayerManagerViewModel}}"
                                                       GroupName="MenuItem" />
-                        <components:HamburgerMenuItem Text="Controller"
-                                                      Command="{Binding SelectViewModelCommand}"
-                                                      CommandParameter="Controller"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
-                                                      GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Leaderboard"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Leaderboard"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:LeaderboardViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:LeaderboardPanelViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Scene Config"
                                                       Command="{Binding SelectViewModelCommand}"

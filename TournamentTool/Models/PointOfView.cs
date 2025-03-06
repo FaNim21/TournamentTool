@@ -270,7 +270,7 @@ public class PointOfView : BaseViewModel
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
 
         string name = string.Empty;
-        switch (_obs.Controller.Configuration.DisplayedNameType)
+        switch (_obs.Controller.TournamentViewModel.DisplayedNameType)
         {
             case DisplayedNameType.Twitch:
                 name = TwitchName;

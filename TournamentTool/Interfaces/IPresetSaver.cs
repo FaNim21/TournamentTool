@@ -4,5 +4,6 @@ namespace TournamentTool.Interfaces;
 
 public interface IPresetSaver
 {
-    void SavePreset(IPreset? preset = null);
+    void SavePreset(IPreset? preset);
+    void SavePreset();
 }

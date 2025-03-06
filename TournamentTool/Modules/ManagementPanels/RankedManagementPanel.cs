@@ -75,7 +75,7 @@ public class RankedManagementPanel : ManagementPanel
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubstractRoundCommand = new RelayCommand(() => { Rounds--; });
 
-        RankedManagementData = (RankedManagementData)controller.Configuration.ManagementData!;
+        RankedManagementData = (RankedManagementData)controller.TournamentViewModel.ManagementData!;
     }
 
     public override void OnEnable(object? parameter) { }

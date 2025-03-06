@@ -107,7 +107,7 @@ public class ObsController : BaseViewModel
         _cancellationTokenSource = new();
         Task.Factory.StartNew(async () =>
         {
-            await Connect(Controller.Configuration.Password!, Controller.Configuration.Port);
+            await Connect(Controller.TournamentViewModel.Password!, Controller.TournamentViewModel.Port);
         }, _cancellationTokenSource.Token);
     }
     public override bool OnDisable()
@@ -124,7 +124,7 @@ public class ObsController : BaseViewModel
 
     public async Task Connect(string password, int port)
     {
-        if (Controller.Configuration == null) return;
+        if (Controller.TournamentViewModel == null) return;
 
         EventSubscriptions subscription = EventSubscriptions.All;
         await Client.ConnectAsync(true, password, "localhost", port, subscription);
@@ -135,8 +135,8 @@ public class ObsController : BaseViewModel
     {
         try
         {
-            if (!string.IsNullOrEmpty(Controller.Configuration.SceneCollection))
-                await Client.SetCurrentSceneCollection(Controller.Configuration.SceneCollection);
+            if (!string.IsNullOrEmpty(Controller.TournamentViewModel.SceneCollection))
+                await Client.SetCurrentSceneCollection(Controller.TournamentViewModel.SceneCollection);
 
             var settings = await Client.GetVideoSettings();
             Controller.MainScene.CalculateProportionsRatio(settings.BaseWidth);
@@ -197,10 +197,10 @@ public class ObsController : BaseViewModel
     {
         if(!IsConnectedToWebSocket)
         {
-            await Connect(Controller.Configuration.Password!, Controller.Configuration.Port);
+            await Connect(Controller.TournamentViewModel.Password!, Controller.TournamentViewModel.Port);
         }
 
-        Controller.Configuration.ClearPlayersFromPOVS();
+        Controller.TournamentViewModel.ClearPlayersFromPOVS();
         await Controller.RefreshScenes();
     }
 
@@ -219,9 +219,9 @@ public class ObsController : BaseViewModel
         if (pov == null) return;
         if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
 
-        if (Controller.Configuration.SetPovHeadsInBrowser) pov.UpdateHead();
-        if (Controller.Configuration.DisplayedNameType != DisplayedNameType.None) pov.UpdateNameTextField();
-        if (Controller.Configuration.SetPovPBText) pov.UpdatePersonalBestTextField();
+        if (Controller.TournamentViewModel.SetPovHeadsInBrowser) pov.UpdateHead();
+        if (Controller.TournamentViewModel.DisplayedNameType != DisplayedNameType.None) pov.UpdateNameTextField();
+        if (Controller.TournamentViewModel.SetPovPBText) pov.UpdatePersonalBestTextField();
     }
     public bool SetBrowserURL(string sceneItemName, string path)
     {
@@ -325,7 +325,7 @@ public class ObsController : BaseViewModel
                 if (!option)
                 {
                     IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor);
-                    Controller.Configuration.ClearPlayersFromPOVS();
+                    Controller.TournamentViewModel.ClearPlayersFromPOVS();
                     Controller.ClearScenes();
                 }
                 else

@@ -40,7 +40,7 @@ public class NavigationService : BaseViewModel, INavigationService
         SelectableViewModel selectedViewModel = _viewModelFactory.Invoke(typeof(T));
 
         if (SelectedView != null && !SelectedView.OnDisable()) return;
-        if (!selectedViewModel.CanEnable(MainViewModel.Configuration!)) return;
+        if (!selectedViewModel.CanEnable()) return;
 
         MainViewModel.UpdateDebugWindowViewModel(selectedViewModel);
         SelectedView = selectedViewModel;

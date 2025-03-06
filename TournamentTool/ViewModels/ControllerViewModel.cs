@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Modules.ManagementPanels;
@@ -10,6 +11,7 @@ using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
@@ -39,7 +41,8 @@ public class ControllerViewModel : SelectableViewModel
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
 
-    public Tournament Configuration { get; private set; } = new();
+    public TournamentViewModel TournamentViewModel { get; }
+    public IPresetSaver PresetService { get; }
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -108,8 +111,11 @@ public class ControllerViewModel : SelectableViewModel
     public ICommand UnSelectItemsCommand { get; set; }
 
 
-    public ControllerViewModel(MainViewModelCoordinator coordinator) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService) : base(coordinator)
     {
+        TournamentViewModel = tournamentViewModel;
+        PresetService = presetService;
+
         _api = new APIDataSaver();
 
         MainScene = new Scene(this, coordinator);
@@ -122,16 +128,13 @@ public class ControllerViewModel : SelectableViewModel
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
 
-    public override bool CanEnable(Tournament? tournament)
+    public override bool CanEnable()
     {
-        if (tournament is null) return false;
-
-        Configuration = tournament;
-        return true;
-    }
+        return !TournamentViewModel.IsNullOrEmpty();
+    } 
     public override void OnEnable(object? parameter)
     {
-        switch(Configuration.ControllerMode)
+        switch(TournamentViewModel.ControllerMode)
         {
             case ControllerMode.None:
                 UseSidePanel = false;
@@ -173,9 +176,9 @@ public class ControllerViewModel : SelectableViewModel
         ManagementPanel?.OnEnable(null);
         OBS.OnEnable(null);
 
-        if (!Configuration.IsUsingTwitchAPI)
+        if (!TournamentViewModel.IsUsingTwitchAPI)
         {
-            Configuration.ClearPlayerStreamData();
+            TournamentViewModel.ClearPlayerStreamData();
             return;
         }
 
@@ -195,7 +198,7 @@ public class ControllerViewModel : SelectableViewModel
         _cancellationTokenSource = null;
         _apiWorker = null;
 
-        Configuration.ClearFromController();
+        TournamentViewModel.ClearFromController();
 
         MainScene.Clear();
         PreviewScene.Clear();
@@ -224,7 +227,7 @@ public class ControllerViewModel : SelectableViewModel
 
             try
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(Configuration.ApiRefreshRateMiliseconds), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.ApiRefreshRateMiliseconds), cancellationToken);
             }
             catch (TaskCanceledException) { break; }
         }
@@ -235,7 +238,7 @@ public class ControllerViewModel : SelectableViewModel
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
 
-        IEnumerable<Player> playersToAdd = Configuration.Players
+        IEnumerable<Player> playersToAdd = TournamentViewModel.Players
             .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
             .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
 
@@ -280,7 +283,7 @@ public class ControllerViewModel : SelectableViewModel
 
     public void SavePreset()
     {
-        Coordinator.SavePreset();
+        PresetService.SavePreset();
     }
 
     public void ClearScenes()

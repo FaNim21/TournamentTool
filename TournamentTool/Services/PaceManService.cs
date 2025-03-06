@@ -75,7 +75,7 @@ public class PaceManService : BaseViewModel
 
             try
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(Controller.Configuration.PaceManRefreshRateMiliseconds), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(Controller.TournamentViewModel.PaceManRefreshRateMiliseconds), cancellationToken);
             }
             catch (TaskCanceledException) { break; }
         }
@@ -111,17 +111,17 @@ public class PaceManService : BaseViewModel
 
             if (wasPaceFound) continue;
 
-            int n = Controller.Configuration.Players.Count;
+            int n = Controller.TournamentViewModel.Players.Count;
             for (int j = 0; j < n; j++)
             {
-                var current = Controller.Configuration.Players[j];
+                var current = Controller.TournamentViewModel.Players[j];
                 if (!current.StreamData.ExistName(pace.User.TwitchName!)) continue;
                 
                 pace.Player = current;
                 break;
             }
 
-            if (Controller.Configuration.IsUsingWhitelistOnPaceMan && pace.Player == null) continue;
+            if (Controller.TournamentViewModel.IsUsingWhitelistOnPaceMan && pace.Player == null) continue;
 
             pace.Initialize(Controller, pace.Splits);
             AddPaceMan(pace);
@@ -138,11 +138,11 @@ public class PaceManService : BaseViewModel
     {
         Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceMan); });
 
-        int n = Controller.Configuration.Players.Count;
+        int n = Controller.TournamentViewModel.Players.Count;
         bool updatedPlayer = false;
         for (int i = 0; i < n; i++)
         {
-            var player = Controller.Configuration.Players[i];
+            var player = Controller.TournamentViewModel.Players[i];
 
             if (player.InGameName!.Equals(paceMan.Nickname, StringComparison.OrdinalIgnoreCase))
             {

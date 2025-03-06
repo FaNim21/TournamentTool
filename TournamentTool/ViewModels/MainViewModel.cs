@@ -1,12 +1,9 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Components;
-using TournamentTool.Interfaces;
-using TournamentTool.Models;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.Windows;
@@ -15,9 +12,6 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    private readonly JsonSerializerOptions _serializerOptions;
-
-    public Tournament? Configuration { get; set; }
     public DebugWindow? DebugWindow { get; set; }
 
     private INavigationService? _navigationService;
@@ -84,7 +78,6 @@ public class MainViewModel : BaseViewModel
         if (!Directory.Exists(Consts.LogsPath))
             Directory.CreateDirectory(Consts.LogsPath);
 
-        _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
         OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
@@ -97,31 +90,19 @@ public class MainViewModel : BaseViewModel
 
     public void SelectViewModel(string viewModelName)
     {
+        if (NavigationService == null) return;
+        
         switch (viewModelName)
         {
             case "Presets": NavigationService.NavigateTo<PresetManagerViewModel>(); break;
             case "Whitelist": NavigationService.NavigateTo<PlayerManagerViewModel>(); break;
             case "Controller": NavigationService.NavigateTo<ControllerViewModel>(); break;
-            case "Leaderboard": NavigationService.NavigateTo<LeaderboardViewModel>(); break;
+            case "Leaderboard": NavigationService.NavigateTo<LeaderboardPanelViewModel>(); break;
             case "SceneManagement": NavigationService.NavigateTo<SceneManagementViewModel>(); break;
             case "Updates": NavigationService.NavigateTo<UpdatesViewModel>(); break;
             case "Settings": NavigationService.NavigateTo<SettingsViewModel>(); break;
         }
         IsHamburgerMenuOpen = false;
-    }
-
-    public void SavePreset(IPreset? preset = null)
-    {
-        preset ??= Configuration!;
-        if (preset == null) return;
-
-        var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
-        string path = preset.GetPath();
-        File.WriteAllText(path, data);
-
-        if (preset != Configuration) return;
-        if (NavigationService.SelectedView is not PresetManagerViewModel presetManager) return;
-        presetManager.PresetIsSaved();
     }
 
     private async Task CheckForUpdate()
