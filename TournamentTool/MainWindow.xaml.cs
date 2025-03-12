@@ -66,11 +66,9 @@ public partial class MainWindow : Window
         if (mainViewModel.NavigationService.SelectedView != null && mainViewModel.NavigationService.SelectedView is not PresetManagerViewModel)
         {
             var option = DialogBox.Show($"Are you sure you want to exit from here?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (option == MessageBoxResult.Yes)
-            {
-                if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
-                Close();
-            }
+            if (option != MessageBoxResult.Yes) return;
+            if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
+            Close();
             return;
         }
 

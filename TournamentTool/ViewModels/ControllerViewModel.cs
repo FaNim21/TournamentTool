@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
@@ -116,6 +117,8 @@ public class ControllerViewModel : SelectableViewModel
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
 
+        tournamentViewModel.OnControllerModeChanged += UpdateSidePanel;
+        
         _api = new APIDataSaver();
 
         MainScene = new Scene(this, coordinator);
@@ -134,37 +137,6 @@ public class ControllerViewModel : SelectableViewModel
     } 
     public override void OnEnable(object? parameter)
     {
-        switch(TournamentViewModel.ControllerMode)
-        {
-            case ControllerMode.None:
-                UseSidePanel = false;
-
-                if (SidePanel != null)
-                {
-                    SidePanel = null;
-                    ManagementPanel = null;
-                }
-                break;
-            case ControllerMode.PaceMan:
-                UseSidePanel = true;
-
-                if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(PaceManPanel))))
-                {
-                    SidePanel = new PaceManPanel(this);
-                    ManagementPanel = null;
-                }
-                break;
-            case ControllerMode.Ranked:
-                UseSidePanel = true;
-
-                if (SidePanel == null || (SidePanel != null && !SidePanel.GetType().Equals(typeof(RankedPacePanel))))
-                {
-                    SidePanel = new RankedPacePanel(this);
-                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
-                }
-                break;
-        }
-
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _apiWorker.DoWork += UpdateAPI;
@@ -213,6 +185,46 @@ public class ControllerViewModel : SelectableViewModel
         return true;
     }
 
+    private void UpdateSidePanel()
+    {
+        if (SidePanel != null && TournamentViewModel.ControllerMode == SidePanel.Mode) return;
+        
+        SidePanel?.UnInitialize();
+        
+        switch(TournamentViewModel.ControllerMode)
+        {
+            case ControllerMode.None:
+                UseSidePanel = false;
+
+                if (SidePanel != null)
+                {
+                    SidePanel = null;
+                    ManagementPanel = null;
+                }
+                break;
+            case ControllerMode.PaceMan:
+                UseSidePanel = true;
+
+                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
+                {
+                    SidePanel = new PaceManPanel(this);
+                    ManagementPanel = null;
+                }
+                break;
+            case ControllerMode.Ranked:
+                UseSidePanel = true;
+
+                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
+                {
+                    SidePanel = new RankedPacePanel(this);
+                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
+                }
+                break;
+        }
+        
+        SidePanel?.Initialize();
+    }
+    
     private async void UpdateAPI(object? sender, DoWorkEventArgs e)
     {
         if (ManagementPanel == null) return;

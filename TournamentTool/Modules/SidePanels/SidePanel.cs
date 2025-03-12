@@ -23,12 +23,18 @@ public abstract class SidePanel : BaseViewModel
         }
     }
 
+    public ControllerMode Mode { get; protected set; }
 
-    public SidePanel(ControllerViewModel controller)
+
+    protected SidePanel(ControllerViewModel controller)
     {
         Controller = controller;
+        Mode = ControllerMode.None;
     }
 
+    public abstract void Initialize();
+    public abstract void UnInitialize();
+    
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() { return true; }
 

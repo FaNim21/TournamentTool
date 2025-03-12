@@ -30,22 +30,31 @@ public class PaceManPanel : SidePanel
 
     public PaceManPanel(ControllerViewModel controller) : base(controller)
     {
-        _paceManService = new(controller);
+        _paceManService = new PaceManService(controller);
+        Mode = ControllerMode.PaceMan;
     }
 
+    public override void Initialize()
+    {
+        _paceManService.OnRefreshGroup += RefreshGroup;
+        _paceManService.OnEnable(null);
+    }
+
+    public override void UnInitialize()
+    {
+        _paceManService.OnRefreshGroup -= RefreshGroup;
+        _paceManService.OnDisable();
+    }
+    
     public override void OnEnable(object? parameter)
     {
         base.OnEnable(parameter);
+        
         SetupPaceManGrouping();
-
-        _paceManService.OnRefreshGroup += RefreshGroup;
-        _paceManService.OnEnable(parameter);
     }
     public override bool OnDisable()
     {
         base.OnDisable();
-        _paceManService.OnRefreshGroup -= RefreshGroup;
-        _paceManService.OnDisable();
 
         SelectedPlayer = null;
         GroupedPaceManPlayers = null;
@@ -66,7 +75,10 @@ public class PaceManPanel : SidePanel
 
     public void RefreshGroup(bool isEmpty)
     {
-        Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers?.Refresh(); });
+        if (GroupedPaceManPlayers != null)
+        {
+            Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers.Refresh(); });
+        }
 
         if (isEmpty == _lastOutput) return;
         EmptyRunsTitle = isEmpty ? "No active pace or stream" : string.Empty;

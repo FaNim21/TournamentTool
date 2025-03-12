@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Updates\" />
+    <Folder Include="Windows\Ranking\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\audio.png" />

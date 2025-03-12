@@ -7,8 +7,6 @@ using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Modules;
-using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json.Serialization;
 using TournamentTool.Interfaces;
+using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -99,6 +100,8 @@ public class PacemanManagementData : ManagementData
 public class Tournament : IPreset
 {
     public ManagementData? ManagementData { get; set; }
+
+    public Leaderboard Leaderboard { get; set; } = new();
 
     public ObservableCollection<Player> Players { get; set; } = [];
 

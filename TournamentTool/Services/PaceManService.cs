@@ -4,6 +4,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.Json;
 using TournamentTool.ViewModels;
 
@@ -36,8 +37,8 @@ public class PaceManService : BaseViewModel
 
     public override void OnEnable(object? parameter)
     {
-        _cancellationTokenSource = new();
-        _paceManWorker = new() { WorkerSupportsCancellation = true };
+        _cancellationTokenSource = new CancellationTokenSource();
+        _paceManWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _paceManWorker.DoWork += PaceManUpdate;
         _paceManWorker.RunWorkerAsync();
     }
@@ -82,7 +83,6 @@ public class PaceManService : BaseViewModel
     }
     private async Task RefreshPaceManAsync()
     {
-        //TODO: 0 Uzyc IProgress do raportowania zmian na UI
         string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
         if (paceMan == null) return;

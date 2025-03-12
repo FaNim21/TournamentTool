@@ -195,20 +195,19 @@ public class RankedPacePanel : SidePanel
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
             PropertyNameCaseInsensitive = true
         };
+
+        Mode = ControllerMode.Ranked;
     }
 
-    public override void OnEnable(object? parameter)
+    public override void Initialize()
     {
-        base.OnEnable(parameter);
-        SetupPaceManGrouping();
-
         string dataName = Controller.TournamentViewModel.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
             dataName = Path.Combine(dataName, ".json");
         }
         FilePath = Path.Combine(Controller.TournamentViewModel.RankedRoomDataPath, dataName);
-        _cancellationTokenSource = new();
+        _cancellationTokenSource = new CancellationTokenSource();
 
         if (!File.Exists(FilePath))
         {
@@ -218,13 +217,25 @@ public class RankedPacePanel : SidePanel
 
         Task.Run(UpdateSpectatorMatch);
     }
+
+    public override void UnInitialize()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+    }
+
+    public override void OnEnable(object? parameter)
+    {
+        base.OnEnable(parameter);
+        
+        SetupPaceManGrouping();
+    }
     public override bool OnDisable()
     {
         base.OnDisable();
 
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
+        GroupedRankedPaces = null;
         return true;
     }
 
@@ -269,7 +280,7 @@ public class RankedPacePanel : SidePanel
         {
             string jsonContent;
 
-            using (FileStream fs = new(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            await using (FileStream fs = new(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader reader = new(fs))
             {
                 jsonContent = await reader.ReadToEndAsync();
@@ -287,7 +298,9 @@ public class RankedPacePanel : SidePanel
         FilterJSON(rankedData.Value);
 
         CompletedRunsCount = rankedData.Value.Completes.Length;
-        Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces?.Refresh(); });
+        
+        if (GroupedRankedPaces == null) return;
+        Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });
     }
     private void FilterJSON(RankedData rankedData)
     {

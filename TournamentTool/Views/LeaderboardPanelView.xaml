@@ -8,7 +8,9 @@
              xmlns:converters="clr-namespace:TournamentTool.Converters"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
+             xmlns:entitiesViewmodels="clr-namespace:TournamentTool.ViewModels.Entities"
              xmlns:models="clr-namespace:TournamentTool.Models"
+             xmlns:ranking="clr-namespace:TournamentTool.Models.Ranking"
              d:DataContext="{d:DesignInstance Type=viewmodels:LeaderboardPanelViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -54,12 +56,13 @@
                     <behaviors:ListBoxClampScrollBehavior />
                 </i:Interaction.Behaviors>
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:LeaderboardEntry}">
+                    <DataTemplate DataType="{x:Type entitiesViewmodels:LeaderboardEntryViewModel}">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
                                 Width="auto">
                             <StackPanel>
-                                
+                                <TextBlock Text="xd"/>
+                                <TextBlock Text="{Binding Player.Name}"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

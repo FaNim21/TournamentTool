@@ -2,13 +2,14 @@
 using System.IO;
 using System.Windows;
 using TournamentTool.Models;
+using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
 
 public class TournamentViewModel : BaseViewModel, ITournamentManager
 {
-    private Tournament _tournament = new();
+    private Tournament _tournament;
     
     public ManagementData? ManagementData
     {
@@ -19,7 +20,9 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             OnPropertyChanged(nameof(ManagementData));
         }
     }
-    
+
+    public LeaderboardViewModel Leaderboard { get; set; }
+
     public ObservableCollection<Player> Players
     {
         get => _tournament.Players;
@@ -257,16 +260,19 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
     }
     public string? CreditsToText { set; get; }
-    
+
+    public Action? OnControllerModeChanged;
     public ControllerMode ControllerMode
     {
         get => _tournament.ControllerMode;
         set
         {
+            if (_tournament.ControllerMode == value) return;
+            
             _tournament.ControllerMode = value;
             OnPropertyChanged(nameof(ControllerMode));
-    
-            if (_tournament.ControllerMode == value) return;
+            
+            OnControllerModeChanged?.Invoke();
     
             if (value == ControllerMode.Ranked)
                 ManagementData = new RankedManagementData();
@@ -317,6 +323,12 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
 
     public bool HasBeenRemoved { get; set; } = true;
 
+    
+    public TournamentViewModel()
+    {
+        _tournament = new Tournament();
+        Leaderboard = new LeaderboardViewModel(_tournament);
+    }
 
     public void ChangeData(Tournament tournament)
     {
@@ -324,12 +336,17 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         
         _tournament = tournament;
         
+        Leaderboard.Update(this);
         UpdatePlayers();
         UpdateGoodPacesTexts();
         
+        Leaderboard.RefreshUI();
         RefreshUI();
+        
         IsCurrentlyOpened = true;
         HasBeenRemoved = false;
+        
+        OnControllerModeChanged?.Invoke();
     }
     
     public void RefreshUI()
@@ -412,6 +429,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             Players.Remove(player);
         });
     }
+
     
     public bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null)
     {
@@ -443,6 +461,16 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             if (current.StreamData.ExistName(twitchName))
                 return current;
         }
+        return null;
+    }
+    public Player? GetPlayerByGUID(Guid id)
+    {
+        foreach (var player in Players)
+        {
+            if (player.Id != id) continue;
+            return player;
+        }
+        
         return null;
     }
     
