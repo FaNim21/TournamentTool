@@ -37,4 +37,16 @@ public class MainViewModelCoordinator : ICoordinator
         LoadingWindow window = new(loading);
         ShowDialog(window);
     }
+
+    public void ShowLoading(Func<IProgress<float>, IProgress<string>, CancellationToken, Task> loading, bool keepBackground)
+    {
+        if (!keepBackground)
+        {
+            ShowLoading(loading);
+            return;
+        }
+        
+        LoadingWindow window = new(loading) { Owner = Application.Current.MainWindow };
+        window.ShowDialog();
+    }
 }

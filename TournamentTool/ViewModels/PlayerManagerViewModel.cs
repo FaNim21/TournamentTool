@@ -121,9 +121,13 @@ public class PlayerManagerViewModel : SelectableViewModel
     }
     
     public ICommand AddPlayerCommand { get; set; }
+    public ICommand ValidatePlayersCommand { get; set; }
+
+    public ICommand ViewPlayerInfoCommand { get; set; }
     public ICommand EditPlayerCommand { get; set; }
-    public ICommand RemovePlayerCommand { get; set; }
+    public ICommand ValidatePlayerCommand { get; set; }
     public ICommand FixPlayerHeadCommand { get; set; }
+    public ICommand RemovePlayerCommand { get; set; }
     
     public ICommand RemoveSelectedPlayerCommand { get; set; }
 
@@ -144,15 +148,24 @@ public class PlayerManagerViewModel : SelectableViewModel
     private string _lastTournamentName = string.Empty;
 
 
+    /// <summary>
+    /// Powinienem zrobic okno bazujace na blokowaniu opcji odswiezenia walidacji in game name poprzez ponowna mozliwosc walidacji po resecie okna?
+    /// Tez glowny guzik walidacji powinien miec cooldown na sekunde po kazdym uzytkowniku
+    /// </summary>
+    
     public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService) : base(coordinator)
     {
         Tournament = tournament;
         PresetService = presetService;
 
         AddPlayerCommand = new RelayCommand(AddPlayer);
+        ValidatePlayersCommand = new RelayCommand(() => { Coordinator.ShowLoading(ValidateAllPlayers); });
+
+        ViewPlayerInfoCommand = new ViewPlayerInfoCommand(this, coordinator, coordinator, PresetService);
         EditPlayerCommand = new EditPlayerCommand(this);
-        RemovePlayerCommand = new RemovePlayerCommand(this, PresetService);
+        ValidatePlayerCommand = new ValidatePlayerCommand(this, coordinator, PresetService);
         FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, PresetService);
+        RemovePlayerCommand = new RemovePlayerCommand(this, PresetService);
 
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
@@ -164,7 +177,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
-        SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist();});
+        SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist(); });
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
         
         Task.Run(async () => {
@@ -212,6 +225,36 @@ public class PlayerManagerViewModel : SelectableViewModel
         ChosenEvent = null;
 
         return true;
+    }
+
+    private async Task ValidateAllPlayers(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
+    {
+       int count = Tournament.Players.Count;
+       for (int i = 0; i < count; i++)
+       {
+           var player = Tournament.Players[i];
+           cancellationToken.ThrowIfCancellationRequested();
+           progress.Report((float)i / count);
+           if (string.IsNullOrEmpty(player.UUID)) continue;
+           
+           logProgress.Report($"({i+1}/{count}) validating player in game name: {player.InGameName}");
+           await Task.Delay(500, cancellationToken);
+
+           var data = await player.GetDataFromUUID();
+           if (!data.HasValue) return;
+        
+           if (data.Value.InGameName.Equals(player.InGameName))
+           {
+               logProgress.Report($"({i+1}/{count}) player {player.InGameName} is correct");
+           }
+           else
+           {
+               logProgress.Report($"({i+1}/{count}) incorrect in game name... changing to: {player.InGameName}");
+               player.InGameName = data.Value.InGameName;
+           }
+           await Task.Delay(500, cancellationToken);
+       }
+       PresetService.SavePreset();
     }
 
     public void Add(Player player)
@@ -373,7 +416,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         player.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
         player.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
 
-        await player.UpdateHeadImage();
+        await player.CompleteData();
         return true;
     }
 

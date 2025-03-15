@@ -2,5 +2,5 @@
 
 public sealed class LeaderboardEntry
 {
-    public Guid PlayerID { get; set; }
+    public string PlayerUUID { get; set; }
 }

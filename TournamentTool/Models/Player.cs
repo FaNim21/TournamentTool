@@ -10,15 +10,13 @@ using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
 
-public struct ResponseApiID
+public readonly struct ResponseMojangProfileAPI
 {
     [JsonPropertyName("id")]
-    public string ID { get; set; }
-}
-public struct ResponseApiName
-{
+    public string UUID { get; init; }
+    
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string InGameName { get; init; } 
 }
 
 public class StreamData : BaseViewModel
@@ -227,7 +225,17 @@ public class Player : BaseViewModel, IPlayer
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
-    public string UUID { get; set; } = string.Empty;
+    private string _UUID = string.Empty;
+    public string UUID
+    {
+        get => _UUID;
+        set
+        {
+            _UUID = value;
+            OnPropertyChanged(nameof(UUID));
+            IsUUIDEmpty = string.IsNullOrEmpty(UUID);
+        }
+    }
 
     [JsonIgnore]
     private BitmapImage? _image;
@@ -328,6 +336,18 @@ public class Player : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(IsUsedInPreview));
         }
     }
+    
+    [JsonIgnore] private bool _isUUIDEmpty;
+    [JsonIgnore]
+    public bool IsUUIDEmpty
+    {
+        get => _isUUIDEmpty;
+        set
+        {
+            _isUUIDEmpty = value;
+            OnPropertyChanged(nameof(IsUUIDEmpty));
+        }
+    }
 
     private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
 
@@ -339,6 +359,14 @@ public class Player : BaseViewModel, IPlayer
         StreamData.LiveData.Update(new TwitchStreamData());
     }
 
+    public void Initialize()
+    {
+        LoadHead();
+        CleanUpUUID();
+
+        IsUUIDEmpty = string.IsNullOrEmpty(UUID);
+    }
+
     public void ShowCategory(bool option)
     {
         StreamData.LiveData.GameNameVisibility = option;
@@ -348,19 +376,48 @@ public class Player : BaseViewModel, IPlayer
         IsShowingTeamName = option;
     }
 
-    public async Task CompleteData()
+    public async Task CompleteData(bool completeUUID = true)
     {
         try
         {
-            string result = await Helper.MakeRequestAsString($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
-            ResponseApiName name = JsonSerializer.Deserialize<ResponseApiName>(result);
-            InGameName = name.Name;
+            if (string.IsNullOrEmpty(UUID) && completeUUID)
+            {
+                var data = await GetDataFromInGameName();
+                if (data != null)
+                {
+                    UUID = data.Value.UUID;
+                }
+            }
+            if (string.IsNullOrEmpty(InGameName))
+            {
+                var data = await GetDataFromUUID();
+                if (data != null)
+                {
+                    InGameName = data.Value.InGameName;
+                }
+            }
+            
             await UpdateHeadImage();
         }
         catch (Exception ex)
         {
-            DialogBox.Show("Error: " + ex.Message + " - " + ex.StackTrace, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            DialogBox.Show("Error: " + ex.Message + " - " + ex.StackTrace, "ERROR completing data", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    public async Task<ResponseMojangProfileAPI?> GetDataFromUUID()
+    {
+        if (string.IsNullOrEmpty(UUID)) return null;
+        
+        string result = await Helper.MakeRequestAsString($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
+        return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);
+    }
+    public async Task<ResponseMojangProfileAPI?> GetDataFromInGameName()
+    {
+        if (string.IsNullOrEmpty(InGameName)) return null;
+        
+        string result = await Helper.MakeRequestAsString($"https://api.mojang.com/users/profiles/minecraft/{InGameName}");
+        return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);
     }
 
     public void LoadHead()
@@ -409,6 +466,13 @@ public class Player : BaseViewModel, IPlayer
         IsUsedInPov = false;
 
         StreamData.LiveData.Clear();
+    }
+
+    public void CleanUpUUID()
+    {
+        if (string.IsNullOrEmpty(UUID)) return;
+
+        UUID = UUID.Replace("-", "");
     }
 
     public string GetDisplayName()

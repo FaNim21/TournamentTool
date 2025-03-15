@@ -49,7 +49,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         for (int i = 0; i < _chosenEvent!.WhiteList!.Length; i++)
         {
             var current = _chosenEvent!.WhiteList[i];
-            Player player = new() { UUID = current ?? string.Empty };
+            Player player = new() { UUID = current.Replace("-", "") ?? string.Empty };
             eventPlayers.Add(player);
         }
 
@@ -105,7 +105,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
             {
                 var twitch = _twitchNames[j];
                 progress.Report((float)i / eventPlayers.Count);
-                if (player.UUID != twitch.uuid) continue;
+                if (player.UUID != twitch.uuid.Replace("-", "")) continue;
                 player.StreamData.Main = twitch.liveAccount?.Trim() ?? string.Empty;
                 player.PersonalBest = string.Empty;
                 

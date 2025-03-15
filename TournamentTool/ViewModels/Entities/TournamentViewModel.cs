@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
@@ -17,6 +18,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         set
         {
             _tournament.ManagementData = value;
+            PresetIsModified();
             OnPropertyChanged(nameof(ManagementData));
         }
     }
@@ -30,6 +32,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.Players = value;
             OnPropertyChanged(nameof(Players));
+            PresetIsModified();
         }
     }
     
@@ -50,6 +53,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.IsAlwaysOnTop = value;
             OnPropertyChanged(nameof(IsAlwaysOnTop));
+            PresetIsModified();
             SetAlwaysOnTop();
         }
     }
@@ -62,6 +66,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
                 
             _tournament.IsUsingTeamNames = value;
             OnPropertyChanged(nameof(IsUsingTeamNames));
+            PresetIsModified();
             UpdateTeamNamesForPlayers();
         }
     }
@@ -72,6 +77,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.IsUsingWhitelistOnPaceMan = value;
             OnPropertyChanged(nameof(IsUsingWhitelistOnPaceMan));
+            PresetIsModified();
         }
     }
     
@@ -82,6 +88,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.Port = value;
             OnPropertyChanged(nameof(Port));
+            PresetIsModified();
         }
     }
     public string Password
@@ -91,6 +98,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.Password = value;
             OnPropertyChanged(nameof(Password));
+            PresetIsModified();
         }
     }
     public string SceneCollection
@@ -100,6 +108,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.SceneCollection = value;
             OnPropertyChanged(nameof(SceneCollection));
+            PresetIsModified();
         }
     }
     public string FilterNameAtStartForSceneItems
@@ -111,6 +120,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
                 _tournament.FilterNameAtStartForSceneItems = value;
     
             OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
+            PresetIsModified();
         }
     }
     
@@ -123,6 +133,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
                 
             _tournament.IsUsingTwitchAPI = value;
             OnPropertyChanged(nameof(IsUsingTwitchAPI));
+            PresetIsModified();
             UpdateCategoryForPlayers();
         }
     }
@@ -135,6 +146,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
                 
             _tournament.ShowStreamCategory = value;
             OnPropertyChanged(nameof(ShowStreamCategory));
+            PresetIsModified();
             UpdateCategoryForPlayers();
         }
     }
@@ -146,6 +158,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.SetPovHeadsInBrowser = value;
             OnPropertyChanged(nameof(SetPovHeadsInBrowser));
+            PresetIsModified();
         }
     }
     public bool SetPovPBText
@@ -155,6 +168,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.SetPovPBText = value;
             OnPropertyChanged(nameof(SetPovPBText));
+            PresetIsModified();
         }
     }
     public DisplayedNameType DisplayedNameType
@@ -164,6 +178,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.DisplayedNameType = value;
             OnPropertyChanged(nameof(DisplayedNameType));
+            PresetIsModified();
         }
     }
     
@@ -174,6 +189,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.ApiRefreshRateMiliseconds = value < 1000 ? 1000 : value;
             OnPropertyChanged(nameof(ApiRefreshRateMiliseconds));
+            PresetIsModified();
         }
     }
     public int PaceManRefreshRateMiliseconds
@@ -183,6 +199,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         {
             _tournament.PaceManRefreshRateMiliseconds = value < 3000 ? 3000 : value;
             OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
+            PresetIsModified();
         }
     }
     
@@ -197,6 +214,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             Structure2ToText = $"Structure 2 (sub {time})";
             OnPropertyChanged(nameof(Structure2ToText));
             OnPropertyChanged(nameof(Structure2GoodPaceMiliseconds));
+            PresetIsModified();
         }
     }
     public string? Structure2ToText { set; get; }
@@ -212,6 +230,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             FirstPortalToText = $"First Portal (sub {time})";
             OnPropertyChanged(nameof(FirstPortalToText));
             OnPropertyChanged(nameof(FirstPortalGoodPaceMiliseconds));
+            PresetIsModified();
         }
     }
     public string? FirstPortalToText { set; get; }
@@ -227,6 +246,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             EnterStrongholdToText = $"Enter Stronghold (sub {time})";
             OnPropertyChanged(nameof(EnterStrongholdToText));
             OnPropertyChanged(nameof(EnterStrongholdGoodPaceMiliseconds));
+            PresetIsModified();
         }
     }
     public string? EnterStrongholdToText { set; get; }
@@ -242,6 +262,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             EnterEndToText = $"Enter End (sub {time})";
             OnPropertyChanged(nameof(EnterEndToText));
             OnPropertyChanged(nameof(EnterEndGoodPaceMiliseconds));
+            PresetIsModified();
         }
     }
     public string? EnterEndToText { set; get; }
@@ -257,6 +278,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             CreditsToText = $"Finish (sub {time})";
             OnPropertyChanged(nameof(CreditsToText));
             OnPropertyChanged(nameof(CreditsGoodPaceMiliseconds));
+            PresetIsModified();
         }
     }
     public string? CreditsToText { set; get; }
@@ -271,6 +293,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             
             _tournament.ControllerMode = value;
             OnPropertyChanged(nameof(ControllerMode));
+            PresetIsModified();
             
             OnControllerModeChanged?.Invoke();
     
@@ -287,6 +310,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         set
         {
             _tournament.RankedRoomDataPath = value;
+            PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataPath));
         }
     }
@@ -296,6 +320,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         set
         {
             _tournament.RankedRoomDataName = value;
+            PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataName));
         }
     }
@@ -305,11 +330,12 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         set
         {
             _tournament.RankedRoomUpdateFrequency = value < 1000 ? 1000 : value;
-
+            PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
         }
     }
 
+    
     private bool _isCurrentlyOpened;
     public bool IsCurrentlyOpened
     {
@@ -320,22 +346,48 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             OnPropertyChanged(nameof(IsCurrentlyOpened));
         }
     }
-
+    
+    private bool _isPresetModified;
+    public bool IsPresetModified
+    {
+        get => _isPresetModified;
+        set
+        {
+            _isPresetModified = value;
+            OnPropertyChanged(nameof(IsPresetModified));
+        }
+    }
+    
     public bool HasBeenRemoved { get; set; } = true;
 
-    
+
     public TournamentViewModel()
     {
         _tournament = new Tournament();
-        Leaderboard = new LeaderboardViewModel(_tournament);
+        Leaderboard = new LeaderboardViewModel(_tournament, this);
     }
 
     public void ChangeData(Tournament tournament)
     {
         if (tournament == null) return;
+
+        Leaderboard.Clear();
         
         _tournament = tournament;
+        Leaderboard = new LeaderboardViewModel(_tournament, this);
         
+        SetupPreset();
+        
+        IsCurrentlyOpened = true;
+        HasBeenRemoved = false;
+        
+        OnControllerModeChanged?.Invoke();
+        
+        PresetIsSaved();
+    }
+
+    private void SetupPreset()
+    {
         Leaderboard.Update(this);
         UpdatePlayers();
         UpdateGoodPacesTexts();
@@ -343,10 +395,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         Leaderboard.RefreshUI();
         RefreshUI();
         
-        IsCurrentlyOpened = true;
-        HasBeenRemoved = false;
-        
-        OnControllerModeChanged?.Invoke();
+        SetAlwaysOnTop();
     }
     
     public void RefreshUI()
@@ -393,13 +442,12 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         for (int i = 0; i < Players.Count; i++)
         {
             var player = Players[i];
-            player.LoadHead();
+            player.Initialize();
         }
     }
     public void UpdateGoodPacesTexts()
     {
-        string time;
-        time = TimeSpan.FromMilliseconds(Structure2GoodPaceMiliseconds).ToString(@"mm\:ss");
+        var time = TimeSpan.FromMilliseconds(Structure2GoodPaceMiliseconds).ToString(@"mm\:ss");
         Structure2ToText = $"Structure 2 (sub {time})";
     
         time = TimeSpan.FromMilliseconds(FirstPortalGoodPaceMiliseconds).ToString(@"mm\:ss");
@@ -420,6 +468,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         Application.Current.Dispatcher.Invoke(() =>
         {
             Players.Add(player);
+            PresetIsModified();
         });
     }
     public void RemovePlayer(Player player)
@@ -427,6 +476,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         Application.Current.Dispatcher.Invoke(() =>
         {
             Players.Remove(player);
+            PresetIsModified();
         });
     }
 
@@ -463,11 +513,11 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
         return null;
     }
-    public Player? GetPlayerByGUID(Guid id)
+    public Player? GetPlayerByGUID(string uuid)
     {
         foreach (var player in Players)
         {
-            if (player.Id != id) continue;
+            if (player.UUID != uuid) continue;
             return player;
         }
         
@@ -547,6 +597,18 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
     }
 
+    public void PresetIsModified()
+    {
+        //TODO: 9 kiedys zrobic bardziej zaawansowane przechwytywanie zmian z weryfikacja powrotu do danych przed zmiana itd
+        //to sie tez tyczy problemow jak zmiana atrybutow w player, ponieawz nie jest bezposrednio powiazany z modelem wiec na razie
+        // nie chce wprowadzac zmian z zapisywaniem itp itd tutaj
+        IsPresetModified = true;
+    }
+    public void PresetIsSaved()
+    {
+        IsPresetModified = false;
+    }
+
     private void SetAlwaysOnTop()
     {
         Application.Current?.Dispatcher.Invoke(() =>
@@ -564,4 +626,5 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
     }
 
     public Tournament GetData() => _tournament;
+
 }

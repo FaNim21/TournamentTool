@@ -7,6 +7,7 @@ namespace TournamentTool.ViewModels.Entities;
 
 public sealed class LeaderboardViewModel : BaseViewModel
 {
+    private readonly TournamentViewModel _tournamentViewModel;
     private readonly Tournament _tournament;
 
     private ObservableCollection<LeaderboardEntryViewModel> _entries = [];
@@ -21,9 +22,10 @@ public sealed class LeaderboardViewModel : BaseViewModel
     }
     
     
-    public LeaderboardViewModel(Tournament tournament)
+    public LeaderboardViewModel(Tournament tournament, TournamentViewModel tournamentViewModel)
     {
         _tournament = tournament;
+        _tournamentViewModel = tournamentViewModel;
     }
 
     public void Update(TournamentViewModel tournamentViewModel)
@@ -31,7 +33,7 @@ public sealed class LeaderboardViewModel : BaseViewModel
         Entries.Clear();
         foreach (var entry in _tournament.Leaderboard.Entries)
         {
-            var player = tournamentViewModel.GetPlayerByGUID(entry.PlayerID);
+            var player = tournamentViewModel.GetPlayerByGUID(entry.PlayerUUID);
             if (player == null) continue;
             
             Entries.Add(new LeaderboardEntryViewModel(entry, player));
@@ -43,6 +45,7 @@ public sealed class LeaderboardViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(() =>
         {
             Entries.Add(entry);
+            _tournamentViewModel.PresetIsModified();
         });
     }
     private void RemoveEntry(LeaderboardEntryViewModel entry)
@@ -50,6 +53,7 @@ public sealed class LeaderboardViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(() =>
         {
             Entries.Remove(entry);
+            _tournamentViewModel.PresetIsModified();
         });
     }
 
@@ -67,5 +71,14 @@ public sealed class LeaderboardViewModel : BaseViewModel
     public void RefreshUI()
     {
         OnPropertyChanged(nameof(Entries));
+    }
+
+    public void Clear()
+    {
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+            Entries.Clear();
+            _tournamentViewModel.PresetIsModified();
+        });
     }
 }

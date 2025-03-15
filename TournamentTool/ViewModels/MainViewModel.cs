@@ -6,6 +6,7 @@ using TournamentTool.Commands;
 using TournamentTool.Components;
 using TournamentTool.Services;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
@@ -13,6 +14,7 @@ namespace TournamentTool.ViewModels;
 public class MainViewModel : BaseViewModel
 {
     public DebugWindow? DebugWindow { get; set; }
+    public TournamentViewModel TournamentViewModel { get; private set; }
 
     private INavigationService? _navigationService;
     public INavigationService NavigationService
@@ -68,16 +70,16 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; set; }
 
 
-    public MainViewModel(INavigationService navigationService)
+    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel)
     {
         NavigationService = navigationService;
+        TournamentViewModel = tournamentViewModel;
 
         if (!Directory.Exists(Consts.PresetsPath))
             Directory.CreateDirectory(Consts.PresetsPath);
 
         if (!Directory.Exists(Consts.LogsPath))
             Directory.CreateDirectory(Consts.LogsPath);
-
 
         OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);

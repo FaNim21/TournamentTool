@@ -18,7 +18,7 @@
              Background="#1E1E1E">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="540"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         
@@ -39,16 +39,19 @@
                   Stroke="#000D14"
                   StrokeThickness="3" />
 
+            <!--
+                     behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
+                       -->
+
             <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      Background="Transparent"
                      BorderThickness="0"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
-                     ItemsSource="{Binding }"
+                     ItemsSource="{Binding Leaderboard.Entries}"
                      VirtualizingPanel.IsVirtualizing="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"
-                     behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
                      Margin="5 0 0 0">
                 <i:Interaction.Behaviors>
                     <behaviors:ListBoxUpdateBehavior />

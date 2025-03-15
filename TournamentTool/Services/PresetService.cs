@@ -38,5 +38,6 @@ public class PresetService : IPresetSaver
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
         string path = preset.GetPath();
         File.WriteAllText(path, data);
+        Tournament.PresetIsSaved();
     }
 }

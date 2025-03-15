@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
@@ -7,6 +9,7 @@ using Microsoft.Win32;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Commands.PlayerManager;
@@ -117,7 +120,7 @@ public class ImportWhitelistCommand : BaseCommand
             {
                 Name = fields[0].Trim(),
                 InGameName = fields[1].Trim(),
-                UUID = fields[2],
+                UUID = fields[2].Replace("-", ""),
                 PersonalBest = fields[3]
             };
             if (fields.Length > 4) 
@@ -152,6 +155,8 @@ public class ImportWhitelistCommand : BaseCommand
             if (players.Length == 0) return;
      
             int length = players.Length;
+            List<Player> playersToComplete = [];
+            
             for (int i = 0; i < length; i++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -168,8 +173,15 @@ public class ImportWhitelistCommand : BaseCommand
                 if (_tournamentManager.ContainsDuplicatesNoDialog(data)) continue;
                      
                 logProgress.Report($"({i+1}/{length}) Completing data for {data.InGameName}");
-                await data.UpdateHeadImage();
+                await data.CompleteData(false);
+                
+                if (string.IsNullOrEmpty(data.UUID)) playersToComplete.Add(data);
                 Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(data); });
+            }
+            
+            if (playersToComplete.Count > 0)
+            {
+                await FetchAndAssignUUIDs(playersToComplete, logProgress, cancellationToken);
             }
      
             logProgress.Report("Loading complete");
@@ -181,5 +193,48 @@ public class ImportWhitelistCommand : BaseCommand
             DialogBox.Show($"Error loading json data: {ex.Message}", "", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }   
     }
+    
+    private async Task FetchAndAssignUUIDs(List<Player> players, IProgress<string> logProgress, CancellationToken cancellationToken)
+    {
+        for (int i = 0; i < players.Count; i += 10)
+        {
+            var batch = players.Skip(i).Take(10).ToList();
+            string[] names = batch.Select(p => p.InGameName!).ToArray();
+
+            logProgress.Report($"Fetching UUIDs for {i}-{i + batch.Count} players");
+
+            try
+            {
+                using HttpClient client = new();
+                var jsonRequest = JsonSerializer.Serialize(names);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PostAsync(Consts.MojangGetMultipleUUIDAPI, content, cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    logProgress.Report($"Error fetching UUIDs: {response.StatusCode}");
+                    continue;
+                }
+
+                string jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
+                var uuidResults = JsonSerializer.Deserialize<List<ResponseMojangProfileAPI>>(jsonResponse);
+                if (uuidResults == null) return;
+                
+                foreach (var result in uuidResults)
+                {
+                    var player = batch.FirstOrDefault(p => p.InGameName!.Equals(result.InGameName, StringComparison.OrdinalIgnoreCase));
+                    if (player == null) continue;
+                    
+                    player.UUID = result.UUID;
+                    logProgress.Report($"Assigned UUID {player.UUID} to {player.InGameName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                logProgress.Report($"Error fetching UUIDs: {ex.Message}");
+            }
+        }
+    }
+
 }
 
