@@ -480,7 +480,6 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         });
     }
 
-    
     public bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null)
     {
         foreach (var player in Players)
@@ -513,7 +512,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
         return null;
     }
-    public Player? GetPlayerByGUID(string uuid)
+    public Player? GetPlayerByUUID(string uuid)
     {
         foreach (var player in Players)
         {
@@ -522,6 +521,26 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
         
         return null;
+    }
+    public Player? GetPlayerByIGN(string ign)
+    {
+        foreach (var player in Players)
+        {
+            if (!player.InGameName!.Equals(ign)) continue;
+            return player;
+        }
+        
+        return null;
+    }
+    public string GetUUIDByIGN(string ign)
+    {
+        foreach (var player in Players)
+        {
+            if (!player.InGameName!.Equals(ign)) continue;
+            return player.UUID;
+        }
+        
+        return string.Empty;
     }
     
     public void ClearPlayerStreamData()

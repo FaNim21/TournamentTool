@@ -25,7 +25,7 @@
         <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
         <converters:IndentConverter x:Key="IndentConverter" />
         <converters:ExpandCollapseConverter x:Key="ExpandCollapseConverter" />
-
+         
         <DataTemplate DataType="{x:Type viewModels:PresetManagerViewModel}">
             <views:PresetManagerView OnListItemClickCommand="{Binding OnItemListClickCommand}" />
         </DataTemplate>

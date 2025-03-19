@@ -17,6 +17,8 @@
         WindowStartupLocation="CenterOwner"
         Width="400"
         Height="105"
+        BorderThickness="1"
+        BorderBrush="Black"
         Background="#1E1E1E">
     <StackPanel Margin="10 10 10 0">
         <TextBlock Text="{Binding TextLog}"

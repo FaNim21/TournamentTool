@@ -34,26 +34,25 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     }
     public override void OnEnable(object? parameter)
     {
-        AddEntry("ec20efb08e3741c3898014696cbb2748");
+        AddEntry("fanim21");
     }
     public override bool OnDisable()
     {
         return true;
     }
 
-    public void AddEntry(string uuid)
+    public void AddEntry(string ign)
     {
-        if (string.IsNullOrEmpty(uuid)) return;
-        if (IsDuplicated(uuid)) return;
+        if (string.IsNullOrEmpty(ign)) return;
         
-        //to wiadomo nie skonczone jako idea pod mozliwosc dobrze przekminionej logiki dodawania danych do leaderboard'a
+       var player = Tournament.GetPlayerByIGN(ign);
+       if (player == null) return;
+       if (IsDuplicated(ign)) return;
+       
         LeaderboardEntry entry = new()
         {
-            PlayerUUID = uuid,
+            PlayerUUID = player.UUID,
         };
-        
-       var player = Tournament.GetPlayerByGUID(uuid);
-       if (player == null) return;
        
        Leaderboard.AddLeaderboardEntry(entry, player);
     }

@@ -34,6 +34,9 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
     [JsonPropertyName("eventList")]
     public List<PaceSplitsList> Splits { get; set; } = [];
 
+    [JsonPropertyName("contextEventList")]
+    public List<PaceSplitsList> Advacements { get; set; } = [];
+
     [JsonPropertyName("itemData")]
     public PaceItemData ItemsData { get; set; } = new();
 
@@ -133,16 +136,19 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
     public bool IsUsedInPreview { get; set; }
 
 
-    public void Initialize(ControllerViewModel controller, List<PaceSplitsList> splits)
+    public void Initialize(ControllerViewModel controller)
     {
         Controller = controller;
 
         UpdateHeadImage();
-        UpdateTime(splits);
+        UpdateTime();
     }
 
     public void Update(PaceMan paceman)
     {
+        //TODO: 1 that shit is crazy and about to go down
+        //to jest tak slabe ze az mi sie chce plakac dlaczego lenistwo jest silniejsze
+        //trzeba to zrobic klasykiem model-viewmodel
         User = paceman.User;
         Splits = paceman.Splits;
         LastUpdate = paceman.LastUpdate;
@@ -151,33 +157,33 @@ public class PaceMan : BaseViewModel, IPlayer, IPace
         IsHidden = paceman.IsHidden;
 
         if (Splits.Count == 0) return;
-        UpdateTime(Splits);
+        UpdateTime();
     }
 
-    private void UpdateTime(List<PaceSplitsList> splits)
+    private void UpdateTime()
     {
-        foreach (var t in splits)
+        foreach (var t in Splits)
             t.SplitName = t.SplitName.Replace("rsg.", "");
 
-        PaceSplitsList lastSplit = splits[^1];
+        PaceSplitsList lastSplit = Splits[^1];
 
         if (ItemsData.EstimatedCounts != null)
         {
             ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
             ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if (splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
+            if (Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
 
             Inventory.BlazeRodsCount = estimatedRods;
             Inventory.PearlsCount = estimatedPearls;
         }
 
-        if (splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
+        if (Splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
         {
-            SplitType = splits[^2].SplitName.Equals("enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
+            SplitType = Splits[^2].SplitName.Equals("enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
         }
         else
         {
-            SplitType = (SplitType)Enum.Parse(typeof(SplitType), lastSplit.SplitName);
+            SplitType = Enum.Parse<SplitType>(lastSplit.SplitName);
         }
 
         CheckForGoodPace(lastSplit);

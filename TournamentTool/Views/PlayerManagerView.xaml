@@ -17,21 +17,22 @@
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="View"
-                      Command="{Binding DataContext.ViewPlayerInfoCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                      Command="{Binding DataContext.ViewPlayerInfoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       CommandParameter="{Binding}"/>
             <MenuItem Header="Edit"
-                      Command="{Binding DataContext.EditPlayerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                      Command="{Binding DataContext.EditPlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       CommandParameter="{Binding}"/>
             <MenuItem Header="Validate"
-                      Command="{Binding DataContext.ValidatePlayerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      Command="{Binding DataContext.ValidatePlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       CommandParameter="{Binding}"/>
             <MenuItem Header="Fix head"
-                      Command="{Binding DataContext.FixPlayerHeadCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      Command="{Binding DataContext.FixPlayerHeadCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       CommandParameter="{Binding}"/>
             <MenuItem Header="Delete"
-                      Command="{Binding DataContext.RemovePlayerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                      Command="{Binding DataContext.RemovePlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       CommandParameter="{Binding}"/>
         </ContextMenu>
+        
         <ContextMenu x:Key="ListViewContextMenuPanel">
             <MenuItem Header="Add player"
                       Command="{Binding AddPlayerCommand}" />
@@ -42,7 +43,7 @@
             <ColumnDefinition Width="160" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-
+        
         <Grid Grid.Column="0"
               Background="#2d2d2d">
             <Grid.RowDefinitions>
@@ -303,15 +304,23 @@
                   Stroke="#000D14"
                   StrokeThickness="3" />
 
-            <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
+            <Grid Visibility="{Binding ShowPlayers, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
+                <TextBlock Text="Loading players..."
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="90"
+                           Foreground="white" />
+            </Grid>
+
+            <ListBox Visibility="{Binding ShowPlayers, Converter={StaticResource BoolToVisibilityConverter}}"
+                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      Background="Transparent"
                      BorderThickness="0"
-                     ContextMenu="{StaticResource ListViewContextMenuPanel}"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
-                     VirtualizingPanel.IsVirtualizing="True"
-                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
                      behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
                      ItemsSource="{Binding FilteredPlayers}"
                      SelectionMode="Extended"

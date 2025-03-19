@@ -33,7 +33,7 @@ public sealed class LeaderboardViewModel : BaseViewModel
         Entries.Clear();
         foreach (var entry in _tournament.Leaderboard.Entries)
         {
-            var player = tournamentViewModel.GetPlayerByGUID(entry.PlayerUUID);
+            var player = tournamentViewModel.GetPlayerByUUID(entry.PlayerUUID);
             if (player == null) continue;
             
             Entries.Add(new LeaderboardEntryViewModel(entry, player));

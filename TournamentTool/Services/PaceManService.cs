@@ -123,7 +123,7 @@ public class PaceManService : BaseViewModel
 
             if (Controller.TournamentViewModel.IsUsingWhitelistOnPaceMan && pace.Player == null) continue;
 
-            pace.Initialize(Controller, pace.Splits);
+            pace.Initialize(Controller);
             AddPaceMan(pace);
             isPacemanEmpty = false;
         }

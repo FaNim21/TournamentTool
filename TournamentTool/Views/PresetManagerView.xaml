@@ -71,7 +71,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <WrapPanel Grid.Column="0"
+                    <StackPanel Grid.Column="0"
                                Orientation="Vertical"
                                Margin="20 10 20 20"
                                HorizontalAlignment="Left"
@@ -85,7 +85,7 @@
                                     Padding="0"
                                     Margin="0 0 0 5" />
 
-                        <WrapPanel Orientation="Horizontal"
+                        <StackPanel Orientation="Horizontal"
                                    Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
                                      Width="40"
@@ -99,7 +99,7 @@
                                        Foreground="White"
                                        FontSize="16"
                                        Margin="5 0 0 3" />
-                        </WrapPanel>
+                        </StackPanel>
 
                         <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
                                   Content="Use Twitch API"
@@ -119,7 +119,7 @@
                                   Foreground="White"
                                   Margin="0 0 0 5" />
 
-                        <WrapPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical">
                             <TextBlock Text="Controller Mode"
                                        Foreground="White"
                                        Padding="0" />
@@ -135,10 +135,10 @@
                                          Foreground="White"
                                          Content="Ranked"
                                          IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
-                        </WrapPanel>
+                        </StackPanel>
 
                         <!-- PACEMAN -->
-                        <WrapPanel Orientation="Vertical"
+                        <StackPanel Orientation="Vertical"
                                    Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
                             <TextBlock  Text="Paceman"
                                         Foreground="Wheat"
@@ -151,7 +151,7 @@
                                       Foreground="White"
                                       Margin="0 0 0 5" />
 
-                            <WrapPanel Orientation="Horizontal"
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -166,14 +166,14 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                            </WrapPanel>
+                            </StackPanel>
 
                             <TextBlock Text="Good Pace Splits (ms)"
                                        Foreground="White"
                                        FontSize="24"
                                        Padding="0"
                                        Margin="0 0 0 5" />
-                            <WrapPanel Orientation="Horizontal"
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -189,8 +189,8 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 0" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -206,8 +206,8 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 0" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -224,8 +224,8 @@
                                            Padding="0"
                                            Margin="5 0 0 0" />
 
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -241,8 +241,8 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 0" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
@@ -258,11 +258,11 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 0" />
-                            </WrapPanel>
-                        </WrapPanel>
+                            </StackPanel>
+                        </StackPanel>
 
                         <!-- RANKED -->
-                        <WrapPanel Orientation="Vertical"
+                        <StackPanel Orientation="Vertical"
                                    Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
                             <Label  Content="Ranked"
                                     Foreground="Wheat"
@@ -271,7 +271,7 @@
                                     Padding="0"
                                     Margin="0 10 0 5" />
 
-                            <WrapPanel Orientation="Horizontal"
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
                                          Width="220"
@@ -291,8 +291,8 @@
                                        FontSize="16"
                                        Padding="0"
                                        Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
                                          Width="120"
@@ -307,8 +307,8 @@
                                        FontSize="16"
                                        Padding="0"
                                        Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
                                          Width="120"
@@ -323,12 +323,12 @@
                                        FontSize="16"
                                        Padding="0"
                                        Margin="5 0 0 3" />
-                            </WrapPanel>
-                        </WrapPanel>
-                    </WrapPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
 
-                    <WrapPanel Grid.Column="1"
-                               Background="Transparent">
+                    <StackPanel Grid.Column="1"
+                                Background="Transparent">
                         <components:ButtonNormal ContentText="Controller"
                                                  Width="350"
                                                  Height="90"
@@ -346,8 +346,8 @@
                                                  OnCommand="{Binding OpenLeaderboardCommand}"
                                                  Margin="30 0 30 20" />
 
-                        <WrapPanel Orientation="Vertical"
-                                   Margin="40 0 0 0">
+                        <StackPanel Orientation="Vertical"
+                                    Margin="40 0 0 0">
 
                             <!-- OBS CONNECTION -->
                             <TextBlock Text="OBS Connection"
@@ -356,8 +356,8 @@
                                        FontWeight="SemiBold"
                                        Padding="0"
                                        Margin="0 0 0 5" />
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="50"
                                          Height="20"
@@ -372,9 +372,9 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
@@ -388,9 +388,9 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
@@ -404,7 +404,7 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                            </WrapPanel>
+                            </StackPanel>
 
                             <!--POV MANAGEMENT-->
                             <TextBlock Text="Pov management"
@@ -413,8 +413,8 @@
                                        FontWeight="SemiBold"
                                        Padding="0"
                                        Margin="0 10 0 5" />
-                            <WrapPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
                                          Width="120"
                                          Height="20"
@@ -428,9 +428,9 @@
                                            FontSize="16"
                                            Padding="0"
                                            Margin="5 0 0 3" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Vertical"
-                                       Margin="0 0 0 5">
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical"
+                                        Margin="0 0 0 5">
                                 <CheckBox IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
                                           Content="Use skin heads"
                                           Foreground="White"
@@ -459,9 +459,9 @@
                                              Foreground="White"
                                              Content="Whitelist"
                                              IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
-                            </WrapPanel>
-                        </WrapPanel>
-                    </WrapPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </ScrollViewer>
 
@@ -475,17 +475,17 @@
                            VerticalAlignment="Bottom"
                            HorizontalAlignment="Right"
                            Margin="0 0 0 0">
-                            <Hyperlink NavigateUri="https://ko-fi.com/fanim"
-                                       RequestNavigate="OpenDonateSite">
-                                <Hyperlink.Style>
-                                    <Style TargetType="Hyperlink"
-                                           BasedOn="{StaticResource {x:Type Hyperlink}}">
-                                        <Setter Property="Foreground"
-                                                Value="LightSkyBlue" />
-                                    </Style>
-                                </Hyperlink.Style>
-                                Support me here :)
-                            </Hyperlink>
+                    <Hyperlink NavigateUri="https://ko-fi.com/fanim"
+                               RequestNavigate="OpenDonateSite">
+                        <Hyperlink.Style>
+                            <Style TargetType="Hyperlink"
+                                   BasedOn="{StaticResource {x:Type Hyperlink}}">
+                                <Setter Property="Foreground"
+                                        Value="LightSkyBlue" />
+                            </Style>
+                        </Hyperlink.Style>
+                        Support me here :)
+                    </Hyperlink>
                 </TextBlock>
 
                 <Button Click="OpenDonateSiteButton"

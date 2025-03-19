@@ -119,7 +119,18 @@ public class PlayerManagerViewModel : SelectableViewModel
             OnPropertyChanged(nameof(IsSearchEmpty));
         }
     }
-    
+
+    private bool _showPlayers;
+    public bool ShowPlayers
+    {
+        get => _showPlayers;
+        set
+        {
+            _showPlayers = value;
+            OnPropertyChanged(nameof(ShowPlayers));
+        }
+    }
+
     public ICommand AddPlayerCommand { get; set; }
     public ICommand ValidatePlayersCommand { get; set; }
 
@@ -205,8 +216,13 @@ public class PlayerManagerViewModel : SelectableViewModel
     } 
     public override void OnEnable(object? parameter)
     {
+        _ = FilterWhitelist(true);
+
+        return;
+        
         if (!Tournament.Name.Equals(_lastTournamentName))
         {
+            ShowPlayers = false;
             SearchText = string.Empty;
             SortingType = PlayerSortingType.Name;
             
@@ -217,13 +233,26 @@ public class PlayerManagerViewModel : SelectableViewModel
             
             _ = FilterWhitelist(true);
         }
+        else
+        {
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                await Task.Delay(50);
+                ShowPlayers = true;
+            });
+        }
         
         _lastTournamentName = Tournament.Name;
     }
     public override bool OnDisable()
     {
         ChosenEvent = null;
-
+        ShowPlayers = false;
+        
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            FilteredPlayers.Clear();
+        });
         return true;
     }
 
@@ -296,6 +325,11 @@ public class PlayerManagerViewModel : SelectableViewModel
     
     public async Task FilterWhitelist(bool forceFilter = false)
     {
+        //TODO: 2 Tutaj mozna duzo optymalizacji zrobic zeby zmniejszyc ladowanie, poniewaz nie da sie nie blokowac ui przy tym
+        //takze trzeba bedziez aczac od zmniejszenia obciazenie przez sam viewmodel, ktory w tym jest czyli rozbic player i playerviewmodel i tez zrobic oddzielny whitelistplayerviewmodel
+        //pod to zeby tylko najwazniejsze rzeczy dawac dla whitelistplayerviewmodel itp itd
+        SearchText = SearchText.Trim();
+        ShowPlayers = false;
         if (!forceFilter && _lastFilterSearch.Equals(SearchText, _comparison) && _lastSortingType.Equals(SortingType)) return;
         if (!forceFilter && string.IsNullOrEmpty(SearchText) && string.IsNullOrEmpty(_lastFilterSearch)) return;
 
@@ -306,12 +340,18 @@ public class PlayerManagerViewModel : SelectableViewModel
         if (string.IsNullOrEmpty(SearchText))
         {
             UpdateInformationCountText("Restoring...", "?");
+            
             await Task.Delay(1);
             
-            FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
+            });
             
             UpdateInformationCountText();
             IsSearchEnabled = true;
+            ShowPlayers = true;
+
             return;
         }
         UpdateInformationCountText("Filtering...", "?");
@@ -319,12 +359,12 @@ public class PlayerManagerViewModel : SelectableViewModel
         
         var filtered = SortingType switch
         {
-            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Trim().Contains(SearchText.Trim(), _comparison)),
-            PlayerSortingType.InGameName => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText.Trim(), _comparison)),
-            PlayerSortingType.TeamName => Tournament.Players.Where(p => p.TeamName!.Trim().Contains(SearchText.Trim(), _comparison)),
+            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Trim().Contains(SearchText, _comparison)),
+            PlayerSortingType.InGameName => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText, _comparison)),
+            PlayerSortingType.TeamName => Tournament.Players.Where(p => p.TeamName!.Trim().Contains(SearchText, _comparison)),
             PlayerSortingType.Stream => Tournament.Players.Where(p =>
-                p.StreamData.Main!.Trim().Contains(SearchText.Trim(), _comparison) ||
-                p.StreamData.Alt.Trim().Contains(SearchText.Trim(), _comparison)),
+                p.StreamData.Main!.Trim().Contains(SearchText, _comparison) ||
+                p.StreamData.Alt.Trim().Contains(SearchText, _comparison)),
             _ => []
         };
 
@@ -335,6 +375,7 @@ public class PlayerManagerViewModel : SelectableViewModel
         
         UpdateInformationCountText();
         IsSearchEnabled = true;
+        ShowPlayers = true;
     }
     
     private void UpdateInformationCountText(string header = "Found", string filteredCount = "")
