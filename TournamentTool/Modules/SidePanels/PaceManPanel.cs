@@ -2,9 +2,11 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Data;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Services;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
@@ -28,9 +30,9 @@ public class PaceManPanel : SidePanel
     private bool _lastOutput;
 
 
-    public PaceManPanel(ControllerViewModel controller) : base(controller)
+    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, IPresetSaver presetSaver) : base(controller)
     {
-        _paceManService = new PaceManService(controller);
+        _paceManService = new PaceManService(controller, tournamentViewModel, presetSaver);
         Mode = ControllerMode.PaceMan;
     }
 
@@ -66,9 +68,9 @@ public class PaceManPanel : SidePanel
     {
         var collectionViewSource = new CollectionViewSource { Source = _paceManService.PaceManPlayers };
 
-        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceMan.SplitName)));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.SplitType), ListSortDirection.Descending));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceMan.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
 
         GroupedPaceManPlayers = collectionViewSource.View;
     }

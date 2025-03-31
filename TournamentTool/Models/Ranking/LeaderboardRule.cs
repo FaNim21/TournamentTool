@@ -2,5 +2,5 @@
 
 public class LeaderboardRule
 {
-    
+    public string Name { get; set; } = string.Empty;
 }

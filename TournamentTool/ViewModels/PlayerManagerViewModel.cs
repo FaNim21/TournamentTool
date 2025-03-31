@@ -217,32 +217,6 @@ public class PlayerManagerViewModel : SelectableViewModel
     public override void OnEnable(object? parameter)
     {
         _ = FilterWhitelist(true);
-
-        return;
-        
-        if (!Tournament.Name.Equals(_lastTournamentName))
-        {
-            ShowPlayers = false;
-            SearchText = string.Empty;
-            SortingType = PlayerSortingType.Name;
-            
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                FilteredPlayers.Clear();
-            });
-            
-            _ = FilterWhitelist(true);
-        }
-        else
-        {
-            Application.Current.Dispatcher.Invoke(async () =>
-            {
-                await Task.Delay(50);
-                ShowPlayers = true;
-            });
-        }
-        
-        _lastTournamentName = Tournament.Name;
     }
     public override bool OnDisable()
     {

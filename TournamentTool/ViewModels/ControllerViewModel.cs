@@ -187,8 +187,6 @@ public class ControllerViewModel : SelectableViewModel
 
     private void UpdateSidePanel()
     {
-        if (SidePanel != null && TournamentViewModel.ControllerMode == SidePanel.Mode) return;
-        
         SidePanel?.UnInitialize();
         
         switch(TournamentViewModel.ControllerMode)
@@ -207,7 +205,7 @@ public class ControllerViewModel : SelectableViewModel
 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
                 {
-                    SidePanel = new PaceManPanel(this);
+                    SidePanel = new PaceManPanel(this, TournamentViewModel, PresetService);
                     ManagementPanel = null;
                 }
                 break;

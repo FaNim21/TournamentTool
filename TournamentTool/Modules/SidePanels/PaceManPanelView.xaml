@@ -49,7 +49,7 @@
                             BorderThickness="1"
                             Width="263">
                         <i:Interaction.Behaviors>
-                            <behaviors:BorderDragDropBehavior OnCommand="{Binding Controller.UnSelectItemsCommand}"
+                            <behaviors:BorderDragDropBehavior OnCommand="{Binding DataContext.Controller.UnSelectItemsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                               DragDataType="{x:Type models:IPlayer}" />
                         </i:Interaction.Behaviors>
                         <Grid>

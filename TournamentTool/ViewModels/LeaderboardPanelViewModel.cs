@@ -14,17 +14,28 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     public LeaderboardViewModel Leaderboard { get; set; }
 
     public ICommand AddEntryCommand { get; set; }
-    public ICommand RemoveEntryCommand { get; set; }
+    public ICommand AddRuleCommand { get; set; }
 
+    public ICommand EditRuleCommand { get; set; }
+    public ICommand RemoveRuleCommand { get; set; }
+
+    public ICommand EditEntryCommand { get; set; }
+    public ICommand RemoveEntryCommand { get; set; }
 
     public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver) : base(coordinator)
     {
         Tournament = tournament;
         PresetSaver = presetSaver;
-        
-        Leaderboard = tournament.Leaderboard;
 
-        AddEntryCommand = new RelayCommand(null);
+        Leaderboard = Tournament.Leaderboard;
+        
+        AddEntryCommand = new RelayCommand( () => Leaderboard.AddLeaderboardEntry(new LeaderboardEntry(), null!));
+        AddRuleCommand = new RelayCommand(() => Leaderboard.AddRule(new LeaderboardRule()));
+
+        EditRuleCommand = new RelayCommand(null);
+        RemoveRuleCommand = new RelayCommand(null);
+        
+        EditEntryCommand = new RelayCommand(null);
         RemoveEntryCommand = new RelayCommand(null);
     }
 
@@ -34,33 +45,21 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     }
     public override void OnEnable(object? parameter)
     {
-        AddEntry("fanim21");
+        Leaderboard = Tournament.Leaderboard;
     }
     public override bool OnDisable()
     {
+        PresetSaver.SavePreset();
         return true;
-    }
-
-    public void AddEntry(string ign)
-    {
-        if (string.IsNullOrEmpty(ign)) return;
-        
-       var player = Tournament.GetPlayerByIGN(ign);
-       if (player == null) return;
-       if (IsDuplicated(ign)) return;
-       
-        LeaderboardEntry entry = new()
-        {
-            PlayerUUID = player.UUID,
-        };
-       
-       Leaderboard.AddLeaderboardEntry(entry, player);
     }
 
     public void RemoveEntry(LeaderboardEntryViewModel entry)
     {
-        //...
         Leaderboard.RemoveLeaderboardEntry(entry);
+    }
+    public void RemoveRule(LeaderboardRuleViewModel rule)
+    {
+        Leaderboard.RemoveRule(rule);
     }
 
     private bool IsDuplicated(string uuid)

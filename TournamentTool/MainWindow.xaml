@@ -171,7 +171,7 @@
                         <components:HamburgerMenuItem Text="Controller"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Controller"
-                                                      Foreground="Red"
+                                                      Foreground="LimeGreen"
                                                       IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
                                                       GroupName="MenuItem" />
                         <Grid>

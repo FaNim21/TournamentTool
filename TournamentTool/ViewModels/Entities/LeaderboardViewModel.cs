@@ -21,6 +21,17 @@ public sealed class LeaderboardViewModel : BaseViewModel
         }
     }
     
+    private ObservableCollection<LeaderboardRuleViewModel> _rules = [];
+    public ObservableCollection<LeaderboardRuleViewModel> Rules
+    {
+        get => _rules;
+        set
+        {
+            _rules = value;
+            OnPropertyChanged(nameof(Rules));
+        }
+    }
+    
     
     public LeaderboardViewModel(Tournament tournament, TournamentViewModel tournamentViewModel)
     {
@@ -28,15 +39,24 @@ public sealed class LeaderboardViewModel : BaseViewModel
         _tournamentViewModel = tournamentViewModel;
     }
 
-    public void Update(TournamentViewModel tournamentViewModel)
+    public void Setup()
     {
-        Entries.Clear();
         foreach (var entry in _tournament.Leaderboard.Entries)
         {
-            var player = tournamentViewModel.GetPlayerByUUID(entry.PlayerUUID);
-            if (player == null) continue;
+            var player = _tournamentViewModel.GetPlayerByUUID(entry.PlayerUUID);
             
-            Entries.Add(new LeaderboardEntryViewModel(entry, player));
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Entries.Add(new LeaderboardEntryViewModel(entry, player));
+            });
+        }
+        
+        foreach (var rule in _tournament.Leaderboard.Rules)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Rules.Add(new LeaderboardRuleViewModel(rule));
+            });
         }
     }
 
@@ -64,13 +84,34 @@ public sealed class LeaderboardViewModel : BaseViewModel
     }
     public void RemoveLeaderboardEntry(LeaderboardEntryViewModel entry)
     {
-        _tournament.Leaderboard.Entries.Add(entry.GetLeaderboardEntry());
+        _tournament.Leaderboard.Entries.Remove(entry.GetLeaderboardEntry());
         RemoveEntry(entry);
+    }
+
+    public void AddRule(LeaderboardRule rule)
+    {
+        var ruleViewModel = new LeaderboardRuleViewModel(rule);
+        _tournament.Leaderboard.Rules.Add(rule);
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Rules.Add(ruleViewModel);
+            _tournamentViewModel.PresetIsModified();
+        });
+    }
+    public void RemoveRule(LeaderboardRuleViewModel rule)
+    {
+        _tournament.Leaderboard.Rules.Remove(rule.GetLeaderboardRule());
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Rules.Remove(rule);
+            _tournamentViewModel.PresetIsModified();
+        });
     }
     
     public void RefreshUI()
     {
         OnPropertyChanged(nameof(Entries));
+        OnPropertyChanged(nameof(Rules));
     }
 
     public void Clear()

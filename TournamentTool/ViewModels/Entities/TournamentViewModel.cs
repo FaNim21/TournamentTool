@@ -388,7 +388,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
 
     private void SetupPreset()
     {
-        Leaderboard.Update(this);
+        Leaderboard.Setup();
         UpdatePlayers();
         UpdateGoodPacesTexts();
         

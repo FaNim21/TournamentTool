@@ -16,6 +16,21 @@
              d:DesignHeight="601"
              d:DesignWidth="1082"
              Background="#1E1E1E">
+    <UserControl.Resources>
+        <ContextMenu x:Key="RulesContextMenu">
+            <MenuItem Header="Edit"
+                      Command="{Binding EditRuleCommand}" />
+            <MenuItem Header="Remove"
+                      Command="{Binding RemoveRuleCommand}" />
+        </ContextMenu>
+        
+        <ContextMenu x:Key="EntriesContextMenu">
+            <MenuItem Header="Edit"
+                      Command="{Binding EditEntryCommand}" />
+            <MenuItem Header="Remove"
+                      Command="{Binding RemoveEntryCommand}" />
+        </ContextMenu>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="540"/>
@@ -23,12 +38,81 @@
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Column="0">
-            <TextBlock Text="WORK IN PROGRESS..."
-                       Foreground="White"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontSize="30" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="380"/>
+            </Grid.ColumnDefinitions>
+            
+            <Grid Grid.Column="0">
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <components:ButtonNormal ContentText="Add Rule"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding AddRuleCommand}"
+                                             Margin="0 10 0 0" />
+                    <components:ButtonNormal ContentText="Add Tracked Player"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding AddEntryCommand}"
+                                             Margin="0 10 0 0" />
+                </StackPanel>
+            </Grid>
 
+            <Grid Grid.Column="1">
+                <Line X1="0"
+                      Y1="0"
+                      X2="0"
+                      Y2="2000"
+                      Stroke="#000D14"
+                      StrokeThickness="3" />
+
+                <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Width="380"
+                         VerticalAlignment="Top"
+                         HorizontalAlignment="Left"
+                         ItemsSource="{Binding Leaderboard.Rules}"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         Margin="1 0 1 0">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ListBoxUpdateBehavior />
+                        <behaviors:ListBoxSelectionBehavior />
+                        <behaviors:ListBoxClampScrollBehavior />
+                    </i:Interaction.Behaviors>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type entitiesViewmodels:LeaderboardRuleViewModel}">
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="1" 
+                                    Width="359"
+                                    Height="40">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" Foreground="White" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Margin"
+                                    Value="0" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource RulesContextMenu}" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
         </Grid>
         
         <Grid Grid.Column="1">
@@ -81,6 +165,8 @@
                                 Value="0" />
                         <Setter Property="Padding"
                                 Value="0" />
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource EntriesContextMenu}" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>
