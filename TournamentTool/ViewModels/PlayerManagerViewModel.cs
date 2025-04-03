@@ -5,6 +5,7 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
@@ -12,14 +13,6 @@ using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
-
-public enum PlayerSortingType
-{
-    Name,
-    InGameName,
-    TeamName,
-    Stream
-}
 
 public class PlayerManagerViewModel : SelectableViewModel
 {

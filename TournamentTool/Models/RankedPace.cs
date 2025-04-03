@@ -1,24 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
+using TournamentTool.Enums;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
-
-public enum RankedSplitType
-{
-    none,
-    Start,
-    enter_the_nether,
-    structure_1,  // find_bastion
-    structure_2,  // find_fortress
-    blind_travel,
-    follow_ender_eye,
-    enter_the_end,
-    kill_dragon,
-    complete,
-}
 
 public class RankedPace : BaseViewModel, IPlayer, IPace
 {

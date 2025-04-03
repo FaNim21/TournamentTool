@@ -3,4 +3,6 @@
 public sealed class LeaderboardEntry
 {
     public string PlayerUUID { get; set; }
+    
+    
 }

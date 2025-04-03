@@ -19,16 +19,20 @@
     <UserControl.Resources>
         <ContextMenu x:Key="RulesContextMenu">
             <MenuItem Header="Edit"
-                      Command="{Binding EditRuleCommand}" />
+                      Command="{Binding DataContext.EditRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      CommandParameter="{Binding .}"/>
             <MenuItem Header="Remove"
-                      Command="{Binding RemoveRuleCommand}" />
+                      Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding .}"/>
         </ContextMenu>
-        
+
         <ContextMenu x:Key="EntriesContextMenu">
             <MenuItem Header="Edit"
-                      Command="{Binding EditEntryCommand}" />
+                      Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      CommandParameter="{Binding .}"/>
             <MenuItem Header="Remove"
-                      Command="{Binding RemoveEntryCommand}" />
+                      Command="{Binding DataContext.RemoveEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding .}"/>
         </ContextMenu>
     </UserControl.Resources>
     <Grid>

@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Data;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 
@@ -144,7 +145,7 @@ public struct RankedPaceData
     public int Resets { get; set; }
 }
 
-public class RankedBestSplit()
+public class RankedBestSplit
 {
     public string? PlayerName { get; set; }
     public RankedSplitType Type { get; set; }

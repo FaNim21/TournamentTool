@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels.Entities;
@@ -21,6 +22,7 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
 
     public ICommand EditEntryCommand { get; set; }
     public ICommand RemoveEntryCommand { get; set; }
+    
 
     public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver) : base(coordinator)
     {
@@ -33,10 +35,10 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         AddRuleCommand = new RelayCommand(() => Leaderboard.AddRule(new LeaderboardRule()));
 
         EditRuleCommand = new RelayCommand(null);
-        RemoveRuleCommand = new RelayCommand(null);
+        RemoveRuleCommand = new RemoveRuleCommand(this);
         
         EditEntryCommand = new RelayCommand(null);
-        RemoveEntryCommand = new RelayCommand(null);
+        RemoveEntryCommand = new RemoveEntryCommand(this);
     }
 
     public override bool CanEnable()
@@ -51,15 +53,6 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     {
         PresetSaver.SavePreset();
         return true;
-    }
-
-    public void RemoveEntry(LeaderboardEntryViewModel entry)
-    {
-        Leaderboard.RemoveLeaderboardEntry(entry);
-    }
-    public void RemoveRule(LeaderboardRuleViewModel rule)
-    {
-        Leaderboard.RemoveRule(rule);
     }
 
     private bool IsDuplicated(string uuid)
