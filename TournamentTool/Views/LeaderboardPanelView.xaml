@@ -27,8 +27,8 @@
         </ContextMenu>
 
         <ContextMenu x:Key="EntriesContextMenu">
-            <MenuItem Header="Edit"
-                      Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+            <MenuItem Header="View"
+                      Command="{Binding DataContext.ViewEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       CommandParameter="{Binding .}"/>
             <MenuItem Header="Remove"
                       Command="{Binding DataContext.RemoveEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -150,10 +150,43 @@
                     <DataTemplate DataType="{x:Type entitiesViewmodels:LeaderboardEntryViewModel}">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
-                                Width="auto">
-                            <StackPanel>
-                                <TextBlock Text="xd"/>
-                                <TextBlock Text="{Binding Player.Name}"/>
+                                Width="500"
+                                Height="50" >
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="1"
+                                           Foreground="White"
+                                           FontSize="36"
+                                           Margin="5 0 0 0" />
+                                <Image Width="30"
+                                       Height="30"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Margin="7 10 0 0"
+                                       Source="{Binding Player.Image}" />
+                                <StackPanel Orientation="Vertical"
+                                            Margin="5 4 0 0">
+
+                                    <TextBlock Text="{Binding Player.InGameName}"
+                                               FontWeight="Bold"
+                                               FontSize="17"
+                                               Foreground="Wheat"
+                                               Background="Transparent" />
+
+                                    <TextBlock Foreground="White">
+                                        <Run Text="Points: " />
+                                        <Run Text="XX" />
+
+                                        <Run Text=" - " />
+                                        
+                                        <Run Text="Best time: " />
+                                        <Run Text="XX:XX" />
+
+                                        <Run Text=" - " />
+
+                                        <Run Text="Average time: " />
+                                        <Run Text="XX:XX" />
+                                    </TextBlock>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

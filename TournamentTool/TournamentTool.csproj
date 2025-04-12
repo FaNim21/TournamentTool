@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Updates\" />
-    <Folder Include="Windows\Ranking\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\audio.png" />
@@ -58,5 +57,12 @@
     <Resource Include="Resources\pearlIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Windows\LeaderboardRuleEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 </Project>

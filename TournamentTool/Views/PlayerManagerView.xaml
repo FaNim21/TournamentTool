@@ -421,7 +421,8 @@
                                 Value="0" />
                         <Setter Property="Padding"
                                 Value="0" />
-                        <Setter Property="ContextMenu" Value="{StaticResource ListViewContextMenu}"/>
+                        <Setter Property="ContextMenu"
+                                Value="{StaticResource ListViewContextMenu}" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

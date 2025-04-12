@@ -59,7 +59,7 @@ public class RankedManagementPanel : ManagementPanel
     }
 
     public ICommand AddRoundCommand { get; set; }
-    public ICommand SubstractRoundCommand { get; set; }
+    public ICommand SubtractRoundCommand { get; set; }
 
     private const string _rankedPlayerCountFileName = "Ranked_players_count";
     private const string _rankedCompletedCountFileName = "Ranked_completes_count";
@@ -73,7 +73,7 @@ public class RankedManagementPanel : ManagementPanel
         RankedPacePanel = rankedPacePanel;
 
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
-        SubstractRoundCommand = new RelayCommand(() => { Rounds--; });
+        SubtractRoundCommand = new RelayCommand(() => { Rounds--; });
 
         RankedManagementData = (RankedManagementData)controller.TournamentViewModel.ManagementData!;
     }

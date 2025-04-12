@@ -1,8 +1,11 @@
-﻿using System.Windows.Input;
+﻿using System.IO;
+using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Interfaces;
+using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
@@ -20,7 +23,7 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand EditRuleCommand { get; set; }
     public ICommand RemoveRuleCommand { get; set; }
 
-    public ICommand EditEntryCommand { get; set; }
+    public ICommand ViewEntryCommand { get; set; }
     public ICommand RemoveEntryCommand { get; set; }
     
 
@@ -34,11 +37,14 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         AddEntryCommand = new RelayCommand( () => Leaderboard.AddLeaderboardEntry(new LeaderboardEntry(), null!));
         AddRuleCommand = new RelayCommand(() => Leaderboard.AddRule(new LeaderboardRule()));
 
-        EditRuleCommand = new RelayCommand(null);
+        EditRuleCommand = new EditRuleCommand(coordinator);
         RemoveRuleCommand = new RemoveRuleCommand(this);
-        
-        EditEntryCommand = new RelayCommand(null);
+
+        ViewEntryCommand = new ViewEntryCommand(coordinator);
         RemoveEntryCommand = new RemoveEntryCommand(this);
+        
+        if (!Directory.Exists(Consts.AppAPIPath))
+            Directory.CreateDirectory(Consts.AppAPIPath);
     }
 
     public override bool CanEnable()
@@ -55,14 +61,23 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         return true;
     }
 
-    private bool IsDuplicated(string uuid)
+    public void EvaluatePlayer(Player player)
     {
-        foreach (var entry in Leaderboard.Entries)
-        {
-            if (!entry.GetLeaderboardEntry().PlayerUUID.Equals(uuid)) continue;
-            return true;
-        }
+        if (Leaderboard.Rules.Count == 0) return;
         
-        return false;
+        foreach (var rule in Leaderboard.Rules)
+        {
+            rule.Evaluate();
+        }
+    }
+
+    public void EvaluatePlayers(List<Player> players)
+    {
+        if (Leaderboard.Rules.Count == 0) return;
+        
+        foreach (var rule in Leaderboard.Rules)
+        {
+            rule.Evaluate();
+        }
     }
 }

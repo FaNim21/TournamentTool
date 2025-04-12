@@ -1,0 +1,51 @@
+﻿<Window x:Class="TournamentTool.Windows.LeaderboardEntryViewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:TournamentTool.Windows"
+        xmlns:models="clr-namespace:TournamentTool.Models"
+        xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
+        xmlns:local2="clr-namespace:TournamentTool.Components"
+        xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
+        d:DataContext="{d:DesignInstance Type=viewmodels:LeaderboardEntryViewViewModel}"
+        mc:Ignorable="d"
+        d:DesignWidth="400"
+        d:DesignHeight="250"
+        Background="#1E1E1E"
+        Title="Entry View"
+        BorderThickness="0.75"
+        BorderBrush="Black"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        WindowStartupLocation="CenterOwner"
+        Width="400"
+        Height="250" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="29" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              Background="#000D14">
+            <components:ButtonTaskbar Width="30"
+                                      Height="30"
+                                      FontSize="20"
+                                      WindowChrome.IsHitTestVisibleInChrome="True"
+                                      HorizontalAlignment="Right"
+                                      ColorBrush="#ff000f"
+                                      ContentText="X"
+                                      Padding="1"
+                                      Click="ExitButtonClick" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <TextBlock Text="Witam leaderboard entry"
+                       Foreground="White"
+                       FontSize="36"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

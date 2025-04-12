@@ -13,13 +13,14 @@ using TournamentTool.ViewModels;
 
 namespace TournamentTool.Modules.SidePanels;
 
-public struct RankedPlayer
+//Kiedys tu sprobowac ogarnac record class dla wszystkich obiektow pod json dla optymalizacji i organizacji, ale to tez trzeba bedzie potestowac
+public class RankedPlayer
 {
-    [JsonPropertyName("uuid")]
-    public string UUID { get; set; }
+    [JsonPropertyName("uuid")] 
+    public string UUID { get; set; } = string.Empty;
 
-    [JsonPropertyName("nickname")]
-    public string NickName { get; set; }
+    [JsonPropertyName("nickname")] 
+    public string NickName { get; set; } = string.Empty;
 
     [JsonPropertyName("roleType")]
     public byte RoleType { get; set; }
@@ -38,7 +39,7 @@ public struct RankedComplete
     [JsonPropertyName("time")]
     public long Time { get; set; }
 }
-public struct RankedInventory
+public class RankedInventory
 {
     [JsonPropertyName("splash_potion")]
     public int? SplashPotions { get; set; }
@@ -94,54 +95,54 @@ public struct RankedInventory
     [JsonPropertyName("potion")]
     public int Potion { get; set; }
 }
-public struct RankedTimeline
+public class RankedTimeline
 {
-    [JsonPropertyName("uuid")]
-    public string UUID { get; set; }
+    [JsonPropertyName("uuid")] 
+    public string UUID { get; set; } = string.Empty;
 
-    [JsonPropertyName("type")]
-    public string Type { get; set; } //maybe enum?? with all types ready
+    [JsonPropertyName("type")] 
+    public string Type { get; set; } = string.Empty; //maybe enum?? with all types ready
 
     [JsonPropertyName("time")]
     public long Time { get; set; }
 
-    [JsonPropertyName("data")]
-    public int[] Data { get; set; }
+    [JsonPropertyName("data")] 
+    public int[] Data { get; set; } = [];
 
     [JsonPropertyName("shown")]
     public bool IsShown { get; set; }
 }
-public readonly struct RankedData
+public class RankedData
 {
     [JsonPropertyName("matchType")]
-    public string MatchType { get; init; }
+    public string MatchType { get; set; } = string.Empty;
 
-    [JsonPropertyName("category")]
-    public string Category { get; init; }
+    [JsonPropertyName("category")] 
+    public string Category { get; set; } = string.Empty;
 
     [JsonPropertyName("startTime")]
-    public long StartTime { get; init; }
+    public long StartTime { get; set; }
 
     [JsonPropertyName("players")]
-    public RankedPlayer[] Players { get; init; }
+    public RankedPlayer[] Players { get; set; } = [];
 
-    [JsonPropertyName("completes")]
-    public RankedComplete[] Completes { get; init; }
+    [JsonPropertyName("completes")] 
+    public RankedComplete[] Completes { get; set; } = [];
 
     [JsonPropertyName("inventories")]
-    public Dictionary<string, RankedInventory> Inventories { get; init; }
+    public Dictionary<string, RankedInventory> Inventories { get; set; } = [];
 
     [JsonPropertyName("timelines")]
-    public List<RankedTimeline> Timelines { get; init; }
+    public List<RankedTimeline> Timelines { get; set; } = [];
 }
 
-public struct RankedPaceData
+public class RankedPaceData
 {
-    public RankedPlayer Player { get; set; }
+    public RankedPlayer Player { get; set; } = new();
     //eweutnalnie zrobic globaltimeline poniewaz obecny jest tylko dla rzeczywistych splitow
-    public List<RankedTimeline> Timelines { get; set; }
-    public RankedInventory Inventory { get; set; }
-    public RankedComplete Completion { get; set; }
+    public List<RankedTimeline> Timelines { get; set; } = [];
+    public RankedInventory Inventory { get; set; } = new();
+    public RankedComplete Completion { get; set; } = new();
     public int Resets { get; set; }
 }
 
@@ -294,11 +295,11 @@ public class RankedPacePanel : SidePanel
             Trace.WriteLine("Error reading JSON file: " + ex.Message);
         }
 
-        if (!rankedData.HasValue) return;
+        if (rankedData == null) return;
 
-        FilterJSON(rankedData.Value);
+        FilterJSON(rankedData);
 
-        CompletedRunsCount = rankedData.Value.Completes.Length;
+        CompletedRunsCount = rankedData.Completes.Length;
         
         if (GroupedRankedPaces == null) return;
         Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });

@@ -295,12 +295,12 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             OnPropertyChanged(nameof(ControllerMode));
             PresetIsModified();
             
-            OnControllerModeChanged?.Invoke();
-    
             if (value == ControllerMode.Ranked)
                 ManagementData = new RankedManagementData();
             else if (value == ControllerMode.PaceMan)
                 ManagementData = new PacemanManagementData();
+            
+            OnControllerModeChanged?.Invoke();
         }
     }
     

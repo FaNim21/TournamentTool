@@ -78,11 +78,11 @@ public struct PaceManStreamData
     public string AltID { get; set; }
 }
 
-public struct PaceItemData
+public class PaceItemData
 {
-    [JsonPropertyName("estimatedCounts")]
-    public Dictionary<string, int> EstimatedCounts { get; set; }
+    [JsonPropertyName("estimatedCounts")] 
+    public Dictionary<string, int> EstimatedCounts { get; set; } = [];
 
-    [JsonPropertyName("usages")]
-    public Dictionary<string, int> Usages { get; set; }
+    [JsonPropertyName("usages")] 
+    public Dictionary<string, int> Usages { get; set; } = [];
 }
