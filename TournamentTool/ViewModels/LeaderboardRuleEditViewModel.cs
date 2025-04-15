@@ -85,4 +85,5 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         _ruleModel.SubRules.Remove(subRule.Model);
         Rule.SubRules.Remove(subRule);
     }
+
 }

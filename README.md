@@ -41,3 +41,7 @@ Controller menu view with controller mode for Paceman (view is WIP)
 3. Select the desired preset and start your tournament!
 
 For support or inquiries, feel free to reach out via Discord: FaNim#fanim
+
+## Thanks to:
+- Automatt for ideas and motivation
+- Hinxer for help with UI design

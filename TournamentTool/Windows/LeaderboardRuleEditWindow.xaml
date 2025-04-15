@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:TournamentTool.Windows"
         xmlns:models="clr-namespace:TournamentTool.Models"
+        xmlns:RankingModels="clr-namespace:TournamentTool.Models.Ranking"
         xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:local2="clr-namespace:TournamentTool.Components"
         xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
@@ -19,8 +20,8 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         WindowStartupLocation="CenterOwner"
-        Width="500"
-        Height="350">
+        Width="600"
+        Height="450">
     <Window.Resources>
         <ContextMenu x:Key="SubRuleContextMenu">
             <MenuItem Header="Remove"
@@ -64,7 +65,7 @@
                 <Grid Grid.Row="0">
                     <components:ButtonNormal HorizontalAlignment="Center"
                                              Width="100"
-                                             ContentText="General"
+                                             ContentText="Settings"
                                              FontSize="20"
                                              OnCommand="{Binding OpenGeneralCommand}" />
                 </Grid>
@@ -110,55 +111,167 @@
                                               Margin="5 0 0 0" />
                 </Grid>
             </Grid>
-            
+
             <Grid Grid.Column="1">
-                <Grid Visibility="{Binding IsGeneralVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="no siema general"
-                               Foreground="White"
-                               FontSize="36"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
+                <StackPanel Orientation="Vertical"
+                            Visibility="{Binding IsGeneralVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Margin="10 10 0 0">
 
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 0 0 5">
                         <TextBox TextWrapping="Wrap"
-                                 Width="40"
+                                 Width="120"
                                  Height="20"
-                                 Text="{Binding TournamentViewModel.ApiRefreshRateMiliseconds}"
-                                 PreviewTextInput="NumberValidationTextBox"
+                                 Text="{Binding Rule.Name}"
                                  Padding="0 1 0 0"
-                                 Background="#9E9E9E"
-                                 MaxLength="5" />
+                                 Background="#9E9E9E" />
                         <TextBlock Text="Name"
                                    Foreground="White"
                                    FontSize="16"
                                    Margin="5 0 0 3" />
                     </StackPanel>
 
+
                     <StackPanel Orientation="Horizontal"
-                                Margin="0 0 0 5">
-                        <TextBox TextWrapping="Wrap"
-                                 Width="40"
-                                 Height="20"
-                                 Text="{Binding TournamentViewModel.ApiRefreshRateMiliseconds}"
-                                 PreviewTextInput="NumberValidationTextBox"
-                                 Padding="0 1 0 0"
-                                 Background="#9E9E9E"
-                                 MaxLength="5" />
-                        <TextBlock Text=""
+                                Margin="0 3 0 5">
+                        <ComboBox Width="150"
+                                  Style="{StaticResource ComboBoxTest2}" />
+                        <TextBlock Text="Choose Split"
                                    Foreground="White"
                                    FontSize="16"
                                    Margin="5 0 0 3" />
                     </StackPanel>
-                </Grid>
+
+                    <components:ButtonNormal ContentText="Switch Rule Type"
+                                             Width="100"
+                                             Height="25"
+                                             HorizontalAlignment="Left"
+                                             Margin="0 3 0 5" />
+                </StackPanel>
 
                 <Grid Visibility="{Binding IsGeneralVisible, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
-                    <TextBlock Text="no siema sub rule"
-                               Foreground="White"
-                               FontSize="36"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                </Grid>
+                    <StackPanel Orientation="Vertical"
+                                Margin="10 2 0 0">
+
+                        <TextBlock Text="Config"
+                                   Foreground="Wheat"
+                                   FontSize="32"
+                                   FontWeight="SemiBold"
+                                   Margin="0 0 0 10" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="160"
+                                     Height="20"
+                                     Text="{Binding SelectedSubRule.Description}"
+                                     Padding="0 1 0 0"
+                                     Background="#9E9E9E" />
+                            <TextBlock Text="Description"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="64"
+                                     Height="20"
+                                     Text="{Binding SelectedSubRule.Time}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 1 0 0"
+                                     MaxLength="8"
+                                     Background="#9E9E9E" />
+                            <TextBlock Text="Time (ms)"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="50"
+                                     Height="20"
+                                     Text="{Binding SelectedSubRule.BasePoints}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 1 0 0"
+                                     MaxLength="6"
+                                     Background="#9E9E9E" />
+                            <TextBlock Text="Base Points"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="50"
+                                     Height="20"
+                                     Text="{Binding SelectedSubRule.MaxWinners}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 1 0 0"
+                                     MaxLength="6"
+                                     Background="#9E9E9E" />
+                            <TextBlock Text="Max Winners"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+
+                        <CheckBox IsChecked="{Binding SelectedSubRule.Repeatable}"
+                                  Content="Repeatable"
+                                  Foreground="White"
+                                  Margin="0 0 0 5" />
+                    </StackPanel>
+
+                    <Line X1="0"
+                          Y1="220"
+                          X2="600"
+                          Y2="220"
+                          Stroke="#404447"
+                          StrokeThickness="2" />
+
+                    <StackPanel VerticalAlignment="Bottom"
+                                Background="Transparent"
+                                Height="200"
+                                Margin="10 0 0 0">
+                        <TextBlock Text="Lua"
+                                   Foreground="Wheat"
+                                   FontSize="32"
+                                   FontWeight="SemiBold"
+                                   Margin="0 0 0 10" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 -4 10 0">
+                            <TextBlock Text="Scripts: "
+                                       Foreground="White"
+                                       FontSize="16" />
+                            <ComboBox Width="150"
+                                      Height="25"
+                                      Style="{StaticResource ComboBoxTest2}" />
+                        </StackPanel>
+
+                        <Border BorderBrush="Black"
+                                Width="480"
+                                Height="109"
+                                HorizontalAlignment="Left"
+                                BorderThickness="1"
+                                Margin="0 9 0 0">
+                            <TextBlock Text="Script description"
+                                       Foreground="White"
+                                       TextWrapping="Wrap"
+                                       FontSize="12"
+                                       Background="Transparent"
+                                       Margin="5"/>
+                        </Border>
+
+                    </StackPanel>
+
+                </Grid >
             </Grid>
         </Grid>
     </Grid>

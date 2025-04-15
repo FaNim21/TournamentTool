@@ -4,6 +4,8 @@ namespace TournamentTool.Enums;
 
 public enum MinecraftAdvancement
 {
+    [Display(Name = "None", Description = "none", ShortName = "none")] None,
+    
     // ====== Story Advancements ======
     [Display(Name = "Minecraft", Description = "story.root", ShortName = "story")] StoryRoot,
     [Display(Name = "Stone Age", Description = "story.mine_stone", ShortName = "mine_stone")] StoryMineStone,

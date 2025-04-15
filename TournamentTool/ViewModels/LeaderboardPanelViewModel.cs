@@ -26,6 +26,9 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand ViewEntryCommand { get; set; }
     public ICommand RemoveEntryCommand { get; set; }
     
+    public ICommand RefreshScriptsCommand { get; set; }
+    public ICommand OpenScriptsFolderCommand { get; set; }
+    
 
     public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver) : base(coordinator)
     {
@@ -42,9 +45,12 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
         RemoveEntryCommand = new RemoveEntryCommand(this);
+
+        RefreshScriptsCommand = new RelayCommand(RefreshScripts);
+        OpenScriptsFolderCommand = new RelayCommand(OpenScriptsFolder);
         
-        if (!Directory.Exists(Consts.AppAPIPath))
-            Directory.CreateDirectory(Consts.AppAPIPath);
+        if (!Directory.Exists(Consts.ScriptsPath))
+            Directory.CreateDirectory(Consts.ScriptsPath);
     }
 
     public override bool CanEnable()
@@ -79,5 +85,15 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         {
             rule.Evaluate();
         }
+    }
+    
+    private void RefreshScripts()
+    {
+        
+    }
+    
+    private void OpenScriptsFolder()
+    {
+        
     }
 }
