@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
@@ -297,7 +298,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             
             if (value == ControllerMode.Ranked)
                 ManagementData = new RankedManagementData();
-            else if (value == ControllerMode.PaceMan)
+            else if (value == ControllerMode.Paceman)
                 ManagementData = new PacemanManagementData();
             
             OnControllerModeChanged?.Invoke();

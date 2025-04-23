@@ -30,6 +30,9 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         set
         {
             Model.Time = value;
+            var span = TimeSpan.FromMilliseconds(value);
+            TimeText = "xd";
+            TimeText = $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
             OnPropertyChanged(nameof(Time));
         } 
     }
@@ -61,9 +64,26 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         } 
     }
 
+    private string _timeText = string.Empty;
+    public string TimeText
+    {
+        get => _timeText;
+        set
+        {
+            _timeText = value;
+            OnPropertyChanged(nameof(TimeText));
+        } 
+    }
+
     
     public LeaderboardSubRuleViewModel(LeaderboardSubRule model)
     {
         Model = model;
+        Time = Model.Time;
+    }
+
+    public void Evaluate()
+    {
+        
     }
 }

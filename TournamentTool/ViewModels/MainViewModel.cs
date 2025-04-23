@@ -75,11 +75,10 @@ public class MainViewModel : BaseViewModel
         NavigationService = navigationService;
         TournamentViewModel = tournamentViewModel;
 
-        if (!Directory.Exists(Consts.PresetsPath))
-            Directory.CreateDirectory(Consts.PresetsPath);
-
-        if (!Directory.Exists(Consts.LogsPath))
-            Directory.CreateDirectory(Consts.LogsPath);
+        Directory.CreateDirectory(Consts.PresetsPath);
+        Directory.CreateDirectory(Consts.LogsPath);
+        Directory.CreateDirectory(Consts.ScriptsPath);
+        Directory.CreateDirectory(Consts.LeaderboardRules);
 
         OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);

@@ -57,19 +57,10 @@ public partial class PresetManagerView : UserControl
     
     private void OpenDonateSite(object sender, RequestNavigateEventArgs e)
     {
-        OpenKofiInBrowser(e.Uri.ToString());
+        Helper.StartProcess(e.Uri.ToString());
     }
     private void OpenDonateSiteButton(object sender, RoutedEventArgs e)
     {
-        OpenKofiInBrowser("https://ko-fi.com/fanim");
-    }
-    private void OpenKofiInBrowser(string uri)
-    {
-        var processStart = new ProcessStartInfo(uri)
-        {
-            UseShellExecute = true,
-            Verb = "open"
-        };
-        Process.Start(processStart);
+        Helper.StartProcess("https://ko-fi.com/fanim");
     }
 }

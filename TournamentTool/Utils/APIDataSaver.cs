@@ -7,8 +7,7 @@ public class APIDataSaver
 {
     public APIDataSaver()
     {
-        if (!Directory.Exists(Consts.AppAPIPath))
-            Directory.CreateDirectory(Consts.AppAPIPath);
+        Directory.CreateDirectory(Consts.AppAPIPath);
     }
 
     public string CheckFile(string fileName)

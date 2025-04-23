@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Meziantou.Xunit;
 using Moq;
 using MultiOpener.Entities.Interfaces;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;

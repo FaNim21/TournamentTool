@@ -40,17 +40,14 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         AddEntryCommand = new RelayCommand( () => Leaderboard.AddLeaderboardEntry(new LeaderboardEntry(), null!));
         AddRuleCommand = new RelayCommand(() => Leaderboard.AddRule(new LeaderboardRule()));
 
-        EditRuleCommand = new EditRuleCommand(coordinator);
+        EditRuleCommand = new EditRuleCommand(coordinator, Tournament);
         RemoveRuleCommand = new RemoveRuleCommand(this);
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
         RemoveEntryCommand = new RemoveEntryCommand(this);
 
         RefreshScriptsCommand = new RelayCommand(RefreshScripts);
-        OpenScriptsFolderCommand = new RelayCommand(OpenScriptsFolder);
-        
-        if (!Directory.Exists(Consts.ScriptsPath))
-            Directory.CreateDirectory(Consts.ScriptsPath);
+        OpenScriptsFolderCommand = new RelayCommand(() => { Helper.StartProcess(Consts.ScriptsPath);});
     }
 
     public override bool CanEnable()
@@ -88,11 +85,6 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
     }
     
     private void RefreshScripts()
-    {
-        
-    }
-    
-    private void OpenScriptsFolder()
     {
         
     }

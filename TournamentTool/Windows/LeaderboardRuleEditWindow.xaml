@@ -9,6 +9,7 @@
         xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:local2="clr-namespace:TournamentTool.Components"
         xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
+        xmlns:converters="clr-namespace:TournamentTool.Converters"
         d:DataContext="{d:DesignInstance Type=viewmodels:LeaderboardRuleEditViewModel}"
         mc:Ignorable="d"
         d:DesignWidth="500"
@@ -23,6 +24,8 @@
         Width="600"
         Height="450">
     <Window.Resources>
+        <converters:EnumDisplayNameConverter x:Key="EnumDisplayNameConverter"/>
+        
         <ContextMenu x:Key="SubRuleContextMenu">
             <MenuItem Header="Remove"
                       Command="{Binding DataContext.RemoveSubRuleCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
@@ -94,7 +97,7 @@
                             <Grid Width="190"
                                   Height="20"
                                   HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding Time}"
+                               <TextBlock Text="{Binding TimeText}"
                                            HorizontalAlignment="Center"
                                            Margin="0 -2 0 0" />
                             </Grid>
@@ -135,18 +138,37 @@
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 3 0 5">
                         <ComboBox Width="150"
-                                  Style="{StaticResource ComboBoxTest2}" />
-                        <TextBlock Text="Choose Split"
-                                   Foreground="White"
+                                  ItemsSource="{Binding Rule.FilteredAdvancementsAndSplits}"
+                                  SelectedItem="{Binding Rule.ChosenAdvancement, Mode=TwoWay}"
+                                  Style="{StaticResource ComboBoxTest2}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumDisplayNameConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Foreground="White"
                                    FontSize="16"
-                                   Margin="5 0 0 3" />
+                                   Margin="5 0 0 3">
+                            <Run Text="Choose" />
+                            <Run Text="{Binding Rule.RuleTypeText}" />
+                        </TextBlock>
                     </StackPanel>
 
-                    <components:ButtonNormal ContentText="Switch Rule Type"
-                                             Width="100"
-                                             Height="25"
-                                             HorizontalAlignment="Left"
-                                             Margin="0 3 0 5" />
+                    <StackPanel Orientation="Horizontal">
+                        <components:ButtonNormal ContentText="Switch Rule Type"
+                                                 Width="100"
+                                                 Height="25"
+                                                 HorizontalAlignment="Left"
+                                                 Margin="0 3 0 5"
+                                                 OnCommand="{Binding Rule.SwitchRuleTypeCommand}" />
+                        <TextBlock Foreground="White"
+                                   FontSize="14"
+                                   Margin="5 5 0 0">
+                            <Run Text="Type:"/>
+                            <Run Text="{Binding Rule.RuleTypeText}"/>
+                        </TextBlock>
+                    </StackPanel>
                 </StackPanel>
 
                 <Grid Visibility="{Binding IsGeneralVisible, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
@@ -178,12 +200,12 @@
                             <TextBox TextWrapping="Wrap"
                                      Width="64"
                                      Height="20"
-                                     Text="{Binding SelectedSubRule.Time}"
+                                     Text="{Binding SelectedSubRule.Time, UpdateSourceTrigger=PropertyChanged}"
                                      PreviewTextInput="NumberValidationTextBox"
                                      Padding="0 1 0 0"
                                      MaxLength="8"
                                      Background="#9E9E9E" />
-                            <TextBlock Text="Time (ms)"
+                            <TextBlock Text="Time (ms to mm:ss.fff)"
                                        Foreground="White"
                                        FontSize="16"
                                        Margin="5 0 0 3" />

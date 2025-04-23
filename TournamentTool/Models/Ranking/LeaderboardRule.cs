@@ -1,14 +1,19 @@
-﻿namespace TournamentTool.Models.Ranking;
+﻿using TournamentTool.Enums;
+
+namespace TournamentTool.Models.Ranking;
 
 public enum LeaderboardRuleType
 {
+    None,
     Split,
-    Advancement
+    Advancement,
+    All,
 }
 
 public class LeaderboardRule
 {
     public string Name { get; set; } = string.Empty;
-    public LeaderboardRuleType Type { get; set; } = LeaderboardRuleType.Split;
+    public LeaderboardRuleType RuleType { get; set; } = LeaderboardRuleType.Split;
+    public MinecraftAdvancement ChosenAdvancement { get; set; } = MinecraftAdvancement.None;
     public List<LeaderboardSubRule> SubRules { get; set; } = [];
 }

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:models="clr-namespace:TournamentTool.Models"
+             xmlns:enums="clr-namespace:TournamentTool.Enums"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:local2="clr-namespace:TournamentTool.Components"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
@@ -126,20 +127,20 @@
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="None"
-                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.None}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.None}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="PaceMan"
-                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Paceman}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="Ranked"
-                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}" />
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}" />
                         </StackPanel>
 
                         <!-- PACEMAN -->
                         <StackPanel Orientation="Vertical"
-                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.PaceMan}}">
+                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Paceman}}">
                             <TextBlock  Text="Paceman"
                                         Foreground="Wheat"
                                         FontWeight="SemiBold"
@@ -263,7 +264,7 @@
 
                         <!-- RANKED -->
                         <StackPanel Orientation="Vertical"
-                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static models:ControllerMode.Ranked}}">
+                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}">
                             <Label  Content="Ranked"
                                     Foreground="Wheat"
                                     FontSize="24"

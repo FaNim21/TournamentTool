@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
@@ -200,7 +201,7 @@ public class ControllerViewModel : SelectableViewModel
                     ManagementPanel = null;
                 }
                 break;
-            case ControllerMode.PaceMan:
+            case ControllerMode.Paceman:
                 UseSidePanel = true;
 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))

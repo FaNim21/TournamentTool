@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Data;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Services;
@@ -33,7 +34,7 @@ public class PaceManPanel : SidePanel
     public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, IPresetSaver presetSaver) : base(controller)
     {
         _paceManService = new PaceManService(controller, tournamentViewModel, presetSaver);
-        Mode = ControllerMode.PaceMan;
+        Mode = ControllerMode.Paceman;
     }
 
     public override void Initialize()

@@ -10,6 +10,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.Enums;
 
 namespace TournamentTool.Modules.SidePanels;
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Input;
@@ -11,6 +12,16 @@ namespace TournamentTool.Utils;
 
 public static class Helper
 {
+    public static void StartProcess(string path)
+    {
+        var processStart = new ProcessStartInfo(path)
+        {
+            UseShellExecute = true,
+            Verb = "open"
+        };
+        Process.Start(processStart);
+    }
+    
     public static void SaveLog(string output, string logName = "log")
     {
         string date = DateTimeOffset.Now.ToString("yyyy-MM-dd_HH.mm");

@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
+using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels.Entities;
 

@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json.Serialization;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
@@ -16,13 +17,6 @@ public enum DisplayedNameType
     Twitch,
     IGN,
     WhiteList
-}
-
-public enum ControllerMode
-{
-    None,
-    PaceMan,
-    Ranked,
 }
 
 public interface IPreset
