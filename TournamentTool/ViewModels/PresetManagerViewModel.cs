@@ -17,6 +17,7 @@ public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
+    private LeaderboardPanelViewModel Leaderboard { get; set; }
     public TournamentViewModel TournamentViewModel { get; }
     public IPresetSaver PresetService { get; }
 
@@ -56,10 +57,11 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SetRankedDataPathCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, ControllerViewModel controller) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, ControllerViewModel controller, LeaderboardPanelViewModel leaderboard) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
+        Leaderboard = leaderboard;
         
         LoadPresetsList();
 
@@ -115,6 +117,7 @@ public class PresetManagerViewModel : SelectableViewModel
             if (data == null) return;
             
             TournamentViewModel.ChangeData(data);
+            Leaderboard.OnPresetChanged();
         }
         catch { }
     }

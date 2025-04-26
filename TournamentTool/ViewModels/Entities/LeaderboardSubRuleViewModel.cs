@@ -1,10 +1,15 @@
-﻿using TournamentTool.Models.Ranking;
+﻿using System.Diagnostics;
+using System.Windows.Documents;
+using TournamentTool.Models;
+using TournamentTool.Models.Ranking;
 
 namespace TournamentTool.ViewModels.Entities;
 
 public class LeaderboardSubRuleViewModel : BaseViewModel
 {
     public LeaderboardSubRule Model { get; private set; }
+
+    public LeaderboardRuleViewModel Rule { get; private set; }
 
     public string LuaPath
     {
@@ -31,7 +36,6 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.Time = value;
             var span = TimeSpan.FromMilliseconds(value);
-            TimeText = "xd";
             TimeText = $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
             OnPropertyChanged(nameof(Time));
         } 
@@ -76,14 +80,25 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
     }
 
     
-    public LeaderboardSubRuleViewModel(LeaderboardSubRule model)
+    public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule)
     {
         Model = model;
+        Rule = rule;
+        
         Time = Model.Time;
     }
 
-    public void Evaluate()
+    public bool Evaluate(LeaderboardPlayerEvaluateData data)
     {
+        if (data.Time > Time) return false;
         
+        var span = TimeSpan.FromMilliseconds(data.Time);
+        string timeText = $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}"; 
+        if (data.Player == null)
+            Trace.WriteLine($"Player: ??? just achieved milestone: \"{Rule.ChosenMilestone}\" in time: {timeText}, so under {TimeText}");
+        else
+            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{Rule.ChosenMilestone}\" in time: {timeText}, so under {TimeText}");
+        
+        return true;
     }
 }

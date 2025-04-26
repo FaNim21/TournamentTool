@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
@@ -10,7 +11,7 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
-public sealed class LeaderboardPanelViewModel : SelectableViewModel
+public class LeaderboardPanelViewModel : SelectableViewModel
 {
     public IPresetSaver PresetSaver { get; private set; }
 
@@ -64,23 +65,23 @@ public sealed class LeaderboardPanelViewModel : SelectableViewModel
         return true;
     }
 
-    public void EvaluatePlayer(Player player)
+    public void OnPresetChanged()
     {
-        if (Leaderboard.Rules.Count == 0) return;
-        
-        foreach (var rule in Leaderboard.Rules)
-        {
-            rule.Evaluate();
-        }
+        Leaderboard = Tournament.Leaderboard;
     }
-
-    public void EvaluatePlayers(List<Player> players)
+    
+    public void EvaluatePlayer(LeaderboardPlayerEvaluateData data)
     {
+        //if (data.Player == null) return;
         if (Leaderboard.Rules.Count == 0) return;
+        if (data.Player == null)
+            Trace.WriteLine($"Player: ??? achieved milestone -> checking all rules ({data.Milestone})");
+        else
+            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" achieved milestone -> checking all rules ({data.Milestone})");
         
         foreach (var rule in Leaderboard.Rules)
         {
-            rule.Evaluate();
+            rule.Evaluate(data);
         }
     }
     

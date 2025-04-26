@@ -77,7 +77,7 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(() =>
         {
             _ruleModel.SubRules.Add(subRule);
-            Rule.SubRules.Add(new LeaderboardSubRuleViewModel(subRule));
+            Rule.SubRules.Add(new LeaderboardSubRuleViewModel(subRule, Rule));
         });
     }
 

@@ -14,6 +14,6 @@ public class LeaderboardRule
 {
     public string Name { get; set; } = string.Empty;
     public LeaderboardRuleType RuleType { get; set; } = LeaderboardRuleType.Split;
-    public MinecraftAdvancement ChosenAdvancement { get; set; } = MinecraftAdvancement.None;
+    public RunMilestone ChosenAdvancement { get; set; } = RunMilestone.None;
     public List<LeaderboardSubRule> SubRules { get; set; } = [];
 }

@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Models;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
@@ -11,8 +13,8 @@ namespace TournamentTool.ViewModels.Entities;
 public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 {
     private PaceMan _paceMan;
-    
-    private TournamentViewModel? TournamentViewModel { get; set; }
+
+    private PaceManService Service { get; set; }
 
     public string Nickname => _paceMan.Nickname;
     public string TwitchName => _paceMan.User.TwitchName ?? string.Empty;
@@ -72,6 +74,8 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     }
     public string CurrentSplitTime { get; set; } = "00:00";
 
+    private PacemanPaceMilestone? LastMilestone { get; set; } = null;
+    
     private long _igtTimeMiliseconds;
     public long IGTTimeMiliseconds
     {
@@ -104,10 +108,10 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     public bool IsUsedInPreview { get; set; }
 
     
-    public PaceManViewModel(PaceMan paceMan, TournamentViewModel? tournamentViewModel, Player player)
+    public PaceManViewModel(PaceManService service, PaceMan paceMan, Player player)
     {
+        Service = service;
         _paceMan = paceMan;
-        TournamentViewModel = tournamentViewModel;
         Player = player;
         
         UpdateHeadImage();
@@ -116,10 +120,6 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     
     public void Update(PaceMan paceman)
     {
-        //TODO: 1 that shit is crazy and about to go down
-        //to jest tak slabe ze az mi sie chce plakac dlaczego lenistwo jest silniejsze
-        //trzeba to zrobic klasykiem model-viewmodel
-
         _paceMan = paceman;
         
         if (_paceMan.Splits.Count == 0) return;
@@ -127,34 +127,18 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     }
     private void UpdateTime()
     {
-        foreach (var t in _paceMan.Splits)
-            t.SplitName = t.SplitName.Replace("rsg.", "");
+        PacemanPaceMilestone lastMilestone = GetLastSplit();
+        lastMilestone.SplitName = lastMilestone.SplitName.Replace("rsg.", "");
 
-        PaceSplitsList lastSplit = _paceMan.Splits[^1];
-
-        if (_paceMan.ItemsData.EstimatedCounts != null)
+        if (LastMilestone == null || !LastMilestone!.SplitName.Equals(lastMilestone.SplitName))
         {
-            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
-            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if (_paceMan.Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
-
-            Inventory.BlazeRodsCount = estimatedRods;
-            Inventory.PearlsCount = estimatedPearls;
+            string milestone = LastMilestone == null ? "None" : $"{LastMilestone.SplitName}";
+            Trace.WriteLine($"{Nickname} player from {milestone} to {lastMilestone!.SplitName}");
+            UpdateLastSplit(lastMilestone);
+            Service.EvaluatePlayerInLeaderboard(this);
         }
-
-        if (_paceMan.Splits.Count > 1 && (lastSplit.SplitName.Equals("enter_bastion") || lastSplit.SplitName.Equals("enter_fortress")))
-        {
-            SplitType = _paceMan.Splits[^2].SplitName.Equals("enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
-        }
-        else
-        {
-            SplitType = Enum.Parse<SplitType>(lastSplit.SplitName);
-        }
-
-        CheckForGoodPace(lastSplit);
-
-        CurrentSplitTimeMiliseconds = lastSplit.IGT;
-        IGTTimeMiliseconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - _paceMan.LastUpdate) + lastSplit.IGT;
+        
+        UpdateIGTTime();
     }
     private void UpdateHeadImage()
     {
@@ -174,6 +158,36 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
             HeadImageOpacity = 1f;
             HeadImage = Player!.Image;
         }
+    }
+
+    private void UpdateLastSplit(PacemanPaceMilestone lastMilestone)
+    {
+        if (_paceMan.ItemsData.EstimatedCounts != null)
+        {
+            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
+            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
+            if (_paceMan.Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
+
+            Inventory.BlazeRodsCount = estimatedRods;
+            Inventory.PearlsCount = estimatedPearls;
+        }
+
+        if (_paceMan.Splits.Count > 1 && (lastMilestone.SplitName.Equals("enter_bastion") || lastMilestone.SplitName.Equals("enter_fortress")))
+        {
+            SplitType = _paceMan.Splits[^2].SplitName.Equals("rsg.enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
+        }
+        else
+        {
+            SplitType = Enum.Parse<SplitType>(lastMilestone.SplitName);
+        }
+
+        SetPacePriority(Service.CheckForGoodPace(SplitType, lastMilestone));
+        CurrentSplitTimeMiliseconds = lastMilestone.IGT;
+        LastMilestone = lastMilestone;
+    }
+    private void UpdateIGTTime()
+    {
+        IGTTimeMiliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - _paceMan.LastUpdate + LastMilestone!.IGT;
     }
 
     public string GetDisplayName()
@@ -197,38 +211,22 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         return Player != null;
     }
 
-    private void CheckForGoodPace(PaceSplitsList lastSplit)
+    public PacemanPaceMilestone GetLastSplit()
     {
-        if (TournamentViewModel == null) return;
-
-        switch (SplitType)
+        var lastSplit = _paceMan.Splits[^1];
+        return new PacemanPaceMilestone()
         {
-            case SplitType.structure_2:
-                SetPacePriority(TournamentViewModel.Structure2GoodPaceMiliseconds > lastSplit.IGT);
-                break;
-            case SplitType.first_portal:
-                SetPacePriority(TournamentViewModel.FirstPortalGoodPaceMiliseconds > lastSplit.IGT);
-                break;
-            case SplitType.enter_stronghold:
-                SetPacePriority(TournamentViewModel.EnterStrongholdGoodPaceMiliseconds > lastSplit.IGT);
-                break;
-            case SplitType.enter_end:
-                SetPacePriority(TournamentViewModel.EnterEndGoodPaceMiliseconds > lastSplit.IGT);
-                break;
-            case SplitType.credits:
-                SetPacePriority(TournamentViewModel.CreditsGoodPaceMiliseconds > lastSplit.IGT);
-                break;
-            default:
-                SetPacePriority(false);
-                break;
-        }
+            SplitName = lastSplit.SplitName,
+            RTA = lastSplit.RTA,
+            IGT = lastSplit.IGT,
+        };
     }
+    
     private void SetPacePriority(bool good)
     {
         if (good)
         {
             PaceFontWeight = FontWeights.Bold;
-
             Color gold = Color.FromRgb(255, 215, 0);
             Application.Current?.Dispatcher.Invoke(delegate { PaceSplitTimeColor = new SolidColorBrush(gold); });
         }

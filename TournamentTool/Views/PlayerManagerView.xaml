@@ -269,19 +269,18 @@
                                              OnCommand="{Binding ClearSearchFieldCommand}"
                                              Margin="3 0 0 0" />
                 </StackPanel>
-                
+
                 <StackPanel Orientation="Horizontal"
                             Margin="5 0 0 0">
-                <ComboBox Style="{StaticResource ComboBoxTest2}"
-                          DisplayMemberPath="DisplayName"
-                          SelectedValuePath="Value"
-                          ItemsSource="{Binding Path=SortingType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
-                          SelectedValue="{Binding Path=SortingType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Width="105"
-                          Height="20" />
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              DisplayMemberPath="DisplayName"
+                              SelectedValuePath="Value"
+                              ItemsSource="{Binding Path=SortingType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
+                              SelectedValue="{Binding Path=SortingType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Width="105"
+                              Height="20" />
                     <components:ButtonNormal ContentText="Search"
                                              FontSize="12"
-                                             IsEnabled="{Binding IsSearchEnabled}"
                                              Width="45"
                                              Height="20"
                                              OnCommand="{Binding SubmitSearchCommand}"

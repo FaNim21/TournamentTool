@@ -97,9 +97,11 @@
                             <Grid Width="190"
                                   Height="20"
                                   HorizontalAlignment="Center">
-                               <TextBlock Text="{Binding TimeText}"
+                                <TextBlock Text="{Binding TimeText}"
                                            HorizontalAlignment="Center"
-                                           Margin="0 -2 0 0" />
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Margin="0 0 0 0" />
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -138,8 +140,8 @@
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 3 0 5">
                         <ComboBox Width="150"
-                                  ItemsSource="{Binding Rule.FilteredAdvancementsAndSplits}"
-                                  SelectedItem="{Binding Rule.ChosenAdvancement, Mode=TwoWay}"
+                                  ItemsSource="{Binding Rule.FilteredMilestones}"
+                                  SelectedItem="{Binding Rule.ChosenMilestone, Mode=TwoWay}"
                                   Style="{StaticResource ComboBoxTest2}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>

@@ -29,10 +29,11 @@ public class PresetManagerTests
         _mockPresetService = new Mock<IPresetSaver>();
         _mockTournamentViewModel = new Mock<TournamentViewModel>();
         _mockCoordinator = new Mock<MainViewModelCoordinator>(null!);
+        
+        Mock<LeaderboardPanelViewModel> _mockLeaderboard = new Mock<LeaderboardPanelViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object);
+        Mock<ControllerViewModel> mockController = new Mock<ControllerViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, _mockLeaderboard.Object);
 
-        Mock<ControllerViewModel> mockController = new Mock<ControllerViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object);
-
-        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockController.Object);
+        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockController.Object, _mockLeaderboard.Object);
     }
 
     [Fact]
@@ -110,9 +111,11 @@ public class PresetManagerTests
             _mockTournamentViewModel = new Mock<TournamentViewModel>();
             _mockCoordinator = new Mock<ICoordinator>();
             _presetService = new PresetService(_mockTournamentViewModel.Object);
-            Mock<ControllerViewModel> mockController = new Mock<ControllerViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService);
+            
+            Mock<LeaderboardPanelViewModel> _mockLeaderboard = new Mock<LeaderboardPanelViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService);
+            Mock<ControllerViewModel> mockController = new Mock<ControllerViewModel>(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockLeaderboard.Object);
 
-            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, mockController.Object);
+            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, mockController.Object, _mockLeaderboard.Object);
         }
 
         [Fact]

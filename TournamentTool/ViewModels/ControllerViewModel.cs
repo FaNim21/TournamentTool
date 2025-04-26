@@ -43,7 +43,8 @@ public class ControllerViewModel : SelectableViewModel
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
 
-    public TournamentViewModel TournamentViewModel { get; }
+    public TournamentViewModel TournamentViewModel { get; private set; }
+    public LeaderboardPanelViewModel Leaderboard { get; private set; }
     public IPresetSaver PresetService { get; }
 
     private IPlayer? _currentChosenPlayer;
@@ -113,10 +114,11 @@ public class ControllerViewModel : SelectableViewModel
     public ICommand UnSelectItemsCommand { get; set; }
 
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
+        Leaderboard = leaderboard;
 
         tournamentViewModel.OnControllerModeChanged += UpdateSidePanel;
         

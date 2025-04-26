@@ -33,7 +33,7 @@ public class PaceManPanel : SidePanel
 
     public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, IPresetSaver presetSaver) : base(controller)
     {
-        _paceManService = new PaceManService(controller, tournamentViewModel, presetSaver);
+        _paceManService = new PaceManService(this, tournamentViewModel);
         Mode = ControllerMode.Paceman;
     }
 

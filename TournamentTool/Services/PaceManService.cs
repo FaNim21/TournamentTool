@@ -7,7 +7,11 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Security.RightsManagement;
 using System.Text.Json;
+using System.Windows.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
+using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
@@ -15,9 +19,8 @@ namespace TournamentTool.Services;
 
 public class PaceManService : BaseViewModel
 {
-    private ControllerViewModel Controller { get; set; }
+    private SidePanel SidePanel { get; set; }
     private TournamentViewModel TournamentViewModel { get; set; }
-    private IPresetSaver PresetSaver { get; set; }
 
     private BackgroundWorker? _paceManWorker;
     private CancellationTokenSource? _cancellationTokenSource;
@@ -35,11 +38,10 @@ public class PaceManService : BaseViewModel
 
     public event Action<bool>? OnRefreshGroup;
 
-    public PaceManService(ControllerViewModel controllerViewModel, TournamentViewModel tournamentViewModel, IPresetSaver presetSaver)
+    public PaceManService(SidePanel sidePanel, TournamentViewModel tournamentViewModel)
     {
-        Controller = controllerViewModel;
+        SidePanel = sidePanel;
         TournamentViewModel = tournamentViewModel;
-        PresetSaver = presetSaver;
     }
 
     public override void OnEnable(object? parameter)
@@ -121,7 +123,8 @@ public class PaceManService : BaseViewModel
             Player? player = TournamentViewModel.GetPlayerByTwitchName(pace.User.TwitchName!);
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
 
-            paceViewModel = new PaceManViewModel(pace, TournamentViewModel, player!);
+            paceViewModel = new PaceManViewModel(this, pace, player!);
+            Trace.WriteLine($"Adding new paceman: {pace.Nickname}");
             AddPaceMan(paceViewModel);
             isPacemanEmpty = false;
         }
@@ -132,30 +135,42 @@ public class PaceManService : BaseViewModel
         OnRefreshGroup?.Invoke(isPacemanEmpty);
     }
 
-    public void AddPaceMan(PaceManViewModel paceMan)
+    public void AddPaceMan(PaceManViewModel paceman)
     {
-        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceMan); });
-
-        int n = TournamentViewModel.Players.Count;
-        bool updatedPlayer = false;
-        for (int i = 0; i < n; i++)
-        {
-            var player = TournamentViewModel.Players[i];
-            if (!player.InGameName!.Equals(paceMan.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
-            
-            updatedPlayer = true;
-            player.StreamData.SetName(paceMan.TwitchName!);
-            Controller.FilterItems();
-        }
-
-        if (updatedPlayer)
-        {
-            PresetSaver.SavePreset();
-        }
+        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceman); });
+        SidePanel.UpdatePlayerStreamData(paceman.Nickname, paceman.TwitchName);
     }
     public void RemovePaceMan(PaceManViewModel paceMan)
     {
         Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
     }
 
+    public void EvaluatePlayerInLeaderboard(PaceManViewModel paceman)
+    {
+        var split =  paceman.GetLastSplit();
+        if (split.SplitName.StartsWith("common.")) return;
+        
+        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
+        var data = new LeaderboardPlayerEvaluateData()
+        {
+            Player = paceman.Player!,
+            Milestone = milestone,
+            Time = (int)split.IGT
+        };
+        SidePanel.EvaluatePlayerInLeaderboard(data);
+    }
+
+    public bool CheckForGoodPace(SplitType splitType, PacemanPaceMilestone lastMilestone)
+    {
+        bool isPacePriority = splitType switch
+        {
+            SplitType.structure_2 => TournamentViewModel.Structure2GoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.first_portal => TournamentViewModel.FirstPortalGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.enter_stronghold => TournamentViewModel.EnterStrongholdGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.enter_end => TournamentViewModel.EnterEndGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.credits => TournamentViewModel.CreditsGoodPaceMiliseconds > lastMilestone.IGT,
+            _ => false
+        };
+        return isPacePriority;
+    }
 }

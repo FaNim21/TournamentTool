@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
@@ -152,11 +153,6 @@ public class PlayerManagerViewModel : SelectableViewModel
     private string _lastTournamentName = string.Empty;
 
 
-    /// <summary>
-    /// Powinienem zrobic okno bazujace na blokowaniu opcji odswiezenia walidacji in game name poprzez ponowna mozliwosc walidacji po resecie okna?
-    /// Tez glowny guzik walidacji powinien miec cooldown na sekunde po kazdym uzytkowniku
-    /// </summary>
-    
     public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService) : base(coordinator)
     {
         Tournament = tournament;
@@ -295,14 +291,18 @@ public class PlayerManagerViewModel : SelectableViewModel
         //TODO: 2 Tutaj mozna duzo optymalizacji zrobic zeby zmniejszyc ladowanie, poniewaz nie da sie nie blokowac ui przy tym
         //takze trzeba bedziez aczac od zmniejszenia obciazenie przez sam viewmodel, ktory w tym jest czyli rozbic player i playerviewmodel i tez zrobic oddzielny whitelistplayerviewmodel
         //pod to zeby tylko najwazniejsze rzeczy dawac dla whitelistplayerviewmodel itp itd
+        
+        if (!IsSearchEnabled) return;
         SearchText = SearchText.Trim();
-        ShowPlayers = false;
         if (!forceFilter && _lastFilterSearch.Equals(SearchText, _comparison) && _lastSortingType.Equals(SortingType)) return;
         if (!forceFilter && string.IsNullOrEmpty(SearchText) && string.IsNullOrEmpty(_lastFilterSearch)) return;
 
         _lastFilterSearch = SearchText;
         _lastSortingType = SortingType;
         IsSearchEnabled = false;
+        ShowPlayers = false;
+
+        Trace.WriteLine("Filtering players");
         
         if (string.IsNullOrEmpty(SearchText))
         {
@@ -318,7 +318,6 @@ public class PlayerManagerViewModel : SelectableViewModel
             UpdateInformationCountText();
             IsSearchEnabled = true;
             ShowPlayers = true;
-
             return;
         }
         UpdateInformationCountText("Filtering...", "?");

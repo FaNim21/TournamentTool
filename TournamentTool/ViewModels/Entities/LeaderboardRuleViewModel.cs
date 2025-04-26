@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Attributes;
 using TournamentTool.Commands;
@@ -37,19 +37,19 @@ public class LeaderboardRuleViewModel : BaseViewModel
         }
     }
 
-    private MinecraftAdvancement _chosenCopy;
-    public MinecraftAdvancement ChosenAdvancement
+    private RunMilestone _chosenCopy;
+    public RunMilestone ChosenMilestone
     {
         get => _rule.ChosenAdvancement;
         set
         {
-            if (ChosenAdvancement != MinecraftAdvancement.None)
+            if (ChosenMilestone != RunMilestone.None)
             {
                 _chosenCopy = _rule.ChosenAdvancement;
             }
             
             _rule.ChosenAdvancement = value; 
-            OnPropertyChanged(nameof(ChosenAdvancement));
+            OnPropertyChanged(nameof(ChosenMilestone));
         }
     }
 
@@ -66,7 +66,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
 
     public ObservableCollection<LeaderboardSubRuleViewModel> SubRules { get; set; } = [];
 
-    public List<MinecraftAdvancement> FilteredAdvancementsAndSplits { get; set; } = [];
+    public List<RunMilestone> FilteredMilestones { get; set; } = [];
 
     public ICommand SwitchRuleTypeCommand { get; set; }
 
@@ -78,23 +78,30 @@ public class LeaderboardRuleViewModel : BaseViewModel
         _rule = rule;
 
         SwitchRuleTypeCommand = new RelayCommand(SwitchRuleType);
-        _chosenCopy = ChosenAdvancement;
+        _chosenCopy = ChosenMilestone;
 
         foreach (var subRule in rule.SubRules)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                SubRules.Add(new LeaderboardSubRuleViewModel(subRule));
+                SubRules.Add(new LeaderboardSubRuleViewModel(subRule, this));
             });
         }
         RuleTypeText = RuleType.ToString();
     }
 
-    public void Evaluate()
+    public void Evaluate(LeaderboardPlayerEvaluateData data)
     {
+        if (data.Milestone != ChosenMilestone) return;
+        if (data.Player == null)
+            Trace.WriteLine($"Player: \"???\" entered {ChosenMilestone} -> checking all subrules");
+        else
+            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" entered {ChosenMilestone} -> checking all subrules");
+        
         foreach (var subRule in SubRules)
         {
-            subRule.Evaluate();
+            var success = subRule.Evaluate(data);
+            if (success) break;
         }
     }
 
@@ -102,10 +109,10 @@ public class LeaderboardRuleViewModel : BaseViewModel
     {
         _controllerMode = controllerMode;
         
-        IEnumerable<MinecraftAdvancement> filtered = Enum.GetValues<MinecraftAdvancement>()
+        IEnumerable<RunMilestone> filtered = Enum.GetValues<RunMilestone>()
             .Where(mode =>
             {
-                var memberInfo = typeof(MinecraftAdvancement).GetMember(mode.ToString()).FirstOrDefault();
+                var memberInfo = typeof(RunMilestone).GetMember(mode.ToString()).FirstOrDefault();
                 var attr = memberInfo?.GetCustomAttribute<EnumRuleContextAttribute>();
                 if (attr == null) return false;
 
@@ -114,12 +121,12 @@ public class LeaderboardRuleViewModel : BaseViewModel
                 return ruleMatch && modeMatch;
             });
 
-        var memberInfo = typeof(MinecraftAdvancement).GetMember(ChosenAdvancement.ToString()).FirstOrDefault();
+        var memberInfo = typeof(RunMilestone).GetMember(ChosenMilestone.ToString()).FirstOrDefault();
         var attr = memberInfo?.GetCustomAttribute<EnumRuleContextAttribute>();
-        ChosenAdvancement = attr!.RuleType.Equals(RuleType) || attr!.RuleType.Equals(LeaderboardRuleType.All) ? _chosenCopy : MinecraftAdvancement.None;
+        ChosenMilestone = attr!.RuleType.Equals(RuleType) || attr.RuleType.Equals(LeaderboardRuleType.All) ? _chosenCopy : RunMilestone.None;
         
-        FilteredAdvancementsAndSplits = new List<MinecraftAdvancement>(filtered);
-        OnPropertyChanged(nameof(FilteredAdvancementsAndSplits));
+        FilteredMilestones = new List<RunMilestone>(filtered);
+        OnPropertyChanged(nameof(FilteredMilestones));
     }
     
     private void SwitchRuleType()

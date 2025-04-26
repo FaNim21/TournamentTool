@@ -11,10 +11,10 @@ public class PaceMan
     public string Nickname { get; set; } = string.Empty;
 
     [JsonPropertyName("eventList")]
-    public List<PaceSplitsList> Splits { get; set; } = [];
+    public List<PacemanPaceMilestone> Splits { get; set; } = [];
 
     [JsonPropertyName("contextEventList")]
-    public List<PaceSplitsList> Advacements { get; set; } = [];
+    public List<PacemanPaceMilestone> Advacements { get; set; } = [];
 
     [JsonPropertyName("itemData")]
     public PaceItemData ItemsData { get; set; } = new();
@@ -35,7 +35,7 @@ public class PaceMan
     }
 }
 
-public class PaceSplitsList
+public class PacemanPaceMilestone
 {
     [JsonPropertyName("eventId")]
     public string SplitName { get; set; } = string.Empty;
