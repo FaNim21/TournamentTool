@@ -5,11 +5,9 @@ public interface IPlayer
     public bool IsUsedInPov { get; set; }
     public bool IsUsedInPreview { get; set; }
 
-
-    public string GetDisplayName();
-    public string GetPersonalBest();
-    public string GetHeadViewParametr();
-    public string GetTwitchName();
-    public bool IsFromWhiteList();
-
+    public string DisplayName { get; }
+    public string GetPersonalBest { get; }
+    public string HeadViewParameter { get; }
+    public string TwitchName { get; }
+    public bool IsFromWhitelist { get; }
 }

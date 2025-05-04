@@ -164,7 +164,7 @@ public class PointOfView : BaseViewModel
             return;
         }
 
-        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.GetTwitchName()))
+        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.TwitchName))
         {
             player = oldPlayer;
             return;
@@ -194,11 +194,11 @@ public class PointOfView : BaseViewModel
             return;
         }
 
-        DisplayedPlayer = player.GetDisplayName();
-        TwitchName = player.GetTwitchName();
-        HeadViewParametr = player.GetHeadViewParametr();
-        PersonalBest = player.GetPersonalBest() ?? "Unk";
-        IsFromWhiteList = player.IsFromWhiteList();
+        DisplayedPlayer = player.DisplayName;
+        TwitchName = player.TwitchName;
+        HeadViewParametr = player.HeadViewParameter;
+        PersonalBest = player.GetPersonalBest ?? "Unk";
+        IsFromWhiteList = player.IsFromWhitelist;
         IsPlayerUsed = true;
 
         _obs.SetBrowserURL(this);

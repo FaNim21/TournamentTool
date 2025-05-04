@@ -35,6 +35,12 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         }
     }
 
+    public string DisplayName => Player == null ? InGameName : Player.DisplayName;
+    public string GetPersonalBest => Player == null ? "Unk" : Player.GetPersonalBest;
+    public string HeadViewParameter => Player == null ? InGameName : Player.HeadViewParameter;
+    public string TwitchName => Player == null ? string.Empty : Player.TwitchName;
+    public bool IsFromWhitelist => Player != null;
+    
     private string _inGameName { get; set; } = string.Empty;
     public string InGameName
     {
@@ -282,26 +288,5 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         {
             HeadImage = Player!.Image;
         }
-    }
-
-    public string GetDisplayName()
-    {
-        return Player == null ? InGameName : Player.GetDisplayName();
-    }
-    public string GetPersonalBest()
-    {
-        return Player == null ? "Unk" : Player.GetPersonalBest();
-    }
-    public string GetTwitchName()
-    {
-        return Player == null ? string.Empty : Player.GetTwitchName();
-    }
-    public string GetHeadViewParametr()
-    {
-        return Player == null ? InGameName : Player.GetHeadViewParametr();
-    }
-    public bool IsFromWhiteList()
-    {
-        return Player != null;
     }
 }

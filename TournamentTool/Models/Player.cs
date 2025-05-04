@@ -279,8 +279,8 @@ public class Player : BaseViewModel, IPlayer
         }
     }
 
-    private string? _personalBest = string.Empty;
-    public string? PersonalBest
+    private string _personalBest = string.Empty;
+    public string PersonalBest
     {
         get => _personalBest;
         set
@@ -289,7 +289,21 @@ public class Player : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(PersonalBest));
         }
     }
-    
+
+    [JsonIgnore] public string DisplayName => Name!;
+    [JsonIgnore] public string GetPersonalBest => PersonalBest ?? "Unk";
+    [JsonIgnore] public string HeadViewParameter => InGameName!;
+    [JsonIgnore] public string TwitchName 
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(StreamData.LiveData.ID)) return StreamData.GetCorrectName();
+
+            return StreamData.LiveData.UserLogin;
+        }
+    }
+    [JsonIgnore] public bool IsFromWhitelist => true;
+
     private string? _teamName = string.Empty;
     public string? TeamName
     {
@@ -473,29 +487,6 @@ public class Player : BaseViewModel, IPlayer
         if (string.IsNullOrEmpty(UUID)) return;
 
         UUID = UUID.Replace("-", "");
-    }
-
-    public string GetDisplayName()
-    {
-        return Name!;
-    }
-    public string GetPersonalBest()
-    {
-        return PersonalBest ?? "Unk";
-    }
-    public string GetTwitchName()
-    {
-        if (string.IsNullOrEmpty(StreamData.LiveData.ID)) return StreamData.GetCorrectName();
-
-        return StreamData.LiveData.UserLogin;
-    }
-    public string GetHeadViewParametr()
-    {
-        return InGameName!;
-    }
-    public bool IsFromWhiteList()
-    {
-        return true;
     }
 
     public bool EqualsNoDialog(Player player)

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -17,7 +16,6 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     private PaceManService Service { get; set; }
 
     public string Nickname => _paceMan.Nickname;
-    public string TwitchName => _paceMan.User.TwitchName ?? string.Empty;
 
     public Player? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -33,6 +31,12 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         }
     }
 
+    public string DisplayName => Player == null ? _paceMan.Nickname : Player.DisplayName;
+    public string GetPersonalBest => Player == null ? "Unk" : Player.GetPersonalBest;
+    public string HeadViewParameter => Player == null ? _paceMan.User.UUID! : Player.HeadViewParameter;
+    public string TwitchName => _paceMan.User.TwitchName ?? string.Empty;
+    public bool IsFromWhitelist => Player != null;
+    
     public float HeadImageOpacity { get; set; }
 
     private SplitType _splitType;
@@ -188,27 +192,6 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     private void UpdateIGTTime()
     {
         IGTTimeMiliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - _paceMan.LastUpdate + LastMilestone!.IGT;
-    }
-
-    public string GetDisplayName()
-    {
-        return Player == null ? _paceMan.Nickname : Player.GetDisplayName();
-    }
-    public string GetPersonalBest()
-    {
-        return Player == null ? "Unk" : Player.GetPersonalBest();
-    }
-    public string GetTwitchName()
-    {
-        return _paceMan.User.TwitchName!;
-    }
-    public string GetHeadViewParametr()
-    {
-        return Player == null ? _paceMan.User.UUID! : Player.GetHeadViewParametr();
-    }
-    public bool IsFromWhiteList()
-    {
-        return Player != null;
     }
 
     public PacemanPaceMilestone GetLastSplit()
