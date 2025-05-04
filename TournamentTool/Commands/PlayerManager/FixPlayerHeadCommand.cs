@@ -1,6 +1,6 @@
 ﻿using TournamentTool.Interfaces;
-using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -10,7 +10,7 @@ public class FixPlayerHeadCommand : BaseCommand
     private readonly ILoadingDialog _loadingDialog;
     private readonly IPresetSaver _presetSaver;
 
-    private Player? _player = null;
+    private PlayerViewModel? _player = null;
 
 
     public FixPlayerHeadCommand(PlayerManagerViewModel playerManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver)
@@ -22,7 +22,7 @@ public class FixPlayerHeadCommand : BaseCommand
 
     public override void Execute(object? parameter)
     {
-        if (parameter is not Player player) return;
+        if (parameter is not PlayerViewModel player) return;
         _player = player;
 
         _loadingDialog.ShowLoading(FixPlayerHead);

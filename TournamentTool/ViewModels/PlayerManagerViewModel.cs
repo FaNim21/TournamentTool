@@ -19,8 +19,8 @@ public class PlayerManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
      
-    private ObservableCollection<Player> _filteredPlayers = [];
-    public ObservableCollection<Player> FilteredPlayers
+    private ObservableCollection<PlayerViewModel> _filteredPlayers = [];
+    public ObservableCollection<PlayerViewModel> FilteredPlayers
     {
         get => _filteredPlayers;
         set
@@ -33,8 +33,8 @@ public class PlayerManagerViewModel : SelectableViewModel
     public TournamentViewModel Tournament { get; set; }
     public IPresetSaver PresetService { get; }
 
-    private ObservableCollection<Player> _selectedPlayers = [];
-    public ObservableCollection<Player> SelectedPlayers
+    private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
+    public ObservableCollection<PlayerViewModel> SelectedPlayers
     {
         get => _selectedPlayers;
         set
@@ -249,7 +249,7 @@ public class PlayerManagerViewModel : SelectableViewModel
        PresetService.SavePreset();
     }
 
-    public void Add(Player player)
+    public void Add(PlayerViewModel playerViewModel)
     {
         bool wasSearched = false;
         if (!string.IsNullOrEmpty(SearchText))
@@ -257,31 +257,31 @@ public class PlayerManagerViewModel : SelectableViewModel
             switch (SortingType)
             {
                 case PlayerSortingType.Name:
-                    if (player.Name!.Contains(SearchText, _comparison)) wasSearched = true;
+                    if (playerViewModel.Name!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
                 case PlayerSortingType.InGameName:
-                    if (player.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
+                    if (playerViewModel.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
                 case PlayerSortingType.TeamName:
-                    if (player.TeamName!.Contains(SearchText, _comparison)) wasSearched = true;
+                    if (playerViewModel.TeamName!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
                 case PlayerSortingType.Stream:
-                    if (player.StreamData.Main!.Contains(SearchText, _comparison) ||
-                        player.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
+                    if (playerViewModel.StreamData.Main!.Contains(SearchText, _comparison) ||
+                        playerViewModel.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
                     break;
             }
         }
         else wasSearched = true;
         
-        if (wasSearched) FilteredPlayers.Add(player);
-        Tournament.AddPlayer(player);
+        if (wasSearched) FilteredPlayers.Add(playerViewModel);
+        Tournament.AddPlayer(playerViewModel);
         
         UpdateInformationCountText();
     }
-    public void Remove(Player player)
+    public void Remove(PlayerViewModel playerViewModel)
     {
-        FilteredPlayers.Remove(player);
-        Tournament.RemovePlayer(player);
+        FilteredPlayers.Remove(playerViewModel);
+        Tournament.RemovePlayer(playerViewModel);
         
         UpdateInformationCountText();
     }
@@ -312,7 +312,7 @@ public class PlayerManagerViewModel : SelectableViewModel
             
             Application.Current.Dispatcher.Invoke(() =>
             {
-                FilteredPlayers = new ObservableCollection<Player>(Tournament.Players);
+                FilteredPlayers = new ObservableCollection<PlayerViewModel>(Tournament.Players);
             });
             
             UpdateInformationCountText();
@@ -336,7 +336,7 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         Application.Current.Dispatcher.Invoke(() =>
         {
-            FilteredPlayers = new ObservableCollection<Player>(filtered);
+            FilteredPlayers = new ObservableCollection<PlayerViewModel>(filtered);
         });
         
         UpdateInformationCountText();
@@ -358,21 +358,27 @@ public class PlayerManagerViewModel : SelectableViewModel
     }
     public void AddPlayer(Player? player)
     {
-        WhitelistPlayerWindowViewModel viewModel = new(this, player);
+        PlayerViewModel? playerViewModel = null;
+        if (player != null)
+        {
+            playerViewModel = new PlayerViewModel(player);
+        }
+        
+        WhitelistPlayerWindowViewModel viewModel = new(this, playerViewModel);
         WhitelistPlayerWindow window = new(viewModel);
 
         Coordinator.ShowDialog(window);
     }
 
-    public async Task<bool> SavePlayer(Player player, bool isEditing)
+    public async Task<bool> SavePlayer(PlayerViewModel playerViewModel, bool isEditing)
     {
-        if (string.IsNullOrEmpty(player.Name))
+        if (string.IsNullOrEmpty(playerViewModel.Name))
         {
             DialogBox.Show($"Name cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
         }
 
-        if (string.IsNullOrEmpty(player.InGameName))
+        if (string.IsNullOrEmpty(playerViewModel.InGameName))
         {
             DialogBox.Show($"InGameName cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
@@ -380,50 +386,50 @@ public class PlayerManagerViewModel : SelectableViewModel
 
         if (isEditing)
         {
-            if (!await EditPlayer(player)) return false;
+            if (!await EditPlayer(playerViewModel)) return false;
         }
         else
         {
-            if (!await AddPlayerToWhitelist(player)) return false;
+            if (!await AddPlayerToWhitelist(playerViewModel)) return false;
         }
 
         SavePreset();
         return true;
     }
-    private async Task<bool> EditPlayer(Player player)
+    private async Task<bool> EditPlayer(PlayerViewModel playerViewModel)
     {
         int n = Tournament!.Players.Count;
         for (int i = 0; i < n; i++)
         {
             var current = Tournament!.Players[i];
-            if (!current.Id.Equals(player.Id)) continue;
+            if (!current.Id.Equals(playerViewModel.Id)) continue;
             
-            bool success = await UpdatePlayerData(current, player, player.Id);
+            bool success = await UpdatePlayerData(current, playerViewModel, playerViewModel.Id);
             return success;
         }
-        return true;
+        return false;
     }
-    private async Task<bool> AddPlayerToWhitelist(Player player)
+    private async Task<bool> AddPlayerToWhitelist(PlayerViewModel playerViewModel)
     {
-        Player newPlayer = new();
-        bool success = await UpdatePlayerData(newPlayer, player);
+        PlayerViewModel newPlayerViewModel = new();
+        bool success = await UpdatePlayerData(newPlayerViewModel, playerViewModel);
         if (!success) return false;
 
-        Add(newPlayer);
+        Add(newPlayerViewModel);
         return true;
     }
-    private async Task<bool> UpdatePlayerData(Player player, Player windowsData, Guid? excludeID = null)
+    private async Task<bool> UpdatePlayerData(PlayerViewModel playerViewModel, PlayerViewModel windowsData, Guid? excludeID = null)
     {
-        if (Tournament.ContainsDuplicates(windowsData, excludeID)) return false;
+        if (Tournament.ContainsDuplicates(windowsData.Data, excludeID)) return false;
 
-        player.Name = windowsData.Name!.Trim();
-        player.InGameName = windowsData.InGameName!.Trim();
-        player.PersonalBest = windowsData.PersonalBest;
-        player.TeamName = windowsData.TeamName?.Trim();
-        player.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
-        player.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
+        playerViewModel.Name = windowsData.Name!.Trim();
+        playerViewModel.InGameName = windowsData.InGameName!.Trim();
+        playerViewModel.PersonalBest = windowsData.PersonalBest;
+        playerViewModel.TeamName = windowsData.TeamName?.Trim();
+        playerViewModel.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
+        playerViewModel.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
 
-        await player.CompleteData();
+        await playerViewModel.CompleteData();
         return true;
     }
 

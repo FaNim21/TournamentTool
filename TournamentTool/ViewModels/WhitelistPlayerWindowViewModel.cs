@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
@@ -8,14 +9,14 @@ public class WhitelistPlayerWindowViewModel : BaseViewModel
 {
     private PlayerManagerViewModel _playerManager; 
 
-    private Player? _player;
-    public Player Player
+    private PlayerViewModel? _playerViewModel;
+    public PlayerViewModel PlayerViewModel
     {
-        get => _player!;
+        get => _playerViewModel!;
         set
         {
-            _player = value;
-            OnPropertyChanged(nameof(Player));
+            _playerViewModel = value;
+            OnPropertyChanged(nameof(PlayerViewModel));
         }
     }
 
@@ -35,25 +36,25 @@ public class WhitelistPlayerWindowViewModel : BaseViewModel
     public event Action? closeWindow;
 
 
-    public WhitelistPlayerWindowViewModel(PlayerManagerViewModel playerManager, Player? player = null)
+    public WhitelistPlayerWindowViewModel(PlayerManagerViewModel playerManager, PlayerViewModel? playerViewModel)
     {
         _playerManager = playerManager;
 
         SaveCommand = new RelayCommand(async () => { await Save(); });
 
-        if (player != null)
+        if (playerViewModel != null)
         {
             IsEditing = true;
-            Player = player;
+            PlayerViewModel = playerViewModel;
             return;
         }
 
-        Player = new Player();
+        PlayerViewModel = new PlayerViewModel();
     }
 
     private async Task Save()
     {
-        bool success = await _playerManager.SavePlayer(Player, IsEditing);
+        bool success = await _playerManager.SavePlayer(PlayerViewModel, IsEditing);
         if (!success) return;
         closeWindow?.Invoke();
     }

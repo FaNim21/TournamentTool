@@ -59,7 +59,7 @@
                     <Run Foreground="DarkGray"
                          Text="Is Editing: " />
                     <Run Foreground="White"
-                         Text="{Binding Player.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
+                         Text="{Binding PlayerViewModel.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
                 </TextBlock>
                 <TextBlock FontSize="18"
                            Visibility="{Binding IsEditing, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
@@ -86,7 +86,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.Name, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.Name, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -102,7 +102,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.InGameName, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.InGameName, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -117,7 +117,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.PersonalBest, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.PersonalBest, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -133,7 +133,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.TeamName, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.TeamName, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -149,7 +149,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.StreamData.Main, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.StreamData.Main, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>
@@ -165,7 +165,7 @@
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding Player.StreamData.Alt, Mode=TwoWay}"
+                                 Text="{Binding PlayerViewModel.StreamData.Alt, Mode=TwoWay}"
                                  Padding="0 2 0 0"
                                  Background="#9E9E9E" />
                     </StackPanel>

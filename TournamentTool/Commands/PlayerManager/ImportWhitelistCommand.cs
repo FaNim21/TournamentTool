@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +12,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -73,12 +75,16 @@ public class ImportWhitelistCommand : BaseCommand
         string text = await File.ReadAllTextAsync(_path, cancellationToken);
         if (string.IsNullOrEmpty(text)) return;
         
-        List<Player>? players = null;
+        List<PlayerViewModel>? players = null;
         try
         {
-            players = JsonSerializer.Deserialize<List<Player>>(text);
+            players = JsonSerializer.Deserialize<List<PlayerViewModel>>(text);
         }
-        catch { }
+        catch
+        {
+            Trace.WriteLine("Error loading player from whitelist");
+        }
+
         if (players == null) return;
 
         for (int i = 0; i < players.Count; i++)
@@ -86,7 +92,7 @@ public class ImportWhitelistCommand : BaseCommand
             var player = players[i];
             progress.Report((float)i/players.Count);
             logProgress.Report($"({i+1}/{players.Count}) Checking for duplicates for player: {player.InGameName}");
-            if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+            if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
             logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
 
             player.UpdateHeadBitmap();
@@ -116,7 +122,7 @@ public class ImportWhitelistCommand : BaseCommand
             string[]? fields = parser.ReadFields();
             if (fields == null) continue;
         
-            Player data = new() 
+            PlayerViewModel player = new() 
             {
                 Name = fields[0].Trim(),
                 InGameName = fields[1].Trim(),
@@ -125,20 +131,20 @@ public class ImportWhitelistCommand : BaseCommand
             };
             if (fields.Length > 4) 
             {
-                data.StreamData.SetName(fields[4].ToLower().Trim());
+                player.StreamData.SetName(fields[4].ToLower().Trim());
                 if (fields.Length > 5)
-                    data.StreamData.SetName(fields[5].ToLower().Trim());
+                    player.StreamData.SetName(fields[5].ToLower().Trim());
             }
 
-            if (_tournamentManager.ContainsDuplicatesNoDialog(data))
+            if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data))
             {
                 totalLines--;
                 continue;
             }
                     
-            logProgress.Report($"({count+1}/{totalLines}) Completing data for {data.InGameName}");
-            await data.CompleteData();
-            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(data); });
+            logProgress.Report($"({count+1}/{totalLines}) Completing data for {player.InGameName}");
+            await player.CompleteData();
+            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
             count++;
         }
         
@@ -151,32 +157,32 @@ public class ImportWhitelistCommand : BaseCommand
         try
         {
             string json = await File.ReadAllTextAsync(_path, cancellationToken);
-            JSONPlayer[] players = JsonSerializer.Deserialize<JSONPlayer[]>(json)!;
-            if (players.Length == 0) return;
+            JSONPlayer[] loadedPlayers = JsonSerializer.Deserialize<JSONPlayer[]>(json)!;
+            if (loadedPlayers.Length == 0) return;
      
-            int length = players.Length;
-            List<Player> playersToComplete = [];
+            int length = loadedPlayers.Length;
+            List<PlayerViewModel> playersToComplete = [];
             
             for (int i = 0; i < length; i++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 progress.Report((float)i / length);
                      
-                var player = players[i];
+                var loadedPlayer = loadedPlayers[i];
      
-                Player data = new()
+                PlayerViewModel player = new()
                 {
-                    Name = player.DisplayName.Trim(),
-                    InGameName = player.IGN.Trim(),
+                    Name = loadedPlayer.DisplayName.Trim(),
+                    InGameName = loadedPlayer.IGN.Trim(),
                 };
-                data.StreamData.SetName(player.Twitch.Trim());
-                if (_tournamentManager.ContainsDuplicatesNoDialog(data)) continue;
+                player.StreamData.SetName(loadedPlayer.Twitch.Trim());
+                if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
                      
-                logProgress.Report($"({i+1}/{length}) Completing data for {data.InGameName}");
-                await data.CompleteData(false);
+                logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
+                await player.CompleteData(false);
                 
-                if (string.IsNullOrEmpty(data.UUID)) playersToComplete.Add(data);
-                Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(data); });
+                if (string.IsNullOrEmpty(player.UUID)) playersToComplete.Add(player);
+                Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
             }
             
             if (playersToComplete.Count > 0)
@@ -194,7 +200,7 @@ public class ImportWhitelistCommand : BaseCommand
         }   
     }
     
-    private async Task FetchAndAssignUUIDs(List<Player> players, IProgress<string> logProgress, CancellationToken cancellationToken)
+    private async Task FetchAndAssignUUIDs(List<PlayerViewModel> players, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
         for (int i = 0; i < players.Count; i += 10)
         {
@@ -237,4 +243,3 @@ public class ImportWhitelistCommand : BaseCommand
     }
 
 }
-

@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -18,7 +19,7 @@ public class RemovePlayerCommand : BaseCommand
 
     public override void Execute(object? parameter)
     {
-        if (parameter is not Player player) return;
+        if (parameter is not PlayerViewModel player) return;
 
         _playerManager.Remove(player);
         _presetSaver.SavePreset();

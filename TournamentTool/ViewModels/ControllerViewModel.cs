@@ -1,13 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Modules;
 using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
@@ -27,8 +25,8 @@ public class ControllerViewModel : SelectableViewModel
     public Scene MainScene { get; set; }
     public PreviewScene PreviewScene { get; set; }
 
-    private ObservableCollection<Player> _filteredPlayers = [];
-    public ObservableCollection<Player> FilteredPlayers
+    private ObservableCollection<PlayerViewModel> _filteredPlayers = [];
+    public ObservableCollection<PlayerViewModel> FilteredPlayers
     {
         get => _filteredPlayers;
         set
@@ -58,8 +56,8 @@ public class ControllerViewModel : SelectableViewModel
         }
     }
 
-    private Player? _selectedWhitelistPlayer;
-    public Player? SelectedWhitelistPlayer
+    private PlayerViewModel? _selectedWhitelistPlayer;
+    public PlayerViewModel? SelectedWhitelistPlayer
     {
         get => _selectedWhitelistPlayer;
         set
@@ -251,7 +249,7 @@ public class ControllerViewModel : SelectableViewModel
         //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
         Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
 
-        IEnumerable<Player> playersToAdd = TournamentViewModel.Players
+        IEnumerable<PlayerViewModel> playersToAdd = TournamentViewModel.Players
             .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
             .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
 

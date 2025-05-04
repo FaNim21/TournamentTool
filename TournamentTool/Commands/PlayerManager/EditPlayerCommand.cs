@@ -1,5 +1,6 @@
 ﻿using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -15,19 +16,22 @@ public class EditPlayerCommand : BaseCommand
 
     public override void Execute(object? parameter)
     {
-        if (parameter is not Player player) return;
+        if (parameter is not PlayerViewModel playerViewModel) return;
 
-        Player newPlayer = new()
+        Player playerModel = new()
         {
-            Id = player.Id,
-            Name = player.Name,
-            InGameName = player.InGameName,
-            PersonalBest = player.PersonalBest,
-            TeamName = player.TeamName,
+            Id = playerViewModel.Id,
+            Name = playerViewModel.Name,
+            InGameName = playerViewModel.InGameName,
+            PersonalBest = playerViewModel.PersonalBest,
+            TeamName = playerViewModel.TeamName,
+            StreamData =
+            {
+                Main = playerViewModel.StreamData.Main ?? string.Empty,
+                Alt = playerViewModel.StreamData.Alt ?? string.Empty
+            }
         };
-        newPlayer.StreamData.Main = player.StreamData.Main ?? string.Empty;
-        newPlayer.StreamData.Alt = player.StreamData.Alt ?? string.Empty;
 
-        PlayerManager.AddPlayer(newPlayer);
+        PlayerManager.AddPlayer(playerModel);
     }
 }

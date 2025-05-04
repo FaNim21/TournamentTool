@@ -6,6 +6,7 @@
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:models="clr-namespace:TournamentTool.Models"
+             xmlns:viewModelModels="clr-namespace:TournamentTool.ViewModels.Entities"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:local2="clr-namespace:TournamentTool.Components"
@@ -248,7 +249,7 @@
                         <behaviors:ListBoxClampScrollBehavior />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
-                        <DataTemplate DataType="models:Player">
+                        <DataTemplate DataType="viewModelModels:PlayerViewModel">
                             <Border BorderBrush="Gray"
                                     BorderThickness="1"
                                     Width="110">

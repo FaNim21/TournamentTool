@@ -77,10 +77,10 @@ public sealed class LeaderboardViewModel : BaseViewModel
         });
     }
 
-    public void AddLeaderboardEntry(LeaderboardEntry entry, Player player)
+    public void AddLeaderboardEntry(LeaderboardEntry entry, PlayerViewModel playerViewModel)
     {
         _tournament.Leaderboard.Entries.Add(entry);
-        AddEntry(new LeaderboardEntryViewModel(entry, player));
+        AddEntry(new LeaderboardEntryViewModel(entry, playerViewModel));
     }
     public void RemoveLeaderboardEntry(LeaderboardEntryViewModel entry)
     {

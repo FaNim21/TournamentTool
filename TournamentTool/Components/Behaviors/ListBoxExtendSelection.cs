@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Models;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Components.Behaviors;
 
@@ -24,7 +25,7 @@ public class ListBoxExtendSelection : BehaviorBase<ListBox>
         return (IList)obj.GetValue(SynchronizedSelectedItemsProperty);
     }
     
-    private Player? _lastSelectedItem;
+    private PlayerViewModel? _lastSelectedItem;
 
     
     protected override void OnAttached()
@@ -48,7 +49,7 @@ public class ListBoxExtendSelection : BehaviorBase<ListBox>
     
     private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.OriginalSource is not FrameworkElement { DataContext: Player item }) return;
+        if (e.OriginalSource is not FrameworkElement { DataContext: PlayerViewModel item }) return;
 
         var listBox = (ListBox)sender;
         var selectedItems = GetSynchronizedSelectedItems(listBox);
@@ -89,7 +90,7 @@ public class ListBoxExtendSelection : BehaviorBase<ListBox>
                 return;
             }
 
-            var allItems = listBox.Items.Cast<Player>().ToList();
+            var allItems = listBox.Items.Cast<PlayerViewModel>().ToList();
             int start = allItems.IndexOf(_lastSelectedItem);
             int end = allItems.IndexOf(item);
 

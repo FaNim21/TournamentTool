@@ -26,12 +26,13 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
 
     public LeaderboardViewModel Leaderboard { get; set; }
 
-    public ObservableCollection<Player> Players
+    private ObservableCollection<PlayerViewModel> _players = [];
+    public ObservableCollection<PlayerViewModel> Players
     {
-        get => _tournament.Players;
+        get => _players;
         set
         {
-            _tournament.Players = value;
+            _players = value;
             OnPropertyChanged(nameof(Players));
             PresetIsModified();
         }
@@ -376,7 +377,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         
         _tournament = tournament;
         Leaderboard = new LeaderboardViewModel(_tournament, this);
-        
+
         SetupPreset();
         
         IsCurrentlyOpened = true;
@@ -440,10 +441,12 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
     }
     public void UpdatePlayers()
     {
-        for (int i = 0; i < Players.Count; i++)
+        Players.Clear();
+        foreach (var player in _tournament.Players)
         {
-            var player = Players[i];
-            player.Initialize();
+            var playerViewModel = new PlayerViewModel(player);
+            playerViewModel.Initialize();
+            Players.Add(playerViewModel);
         }
     }
     public void UpdateGoodPacesTexts()
@@ -464,19 +467,21 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         CreditsToText = $"Finish (sub {time})";
     }
     
-    public void AddPlayer(Player player)
+    public void AddPlayer(PlayerViewModel playerViewModel)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            Players.Add(player);
+            Players.Add(playerViewModel);
+            _tournament.Players.Add(playerViewModel.Data);
             PresetIsModified();
         });
     }
-    public void RemovePlayer(Player player)
+    public void RemovePlayer(PlayerViewModel playerViewModel)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            Players.Remove(player);
+            Players.Remove(playerViewModel);
+            _tournament.Players.Remove(playerViewModel.Data);
             PresetIsModified();
         });
     }
@@ -502,7 +507,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         return false;
     }
         
-    public Player? GetPlayerByTwitchName(string twitchName)
+    public PlayerViewModel? GetPlayerByTwitchName(string twitchName)
     {
         int n = Players.Count;
         for (int i = 0; i < n; i++)
@@ -513,7 +518,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
         return null;
     }
-    public Player? GetPlayerByUUID(string uuid)
+    public PlayerViewModel? GetPlayerByUUID(string uuid)
     {
         foreach (var player in Players)
         {
@@ -523,7 +528,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         
         return null;
     }
-    public Player? GetPlayerByIGN(string ign)
+    public PlayerViewModel? GetPlayerByIGN(string ign)
     {
         foreach (var player in Players)
         {

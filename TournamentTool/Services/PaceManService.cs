@@ -5,11 +5,8 @@ using TournamentTool.Models;
 using TournamentTool.Utils;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Security.RightsManagement;
 using System.Text.Json;
-using System.Windows.Controls;
 using TournamentTool.Enums;
-using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
@@ -61,7 +58,7 @@ public class PaceManService : BaseViewModel
         _paceManWorker = null;
 
         for (int i = 0; i < PaceManPlayers.Count; i++)
-            PaceManPlayers[i].Player = null;
+            PaceManPlayers[i].PlayerViewModel = null;
 
         PaceManPlayers.Clear();
 
@@ -120,7 +117,7 @@ public class PaceManService : BaseViewModel
 
             if (wasPaceFound) continue;
 
-            Player? player = TournamentViewModel.GetPlayerByTwitchName(pace.User.TwitchName!);
+            PlayerViewModel? player = TournamentViewModel.GetPlayerByTwitchName(pace.User.TwitchName!);
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
 
             paceViewModel = new PaceManViewModel(this, pace, player!);
@@ -153,7 +150,7 @@ public class PaceManService : BaseViewModel
         var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
         var data = new LeaderboardPlayerEvaluateData()
         {
-            Player = paceman.Player!,
+            PlayerViewModel = paceman.PlayerViewModel!,
             Milestone = milestone,
             Time = (int)split.IGT
         };

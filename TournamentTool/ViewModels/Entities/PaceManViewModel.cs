@@ -17,7 +17,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 
     public string Nickname => _paceMan.Nickname;
 
-    public Player? Player { get; set; }
+    public PlayerViewModel? PlayerViewModel { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
 
     private BitmapImage? _headImage;
@@ -31,11 +31,11 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         }
     }
 
-    public string DisplayName => Player == null ? _paceMan.Nickname : Player.DisplayName;
-    public string GetPersonalBest => Player == null ? "Unk" : Player.GetPersonalBest;
-    public string HeadViewParameter => Player == null ? _paceMan.User.UUID! : Player.HeadViewParameter;
+    public string DisplayName => PlayerViewModel == null ? _paceMan.Nickname : PlayerViewModel.DisplayName;
+    public string GetPersonalBest => PlayerViewModel == null ? "Unk" : PlayerViewModel.GetPersonalBest;
+    public string HeadViewParameter => PlayerViewModel == null ? _paceMan.User.UUID! : PlayerViewModel.HeadViewParameter;
     public string TwitchName => _paceMan.User.TwitchName ?? string.Empty;
-    public bool IsFromWhitelist => Player != null;
+    public bool IsFromWhitelist => PlayerViewModel != null;
     
     public float HeadImageOpacity { get; set; }
 
@@ -99,12 +99,12 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 
     public bool IsUsedInPov
     {
-        get => Player?.IsUsedInPov ?? false;
+        get => PlayerViewModel?.IsUsedInPov ?? false;
         set
         {
-            if (Player == null) return;
+            if (PlayerViewModel == null) return;
 
-            Player.IsUsedInPov = value;
+            PlayerViewModel.IsUsedInPov = value;
             OnPropertyChanged(nameof(IsUsedInPov));
         }
     }
@@ -112,11 +112,11 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     public bool IsUsedInPreview { get; set; }
 
     
-    public PaceManViewModel(PaceManService service, PaceMan paceMan, Player player)
+    public PaceManViewModel(PaceManService service, PaceMan paceMan, PlayerViewModel playerViewModel)
     {
         Service = service;
         _paceMan = paceMan;
-        Player = player;
+        PlayerViewModel = playerViewModel;
         
         UpdateHeadImage();
         UpdateTime();
@@ -148,7 +148,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     {
         if (HeadImage != null) return;
 
-        if (Player == null)
+        if (PlayerViewModel == null)
         {
             string url = $"https://minotar.net/helm/{_paceMan.User.UUID}/180.png";
             HeadImageOpacity = 0.35f;
@@ -160,7 +160,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         else
         {
             HeadImageOpacity = 1f;
-            HeadImage = Player!.Image;
+            HeadImage = PlayerViewModel!.Image;
         }
     }
 

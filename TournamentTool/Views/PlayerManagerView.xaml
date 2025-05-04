@@ -9,6 +9,7 @@
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:models="clr-namespace:TournamentTool.Models"
+             xmlns:viewModelModels="clr-namespace:TournamentTool.ViewModels.Entities"
              d:DataContext="{d:DesignInstance Type=viewmodels:PlayerManagerViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -332,7 +333,7 @@
                                 Command="{Binding RemoveSelectedPlayerCommand}" />
                 </ListBox.InputBindings>
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="models:Player">
+                    <DataTemplate DataType="viewModelModels:PlayerViewModel">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
                                 Width="110">

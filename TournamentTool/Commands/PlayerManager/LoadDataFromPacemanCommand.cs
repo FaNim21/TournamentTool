@@ -6,6 +6,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -18,7 +19,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
     private readonly ILoadingDialog _loadingDialog;
 
     private List<PaceManTwitchResponse>? _twitchNames;
-    private List<Player> eventPlayers = [];
+    private List<PlayerViewModel> eventPlayers = [];
 
     private PaceManEvent? _chosenEvent;
 
@@ -49,8 +50,8 @@ public class LoadDataFromPacemanCommand : BaseCommand
         for (int i = 0; i < _chosenEvent!.WhiteList!.Length; i++)
         {
             var current = _chosenEvent!.WhiteList[i];
-            Player player = new() { UUID = current.Replace("-", "") ?? string.Empty };
-            eventPlayers.Add(player);
+            PlayerViewModel playerViewModel = new() { UUID = current.Replace("-", "") ?? string.Empty };
+            eventPlayers.Add(playerViewModel);
         }
 
         _twitchNames?.Clear();
@@ -110,7 +111,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
                 player.PersonalBest = string.Empty;
                 
                 await player.CompleteData();
-                if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+                if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
                 logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
                 player.Name = twitch.liveAccount?.Trim() ?? player.InGameName;
                 Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });

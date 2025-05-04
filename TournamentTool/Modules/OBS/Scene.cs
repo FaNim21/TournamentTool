@@ -8,6 +8,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Modules.OBS;
@@ -273,7 +274,7 @@ public class Scene : BaseViewModel
 
         if (!string.IsNullOrEmpty(currentName))
         {
-            Player? player = Controller.TournamentViewModel.GetPlayerByTwitchName(currentName);
+            PlayerViewModel? player = Controller.TournamentViewModel.GetPlayerByTwitchName(currentName);
             if (player != null) pov.SetPOV(player);
         }
 

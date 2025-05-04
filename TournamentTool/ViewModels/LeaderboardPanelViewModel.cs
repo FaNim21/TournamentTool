@@ -74,10 +74,10 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     {
         //if (data.Player == null) return;
         if (Leaderboard.Rules.Count == 0) return;
-        if (data.Player == null)
+        if (data.PlayerViewModel == null)
             Trace.WriteLine($"Player: ??? achieved milestone -> checking all rules ({data.Milestone})");
         else
-            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" achieved milestone -> checking all rules ({data.Milestone})");
+            Trace.WriteLine($"Player: \"{data.PlayerViewModel.InGameName}\" achieved milestone -> checking all rules ({data.Milestone})");
         
         foreach (var rule in Leaderboard.Rules)
         {

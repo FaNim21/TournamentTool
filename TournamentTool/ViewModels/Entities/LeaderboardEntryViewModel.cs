@@ -7,11 +7,11 @@ public class LeaderboardEntryViewModel : BaseViewModel
 {
     private readonly LeaderboardEntry _entry;
 
-    public Player? Player { get; set; }
+    public PlayerViewModel? Player { get; set; }
 
 
     
-    public LeaderboardEntryViewModel(LeaderboardEntry entry, Player? player)
+    public LeaderboardEntryViewModel(LeaderboardEntry entry, PlayerViewModel? player)
     {
         _entry = entry;
         Player = player;

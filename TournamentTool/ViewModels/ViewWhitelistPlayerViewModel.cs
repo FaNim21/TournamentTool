@@ -5,6 +5,7 @@ using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
@@ -13,15 +14,15 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
     private IPresetSaver PresetSaver { get; set; }
     private ILoadingDialog LoadingDialog { get; set; }
 
-    public Player Player { get; private set; }
+    public PlayerViewModel PlayerViewModel { get; private set; }
 
     public ICommand CorrectPlayerUUIDCommand { get; set; }
     public ICommand OpenNameMCCommand { get; set; }
 
     
-    public ViewWhitelistPlayerViewModel(Player player, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
+    public ViewWhitelistPlayerViewModel(PlayerViewModel playerViewModel, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
     {
-        Player = player;
+        PlayerViewModel = playerViewModel;
         PresetSaver = presetSaver;
         LoadingDialog = loadingDialog;
 
@@ -31,27 +32,27 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
     private async Task CompleteUUID(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        if (Player == null) return;
+        if (PlayerViewModel == null) return;
         
         cancellationToken.ThrowIfCancellationRequested();
         progress.Report(0.25f);
 
-        logProgress.Report($"Getting uuid: {Player.InGameName}");
+        logProgress.Report($"Getting uuid: {PlayerViewModel.InGameName}");
         await Task.Delay(500, cancellationToken);
 
-        var data = await Player.GetDataFromInGameName();
+        var data = await PlayerViewModel.GetDataFromInGameName();
         progress.Report(0.5f);
         if (!data.HasValue) return;
 
-        Player.UUID ??= string.Empty;
-        if (data.Value.UUID.Equals(Player.UUID))
+        PlayerViewModel.UUID ??= string.Empty;
+        if (data.Value.UUID.Equals(PlayerViewModel.UUID))
         {
-            logProgress.Report($"player {Player.UUID} is correct");
+            logProgress.Report($"player {PlayerViewModel.UUID} is correct");
         }
         else
         {
             logProgress.Report($"incorrect in UUID based on IGN... changing to: {data.Value.UUID}");
-            Player.UUID = data.Value.UUID;
+            PlayerViewModel.UUID = data.Value.UUID;
         }
         
         await Task.Delay(500, cancellationToken);
@@ -62,12 +63,12 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
     private void OpenNameMC()
     {
-        if (string.IsNullOrEmpty(Player.UUID))
+        if (string.IsNullOrEmpty(PlayerViewModel.UUID))
         {
             DialogBox.Show("Can't open website because player has empty uuid data", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        var processStart = new ProcessStartInfo($"https://pl.namemc.com/profile/{Player.UUID}")
+        var processStart = new ProcessStartInfo($"https://pl.namemc.com/profile/{PlayerViewModel.UUID}")
         {
             UseShellExecute = true,
             Verb = "open"

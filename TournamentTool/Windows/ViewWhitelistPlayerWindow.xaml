@@ -50,9 +50,9 @@
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top"
                                Margin="10"
-                               Source="{Binding Player.Image}" />
+                               Source="{Binding PlayerViewModel.Image}" />
 
-                        <TextBlock Text="{Binding Player.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}"
+                        <TextBlock Text="{Binding PlayerViewModel.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}"
                                    FontSize="34"
                                    TextAlignment="Left"
                                    VerticalAlignment="Center"
@@ -71,10 +71,10 @@
                                Padding="0"
                                Margin="5 0 0 0">
                         <Run Text="UUID: " />
-                        <Run Text="{Binding Player.UUID}"
+                        <Run Text="{Binding PlayerViewModel.UUID}"
                              Foreground="Wheat" />
 
-                        <Border Visibility="{Binding Player.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                        <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
                                 CornerRadius="10"
                                 VerticalAlignment="Center"
@@ -101,7 +101,7 @@
                                Padding="0"
                                Margin="5 0 0 0">
                     <Run Text="In Game Name: " />
-                    <Run Text="{Binding Player.InGameName}"
+                    <Run Text="{Binding PlayerViewModel.InGameName}"
                          Foreground="Wheat" />
                     </TextBlock>
 
@@ -113,7 +113,7 @@
                                Padding="0"
                                Margin="5 0 0 0">
                     <Run Text="Personal Best: " />
-                    <Run Text="{Binding Player.PersonalBest}"
+                    <Run Text="{Binding PlayerViewModel.PersonalBest}"
                          Foreground="Wheat" />
                     </TextBlock>
 
@@ -125,7 +125,7 @@
                                Padding="0"
                                Margin="5 0 0 0">
                     <Run Text="Team Name: " />
-                    <Run Text="{Binding Player.TeamName}"
+                    <Run Text="{Binding PlayerViewModel.TeamName}"
                          Foreground="Wheat" />
                     </TextBlock>
 
@@ -137,7 +137,7 @@
                                Padding="0"
                                Margin="5 0 0 0">
                     <Run Text="Twitch Main: " />
-                    <Run Text="{Binding Player.StreamData.Main}"
+                    <Run Text="{Binding PlayerViewModel.StreamData.Main}"
                          Foreground="Wheat" />
                     </TextBlock>
 
@@ -149,7 +149,7 @@
                                Padding="0"
                                Margin="5 0 0 0">
                     <Run Text="Twitch Alt: " />
-                    <Run Text="{Binding Player.StreamData.Alt}"
+                    <Run Text="{Binding PlayerViewModel.StreamData.Alt}"
                          Foreground="Wheat" />
                     </TextBlock>
 
@@ -166,7 +166,7 @@
                                                  Margin="5 0 0 0"
                                                  OnCommand="{Binding CorrectPlayerUUIDCommand}" />
 
-                        <Border Visibility="{Binding Player.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                        <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
                                 IsHitTestVisible="False"
                                 CornerRadius="10"

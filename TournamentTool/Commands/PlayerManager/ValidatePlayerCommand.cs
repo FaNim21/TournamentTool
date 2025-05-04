@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Commands.PlayerManager;
 
@@ -10,7 +11,7 @@ public class ValidatePlayerCommand : BaseCommand
     private ILoadingDialog _loadingDialog { get; }
     private IPresetSaver _presetSaver { get; }
 
-    private Player? _player = null;
+    private PlayerViewModel? _player = null;
 
     
     public ValidatePlayerCommand(PlayerManagerViewModel playerManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver)
@@ -22,7 +23,7 @@ public class ValidatePlayerCommand : BaseCommand
     
     public override void Execute(object? parameter)
     {
-        if (parameter is not Player player) return;
+        if (parameter is not PlayerViewModel player) return;
 
         _player = player;
         _loadingDialog.ShowLoading(ValidatePlayer);

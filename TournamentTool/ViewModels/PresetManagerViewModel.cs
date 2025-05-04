@@ -115,11 +115,14 @@ public class PresetManagerViewModel : SelectableViewModel
             if (string.IsNullOrEmpty(text)) return;
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
-            
+
             TournamentViewModel.ChangeData(data);
             Leaderboard.OnPresetChanged();
         }
-        catch { }
+        catch
+        {
+            Trace.WriteLine($"Error loading current preset: {opened}");
+        }
     }
     private void LoadPresetsList()
     {

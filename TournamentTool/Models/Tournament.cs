@@ -97,7 +97,7 @@ public class Tournament : IPreset
 
     public Leaderboard Leaderboard { get; set; } = new();
 
-    public ObservableCollection<Player> Players { get; set; } = [];
+    public List<Player> Players { get; set; } = [];
 
     public string Name { get; set; } = string.Empty;
 

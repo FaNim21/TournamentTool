@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Commands.PlayerManager;
@@ -23,7 +24,7 @@ public class ViewPlayerInfoCommand : BaseCommand
     
     public override void Execute(object? parameter)
     {
-        if (parameter is not Player player) return;
+        if (parameter is not PlayerViewModel player) return;
 
         ViewWhitelistPlayerViewModel viewModel = new(player, PresetSaver, LoadingDialog);
         ViewWhitelistPlayerWindow window = new() { DataContext = viewModel };

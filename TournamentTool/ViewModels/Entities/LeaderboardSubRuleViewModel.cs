@@ -94,10 +94,10 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         
         var span = TimeSpan.FromMilliseconds(data.Time);
         string timeText = $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}"; 
-        if (data.Player == null)
+        if (data.PlayerViewModel == null)
             Trace.WriteLine($"Player: ??? just achieved milestone: \"{Rule.ChosenMilestone}\" in time: {timeText}, so under {TimeText}");
         else
-            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{Rule.ChosenMilestone}\" in time: {timeText}, so under {TimeText}");
+            Trace.WriteLine($"Player: \"{data.PlayerViewModel.InGameName}\" just achieved milestone: \"{Rule.ChosenMilestone}\" in time: {timeText}, so under {TimeText}");
         
         return true;
     }

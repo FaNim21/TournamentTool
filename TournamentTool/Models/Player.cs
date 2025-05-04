@@ -45,9 +45,14 @@ public class StreamData : BaseViewModel
         }
     }
 
-    private StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+    private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
 
 
+    public StreamData()
+    {
+        LiveData.Update(new TwitchStreamData());
+    }
+    
     public void SetName(string name)
     {
         if (string.IsNullOrEmpty(name) || ExistName(name)) return;
@@ -221,297 +226,24 @@ public class TwitchStreamData : BaseViewModel
     }
 }
 
-public class Player : BaseViewModel, IPlayer
+public class Player
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
-
-    private string _UUID = string.Empty;
-    public string UUID
-    {
-        get => _UUID;
-        set
-        {
-            _UUID = value;
-            OnPropertyChanged(nameof(UUID));
-            IsUUIDEmpty = string.IsNullOrEmpty(UUID);
-        }
-    }
-
-    [JsonIgnore]
-    private BitmapImage? _image;
-    [JsonIgnore]
-    public BitmapImage? Image
-    {
-        get => _image;
-        set
-        {
-            if (value == null)
-            {
-
-            }
-            _image = value;
-            OnPropertyChanged(nameof(Image));
-        }
-    }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string UUID { get; set; } = string.Empty;
     public byte[]? ImageStream { get; set; }
-
-    private string? _name;
-    public string? Name
-    {
-        get => _name;
-        set
-        {
-            _name = value;
-            OnPropertyChanged(nameof(Name));
-        }
-    }
-
+    public string? Name { get; set; } = string.Empty;
     public StreamData StreamData { get; set; } = new();
-
-    private string? _inGameName;
-    public string? InGameName
-    {
-        get => _inGameName;
-        set
-        {
-            _inGameName = value;
-            OnPropertyChanged(nameof(InGameName));
-        }
-    }
-
-    private string _personalBest = string.Empty;
-    public string PersonalBest
-    {
-        get => _personalBest;
-        set
-        {
-            _personalBest = value;
-            OnPropertyChanged(nameof(PersonalBest));
-        }
-    }
-
-    [JsonIgnore] public string DisplayName => Name!;
-    [JsonIgnore] public string GetPersonalBest => PersonalBest ?? "Unk";
-    [JsonIgnore] public string HeadViewParameter => InGameName!;
-    [JsonIgnore] public string TwitchName 
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(StreamData.LiveData.ID)) return StreamData.GetCorrectName();
-
-            return StreamData.LiveData.UserLogin;
-        }
-    }
-    [JsonIgnore] public bool IsFromWhitelist => true;
-
-    private string? _teamName = string.Empty;
-    public string? TeamName
-    {
-        get => _teamName;
-        set
-        {
-            _teamName = value;
-            OnPropertyChanged(nameof(TeamName));
-        }
-    }
-
-    [JsonIgnore] private bool _isShowingTeamName;
-    [JsonIgnore]
-    public bool IsShowingTeamName
-    {
-        get => _isShowingTeamName;
-        set
-        {
-            _isShowingTeamName = value;
-            OnPropertyChanged(nameof(IsShowingTeamName));
-        }
-    }
-    
-    [JsonIgnore] private bool _isUsedInPov;
-    [JsonIgnore]
-    public bool IsUsedInPov
-    {
-        get => _isUsedInPov;
-        set
-        {
-            _isUsedInPov = value;
-            OnPropertyChanged(nameof(IsUsedInPov));
-        }
-    }
-
-    [JsonIgnore] private bool _isUsedInPreview;
-    [JsonIgnore]
-    public bool IsUsedInPreview
-    {
-        get => _isUsedInPreview;
-        set
-        {
-            _isUsedInPreview = value;
-            OnPropertyChanged(nameof(IsUsedInPreview));
-        }
-    }
-    
-    [JsonIgnore] private bool _isUUIDEmpty;
-    [JsonIgnore]
-    public bool IsUUIDEmpty
-    {
-        get => _isUUIDEmpty;
-        set
-        {
-            _isUUIDEmpty = value;
-            OnPropertyChanged(nameof(IsUUIDEmpty));
-        }
-    }
-
-    private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+    public string? InGameName { get; set; } = string.Empty;
+    public string PersonalBest { get; set; } = string.Empty;
+    public string? TeamName { get; set; } = string.Empty;
 
 
+    /*
     [JsonConstructor]
-    public Player(string name = "")
+    public Player()
     {
         Name = name;
         StreamData.LiveData.Update(new TwitchStreamData());
     }
-
-    public void Initialize()
-    {
-        LoadHead();
-        CleanUpUUID();
-
-        IsUUIDEmpty = string.IsNullOrEmpty(UUID);
-    }
-
-    public void ShowCategory(bool option)
-    {
-        StreamData.LiveData.GameNameVisibility = option;
-    }
-    public void ShowTeamName(bool option)
-    {
-        IsShowingTeamName = option;
-    }
-
-    public async Task CompleteData(bool completeUUID = true)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(UUID) && completeUUID)
-            {
-                var data = await GetDataFromInGameName();
-                if (data != null)
-                {
-                    UUID = data.Value.UUID;
-                }
-            }
-            if (string.IsNullOrEmpty(InGameName))
-            {
-                var data = await GetDataFromUUID();
-                if (data != null)
-                {
-                    InGameName = data.Value.InGameName;
-                }
-            }
-            
-            await UpdateHeadImage();
-        }
-        catch (Exception ex)
-        {
-            DialogBox.Show("Error: " + ex.Message + " - " + ex.StackTrace, "ERROR completing data", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    public async Task<ResponseMojangProfileAPI?> GetDataFromUUID()
-    {
-        if (string.IsNullOrEmpty(UUID)) return null;
-        
-        string result = await Helper.MakeRequestAsString($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
-        return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);
-    }
-    public async Task<ResponseMojangProfileAPI?> GetDataFromInGameName()
-    {
-        if (string.IsNullOrEmpty(InGameName)) return null;
-        
-        string result = await Helper.MakeRequestAsString($"https://api.mojang.com/users/profiles/minecraft/{InGameName}");
-        return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);
-    }
-
-    public void LoadHead()
-    {
-        if (ImageStream == null) return;
-        Image = Helper.LoadImageFromStream(ImageStream);
-    }
-    public async Task UpdateHeadImage()
-    {
-        if (string.IsNullOrEmpty(InGameName) || Image != null) return;
-        Image = await RequestHeadImage();
-    }
-    public async Task ForceUpdateHeadImage()
-    {
-        if (string.IsNullOrEmpty(InGameName)) return;
-        Image = await RequestHeadImage();
-    }
-    private async Task<BitmapImage?> RequestHeadImage()
-    {
-        using HttpClient client = new();
-        if (string.IsNullOrEmpty(InGameName)) return null;
-
-        string path = $"https://minotar.net/helm/{InGameName}/180.png";
-        HttpResponseMessage response = await client.GetAsync(path);
-        if (!response.IsSuccessStatusCode) return null;
-
-        byte[] stream = await response.Content.ReadAsByteArrayAsync();
-        ImageStream = stream;
-        return Helper.LoadImageFromStream(stream);
-    }
-    public void UpdateHeadBitmap()
-    {
-        if (ImageStream == null) return;
-        Image = Helper.LoadImageFromStream(ImageStream);
-    }
-
-    public void Clear()
-    {
-        Name = string.Empty;
-        PersonalBest = string.Empty;
-
-        StreamData.Clear();
-    }
-    public void ClearFromController()
-    {
-        IsUsedInPov = false;
-
-        StreamData.LiveData.Clear();
-    }
-
-    public void CleanUpUUID()
-    {
-        if (string.IsNullOrEmpty(UUID)) return;
-
-        UUID = UUID.Replace("-", "");
-    }
-
-    public bool EqualsNoDialog(Player player)
-    {
-        if (!string.IsNullOrEmpty(UUID) && !string.IsNullOrEmpty(player.UUID) && UUID.Equals(player.UUID)) return true;
-        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison)) return true;
-        if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison)) return true;
-        return StreamData.EqualsNoDialog(player.StreamData);
-    }
-    
-    public bool Equals(Player player)
-    {
-        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison))
-        {
-            DialogBox.Show($"Player with name \"{player.Name}\" already exists", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return true;
-        }
-
-        if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison))
-        {
-            DialogBox.Show($"Player with in game name \"{player.InGameName}\" already exists", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return true;
-        }
-
-        if (StreamData.Equals(player.StreamData)) return true;
-        return false;
-    }
+*/
 }

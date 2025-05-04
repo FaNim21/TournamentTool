@@ -93,10 +93,10 @@ public class LeaderboardRuleViewModel : BaseViewModel
     public void Evaluate(LeaderboardPlayerEvaluateData data)
     {
         if (data.Milestone != ChosenMilestone) return;
-        if (data.Player == null)
+        if (data.PlayerViewModel == null)
             Trace.WriteLine($"Player: \"???\" entered {ChosenMilestone} -> checking all subrules");
         else
-            Trace.WriteLine($"Player: \"{data.Player.InGameName}\" entered {ChosenMilestone} -> checking all subrules");
+            Trace.WriteLine($"Player: \"{data.PlayerViewModel.InGameName}\" entered {ChosenMilestone} -> checking all subrules");
         
         foreach (var subRule in SubRules)
         {

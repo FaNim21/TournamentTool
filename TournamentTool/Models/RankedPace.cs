@@ -4,6 +4,7 @@ using TournamentTool.Enums;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
@@ -19,7 +20,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     public ControllerViewModel Controller { get; set; }
     private RankedPacePanel RankedPacePanel { get; set; }
 
-    public Player? Player { get; set; }
+    public PlayerViewModel? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
 
     public ObservableCollection<RankedTimelineSplit> Splits { get; set; } = [];
