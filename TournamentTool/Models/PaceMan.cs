@@ -4,6 +4,9 @@ namespace TournamentTool.Models;
 
 public class PaceMan
 {
+    [JsonPropertyName("worldId")] 
+    public string WorldID { get; set; } = string.Empty;
+    
     [JsonPropertyName("user")]
     public PaceManUser User { get; set; } = new();
 

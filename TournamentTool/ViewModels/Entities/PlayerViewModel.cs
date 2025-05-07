@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
@@ -8,14 +9,208 @@ using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class StreamDataViewModel : BaseViewModel
-{
-    
-}
-
 public class TwitchStreamDataViewModel : BaseViewModel
 {
+    public string ID { get; set; } = string.Empty;
+    public string BroadcasterID { get; set; } = string.Empty;
+    public string UserLogin { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int ViewerCount { get; set; }
+    public DateTime StartedAt { get; set; }
+    public string Language { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
+
+    public Brush? StatusLabelColor { get; set; }
+    public string Status { get; set; } = "offline";
+
+    public string GameName { get; set; } = string.Empty;
+    public bool WasUpdated { get; set; } = false;
+
+    private bool _gameNameVisibility;
+    public bool GameNameVisibility
+    {
+        get => _gameNameVisibility;
+        set
+        {
+            _gameNameVisibility = value;
+            OnPropertyChanged(nameof(GameNameVisibility));
+        }
+    }
+
+
+    public void Update(TwitchStreamDataViewModel data)
+    {
+        WasUpdated = true;
+
+        ID = data.ID;
+        BroadcasterID = data.BroadcasterID;
+        UserName = data.UserName;
+        UserLogin = data.UserLogin;
+        GameName = data.GameName;
+        Title = data.Title;
+        ViewerCount = data.ViewerCount;
+        StartedAt = data.StartedAt;
+        Language = data.Language;
+        ThumbnailUrl = data.ThumbnailUrl;
+        Status = data.Status;
+
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            if (Status.Equals("live", StringComparison.OrdinalIgnoreCase))
+                StatusLabelColor = new SolidColorBrush(Consts.LiveColor);
+            else
+                StatusLabelColor = new SolidColorBrush(Consts.OfflineColor);
+        });
+
+        Update();
+    }
+    private void Update()
+    {
+        OnPropertyChanged(nameof(ID));
+        OnPropertyChanged(nameof(BroadcasterID));
+        OnPropertyChanged(nameof(UserLogin));
+        OnPropertyChanged(nameof(UserName));
+        OnPropertyChanged(nameof(GameName));
+        OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(ViewerCount));
+        OnPropertyChanged(nameof(StartedAt));
+        OnPropertyChanged(nameof(Language));
+        OnPropertyChanged(nameof(ThumbnailUrl));
+        OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(StatusLabelColor));
+    }
+
+    public void Clear(bool isUsingTwitchApi = true)
+    {
+        BroadcasterID = string.Empty;
+        UserName = string.Empty;
+        GameName = string.Empty;
+        Title = string.Empty;
+        ViewerCount = 0;
+        StartedAt = DateTime.MinValue;
+        Language = string.Empty;
+        ThumbnailUrl = string.Empty;
+        Status = "offline";
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            if (!isUsingTwitchApi)
+                StatusLabelColor = new SolidColorBrush(Consts.DefaultColor);
+            else
+                StatusLabelColor = new SolidColorBrush(Consts.OfflineColor);
+        });
+        Update();
+    }
+}
+
+public class StreamDataViewModel : BaseViewModel
+{
+    private StreamData _streamData;
     
+    public TwitchStreamDataViewModel LiveData { get; set; } = new();
+
+    public string Main
+    {
+        get => _streamData.Main;
+        set
+        {
+            _streamData.Main = value;
+            OnPropertyChanged(nameof(Main));
+        }
+    }
+    public string Alt
+    {
+        get => _streamData.Alt;
+        set
+        {
+            _streamData.Alt = value;
+            OnPropertyChanged(nameof(Alt));
+        }
+    }
+
+    private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+
+
+    public StreamDataViewModel(StreamData data)
+    {
+        _streamData = data;
+        LiveData.Update(new TwitchStreamDataViewModel());
+    }
+    
+    public void SetName(string name)
+    {
+        if (string.IsNullOrEmpty(name) || ExistName(name)) return;
+
+        if (IsMainEmpty())
+        {
+            Main = name;
+        }
+        else if (IsAltEmpty())
+        {
+            Alt = name;
+        }
+    }
+
+    public bool ExistName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return false;
+        return Main.Equals(name, _ordinalIgnoreCaseComparison) || Alt.Equals(name, _ordinalIgnoreCaseComparison);
+    }
+
+    public string GetCorrectName()
+    {
+        if (string.IsNullOrEmpty(Main))
+            return Alt;
+        return Main;
+    }
+
+    public bool EqualsNoDialog(StreamData data)
+    {
+        if (ExistName(data.Main)) return true;
+        if (ExistName(data.Alt)) return true;
+        return false;
+    }
+    
+    public bool Equals(StreamData data)
+    {
+        if (ExistName(data.Main))
+        {
+            DialogBox.Show($"Twitch name \"{data.Main}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+        if (ExistName(data.Alt))
+        {
+            DialogBox.Show($"Twitch name \"{data.Alt}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsMainEmpty()
+    {
+        return string.IsNullOrEmpty(Main);
+    }
+    public bool IsAltEmpty()
+    {
+        return string.IsNullOrEmpty(Alt);
+    }
+    public bool IsNullOrEmpty()
+    {
+        return IsMainEmpty() || IsAltEmpty();
+    }
+    public bool AreBothNullOrEmpty()
+    {
+        return IsMainEmpty() && IsAltEmpty();
+    }
+
+    public void Clear()
+    {
+        Main = string.Empty;
+        Alt = string.Empty;
+
+        LiveData.Clear();
+    }
 }
 
 public class PlayerViewModel : BaseViewModel, IPlayer
@@ -23,8 +218,8 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     public Player Data { get; private set; }
 
     public Guid Id => Data.Id;
-    public StreamData StreamData => Data.StreamData;
-    
+    public StreamDataViewModel StreamData { get; set; }
+
     public string UUID
     {
         get => Data.UUID;
@@ -153,9 +348,11 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         if (data == null)
         {
             Data = new Player();
+            StreamData = new StreamDataViewModel(Data.StreamData);
             return;
         }
         Data = data;
+        StreamData = new StreamDataViewModel(Data.StreamData);
     }
     
     public void Initialize()

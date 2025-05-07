@@ -10,10 +10,13 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.OBS;
 
@@ -324,13 +327,13 @@ public class ObsController : BaseViewModel
             {
                 if (!option)
                 {
-                    IsConnectedColor = new SolidColorBrush(TwitchStreamData.offlineColor);
+                    IsConnectedColor = new SolidColorBrush(Consts.OfflineColor);
                     Controller.TournamentViewModel.ClearPlayersFromPOVS();
                     Controller.ClearScenes();
                 }
                 else
                 {
-                    IsConnectedColor = new SolidColorBrush(TwitchStreamData.liveColor);
+                    IsConnectedColor = new SolidColorBrush(Consts.LiveColor);
                     await OnConnected();
                 }
             });

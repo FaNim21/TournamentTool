@@ -8,6 +8,7 @@ using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using System.ComponentModel;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services;
 
@@ -151,7 +152,7 @@ public class TwitchService
     private async Task UpdateTwitchInformations()
     {
         List<string> logins = [];
-        List<StreamData> notLivePlayers = [];
+        List<StreamDataViewModel> notLivePlayers = [];
 
         for (int i = 0; i < Controller.TournamentViewModel.Players.Count; i++)
         {
@@ -179,7 +180,7 @@ public class TwitchService
                 bool isMainStream = current.UserLogin.Equals(streamData.Main, StringComparison.OrdinalIgnoreCase);
                 bool isAltStream = current.UserLogin.Equals(streamData.Alt, StringComparison.OrdinalIgnoreCase);
 
-                TwitchStreamData liveData = new()
+                TwitchStreamDataViewModel liveData = new()
                 {
                     ID = current.Id,
                     BroadcasterID = current.UserId,
