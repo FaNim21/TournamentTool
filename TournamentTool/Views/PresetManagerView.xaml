@@ -15,18 +15,6 @@
              d:DesignHeight="601"
              Background="#1E1E1E">
     <UserControl.Resources>
-        <Style x:Key="enCheck" TargetType="CheckBox">
-            <Setter Property="Foreground"
-                    Value="White" />
-            <Style.Triggers>
-                <Trigger Property="IsEnabled"
-                         Value="False">
-                    <Setter Property="Foreground"
-                            Value="Gray" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Clear"
                       Command="{Binding ClearCurrentPresetCommand}" />
@@ -102,23 +90,19 @@
                                        Margin="5 0 0 3" />
                         </StackPanel>
 
-                        <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
-                                  Content="Use Twitch API"
-                                  Foreground="White"
-                                  Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
-                                  IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
-                                  Style="{StaticResource enCheck}"
-                                  Content="Show stream category"
-                                  Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
-                                  Content="Use team names"
-                                  Foreground="White"
-                                  Margin="0 0 0 5" />
-                        <CheckBox IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
-                                  Content="Always On Top"
-                                  Foreground="White"
-                                  Margin="0 0 0 5" />
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
+                                      Content="Use Twitch API"
+                                      Margin="0 0 0 5" />
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
+                                      IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
+                                      Content="Show stream category"
+                                      Margin="0 0 0 5" />
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
+                                      Content="Use team names"
+                                      Margin="0 0 0 5" />
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
+                                      Content="Always On Top"
+                                      Margin="0 0 0 5" />
 
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Controller Mode"
@@ -147,10 +131,9 @@
                                         FontSize="24"
                                         Padding="0"
                                         Margin="0 10 0 5" />
-                            <CheckBox IsChecked="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan}"
-                                      Content="Use Whitelist on Paceman"
-                                      Foreground="White"
-                                      Margin="0 0 0 5" />
+                            <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan}"
+                                          Content="Use Whitelist on Paceman"
+                                          Margin="0 0 0 5" />
 
                             <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
@@ -432,13 +415,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical"
                                         Margin="0 0 0 5">
-                                <CheckBox IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
+                                <ToggleButton IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
                                           Content="Use skin heads"
-                                          Foreground="White"
                                           Margin="0 0 0 5" />
-                                <CheckBox IsChecked="{Binding TournamentViewModel.SetPovPBText}"
+                                <ToggleButton IsChecked="{Binding TournamentViewModel.SetPovPBText}"
                                           Content="Use personal best text"
-                                          Foreground="White"
                                           Margin="0 0 0 5" />
 
                                 <TextBlock Text="Use names for povs"

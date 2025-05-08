@@ -319,5 +319,97 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid x:Name="RootGrid"
+                              HorizontalAlignment="Left">
+                            <Border x:Name="border1"
+                                    Width="30"
+                                    Height="15"
+                                    HorizontalAlignment="Left"
+                                    Background="#9e9e9e"
+                                    BorderBrush="Black"
+                                    BorderThickness="0.9"
+                                    Padding="3 0 3 0"
+                                    CornerRadius="8">
+                                <Border x:Name="border2"
+                                        Background="#5d636b"
+                                        CornerRadius="10"
+                                        HorizontalAlignment="Left"
+                                        Width="8"
+                                        Height="8"
+                                        Margin="0 0 0 0">
+                                </Border>
+                            </Border>
+                            <TextBlock Text="{Binding Path=Content, RelativeSource={RelativeSource AncestorType =ToggleButton}}"
+                                       Margin="34 0 0 1" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsChecked"
+                                     Value="True">
+                                <Setter TargetName="border1"
+                                        Property="Background"
+                                        Value="#71b0b0" />
+                                <Setter TargetName="border2"
+                                        Property="Background"
+                                        Value="white" />
+                                <Setter TargetName="border1"
+                                        Property="Padding"
+                                        Value="3 0 3 0" />
+                                <Setter TargetName="border2"
+                                        Property="Width"
+                                        Value="8" />
+                                <Setter TargetName="border2"
+                                        Property="Height"
+                                        Value="8" />
+                                <Setter TargetName="border2"
+                                        Property="Margin"
+                                        Value="14 0 0 0" />
+                            </Trigger>
+                                           
+                            <EventTrigger RoutedEvent="ToggleButton.Checked">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ThicknessAnimation Storyboard.TargetName="border2"
+                                                            Storyboard.TargetProperty="(Border.Margin)"
+                                                            From="0 0 0 0"
+                                                            To="14 0 0 0"
+                                                            Duration="0:0:0.2" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ThicknessAnimation Storyboard.TargetName="border2"
+                                                            Storyboard.TargetProperty="(Border.Margin)"
+                                                            From="14 0 0 0"
+                                                            To="0 0 0 0"
+                                                            Duration="0:0:0.2" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <Trigger Property="IsEnabled"
+                                     Value="True">
+                                <Setter Property="Foreground"
+                                        Value="White" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled"
+                                     Value="False">
+                                <Setter Property="Foreground"
+                                        Value="Gray" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>
