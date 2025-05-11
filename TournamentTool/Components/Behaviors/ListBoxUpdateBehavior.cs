@@ -1,5 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
+using TournamentTool.Interfaces;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 
@@ -31,21 +32,12 @@ public class ListBoxUpdateBehavior : BehaviorBase<ListBox>
         if (AssociatedObject == null) return;
         UpdateAllListBoxesLayouts();
 
-        ControllerViewModel? controller = null;
-        BaseViewModel viewModel = (BaseViewModel)AssociatedObject.DataContext;
-        if (viewModel is SidePanel sidePanel)
-            controller = sidePanel.Controller;
-
-        if (viewModel is ControllerViewModel controllerViewModel)
-            controller = controllerViewModel; 
-
-        if (controller == null) return;
-        if (controller.CurrentChosenPOV != null)
-        {
-            UnselectAllListBoxes();
-            Keyboard.ClearFocus();
-            controller.CurrentChosenPOV = null;
-        }
+        IPovDragAndDropContext? dragAndDropContext = AssociatedObject.DataContext as IPovDragAndDropContext;
+        if (dragAndDropContext?.CurrentChosenPOV == null) return;
+               
+        UnselectAllListBoxes();
+        Keyboard.ClearFocus();
+        dragAndDropContext.CurrentChosenPOV = null; 
     }
 
     private void UpdateAllListBoxesLayouts()

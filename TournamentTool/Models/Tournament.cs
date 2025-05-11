@@ -77,6 +77,7 @@ public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
     }
 }
 
+[JsonDerivedType(typeof(PacemanManagementData), typeDiscriminator: "Paceman")]
 [JsonDerivedType(typeof(RankedManagementData), typeDiscriminator: "Ranked")]
 public abstract class ManagementData;
 
@@ -104,7 +105,8 @@ public class Tournament : IPreset
     public bool IsAlwaysOnTop { get; set; } = true;
     public bool IsUsingTeamNames { get; set; }
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
-    
+    public bool AddUnknownPlayersToWhitelist { get; set; } = false;
+
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;

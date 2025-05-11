@@ -15,7 +15,7 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
-public class ControllerViewModel : SelectableViewModel
+public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 {
     private readonly TwitchService _twitch;
     private readonly APIDataSaver _api;
@@ -206,7 +206,7 @@ public class ControllerViewModel : SelectableViewModel
 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
                 {
-                    SidePanel = new PaceManPanel(this, TournamentViewModel, PresetService);
+                    SidePanel = new PaceManPanel(this, TournamentViewModel, Leaderboard);
                     ManagementPanel = null;
                 }
                 break;
@@ -215,7 +215,7 @@ public class ControllerViewModel : SelectableViewModel
 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
-                    SidePanel = new RankedPacePanel(this);
+                    SidePanel = new RankedPacePanel(this, TournamentViewModel, Leaderboard);
                     ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
                 }
                 break;

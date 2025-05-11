@@ -90,6 +90,9 @@
                                        Margin="5 0 0 3" />
                         </StackPanel>
 
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
+                                      Content="Always On Top"
+                                      Margin="0 0 0 5" />
                         <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
                                       Content="Use Twitch API"
                                       Margin="0 0 0 5" />
@@ -100,8 +103,9 @@
                         <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
                                       Content="Use team names"
                                       Margin="0 0 0 5" />
-                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
-                                      Content="Always On Top"
+                        <ToggleButton IsChecked="{Binding TournamentViewModel.AddUnknownPlayersToWhitelist}"
+                                      Content="Add unknown players to whitelist"
+                                      ToolTip="It adds players from ranked or paceman to whitelist with all information it could get from there"
                                       Margin="0 0 0 5" />
 
                         <StackPanel Orientation="Vertical">
@@ -452,7 +456,7 @@
                        Height="30"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Bottom"
-                       Margin="0 0 0 0">
+                       Margin="0 0 12 0">
                 <TextBlock Grid.Column="1"
                            VerticalAlignment="Bottom"
                            HorizontalAlignment="Right"

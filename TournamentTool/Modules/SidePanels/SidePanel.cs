@@ -1,19 +1,24 @@
-﻿using TournamentTool.Enums;
+﻿using System.Windows.Input;
+using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
-public abstract class SidePanel : BaseViewModel
+public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext
 {
-    public ControllerViewModel Controller { get; private set; }
-    public LeaderboardPanelViewModel Leaderboard { get; private set; }
+    private ControllerViewModel Controller { get; init; }
+    private LeaderboardPanelViewModel Leaderboard { get; init; }
+
+    protected TournamentViewModel TournamentViewModel { get; init; }
 
     private IPlayer? _selectedPlayer;
     public IPlayer? SelectedPlayer
     {
-        get { return _selectedPlayer; }
+        get => _selectedPlayer;
         set
         {
             Controller.ClearSelectedWhitelistPlayer();
@@ -25,14 +30,26 @@ public abstract class SidePanel : BaseViewModel
             Controller.SetPovAfterClickedCanvas(value!);
         }
     }
+    
+    public PointOfView? CurrentChosenPOV
+    {
+        get => Controller.CurrentChosenPOV;
+        set => Controller.CurrentChosenPOV = value;
+    }
 
     public ControllerMode Mode { get; protected set; }
 
+    public ICommand UnselectItemsCommand { get; private set; }
 
-    protected SidePanel(ControllerViewModel controller)
+
+    protected SidePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard)
     {
+        UnselectItemsCommand = controller.UnSelectItemsCommand;
+
         Controller = controller;
-        Leaderboard = controller.Leaderboard;
+        TournamentViewModel = tournamentViewModel;
+        Leaderboard = leaderboard;
+        
         Mode = ControllerMode.None;
     }
 
@@ -73,4 +90,5 @@ public abstract class SidePanel : BaseViewModel
         _selectedPlayer = null;
         OnPropertyChanged(nameof(SelectedPlayer));
     }
+
 }

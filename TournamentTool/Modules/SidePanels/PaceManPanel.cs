@@ -31,7 +31,7 @@ public class PaceManPanel : SidePanel
     private bool _lastOutput;
 
 
-    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, IPresetSaver presetSaver) : base(controller)
+    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel, leaderboard)
     {
         _paceManService = new PaceManService(this, tournamentViewModel);
         Mode = ControllerMode.Paceman;

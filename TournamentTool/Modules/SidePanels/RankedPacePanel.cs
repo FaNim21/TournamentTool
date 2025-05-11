@@ -11,10 +11,10 @@ using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using TournamentTool.Enums;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
-//Kiedys tu sprobowac ogarnac record class dla wszystkich obiektow pod json dla optymalizacji i organizacji, ale to tez trzeba bedzie potestowac
 public class RankedPlayer
 {
     [JsonPropertyName("uuid")] 
@@ -191,7 +191,7 @@ public class RankedPacePanel : SidePanel
     public ICollectionView? GroupedRankedPaces { get; set; }
 
 
-    public RankedPacePanel(ControllerViewModel controller) : base(controller)
+    public RankedPacePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel, leaderboard)
     {
         _options = new JsonSerializerOptions
         {
@@ -204,12 +204,12 @@ public class RankedPacePanel : SidePanel
 
     public override void Initialize()
     {
-        string dataName = Controller.TournamentViewModel.RankedRoomDataName;
+        string dataName = TournamentViewModel.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
             dataName = Path.Combine(dataName, ".json");
         }
-        FilePath = Path.Combine(Controller.TournamentViewModel.RankedRoomDataPath, dataName);
+        FilePath = Path.Combine(TournamentViewModel.RankedRoomDataPath, dataName);
         _cancellationTokenSource = new CancellationTokenSource();
 
         if (!File.Exists(FilePath))
@@ -270,7 +270,7 @@ public class RankedPacePanel : SidePanel
 
             try
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(Controller.TournamentViewModel.RankedRoomUpdateFrequency), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.RankedRoomUpdateFrequency), cancellationToken);
             }
             catch (TaskCanceledException) { break; }
         }
@@ -324,7 +324,7 @@ public class RankedPacePanel : SidePanel
         }
 
         PacesNotFromWhitelistAmount = 0;
-        List<RankedPace> _paces = new(Paces);
+        List<RankedPace> _currentPaces = new(Paces);
         for (int i = 0; i < rankedData.Players.Length; i++)
         {
             var player = rankedData.Players[i];
@@ -335,72 +335,68 @@ public class RankedPacePanel : SidePanel
             };
 
             rankedData.Inventories.TryGetValue(player.UUID, out var inventory);
-            data.Inventory = inventory;
+            data.Inventory = inventory!;
             if (data.Inventory.SplashPotions == null) continue;
 
             for (int j = 0; j < rankedData.Completes.Length; j++)
             {
                 var completion = rankedData.Completes[j];
-                if (completion.UUID.Equals(player.UUID))
-                {
-                    data.Completion = completion;
-                    break;
-                }
+                if (!completion.UUID.Equals(player.UUID)) continue;
+                
+                data.Completion = completion;
+                break;
             }
 
             for (int j = 0; j < rankedData.Timelines.Count; j++)
             {
                 var timeline = rankedData.Timelines[j];
                 if (timeline.Type.EndsWith("root")) continue;
-
-                if (timeline.UUID.Equals(player.UUID))
+                if (!timeline.UUID.Equals(player.UUID)) continue;
+                
+                if (timeline.Type.EndsWith("reset"))
                 {
-                    if (timeline.Type.EndsWith("reset"))
-                    {
-                        data.Resets++;
-                        data.Timelines.Clear();
-                        continue;
-                    }
-                    timeline.Type = timeline.Type.Split('.')[^1];
-
-                    data.Timelines.Add(timeline);
-                    rankedData.Timelines.RemoveAt(j);
-                    j--;
+                    data.Resets++;
+                    data.Timelines.Clear();
+                    continue;
                 }
+                timeline.Type = timeline.Type.Split('.')[^1];
+
+                data.Timelines.Add(timeline);
+                rankedData.Timelines.RemoveAt(j);
+                j--;
             }
 
             bool wasFoundOnPaces = false;
-            for (int j = 0; j < _paces.Count; j++)
+            for (int j = 0; j < _currentPaces.Count; j++)
             {
-                var pace = _paces[j];
-                if (pace.InGameName.Equals(data.Player.NickName))
-                {
-                    Application.Current.Dispatcher.Invoke(() => { pace.Update(data); });
-                    wasFoundOnPaces = true;
-                    _paces.Remove(pace);
-                    break;
-                }
+                var pace = _currentPaces[j];
+                if (!pace.InGameName.Equals(data.Player.NickName)) continue;
+                
+                Application.Current.Dispatcher.Invoke(() => { pace.Update(data); });
+                wasFoundOnPaces = true;
+                _currentPaces.Remove(pace);
+                break;
             }
 
             if (!wasFoundOnPaces) AddPace(data);
         }
 
-        for (int i = 0; i < _paces.Count; i++)
+        for (int i = 0; i < _currentPaces.Count; i++)
         {
-            RemovePace(_paces[i]);
+            RemovePace(_currentPaces[i]);
         }
     }
 
     private void AddPace(RankedPaceData data)
     {
-        RankedPace pace = new(Controller, this);
+        RankedPace pace = new(this);
         pace.Initialize(data.Player);
 
-        int n = Controller.TournamentViewModel.Players.Count;
+        int n = TournamentViewModel.Players.Count;
         bool found = false;
         for (int j = 0; j < n; j++)
         {
-            var current = Controller.TournamentViewModel.Players[j];
+            var current = TournamentViewModel.Players[j];
 
             if (current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase))
             {

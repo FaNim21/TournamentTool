@@ -17,7 +17,6 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         public long Time { get; set; }
     }
 
-    public ControllerViewModel Controller { get; set; }
     private RankedPacePanel RankedPacePanel { get; set; }
 
     public PlayerViewModel? Player { get; set; }
@@ -164,9 +163,8 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     public string SplitDifferenceTime { get; set; } = "00:00";
 
 
-    public RankedPace(ControllerViewModel controller, RankedPacePanel rankedPacePanel)
+    public RankedPace(RankedPacePanel rankedPacePanel)
     {
-        Controller = controller;
         RankedPacePanel = rankedPacePanel;
     }
     public void Initialize(RankedPlayer player)
