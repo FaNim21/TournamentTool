@@ -4,8 +4,8 @@ namespace TournamentTool.Services;
 
 public interface INavigationService
 {
-    MainViewModel MainViewModel { get; set; }
     SelectableViewModel SelectedView { get; }
+    
     void NavigateTo<T>() where T : SelectableViewModel;
     void Startup(MainViewModel mainViewModel);
 }
@@ -14,9 +14,9 @@ public class NavigationService : BaseViewModel, INavigationService
 {
     private readonly Func<Type, SelectableViewModel> _viewModelFactory;
 
-    public MainViewModel MainViewModel { get; set; }
+    public MainViewModel MainViewModel { get; set; } = null!;
 
-    private SelectableViewModel _selectedView;
+    private SelectableViewModel _selectedView = null!;
     public SelectableViewModel SelectedView
     {
         get => _selectedView;

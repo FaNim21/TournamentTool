@@ -119,9 +119,12 @@ public class PaceManService : BaseViewModel
 
             PlayerViewModel? player = TournamentViewModel.GetPlayerByTwitchName(pace.User.TwitchName!);
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
+            if (TournamentViewModel.AddUnknownPlayersToWhitelist && player == null)
+            {
+                player = AddPaceManPlayerToWhiteList(pace);
+            }
 
             paceViewModel = new PaceManViewModel(this, pace, player!);
-            Trace.WriteLine($"Adding new paceman: {pace.Nickname}");
             AddPaceMan(paceViewModel);
             isPacemanEmpty = false;
         }
@@ -132,14 +135,27 @@ public class PaceManService : BaseViewModel
         OnRefreshGroup?.Invoke(isPacemanEmpty);
     }
 
-    public void AddPaceMan(PaceManViewModel paceman)
+    private void AddPaceMan(PaceManViewModel paceman)
     {
         Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceman); });
         SidePanel.UpdatePlayerStreamData(paceman.Nickname, paceman.TwitchName);
     }
-    public void RemovePaceMan(PaceManViewModel paceMan)
+    private void RemovePaceMan(PaceManViewModel paceMan)
     {
         Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
+    }
+
+    private PlayerViewModel AddPaceManPlayerToWhiteList(PaceMan paceMan)
+    {
+        Player player = new Player()
+        {
+            //TODO: 0 SKONCZYC TO
+        };
+
+        PlayerViewModel playerViewModel = new PlayerViewModel();
+        
+        TournamentViewModel.AddPlayer(playerViewModel);
+        return playerViewModel;
     }
 
     public void EvaluatePlayerInLeaderboard(PaceManViewModel paceman)

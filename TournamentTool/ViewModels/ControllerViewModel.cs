@@ -22,8 +22,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
     private BackgroundWorker? _apiWorker;
     private CancellationTokenSource? _cancellationTokenSource;
-    public Scene MainScene { get; set; }
-    public PreviewScene PreviewScene { get; set; }
+    public Scene MainScene { get; }
+    public PreviewScene PreviewScene { get; }
 
     private ObservableCollection<PlayerViewModel> _filteredPlayers = [];
     public ObservableCollection<PlayerViewModel> FilteredPlayers
@@ -36,13 +36,13 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         }
     }
 
-    public ObsController OBS { get; set; }
+    public ObsController OBS { get; }
 
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
 
-    public TournamentViewModel TournamentViewModel { get; private set; }
-    public LeaderboardPanelViewModel Leaderboard { get; private set; }
+    public TournamentViewModel TournamentViewModel { get; }
+    public LeaderboardPanelViewModel Leaderboard { get; }
     public IPresetSaver PresetService { get; }
 
     private IPlayer? _currentChosenPlayer;

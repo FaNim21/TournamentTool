@@ -14,6 +14,8 @@ public class RankedManagementPanel : ManagementPanel
     private RankedManagementData? RankedManagementData { get; set; }
 
 
+    //TODO: 2 Dodac tutaj liste pod najlepsze czasy do splitow, zeby byl i wglad w nie i tez zeby po restarcie tt czasy sie dalej zgadzaly
+    
     private string _customText = string.Empty;
     public string CustomText
     {

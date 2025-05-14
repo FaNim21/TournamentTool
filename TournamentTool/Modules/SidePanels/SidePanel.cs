@@ -59,6 +59,11 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() { return true; }
 
+    protected void AddPlayerToWhitelist(PlayerViewModel player)
+    {
+        TournamentViewModel.AddPlayer(player);
+    }
+    
     public void UpdatePlayerStreamData(string inGameName, string twitchName)
     {
         int n = Controller.TournamentViewModel.Players.Count;
