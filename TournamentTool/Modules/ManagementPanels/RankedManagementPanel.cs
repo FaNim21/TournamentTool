@@ -10,7 +10,7 @@ namespace TournamentTool.Modules.ManagementPanels;
 public class RankedManagementPanel : ManagementPanel
 {
     private ControllerViewModel Controller { get; set; }
-    private RankedPacePanel RankedPacePanel { get; set; }
+    private RankedDataPacePanel RankedDataPacePanel { get; set; }
     private RankedManagementData? RankedManagementData { get; set; }
 
 
@@ -69,10 +69,10 @@ public class RankedManagementPanel : ManagementPanel
     private const string _rankedCustomTextFileName = "Ranked_customText";
 
 
-    public RankedManagementPanel(ControllerViewModel controller, RankedPacePanel rankedPacePanel)
+    public RankedManagementPanel(ControllerViewModel controller, RankedDataPacePanel rankedDataPacePanel)
     {
         Controller = controller;
-        RankedPacePanel = rankedPacePanel;
+        RankedDataPacePanel = rankedDataPacePanel;
 
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubtractRoundCommand = new RelayCommand(() => { Rounds--; });
@@ -106,8 +106,8 @@ public class RankedManagementPanel : ManagementPanel
 
     public override void UpdateAPI(APIDataSaver api)
     {
-        Completions = RankedPacePanel.CompletedRunsCount;
-        Players = RankedPacePanel.Paces.Count;
+        Completions = RankedDataPacePanel.CompletedRunsCount;
+        Players = RankedDataPacePanel.Paces.Count;
 
         api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
         api.UpdateFileContent(_rankedPlayerCountFileName, Players);

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
@@ -80,6 +81,15 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.IsUsingWhitelistOnPaceMan = value;
             OnPropertyChanged(nameof(IsUsingWhitelistOnPaceMan));
             PresetIsModified();
+        }
+    }
+    public bool ShowOnlyLive
+    {
+        get => _tournament.ShowOnlyLive;
+        set
+        {
+            _tournament.ShowOnlyLive = value;
+            OnPropertyChanged(nameof(ShowOnlyLive));
         }
     }
     public bool AddUnknownPlayersToWhitelist
@@ -295,7 +305,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
     }
     public string? CreditsToText { set; get; }
 
-    public Action? OnControllerModeChanged;
+    public Action<ControllerMode>? OnControllerModeChanged;
     public ControllerMode ControllerMode
     {
         get => _tournament.ControllerMode;
@@ -306,13 +316,13 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.ControllerMode = value;
             OnPropertyChanged(nameof(ControllerMode));
             PresetIsModified();
-            
+
             if (value == ControllerMode.Ranked)
                 ManagementData = new RankedManagementData();
             else if (value == ControllerMode.Paceman)
                 ManagementData = new PacemanManagementData();
             
-            OnControllerModeChanged?.Invoke();
+            OnControllerModeChanged?.Invoke(value);
         }
     }
     
@@ -324,7 +334,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.RankedRoomDataPath = value;
             PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataPath));
-            OnControllerModeChanged?.Invoke();
+            OnControllerModeChanged?.Invoke(ControllerMode.Ranked);
         }
     }
     public string RankedRoomDataName
@@ -335,7 +345,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.RankedRoomDataName = value;
             PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataName));
-            OnControllerModeChanged?.Invoke();
+            OnControllerModeChanged?.Invoke(ControllerMode.Ranked);
         }
     }
     public int RankedRoomUpdateFrequency
@@ -349,7 +359,6 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
     }
 
-    
     private bool _isCurrentlyOpened;
     public bool IsCurrentlyOpened
     {
@@ -395,7 +404,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         IsCurrentlyOpened = true;
         HasBeenRemoved = false;
         
-        OnControllerModeChanged?.Invoke();
+        OnControllerModeChanged?.Invoke(ControllerMode);
         
         PresetIsSaved();
     }
@@ -418,6 +427,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         OnPropertyChanged(nameof(IsAlwaysOnTop));
         OnPropertyChanged(nameof(IsUsingTeamNames));
         OnPropertyChanged(nameof(IsUsingWhitelistOnPaceMan));
+        OnPropertyChanged(nameof(ShowOnlyLive));
         OnPropertyChanged(nameof(AddUnknownPlayersToWhitelist));
         
         OnPropertyChanged(nameof(Port));
@@ -522,6 +532,8 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         
     public PlayerViewModel? GetPlayerByTwitchName(string twitchName)
     {
+        if (string.IsNullOrEmpty(twitchName)) return null;
+        
         int n = Players.Count;
         for (int i = 0; i < n; i++)
         {
@@ -585,6 +597,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         IsAlwaysOnTop = true;
         IsUsingTeamNames = false;
         IsUsingWhitelistOnPaceMan = true;
+        ShowOnlyLive = true;
         AddUnknownPlayersToWhitelist = false;
         
         Port = 4455;

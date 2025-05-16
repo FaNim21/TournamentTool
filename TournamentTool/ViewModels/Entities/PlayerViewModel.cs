@@ -220,17 +220,6 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     public Guid Id => Data.Id;
     public StreamDataViewModel StreamData { get; set; }
 
-    public string UUID
-    {
-        get => Data.UUID;
-        set
-        {
-            Data.UUID = value;
-            OnPropertyChanged(nameof(UUID));
-            IsUUIDEmpty = string.IsNullOrEmpty(UUID);
-        }
-    }
-    
     private BitmapImage? _image;
     public BitmapImage? Image
     {
@@ -242,6 +231,16 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         }
     }
     
+    public string UUID
+    {
+        get => Data.UUID;
+        set
+        {
+            Data.UUID = value;
+            OnPropertyChanged(nameof(UUID));
+            IsUUIDEmpty = string.IsNullOrEmpty(UUID);
+        }
+    }
     public string? Name
     {
         get => Data.Name;
@@ -251,7 +250,6 @@ public class PlayerViewModel : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(Name));
         }
     }
-    
     public string? InGameName
     {
         get => Data.InGameName;
@@ -261,7 +259,6 @@ public class PlayerViewModel : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(InGameName));
         }
     }
-    
     public string PersonalBest
     {
         get => Data.PersonalBest;
@@ -271,7 +268,6 @@ public class PlayerViewModel : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(PersonalBest));
         }
     }
-    
     public string? TeamName
     {
         get => Data.TeamName;
@@ -323,6 +319,17 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         {
             _isUUIDEmpty = value;
             OnPropertyChanged(nameof(IsUUIDEmpty));
+        }
+    }
+    
+    private bool _isLive = true;
+    public bool IsLive
+    {
+        get => _isLive;
+        set
+        {
+            _isLive = value;
+            OnPropertyChanged(nameof(IsLive));
         }
     }
     

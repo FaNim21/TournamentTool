@@ -20,6 +20,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     private readonly TwitchService _twitch;
     private readonly APIDataSaver _api;
 
+    private readonly IBackgroundCoordinator _backgroundCoordinator;
+    
     private BackgroundWorker? _apiWorker;
     private CancellationTokenSource? _cancellationTokenSource;
     public Scene MainScene { get; }
@@ -112,14 +114,13 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     public ICommand UnSelectItemsCommand { get; set; }
 
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         Leaderboard = leaderboard;
+        _backgroundCoordinator = backgroundCoordinator;
 
-        tournamentViewModel.OnControllerModeChanged += UpdateSidePanel;
-        
         _api = new APIDataSaver();
 
         MainScene = new Scene(this, coordinator);
@@ -138,13 +139,46 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     } 
     public override void OnEnable(object? parameter)
     {
+        switch(TournamentViewModel.ControllerMode)
+        {
+            case ControllerMode.None:
+                UseSidePanel = false;
+
+                if (SidePanel != null)
+                {
+                    SidePanel = null;
+                    ManagementPanel = null;
+                }
+                break;
+            case ControllerMode.Paceman:
+                UseSidePanel = true;
+
+                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
+                {
+                    SidePanel = new PaceManPanel(this, TournamentViewModel);
+                    ManagementPanel = null;
+                }
+                break;
+            case ControllerMode.Ranked:
+                UseSidePanel = true;
+
+                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedDataPacePanel)))
+                {
+                    SidePanel = new RankedDataPacePanel(this, TournamentViewModel, Leaderboard);
+                    ManagementPanel = new RankedManagementPanel(this, (RankedDataPacePanel)SidePanel);
+                }
+                break;
+        }
+        
+        _backgroundCoordinator.Register(SidePanel);
+        
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _apiWorker.DoWork += UpdateAPI;
         _apiWorker.RunWorkerAsync();
 
         FilterItems();
-
+        
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
         OBS.OnEnable(null);
@@ -159,6 +193,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     }
     public override bool OnDisable()
     {
+        _backgroundCoordinator.Unregister(SidePanel);
+        
         SidePanel?.OnDisable();
         OBS.OnDisable();
         _twitch?.OnDisable();
@@ -184,44 +220,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         SavePreset();
 
         return true;
-    }
-
-    private void UpdateSidePanel()
-    {
-        SidePanel?.UnInitialize();
-        
-        switch(TournamentViewModel.ControllerMode)
-        {
-            case ControllerMode.None:
-                UseSidePanel = false;
-
-                if (SidePanel != null)
-                {
-                    SidePanel = null;
-                    ManagementPanel = null;
-                }
-                break;
-            case ControllerMode.Paceman:
-                UseSidePanel = true;
-
-                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
-                {
-                    SidePanel = new PaceManPanel(this, TournamentViewModel, Leaderboard);
-                    ManagementPanel = null;
-                }
-                break;
-            case ControllerMode.Ranked:
-                UseSidePanel = true;
-
-                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
-                {
-                    SidePanel = new RankedPacePanel(this, TournamentViewModel, Leaderboard);
-                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
-                }
-                break;
-        }
-        
-        SidePanel?.Initialize();
     }
     
     private async void UpdateAPI(object? sender, DoWorkEventArgs e)

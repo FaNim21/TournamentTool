@@ -15,7 +15,7 @@ using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;
 
-public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager
+public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlayerManagerReceiver
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
      

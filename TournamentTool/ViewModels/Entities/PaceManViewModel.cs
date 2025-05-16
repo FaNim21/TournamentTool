@@ -13,9 +13,31 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 {
     private PaceMan _paceMan;
 
-    private PaceManService Service { get; set; }
+    private PaceManService Service { get; }
 
     public string Nickname => _paceMan.Nickname;
+
+    private bool _isLive = true;
+    public bool IsLive
+    {
+        get => _isLive;
+        set
+        {
+            _isLive = value;
+            OnPropertyChanged(nameof(IsLive));
+        }
+    }
+
+    private Brush? _statusLabelColor = new SolidColorBrush(Consts.DefaultColor);
+    public Brush? StatusLabelColor
+    {
+        get => _statusLabelColor;
+        set
+        {
+            _statusLabelColor = value;
+            OnPropertyChanged(nameof(StatusLabelColor));
+        }
+    }
 
     public PlayerViewModel? PlayerViewModel { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -118,13 +140,30 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         _paceMan = paceMan;
         PlayerViewModel = playerViewModel;
         
+        Initialize();
         UpdateHeadImage();
         UpdateTime();
+    }
+    private void Initialize()
+    {
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            if (_paceMan.ShowOnlyLive)
+            {
+                StatusLabelColor = new SolidColorBrush(Consts.DefaultColor);
+                return;
+            }
+            
+            IsLive = _paceMan.IsLive();
+
+            StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
+        });
     }
     
     public void Update(PaceMan paceman)
     {
         _paceMan = paceman;
+        Initialize();
         
         if (_paceMan.Splits.Count == 0) return;
         UpdateTime();
@@ -204,6 +243,8 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
             IGT = lastSplit.IGT,
         };
     }
+
+    public PaceMan GetData() => _paceMan;
     
     private void SetPacePriority(bool good)
     {

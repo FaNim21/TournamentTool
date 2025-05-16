@@ -67,9 +67,6 @@ public partial class MainWindow : Window
         {
             var option = DialogBox.Show($"Are you sure you want to exit from here?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (option != MessageBoxResult.Yes) return;
-            if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
-            Close();
-            return;
         }
 
         if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;

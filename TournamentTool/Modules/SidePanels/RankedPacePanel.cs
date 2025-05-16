@@ -11,6 +11,7 @@ using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
@@ -154,7 +155,7 @@ public class RankedBestSplit
     public long Time { get; set; }
 }
 
-public class RankedPacePanel : SidePanel
+public class RankedDataPacePanel : SidePanel, IRankedDataReceiver
 {
     private readonly JsonSerializerOptions _options;
 
@@ -191,7 +192,7 @@ public class RankedPacePanel : SidePanel
     public ICollectionView? GroupedRankedPaces { get; set; }
 
 
-    public RankedPacePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel, leaderboard)
+    public RankedDataPacePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel)
     {
         _options = new JsonSerializerOptions
         {
@@ -202,8 +203,10 @@ public class RankedPacePanel : SidePanel
         Mode = ControllerMode.Ranked;
     }
 
-    public override void Initialize()
+    public override void OnEnable(object? parameter)
     {
+        base.OnEnable(parameter);
+        
         string dataName = TournamentViewModel.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
         {
@@ -219,30 +222,22 @@ public class RankedPacePanel : SidePanel
         }
 
         Task.Run(UpdateSpectatorMatch);
-    }
-
-    public override void UnInitialize()
-    {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-    }
-
-    public override void OnEnable(object? parameter)
-    {
-        base.OnEnable(parameter);
         
-        SetupPaceManGrouping();
+        SetupRankedPaceGrouping();
     }
     public override bool OnDisable()
     {
         base.OnDisable();
+        
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
 
         GroupedRankedPaces = null;
         return true;
     }
 
-    private void SetupPaceManGrouping()
+    private void SetupRankedPaceGrouping()
     {
         var collectionViewSource = new CollectionViewSource { Source = Paces };
 
@@ -438,5 +433,10 @@ public class RankedPacePanel : SidePanel
         RankedBestSplit bestSplit = new() { Type = splitType };
         BestSplits.Add(bestSplit);
         return bestSplit;
+    }
+
+    public void ReceivePlayers(List<RankedPace> paces)
+    {
+        throw new NotImplementedException();
     }
 }

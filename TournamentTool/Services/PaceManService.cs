@@ -1,115 +1,91 @@
-﻿using System.ComponentModel;
-using System.Windows;
-using TournamentTool.Components.Controls;
-using TournamentTool.Models;
+﻿using TournamentTool.Models;
 using TournamentTool.Utils;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Text.Json;
 using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
-using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services;
 
-public class PaceManService : BaseViewModel
+public class PaceManService : IBackgroundService
 {
-    private SidePanel SidePanel { get; set; }
-    private TournamentViewModel TournamentViewModel { get; set; }
+    private TournamentViewModel TournamentViewModel { get; }
+    private LeaderboardPanelViewModel Leaderboard { get; }
+    private IPresetSaver PresetSaver { get; }
 
-    private BackgroundWorker? _paceManWorker;
-    private CancellationTokenSource? _cancellationTokenSource;
+    private IPacemanDataReceiver? _pacemanSidePanelReceiver;
+    private IPlayerManagerReceiver? _playerManagerReceiver;
 
-    private ObservableCollection<PaceManViewModel> _paceManPlayers = [];
-    public ObservableCollection<PaceManViewModel> PaceManPlayers
+    private List<PaceManViewModel> _paceManPlayers = [];
+    private List<PaceMan> _paceManData = [];
+
+
+    public PaceManService(TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard, IPresetSaver presetSaver)
     {
-        get => _paceManPlayers;
-        set
-        {
-            _paceManPlayers = value;
-            OnPropertyChanged(nameof(PaceManPlayers));
-        }
-    }
-
-    public event Action<bool>? OnRefreshGroup;
-
-    public PaceManService(SidePanel sidePanel, TournamentViewModel tournamentViewModel)
-    {
-        SidePanel = sidePanel;
         TournamentViewModel = tournamentViewModel;
+        Leaderboard = leaderboard;
+        PresetSaver = presetSaver;
     }
 
-    public override void OnEnable(object? parameter)
+    public void RegisterData(IBackgroundDataReceiver? receiver)
     {
-        _cancellationTokenSource = new CancellationTokenSource();
-        _paceManWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
-        _paceManWorker.DoWork += PaceManUpdate;
-        _paceManWorker.RunWorkerAsync();
-    }
-    public override bool OnDisable()
-    {
-        _paceManWorker?.CancelAsync();
-        _cancellationTokenSource?.Cancel();
-        _paceManWorker?.Dispose();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-        _paceManWorker = null;
-
-        for (int i = 0; i < PaceManPlayers.Count; i++)
-            PaceManPlayers[i].PlayerViewModel = null;
-
-        PaceManPlayers.Clear();
-
-        return true;
-    }
-
-    private async void PaceManUpdate(object? sender, DoWorkEventArgs e)
-    {
-        var cancellationToken = _cancellationTokenSource!.Token;
-
-        while (!_paceManWorker!.CancellationPending && !cancellationToken.IsCancellationRequested)
+        if (receiver is IPacemanDataReceiver pacemanDataReceiver)
         {
-            try
-            {
-                await RefreshPaceManAsync();
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            try
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.PaceManRefreshRateMiliseconds), cancellationToken);
-            }
-            catch (TaskCanceledException) { break; }
+            _pacemanSidePanelReceiver = pacemanDataReceiver;
+            Console.WriteLine("--------- Startup registering data");
+            OrganizingPacemanData();
         }
+        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
+        {
+            _playerManagerReceiver = playerManagerReceiver;
+        }
+    }
+    public void UnregisterData(IBackgroundDataReceiver? receiver)
+    {
+        if (receiver is IPacemanDataReceiver pacemanDataReceiver)
+        {
+            _pacemanSidePanelReceiver = null;
+        }
+        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
+        {
+            _playerManagerReceiver = null;
+        }
+    }
+
+    public async Task Update(CancellationToken token)
+    {
+        await RefreshPaceManAsync();
+        await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.PaceManRefreshRateMiliseconds), token);
     }
     private async Task RefreshPaceManAsync()
     {
         string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
         List<PaceMan>? paceMan = JsonSerializer.Deserialize<List<PaceMan>>(result);
-        if (paceMan == null) return;
+        _paceManData = paceMan ?? [];
+        OrganizingPacemanData();
+    }
 
-        bool isPacemanEmpty = true;
-        List<PaceManViewModel> currentPaces = new(PaceManPlayers);
+    private void OrganizingPacemanData()
+    {
+        List<PaceManViewModel> currentPaces = new(_paceManPlayers);
 
-        foreach (var pace in paceMan)
+        foreach (var pace in _paceManData)
         {
             bool wasPaceFound = false;
-            PaceManViewModel? paceViewModel = null;
-            
-            if (!pace.IsLive() || pace.IsHidden || pace.IsCheated) continue;
+
+            if (pace.IsHidden || pace.IsCheated) continue;
+            if (!pace.IsLive() && TournamentViewModel.ShowOnlyLive) continue;
+            pace.ShowOnlyLive = TournamentViewModel.ShowOnlyLive;
             
             for (int j = 0; j < currentPaces.Count; j++)
             {
                 var currentPace = currentPaces[j];
                 if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
+                if (TournamentViewModel.IsUsingWhitelistOnPaceMan && currentPace.PlayerViewModel == null) break;
                 
                 wasPaceFound = true;
-                isPacemanEmpty = false;
                 currentPace.Update(pace);
                 currentPaces.Remove(currentPace);
                 break;
@@ -121,28 +97,49 @@ public class PaceManService : BaseViewModel
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
             if (TournamentViewModel.AddUnknownPlayersToWhitelist && player == null)
             {
-                player = AddPaceManPlayerToWhiteList(pace);
+                //TODO: 0 Zrobic dodawanie graczy do whitelisty z odpowiednimi danymi
+                //player = AddPaceManPlayerToWhiteList(pace);
             }
 
-            paceViewModel = new PaceManViewModel(this, pace, player!);
+            var paceViewModel = new PaceManViewModel(this, pace, player!);
             AddPaceMan(paceViewModel);
-            isPacemanEmpty = false;
         }
 
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
 
-        OnRefreshGroup?.Invoke(isPacemanEmpty);
+        _pacemanSidePanelReceiver?.ReceivePlayers(_paceManPlayers);
     }
 
-    private void AddPaceMan(PaceManViewModel paceman)
+    private void AddPaceMan(PaceManViewModel paceMan)
     {
-        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceman); });
-        SidePanel.UpdatePlayerStreamData(paceman.Nickname, paceman.TwitchName);
+        _paceManPlayers.Add(paceMan);
+        UpdatePlayerStreamData(paceMan.Nickname, paceMan.TwitchName);
     }
     private void RemovePaceMan(PaceManViewModel paceMan)
     {
-        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
+        _paceManPlayers.Remove(paceMan);
+    }
+    
+    protected void UpdatePlayerStreamData(string inGameName, string twitchName)
+    {
+        int n = TournamentViewModel.Players.Count;
+        bool updatedPlayer = false;
+        
+        for (int i = 0; i < n; i++)
+        {
+            var player = TournamentViewModel.Players[i];
+            if (!player.InGameName!.Equals(inGameName, StringComparison.OrdinalIgnoreCase)) continue;
+            
+            updatedPlayer = true;
+            player.StreamData.SetName(twitchName);
+            _pacemanSidePanelReceiver?.FilterItems();
+        }
+        
+        if (updatedPlayer)
+        {
+            PresetSaver.SavePreset();
+        }
     }
 
     private PlayerViewModel AddPaceManPlayerToWhiteList(PaceMan paceMan)
@@ -153,8 +150,15 @@ public class PaceManService : BaseViewModel
         };
 
         PlayerViewModel playerViewModel = new PlayerViewModel();
-        
-        TournamentViewModel.AddPlayer(playerViewModel);
+
+        if (_playerManagerReceiver != null)
+        {
+            _playerManagerReceiver.Add(playerViewModel);
+        }
+        else
+        {
+            TournamentViewModel.AddPlayer(playerViewModel);
+        }
         return playerViewModel;
     }
 
@@ -162,7 +166,7 @@ public class PaceManService : BaseViewModel
     {
         var split =  paceman.GetLastSplit();
         if (split.SplitName.StartsWith("common.")) return;
-        
+
         var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
         var data = new LeaderboardPlayerEvaluateData()
         {
@@ -170,7 +174,7 @@ public class PaceManService : BaseViewModel
             Milestone = milestone,
             Time = (int)split.IGT
         };
-        SidePanel.EvaluatePlayerInLeaderboard(data);
+        Leaderboard.EvaluatePlayer(data);
     }
 
     public bool CheckForGoodPace(SplitType splitType, PacemanPaceMilestone lastMilestone)
@@ -186,4 +190,5 @@ public class PaceManService : BaseViewModel
         };
         return isPacePriority;
     }
+
 }

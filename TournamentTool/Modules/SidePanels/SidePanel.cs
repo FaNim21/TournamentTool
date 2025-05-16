@@ -2,16 +2,14 @@
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
-public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext
+public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgroundDataReceiver
 {
     private ControllerViewModel Controller { get; init; }
-    private LeaderboardPanelViewModel Leaderboard { get; init; }
 
     protected TournamentViewModel TournamentViewModel { get; init; }
 
@@ -42,53 +40,20 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext
     public ICommand UnselectItemsCommand { get; private set; }
 
 
-    protected SidePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard)
+    protected SidePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel)
     {
         UnselectItemsCommand = controller.UnSelectItemsCommand;
 
         Controller = controller;
         TournamentViewModel = tournamentViewModel;
-        Leaderboard = leaderboard;
         
         Mode = ControllerMode.None;
     }
 
-    public abstract void Initialize();
-    public abstract void UnInitialize();
-    
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() { return true; }
 
-    protected void AddPlayerToWhitelist(PlayerViewModel player)
-    {
-        TournamentViewModel.AddPlayer(player);
-    }
-    
-    public void UpdatePlayerStreamData(string inGameName, string twitchName)
-    {
-        int n = Controller.TournamentViewModel.Players.Count;
-        bool updatedPlayer = false;
-        
-        for (int i = 0; i < n; i++)
-        {
-            var player = Controller.TournamentViewModel.Players[i];
-            if (!player.InGameName!.Equals(inGameName, StringComparison.OrdinalIgnoreCase)) continue;
-            
-            updatedPlayer = true;
-            player.StreamData.SetName(twitchName);
-            Controller.FilterItems();
-        }
-        
-        if (updatedPlayer)
-        {
-            Controller.SavePreset();
-        }
-    }
-    
-    public void EvaluatePlayerInLeaderboard(LeaderboardPlayerEvaluateData data)
-    {
-        Leaderboard.EvaluatePlayer(data);
-    }
+    protected void FilterControllerPlayers() => Controller.FilterItems();
     
     public void ClearSelectedPlayer()
     {

@@ -2,7 +2,6 @@
 using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Modules;
-using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -13,8 +12,8 @@ namespace TournamentTool;
 public partial class App : Application
 {
     private readonly ServiceProvider _serviceProvider;
-
-
+    
+    
     public App()
     {
         IServiceCollection services = new ServiceCollection();
@@ -29,6 +28,8 @@ public partial class App : Application
         
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ICoordinator, MainViewModelCoordinator>();
+        
+        services.AddSingleton<IBackgroundCoordinator, BackgroundCoordinator>();
         
         services.AddSingleton<ControllerViewModel>();
         services.AddSingleton<PresetManagerViewModel>();

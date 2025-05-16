@@ -138,6 +138,9 @@
                             <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan}"
                                           Content="Use Whitelist on Paceman"
                                           Margin="0 0 0 5" />
+                            <ToggleButton IsChecked="{Binding TournamentViewModel.ShowOnlyLive}"
+                                          Content="Show only live players"
+                                          Margin="0 0 0 5" />
 
                             <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">

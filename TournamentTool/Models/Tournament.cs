@@ -105,6 +105,7 @@ public class Tournament : IPreset
     public bool IsAlwaysOnTop { get; set; } = true;
     public bool IsUsingTeamNames { get; set; }
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
+    public bool ShowOnlyLive { get; set; } = true;
     public bool AddUnknownPlayersToWhitelist { get; set; } = false;
 
     public int Port { get; set; } = 4455;

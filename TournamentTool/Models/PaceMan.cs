@@ -30,8 +30,10 @@ public class PaceMan
 
     [JsonPropertyName("isCheated")]
     public bool IsCheated { get; set; }
-    
-    
+
+    public bool ShowOnlyLive { get; set; }
+
+
     public bool IsLive()
     {
         return !string.IsNullOrEmpty(User.TwitchName);

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TournamentTool.Models;
 
 namespace TournamentTool.Components.Behaviors;
 
@@ -38,26 +39,14 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
     private void OnMouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
-
         if (OnCommand != null && OnCommand.CanExecute(null))
         {
             OnCommand.Execute(null);
         }
+        
+        if (AssociatedObject.DataContext is IPlayer { IsLive: false }) return;
         var datatype = DragDataType ?? typeof(object);
 
         DragDrop.DoDragDrop(AssociatedObject, new DataObject(datatype, AssociatedObject.DataContext), DragDropEffects.Move);
     }
-
-    /*private void MouseEnter(object sender, MouseEventArgs e)
-    {
-        if (e.LeftButton != MouseButtonState.Pressed) return;
-
-        if (OnCommand != null && OnCommand.CanExecute(null))
-        {
-            OnCommand.Execute(null);
-        }
-        var datatype = DragDataType ?? typeof(object);
-
-        DragDrop.DoDragDrop(AssociatedObject, new DataObject(datatype, AssociatedObject.DataContext), DragDropEffects.Move);
-    }*/
 }

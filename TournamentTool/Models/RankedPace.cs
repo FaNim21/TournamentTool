@@ -17,7 +17,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         public long Time { get; set; }
     }
 
-    private RankedPacePanel RankedPacePanel { get; set; }
+    private RankedDataPacePanel RankedDataPacePanel { get; set; }
 
     public PlayerViewModel? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -60,6 +60,17 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         {
             _eloRate = value;
             OnPropertyChanged(nameof(EloRate));
+        }
+    }
+    
+    private bool _isLive = true;
+    public bool IsLive
+    {
+        get => _isLive;
+        set
+        {
+            _isLive = value;
+            OnPropertyChanged(nameof(IsLive));
         }
     }
 
@@ -163,9 +174,9 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     public string SplitDifferenceTime { get; set; } = "00:00";
 
 
-    public RankedPace(RankedPacePanel rankedPacePanel)
+    public RankedPace(RankedDataPacePanel rankedDataPacePanel)
     {
-        RankedPacePanel = rankedPacePanel;
+        RankedDataPacePanel = rankedDataPacePanel;
     }
     public void Initialize(RankedPlayer player)
     {
@@ -250,7 +261,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
 
             //TODO: to powinno byc zapisywane inaczej i forowane po wszystkich dla wiekszej pewnosci? poniewaz po resecie aplikacji
             //ta metoda jest obecnie najwydajniejsza, ale psuje sie po restarcie apki z racji kolejnosci czytania danych z pliku json ktorego sie nie da zmienic
-            RankedBestSplit bestSplit = RankedPacePanel.GetBestSplit(newSplit.Split);
+            RankedBestSplit bestSplit = RankedDataPacePanel.GetBestSplit(newSplit.Split);
             if(string.IsNullOrEmpty(bestSplit.PlayerName))
             {
                 bestSplit.PlayerName = InGameName;

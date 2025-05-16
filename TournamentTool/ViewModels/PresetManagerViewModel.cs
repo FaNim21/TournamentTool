@@ -6,8 +6,10 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
@@ -17,7 +19,8 @@ public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
-    private LeaderboardPanelViewModel Leaderboard { get; set; }
+    private IBackgroundCoordinator BackgroundCoordinator { get; }
+    private LeaderboardPanelViewModel Leaderboard { get; }
     public TournamentViewModel TournamentViewModel { get; }
     public IPresetSaver PresetService { get; }
 
@@ -57,11 +60,14 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SetRankedDataPathCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, ControllerViewModel controller, LeaderboardPanelViewModel leaderboard) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         Leaderboard = leaderboard;
+        BackgroundCoordinator = backgroundCoordinator;
+
+        TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
         LoadPresetsList();
 
@@ -81,6 +87,10 @@ public class PresetManagerViewModel : SelectableViewModel
         SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
 
         LoadStartupPreset();
+    }
+    ~PresetManagerViewModel()
+    {
+        TournamentViewModel.OnControllerModeChanged -= UpdateBackgroundService;
     }
 
     public override bool CanEnable() { return true; }
@@ -140,7 +150,7 @@ public class PresetManagerViewModel : SelectableViewModel
                 data.Setup(TournamentViewModel, PresetService);
                 Presets.Add(data);
             }
-            catch { }
+            catch { /**/ }
         }
     }
 
@@ -192,5 +202,17 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         Properties.Settings.Default.LastOpenedPresetName = presetName;
         Properties.Settings.Default.Save();
+    }
+
+    private void UpdateBackgroundService(ControllerMode mode)
+    {
+        if (mode == ControllerMode.Ranked)
+        {
+            BackgroundCoordinator.Initialize(new RankedService());
+        }
+        else if (mode == ControllerMode.Paceman)
+        {
+            BackgroundCoordinator.Initialize(new PaceManService(TournamentViewModel, Leaderboard, PresetService));
+        }
     }
 }

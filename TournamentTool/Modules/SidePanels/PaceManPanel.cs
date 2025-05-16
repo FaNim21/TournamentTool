@@ -1,20 +1,18 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Services;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
-public class PaceManPanel : SidePanel
+public class PaceManPanel : SidePanel, IPacemanDataReceiver
 {
-    private readonly PaceManService _paceManService;
-
     private string _emptyRunsTitle = string.Empty;
     public string EmptyRunsTitle
     {
@@ -25,28 +23,26 @@ public class PaceManPanel : SidePanel
             OnPropertyChanged(nameof(EmptyRunsTitle));
         }
     }
+    
+    private ObservableCollection<PaceManViewModel> _paceManPlayers = [];
+    public ObservableCollection<PaceManViewModel> PaceManPlayers
+    {
+        get => _paceManPlayers;
+        set
+        {
+            _paceManPlayers = value;
+            OnPropertyChanged(nameof(PaceManPlayers));
+        }
+    }
 
     public ICollectionView? GroupedPaceManPlayers { get; set; }
 
     private bool _lastOutput;
 
 
-    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel, leaderboard)
+    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel) : base(controller, tournamentViewModel)
     {
-        _paceManService = new PaceManService(this, tournamentViewModel);
         Mode = ControllerMode.Paceman;
-    }
-
-    public override void Initialize()
-    {
-        _paceManService.OnRefreshGroup += RefreshGroup;
-        _paceManService.OnEnable(null);
-    }
-
-    public override void UnInitialize()
-    {
-        _paceManService.OnRefreshGroup -= RefreshGroup;
-        _paceManService.OnDisable();
     }
     
     public override void OnEnable(object? parameter)
@@ -59,15 +55,85 @@ public class PaceManPanel : SidePanel
     {
         base.OnDisable();
 
+        for (int i = 0; i < PaceManPlayers.Count; i++)
+            PaceManPlayers[i].PlayerViewModel = null;
+
+        PaceManPlayers.Clear();
+        
         SelectedPlayer = null;
         GroupedPaceManPlayers = null;
 
         return true;
     }
+    
+    [Time]
+    public void ReceivePlayers(List<PaceManViewModel> players)
+    {
+        if (players == null || players.Count == 0)
+        {
+            Application.Current.Dispatcher.Invoke(() => { PaceManPlayers.Clear(); });
+            RefreshGroup(true);
+            return;
+        }
 
+        List<PaceManViewModel> currentPaces = new(_paceManPlayers);
+
+        foreach (var pace in players)
+        {
+            bool wasPaceFound = false;
+            
+            for (int j = 0; j < currentPaces.Count; j++)
+            {
+                var currentPace = currentPaces[j];
+                if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
+                
+                wasPaceFound = true;
+                currentPace.Update(pace.GetData());
+                currentPaces.Remove(currentPace);
+                break;
+            }
+
+            if (wasPaceFound) continue;
+
+            AddPaceMan(pace);
+        }
+
+        for (int i = 0; i < currentPaces.Count; i++)
+            RemovePaceMan(currentPaces[i]);
+        
+        /*
+        //Przetestowac co bedzie tu lepsze i tez rozkminic opcje z wieloma metodami do panelu w kwesti dodawani oddzielnie i aktualizacji oddzielnie
+        // i to /\ bedzie chyba najlepszym rozwiazaniem
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            PaceManPlayers.Clear();
+            foreach (var player in players)
+            {
+                PaceManPlayers.Add(player);
+            }
+        });
+        */
+        
+        RefreshGroup(false);
+    }
+
+    private void AddPaceMan(PaceManViewModel paceman)
+    {
+        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceman); });
+    }
+    private void RemovePaceMan(PaceManViewModel paceMan)
+    {
+        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
+    }
+    
+    public void FilterItems()
+    {
+        FilterControllerPlayers();
+    }
+    
     private void SetupPaceManGrouping()
     {
-        var collectionViewSource = new CollectionViewSource { Source = _paceManService.PaceManPlayers };
+        var collectionViewSource = new CollectionViewSource { Source = PaceManPlayers };
 
         collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
         collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
@@ -75,7 +141,6 @@ public class PaceManPanel : SidePanel
 
         GroupedPaceManPlayers = collectionViewSource.View;
     }
-
     public void RefreshGroup(bool isEmpty)
     {
         if (GroupedPaceManPlayers != null)
