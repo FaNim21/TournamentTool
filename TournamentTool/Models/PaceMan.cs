@@ -54,8 +54,8 @@ public class PacemanPaceMilestone
 
 public class PaceManUser
 {
-    [JsonPropertyName("uuid")]
-    public string? UUID { get; set; }
+    [JsonPropertyName("uuid")] 
+    public string? UUID { get; set; } = string.Empty;
 
     [JsonPropertyName("liveAccount")]
     public string? TwitchName { get; set; }

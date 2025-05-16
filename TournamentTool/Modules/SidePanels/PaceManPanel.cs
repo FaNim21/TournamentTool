@@ -76,6 +76,7 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
             return;
         }
 
+        /*
         List<PaceManViewModel> currentPaces = new(_paceManPlayers);
 
         foreach (var pace in players)
@@ -100,8 +101,8 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
 
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
+            */
         
-        /*
         //Przetestowac co bedzie tu lepsze i tez rozkminic opcje z wieloma metodami do panelu w kwesti dodawani oddzielnie i aktualizacji oddzielnie
         // i to /\ bedzie chyba najlepszym rozwiazaniem
         Application.Current.Dispatcher.Invoke(() =>
@@ -109,10 +110,10 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
             PaceManPlayers.Clear();
             foreach (var player in players)
             {
+                player.Update();
                 PaceManPlayers.Add(player);
             }
         });
-        */
         
         RefreshGroup(false);
     }

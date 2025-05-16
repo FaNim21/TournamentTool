@@ -93,12 +93,15 @@ public class PaceManService : IBackgroundService
 
             if (wasPaceFound) continue;
 
-            PlayerViewModel? player = TournamentViewModel.GetPlayerByTwitchName(pace.User.TwitchName!);
+            PlayerViewModel? player = TournamentViewModel.GetPlayerByIGN(pace.Nickname!);
+            if (player == null)
+            {
+                
+            }
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
             if (TournamentViewModel.AddUnknownPlayersToWhitelist && player == null)
             {
-                //TODO: 0 Zrobic dodawanie graczy do whitelisty z odpowiednimi danymi
-                //player = AddPaceManPlayerToWhiteList(pace);
+                player = AddPaceManPlayerToWhiteList(pace);
             }
 
             var paceViewModel = new PaceManViewModel(this, pace, player!);
@@ -133,6 +136,10 @@ public class PaceManService : IBackgroundService
             
             updatedPlayer = true;
             player.StreamData.SetName(twitchName);
+            if (!TournamentViewModel.IsUsingTwitchAPI)
+            {
+                player.StreamData.LiveData.Clear(false);
+            }
             _pacemanSidePanelReceiver?.FilterItems();
         }
         
@@ -146,10 +153,17 @@ public class PaceManService : IBackgroundService
     {
         Player player = new Player()
         {
-            //TODO: 0 SKONCZYC TO
+            UUID = paceMan.User.UUID!,
+            Name = paceMan.Nickname,
+            InGameName = paceMan.Nickname,
         };
 
-        PlayerViewModel playerViewModel = new PlayerViewModel();
+        PlayerViewModel playerViewModel = new PlayerViewModel(player);
+        if (!string.IsNullOrEmpty(paceMan.User.TwitchName))
+        {
+            playerViewModel.StreamData.SetName(paceMan.User.TwitchName);
+        }
+        playerViewModel.UpdateHeadImage();
 
         if (_playerManagerReceiver != null)
         {

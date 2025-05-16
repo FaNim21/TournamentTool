@@ -9,6 +9,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
@@ -32,6 +33,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
     public TournamentViewModel Tournament { get; set; }
     public IPresetSaver PresetService { get; }
+    private IBackgroundCoordinator BackgroundCoordinator { get; }
 
     private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
     public ObservableCollection<PlayerViewModel> SelectedPlayers
@@ -153,10 +155,11 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private string _lastTournamentName = string.Empty;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService) : base(coordinator)
+    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         Tournament = tournament;
         PresetService = presetService;
+        BackgroundCoordinator = backgroundCoordinator;
 
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { Coordinator.ShowLoading(ValidateAllPlayers); });
@@ -205,10 +208,12 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     } 
     public override void OnEnable(object? parameter)
     {
+        BackgroundCoordinator.Register(this);
         _ = FilterWhitelist(true);
     }
     public override bool OnDisable()
     {
+        BackgroundCoordinator.Unregister(this);
         ChosenEvent = null;
         ShowPlayers = false;
         
@@ -272,8 +277,9 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             }
         }
         else wasSearched = true;
-        
-        if (wasSearched) FilteredPlayers.Add(playerViewModel);
+
+        if (wasSearched)
+            Application.Current.Dispatcher.Invoke(() => { FilteredPlayers.Add(playerViewModel); });
         Tournament.AddPlayer(playerViewModel);
         
         UpdateInformationCountText();

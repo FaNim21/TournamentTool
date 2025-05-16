@@ -400,7 +400,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
                 }
             }
                 
-            await UpdateHeadImage();
+            await UpdateHeadImageAsync();
         }
         catch (Exception ex)
         {
@@ -425,13 +425,20 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     
     public void LoadHead()
     {
-        if (Data.ImageStream == null) return;
+        if (Data.ImageStream == null || Image != null) return;
         Image = Helper.LoadImageFromStream(Data.ImageStream);
     }
-    public async Task UpdateHeadImage()
+
+    public void UpdateHeadImage()
+    {
+        Console.WriteLine($"Updating head image for {InGameName}");
+        Task.Run(async () => await UpdateHeadImageAsync());
+    }
+    public async Task UpdateHeadImageAsync()
     {
         if (string.IsNullOrEmpty(InGameName) || Image != null) return;
         Image = await RequestHeadImage();
+        Console.WriteLine($"- Finished updating head image for {InGameName} with image being null?: {Image == null}");
     }
     public async Task ForceUpdateHeadImage()
     {

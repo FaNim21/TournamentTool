@@ -159,6 +159,14 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
             StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
         });
     }
+    public void Update()
+    {
+        if (PlayerViewModel == null || HeadImage != null) return;
+        
+        HeadImageOpacity = 1f;
+        PlayerViewModel.LoadHead();
+        HeadImage = PlayerViewModel.Image;
+    }
     
     public void Update(PaceMan paceman)
     {
@@ -199,7 +207,8 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         else
         {
             HeadImageOpacity = 1f;
-            HeadImage = PlayerViewModel!.Image;
+            PlayerViewModel.LoadHead();
+            HeadImage = PlayerViewModel.Image;
         }
     }
 
