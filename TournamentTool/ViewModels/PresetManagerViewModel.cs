@@ -7,6 +7,7 @@ using TournamentTool.Commands;
 using TournamentTool.Commands.Main;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Services;
@@ -44,6 +45,8 @@ public class PresetManagerViewModel : SelectableViewModel
         }
     }
 
+    private readonly BackgroundServiceFactory _backgroundServiceFactory;
+
     public ICommand OpenControllerCommand { get; set; }
     public ICommand OpenLeaderboardCommand { get; set; }
 
@@ -66,6 +69,8 @@ public class PresetManagerViewModel : SelectableViewModel
         PresetService = presetService;
         Leaderboard = leaderboard;
         BackgroundCoordinator = backgroundCoordinator;
+        
+        _backgroundServiceFactory = new BackgroundServiceFactory(TournamentViewModel, Leaderboard, PresetService);
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -206,13 +211,13 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private void UpdateBackgroundService(ControllerMode mode)
     {
-        if (mode == ControllerMode.Ranked)
+        var service = _backgroundServiceFactory.Create(mode);
+
+        if (service != null)
         {
-            BackgroundCoordinator.Initialize(new RankedService());
+            BackgroundCoordinator.Initialize(service);
+            return;
         }
-        else if (mode == ControllerMode.Paceman)
-        {
-            BackgroundCoordinator.Initialize(new PaceManService(TournamentViewModel, Leaderboard, PresetService));
-        }
+        BackgroundCoordinator.Clear();
     }
 }

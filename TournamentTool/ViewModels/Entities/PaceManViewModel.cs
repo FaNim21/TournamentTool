@@ -161,11 +161,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     }
     public void Update()
     {
-        if (PlayerViewModel == null || HeadImage != null) return;
-        
-        HeadImageOpacity = 1f;
-        PlayerViewModel.LoadHead();
-        HeadImage = PlayerViewModel.Image;
+        UpdateHeadImage();
     }
     
     public void Update(PaceMan paceman)

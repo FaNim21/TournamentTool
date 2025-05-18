@@ -353,7 +353,7 @@
                             <DataTemplate DataType="{x:Type sidePanels:PaceManPanel}">
                                 <sidePanels:PaceManPanelView />
                             </DataTemplate>
-                            <DataTemplate DataType="{x:Type sidePanels:RankedDataPacePanel}">
+                            <DataTemplate DataType="{x:Type sidePanels:RankedPacePanel}">
                                 <sidePanels:RankedPacePanelView />
                             </DataTemplate>
                         </ContentControl.Resources>

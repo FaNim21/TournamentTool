@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using OBSStudioClient.Classes;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
@@ -12,6 +14,7 @@ using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
+using Scene = TournamentTool.Modules.OBS.Scene;
 
 namespace TournamentTool.ViewModels;
 
@@ -37,6 +40,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
             OnPropertyChanged(nameof(FilteredPlayers));
         }
     }
+    
+    public ICollectionView? FilteredPlayersCollectionView { get; set; }
 
     public ObsController OBS { get; }
 
@@ -131,6 +136,15 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
+        
+        var collectionViewSource = new CollectionViewSource { Source = FilteredPlayers };
+        //TODO: 0 nie skonczylem z collection view jaka baza na przyszlosc pod filtrowanie w kontrolerze itd
+
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+
+        FilteredPlayersCollectionView = collectionViewSource.View;
     }
 
     public override bool CanEnable()
@@ -155,17 +169,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(PaceManPanel)))
                 {
-                    SidePanel = new PaceManPanel(this, TournamentViewModel);
+                    SidePanel = new PaceManPanel(this);
                     ManagementPanel = null;
                 }
                 break;
             case ControllerMode.Ranked:
                 UseSidePanel = true;
 
-                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedDataPacePanel)))
+                if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
-                    SidePanel = new RankedDataPacePanel(this, TournamentViewModel, Leaderboard);
-                    ManagementPanel = new RankedManagementPanel(this, (RankedDataPacePanel)SidePanel);
+                    SidePanel = new RankedPacePanel(this);
+                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
                 }
                 break;
         }

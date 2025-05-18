@@ -40,7 +40,7 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
     private bool _lastOutput;
 
 
-    public PaceManPanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel) : base(controller, tournamentViewModel)
+    public PaceManPanel(ControllerViewModel controller) : base(controller)
     {
         Mode = ControllerMode.Paceman;
     }
@@ -66,7 +66,6 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
         return true;
     }
     
-    [Time]
     public void ReceivePlayers(List<PaceManViewModel> players)
     {
         if (players == null || players.Count == 0)
@@ -75,36 +74,7 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
             RefreshGroup(true);
             return;
         }
-
-        /*
-        List<PaceManViewModel> currentPaces = new(_paceManPlayers);
-
-        foreach (var pace in players)
-        {
-            bool wasPaceFound = false;
-            
-            for (int j = 0; j < currentPaces.Count; j++)
-            {
-                var currentPace = currentPaces[j];
-                if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
-                
-                wasPaceFound = true;
-                currentPace.Update(pace.GetData());
-                currentPaces.Remove(currentPace);
-                break;
-            }
-
-            if (wasPaceFound) continue;
-
-            AddPaceMan(pace);
-        }
-
-        for (int i = 0; i < currentPaces.Count; i++)
-            RemovePaceMan(currentPaces[i]);
-            */
         
-        //Przetestowac co bedzie tu lepsze i tez rozkminic opcje z wieloma metodami do panelu w kwesti dodawani oddzielnie i aktualizacji oddzielnie
-        // i to /\ bedzie chyba najlepszym rozwiazaniem
         Application.Current.Dispatcher.Invoke(() =>
         {
             PaceManPlayers.Clear();
@@ -118,15 +88,6 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
         RefreshGroup(false);
     }
 
-    private void AddPaceMan(PaceManViewModel paceman)
-    {
-        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Add(paceman); });
-    }
-    private void RemovePaceMan(PaceManViewModel paceMan)
-    {
-        Application.Current?.Dispatcher.Invoke(() => { PaceManPlayers.Remove(paceMan); });
-    }
-    
     public void FilterItems()
     {
         FilterControllerPlayers();

@@ -444,10 +444,18 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         MessageBoxResult result = DialogBox.Show("Are you sure you want to remove all players from whitelist?", "Removing players", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
 
-        Tournament!.Players.Clear();
-        FilteredPlayers.Clear();
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            FilteredPlayers.Clear();
+            int n = Tournament.Players.Count - 1;
+            for (var i = n; i >= 0; i--)
+            {
+                var player = Tournament.Players[i];
+                Tournament.RemovePlayer(player);
+            }
+        });
         
-        UpdateInformationCountText();
+        ClearFilters();
         SavePreset();
     }
     private void RemoveSelectedPlayer()

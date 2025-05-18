@@ -44,14 +44,8 @@ public class PaceManService : IBackgroundService
     }
     public void UnregisterData(IBackgroundDataReceiver? receiver)
     {
-        if (receiver is IPacemanDataReceiver pacemanDataReceiver)
-        {
-            _pacemanSidePanelReceiver = null;
-        }
-        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
-        {
-            _playerManagerReceiver = null;
-        }
+        if (receiver == _pacemanSidePanelReceiver) _pacemanSidePanelReceiver = null;
+        if (receiver == _playerManagerReceiver) _playerManagerReceiver = null;
     }
 
     public async Task Update(CancellationToken token)
@@ -94,10 +88,6 @@ public class PaceManService : IBackgroundService
             if (wasPaceFound) continue;
 
             PlayerViewModel? player = TournamentViewModel.GetPlayerByIGN(pace.Nickname!);
-            if (player == null)
-            {
-                
-            }
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
             if (TournamentViewModel.AddUnknownPlayersToWhitelist && player == null)
             {

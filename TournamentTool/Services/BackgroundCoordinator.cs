@@ -41,6 +41,8 @@ public class BackgroundCoordinator : IBackgroundCoordinator
             _worker.DoWork -= Update;
             _worker.Dispose();
             _cancellationTokenSource?.Dispose();
+            
+            Console.WriteLine($"Service {Service!.GetType()} just stopped");
         }
 
         Service = backgroundService;
@@ -49,8 +51,11 @@ public class BackgroundCoordinator : IBackgroundCoordinator
         _worker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _worker.DoWork += Update;
         _worker.RunWorkerAsync();
-        
-        Service.RegisterData(Receiver);
+
+        if (Receiver != null)
+        {
+            Service.RegisterData(Receiver);
+        }
         
         Console.WriteLine($"Service {backgroundService.GetType()} just started");
     }

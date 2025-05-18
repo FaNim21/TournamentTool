@@ -1,4 +1,5 @@
 ﻿using TournamentTool.Models;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Interfaces;
@@ -13,7 +14,8 @@ public interface IPacemanDataReceiver : IBackgroundDataReceiver
 
 public interface IRankedDataReceiver : IBackgroundDataReceiver
 {
-    void ReceivePlayers(List<RankedPace> paces);
+    void ReceivePaces(List<RankedPace> paces);
+    void UpdateAPIData(List<RankedBestSplit> bestSplits, int completedCount);
 }
 
 public interface IPlayerManagerReceiver : IBackgroundDataReceiver

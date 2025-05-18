@@ -140,14 +140,13 @@ public class RankedData
 
 public class RankedPaceData
 {
-    public RankedPlayer Player { get; set; } = new();
+    public RankedPlayer Player { get; init; } = new();
     //eweutnalnie zrobic globaltimeline poniewaz obecny jest tylko dla rzeczywistych splitow
-    public List<RankedTimeline> Timelines { get; set; } = [];
+    public List<RankedTimeline> Timelines { get; init; } = [];
     public RankedInventory Inventory { get; set; } = new();
     public RankedComplete Completion { get; set; } = new();
     public int Resets { get; set; }
 }
-
 public class RankedBestSplit
 {
     public string? PlayerName { get; set; }
@@ -155,14 +154,8 @@ public class RankedBestSplit
     public long Time { get; set; }
 }
 
-public class RankedDataPacePanel : SidePanel, IRankedDataReceiver
+public class RankedPacePanel : SidePanel, IRankedDataReceiver
 {
-    private readonly JsonSerializerOptions _options;
-
-    private CancellationTokenSource? _cancellationTokenSource;
-
-    private string FilePath { get; set; } = string.Empty;
-
     private ObservableCollection<RankedPace> _paces = [];
     public ObservableCollection<RankedPace> Paces
     {
@@ -174,65 +167,26 @@ public class RankedDataPacePanel : SidePanel, IRankedDataReceiver
         }
     }
 
-    private ObservableCollection<RankedBestSplit> _bestSplits = [];
-    public ObservableCollection<RankedBestSplit> BestSplits
-    {
-        get => _bestSplits;
-        set
-        {
-            _bestSplits = value;
-            OnPropertyChanged(nameof(BestSplits));
-        }
-    }
-
-    public long StartTime { get; set; }
     public int CompletedRunsCount { get; set; }
-    public int PacesNotFromWhitelistAmount { get; set; }
 
     public ICollectionView? GroupedRankedPaces { get; set; }
 
 
-    public RankedDataPacePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard) : base(controller, tournamentViewModel)
+    public RankedPacePanel(ControllerViewModel controller) : base(controller)
     {
-        _options = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
-            PropertyNameCaseInsensitive = true
-        };
-
         Mode = ControllerMode.Ranked;
     }
 
     public override void OnEnable(object? parameter)
     {
         base.OnEnable(parameter);
-        
-        string dataName = TournamentViewModel.RankedRoomDataName;
-        if(!dataName.EndsWith(".json"))
-        {
-            dataName = Path.Combine(dataName, ".json");
-        }
-        FilePath = Path.Combine(TournamentViewModel.RankedRoomDataPath, dataName);
-        _cancellationTokenSource = new CancellationTokenSource();
 
-        if (!File.Exists(FilePath))
-        {
-            DialogBox.Show($"There is not file on: {FilePath}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        Task.Run(UpdateSpectatorMatch);
-        
         SetupRankedPaceGrouping();
     }
     public override bool OnDisable()
     {
         base.OnDisable();
         
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-
         GroupedRankedPaces = null;
         return true;
     }
@@ -248,195 +202,36 @@ public class RankedDataPacePanel : SidePanel, IRankedDataReceiver
         GroupedRankedPaces = collectionViewSource.View;
     }
 
-    private async Task UpdateSpectatorMatch()
+    public void ReceivePaces(List<RankedPace> paces)
     {
-        var cancellationToken = _cancellationTokenSource!.Token;
-
-        while (!cancellationToken.IsCancellationRequested)
+        if (paces == null || paces.Count == 0)
         {
-            try
-            {
-                await LoadJsonFileAsync();
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            try
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.RankedRoomUpdateFrequency), cancellationToken);
-            }
-            catch (TaskCanceledException) { break; }
-        }
-    }
-
-    private async Task LoadJsonFileAsync()
-    {
-        RankedData? rankedData = null;
-        try
-        {
-            string jsonContent;
-
-            await using (FileStream fs = new(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (StreamReader reader = new(fs))
-            {
-                jsonContent = await reader.ReadToEndAsync();
-            }
-
-            rankedData = JsonSerializer.Deserialize<RankedData>(jsonContent, _options);
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine("Error reading JSON file: " + ex.Message);
-        }
-
-        if (rankedData == null) return;
-
-        FilterJSON(rankedData);
-
-        CompletedRunsCount = rankedData.Completes.Length;
-        
-        if (GroupedRankedPaces == null) return;
-        Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });
-    }
-    private void FilterJSON(RankedData rankedData)
-    {
-        if (rankedData.Timelines.Count == 0)
-        {
-            Application.Current.Dispatcher.Invoke(Paces.Clear);
-        }
-
-        //Seed change | New match | 
-        if(rankedData.StartTime != StartTime)
-        {
-            StartTime = rankedData.StartTime;
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                BestSplits.Clear();
-                Paces.Clear();
-            });
-        }
-
-        PacesNotFromWhitelistAmount = 0;
-        List<RankedPace> _currentPaces = new(Paces);
-        for (int i = 0; i < rankedData.Players.Length; i++)
-        {
-            var player = rankedData.Players[i];
-            RankedPaceData data = new()
-            {
-                Player = player,
-                Timelines = []
-            };
-
-            rankedData.Inventories.TryGetValue(player.UUID, out var inventory);
-            data.Inventory = inventory!;
-            if (data.Inventory.SplashPotions == null) continue;
-
-            for (int j = 0; j < rankedData.Completes.Length; j++)
-            {
-                var completion = rankedData.Completes[j];
-                if (!completion.UUID.Equals(player.UUID)) continue;
-                
-                data.Completion = completion;
-                break;
-            }
-
-            for (int j = 0; j < rankedData.Timelines.Count; j++)
-            {
-                var timeline = rankedData.Timelines[j];
-                if (timeline.Type.EndsWith("root")) continue;
-                if (!timeline.UUID.Equals(player.UUID)) continue;
-                
-                if (timeline.Type.EndsWith("reset"))
-                {
-                    data.Resets++;
-                    data.Timelines.Clear();
-                    continue;
-                }
-                timeline.Type = timeline.Type.Split('.')[^1];
-
-                data.Timelines.Add(timeline);
-                rankedData.Timelines.RemoveAt(j);
-                j--;
-            }
-
-            bool wasFoundOnPaces = false;
-            for (int j = 0; j < _currentPaces.Count; j++)
-            {
-                var pace = _currentPaces[j];
-                if (!pace.InGameName.Equals(data.Player.NickName)) continue;
-                
-                Application.Current.Dispatcher.Invoke(() => { pace.Update(data); });
-                wasFoundOnPaces = true;
-                _currentPaces.Remove(pace);
-                break;
-            }
-
-            if (!wasFoundOnPaces) AddPace(data);
-        }
-
-        for (int i = 0; i < _currentPaces.Count; i++)
-        {
-            RemovePace(_currentPaces[i]);
-        }
-    }
-
-    private void AddPace(RankedPaceData data)
-    {
-        RankedPace pace = new(this);
-        pace.Initialize(data.Player);
-
-        int n = TournamentViewModel.Players.Count;
-        bool found = false;
-        for (int j = 0; j < n; j++)
-        {
-            var current = TournamentViewModel.Players[j];
-
-            if (current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase))
-            {
-                found = true;
-                pace.Player = current;
-                break;
-            }
-        }
-        if (!found)
-        {
-            PacesNotFromWhitelistAmount += 1;
+            Application.Current.Dispatcher.Invoke(() => { Paces.Clear(); });
+            RefreshGroup();
             return;
         }
-
-        pace.Inventory.DisplayItems = true;
-        pace.Update(data);
-
+        
         Application.Current.Dispatcher.Invoke(() =>
         {
-            Paces.Add(pace);
+            Paces.Clear();
+            foreach (var pace in paces)
+            {
+                Paces.Add(pace);
+            }
         });
-    }
-    private void RemovePace(RankedPace pace)
-    {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            Paces.Remove(pace);
-        });
+        
+        RefreshGroup();
     }
 
-    public RankedBestSplit GetBestSplit(RankedSplitType splitType)
+    public void UpdateAPIData(List<RankedBestSplit> bestSplits, int completedCount)
     {
-        for (int i = 0; i < BestSplits.Count; i++)
-        {
-            var split = BestSplits[i];
-            if (split.Type.Equals(splitType)) return split;
-        }
-
-        RankedBestSplit bestSplit = new() { Type = splitType };
-        BestSplits.Add(bestSplit);
-        return bestSplit;
+        CompletedRunsCount = completedCount;
     }
 
-    public void ReceivePlayers(List<RankedPace> paces)
+    private void RefreshGroup()
     {
-        throw new NotImplementedException();
+        if (GroupedRankedPaces == null) return;
+        
+        Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });
     }
 }

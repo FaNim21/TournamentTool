@@ -3,15 +3,12 @@ using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 
 public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgroundDataReceiver
 {
     private ControllerViewModel Controller { get; init; }
-
-    protected TournamentViewModel TournamentViewModel { get; init; }
 
     private IPlayer? _selectedPlayer;
     public IPlayer? SelectedPlayer
@@ -40,13 +37,10 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgr
     public ICommand UnselectItemsCommand { get; private set; }
 
 
-    protected SidePanel(ControllerViewModel controller, TournamentViewModel tournamentViewModel)
+    protected SidePanel(ControllerViewModel controller)
     {
         UnselectItemsCommand = controller.UnSelectItemsCommand;
-
         Controller = controller;
-        TournamentViewModel = tournamentViewModel;
-        
         Mode = ControllerMode.None;
     }
 

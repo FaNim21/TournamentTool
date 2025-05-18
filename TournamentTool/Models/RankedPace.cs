@@ -2,6 +2,7 @@
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Modules.SidePanels;
+using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -17,7 +18,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         public long Time { get; set; }
     }
 
-    private RankedDataPacePanel RankedDataPacePanel { get; set; }
+    private RankedService _service;
 
     public PlayerViewModel? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -174,9 +175,9 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     public string SplitDifferenceTime { get; set; } = "00:00";
 
 
-    public RankedPace(RankedDataPacePanel rankedDataPacePanel)
+    public RankedPace(RankedService service)
     {
-        RankedDataPacePanel = rankedDataPacePanel;
+        _service = service;
     }
     public void Initialize(RankedPlayer player)
     {
@@ -261,7 +262,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
 
             //TODO: to powinno byc zapisywane inaczej i forowane po wszystkich dla wiekszej pewnosci? poniewaz po resecie aplikacji
             //ta metoda jest obecnie najwydajniejsza, ale psuje sie po restarcie apki z racji kolejnosci czytania danych z pliku json ktorego sie nie da zmienic
-            RankedBestSplit bestSplit = RankedDataPacePanel.GetBestSplit(newSplit.Split);
+            RankedBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
             if(string.IsNullOrEmpty(bestSplit.PlayerName))
             {
                 bestSplit.PlayerName = InGameName;
