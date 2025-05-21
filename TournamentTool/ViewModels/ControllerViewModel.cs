@@ -16,7 +16,7 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
 
-public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
+public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, IPlayerAddReceiver
 {
     private readonly TwitchService _twitch;
     private readonly APIDataSaver _api;
@@ -28,8 +28,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     public Scene MainScene { get; }
     public PreviewScene PreviewScene { get; }
 
-    
-    public ICollectionView? FilteredPlayersCollectionView { get; set; }
+    public ICollectionView? FilteredPlayersCollectionView { get; private set; }
 
     public ObsController OBS { get; }
 
@@ -123,11 +122,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
-
-        var collectionViewSource = CollectionViewSource.GetDefaultView(TournamentViewModel.Players);
-        collectionViewSource.Filter = FilterPlayers;
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
-        FilteredPlayersCollectionView = collectionViewSource;
     }
 
     public override bool CanEnable()
@@ -136,6 +130,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     } 
     public override void OnEnable(object? parameter)
     {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var collectionViewSource = CollectionViewSource.GetDefaultView(TournamentViewModel.Players);
+            collectionViewSource.Filter = null;
+            collectionViewSource.Filter = FilterPlayers;
+            collectionViewSource.SortDescriptions.Clear();
+            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+            FilteredPlayersCollectionView = collectionViewSource;
+            FilteredPlayersCollectionView.Refresh();
+        });
+        
         switch(TournamentViewModel.ControllerMode)
         {
             case ControllerMode.None:
@@ -168,6 +173,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         }
         
         _backgroundCoordinator.Register(SidePanel);
+        _backgroundCoordinator.Register(this);
         
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
@@ -189,6 +195,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     public override bool OnDisable()
     {
         _backgroundCoordinator.Unregister(SidePanel);
+        _backgroundCoordinator.Unregister(this);
         
         SidePanel?.OnDisable();
         OBS.OnDisable();
@@ -237,7 +244,14 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         }
     }
 
-    public bool FilterPlayers(object obj)
+    public void Add(PlayerViewModel playerViewModel)
+    {
+        TournamentViewModel.AddPlayer(playerViewModel);
+        
+        RefreshFilteredCollection();
+    }
+    
+    private bool FilterPlayers(object obj)
     {
         if (obj is not PlayerViewModel player) return false;
 
@@ -249,6 +263,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
     public void RefreshFilteredCollection()
     {
+        Console.WriteLine("Refreshed collection");
         Application.Current.Dispatcher.Invoke(() =>
         {
             FilteredPlayersCollectionView?.Refresh();

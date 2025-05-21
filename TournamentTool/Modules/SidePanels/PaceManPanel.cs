@@ -95,13 +95,17 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
     
     private void SetupPaceManGrouping()
     {
-        var collectionViewSource = new CollectionViewSource { Source = PaceManPlayers };
-
-        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
-
-        GroupedPaceManPlayers = collectionViewSource.View;
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var collectionViewSource = CollectionViewSource.GetDefaultView(PaceManPlayers);
+            collectionViewSource.GroupDescriptions.Clear();
+            collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
+            collectionViewSource.SortDescriptions.Clear();
+            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
+            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+            GroupedPaceManPlayers = collectionViewSource;
+        });
     }
     public void RefreshGroup(bool isEmpty)
     {

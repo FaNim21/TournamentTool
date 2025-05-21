@@ -3,7 +3,6 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
-using System.Windows.Threading;
 using MethodTimer;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
@@ -21,7 +20,7 @@ public class RankedService : IBackgroundService
     private LeaderboardPanelViewModel Leaderboard { get; }
 
     private IRankedDataReceiver? _rankedDataReceiver;
-    private IPlayerManagerReceiver? _playerManagerReceiver;
+    private IPlayerAddReceiver? _playerManagerReceiver;
     
     private long _startTime;
     private int _completedRunsCount;
@@ -64,7 +63,7 @@ public class RankedService : IBackgroundService
         {
             _rankedDataReceiver = ranked;
         }
-        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
+        else if (receiver is IPlayerAddReceiver playerManagerReceiver)
         {
             _playerManagerReceiver = playerManagerReceiver;
         }

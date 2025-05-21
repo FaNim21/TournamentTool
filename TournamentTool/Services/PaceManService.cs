@@ -16,7 +16,7 @@ public class PaceManService : IBackgroundService
     private IPresetSaver PresetSaver { get; }
 
     private IPacemanDataReceiver? _pacemanSidePanelReceiver;
-    private IPlayerManagerReceiver? _playerManagerReceiver;
+    private IPlayerAddReceiver? _playerAddReceiver;
 
     private List<PaceManViewModel> _paceManPlayers = [];
     private List<PaceMan> _paceManData = [];
@@ -37,15 +37,15 @@ public class PaceManService : IBackgroundService
             Console.WriteLine("--------- Startup registering data");
             OrganizingPacemanData();
         }
-        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
+        else if (receiver is IPlayerAddReceiver addPlayerReceiver)
         {
-            _playerManagerReceiver = playerManagerReceiver;
+            _playerAddReceiver = addPlayerReceiver;
         }
     }
     public void UnregisterData(IBackgroundDataReceiver? receiver)
     {
         if (receiver == _pacemanSidePanelReceiver) _pacemanSidePanelReceiver = null;
-        if (receiver == _playerManagerReceiver) _playerManagerReceiver = null;
+        if (receiver == _playerAddReceiver) _playerAddReceiver = null;
     }
 
     public async Task Update(CancellationToken token)
@@ -155,9 +155,9 @@ public class PaceManService : IBackgroundService
         }
         playerViewModel.UpdateHeadImage();
 
-        if (_playerManagerReceiver != null)
+        if (_playerAddReceiver != null)
         {
-            _playerManagerReceiver.Add(playerViewModel);
+            _playerAddReceiver.Add(playerViewModel);
         }
         else
         {

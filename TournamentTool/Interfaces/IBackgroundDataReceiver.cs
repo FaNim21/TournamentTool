@@ -18,7 +18,7 @@ public interface IRankedDataReceiver : IBackgroundDataReceiver
     void UpdateAPIData(List<RankedBestSplit> bestSplits, int completedCount);
 }
 
-public interface IPlayerManagerReceiver : IBackgroundDataReceiver
+public interface IPlayerAddReceiver : IBackgroundDataReceiver
 {
     void Add(PlayerViewModel playerViewModel);
 }

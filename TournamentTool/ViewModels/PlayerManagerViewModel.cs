@@ -16,25 +16,13 @@ using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
-using ZLinq;
 
 namespace TournamentTool.ViewModels;
 
-public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlayerManagerReceiver
+public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlayerAddReceiver
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
      
-    private ObservableCollection<PlayerViewModel> _filteredPlayers = [];
-    public ObservableCollection<PlayerViewModel> FilteredPlayers
-    {
-        get => _filteredPlayers;
-        set
-        {
-            _filteredPlayers = value;
-            OnPropertyChanged(nameof(FilteredPlayers));
-        }
-    }
-
     public TournamentViewModel Tournament { get; set; }
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
@@ -186,13 +174,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
 
-        SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist(); });
+        SubmitSearchCommand = new RelayCommand(()=> { FilterWhitelist(); });
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
-        
-        var collectionViewSource = CollectionViewSource.GetDefaultView(tournament.Players);
-        // collectionViewSource.Filter = FilterPlayers;
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
-        FilteredPlayersCollectionView = collectionViewSource;
         
         Task.Run(async () => {
             PaceManEvent[]? eventsData = null;
@@ -219,8 +202,17 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     } 
     public override void OnEnable(object? parameter)
     {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            var collectionViewSource = CollectionViewSource.GetDefaultView(Tournament.Players);
+            collectionViewSource.Filter = null;
+            collectionViewSource.Filter = FilterPlayers;
+            collectionViewSource.SortDescriptions.Clear();
+            FilteredPlayersCollectionView = collectionViewSource;
+        });
+        
         BackgroundCoordinator.Register(this);
-        _ = FilterWhitelist(true);
+        FilterWhitelist(true);
     }
     public override bool OnDisable()
     {
@@ -228,10 +220,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         ChosenEvent = null;
         ShowPlayers = false;
         
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            FilteredPlayers.Clear();
-        });
         return true;
     }
 
@@ -267,51 +255,36 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
     public void Add(PlayerViewModel playerViewModel)
     {
-        bool wasSearched = false;
-        if (!string.IsNullOrEmpty(SearchText))
-        {
-            switch (SortingType)
-            {
-                case PlayerSortingType.Name:
-                    if (playerViewModel.Name!.Contains(SearchText, _comparison)) wasSearched = true;
-                    break;
-                case PlayerSortingType.InGameName:
-                    if (playerViewModel.InGameName!.Contains(SearchText, _comparison)) wasSearched = true;
-                    break;
-                case PlayerSortingType.TeamName:
-                    if (playerViewModel.TeamName!.Contains(SearchText, _comparison)) wasSearched = true;
-                    break;
-                case PlayerSortingType.Stream:
-                    if (playerViewModel.StreamData.Main!.Contains(SearchText, _comparison) ||
-                        playerViewModel.StreamData.Alt!.Contains(SearchText, _comparison)) wasSearched = true;
-                    break;
-            }
-        }
-        else wasSearched = true;
-
-        if (wasSearched)
-            Application.Current.Dispatcher.Invoke(() => { FilteredPlayers.Add(playerViewModel); });
         Tournament.AddPlayer(playerViewModel);
         
         UpdateInformationCountText();
+        RefreshFilteredCollectionView();
     }
     public void Remove(PlayerViewModel playerViewModel)
     {
-        FilteredPlayers.Remove(playerViewModel);
         Tournament.RemovePlayer(playerViewModel);
-        
         UpdateInformationCountText();
     }
     
-    [Time]
-    public async Task FilterWhitelist(bool forceFilter = false)
+    private bool FilterPlayers(object obj)
     {
-        //TODO: 2 Tutaj mozna duzo optymalizacji zrobic zeby zmniejszyc ladowanie, poniewaz nie da sie nie blokowac ui przy tym
-        //takze trzeba bedziez aczac od zmniejszenia obciazenie przez sam viewmodel, ktory w tym jest czyli rozbic player i playerviewmodel i tez zrobic oddzielny whitelistplayerviewmodel
-        //pod to zeby tylko najwazniejsze rzeczy dawac dla whitelistplayerviewmodel itp itd
-        
-        //Sprobowac tutaj zrobic specjalny viewmodel aktualizujacy tylko Player klase i zobaczyc czy to przyspieszy wyszukiwanie
-        
+        if (obj is not PlayerViewModel player) return false;
+        if (string.IsNullOrWhiteSpace(_searchText)) return true;
+
+        return SortingType switch
+        {
+            PlayerSortingType.Name => player.Name?.Trim().Contains(SearchText, _comparison) ?? false,
+            PlayerSortingType.InGameName => player.InGameName?.Trim().Contains(SearchText, _comparison) ?? false,
+            PlayerSortingType.TeamName => player.TeamName?.Trim().Contains(SearchText, _comparison) ?? false,
+            PlayerSortingType.Stream =>
+                (player.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
+                (player.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false),
+            _ => false
+        };
+    }
+    
+    public void FilterWhitelist(bool forceFilter = false)
+    {
         if (!IsSearchEnabled) return;
         SearchText = SearchText.Trim();
         if (!forceFilter && _lastFilterSearch.Equals(SearchText, _comparison) && _lastSortingType.Equals(SortingType)) return;
@@ -322,55 +295,26 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         IsSearchEnabled = false;
         ShowPlayers = false;
 
-        Trace.WriteLine("Filtering players");
-        
-        if (string.IsNullOrEmpty(SearchText))
-        {
-            UpdateInformationCountText("Restoring...", "?");
-            
-            await Task.Delay(1);
-            
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                FilteredPlayers = new ObservableCollection<PlayerViewModel>(Tournament.Players);
-            });
-            
-            UpdateInformationCountText();
-            IsSearchEnabled = true;
-            ShowPlayers = true;
-            return;
-        }
-        UpdateInformationCountText("Filtering...", "?");
-        await Task.Delay(1);
-
-        var filtered = Tournament.Players.AsValueEnumerable()
-            .Where(p =>
-                SortingType switch
-                {
-                    PlayerSortingType.Name => p.Name?.Trim().Contains(SearchText, _comparison) ?? false,
-                    PlayerSortingType.InGameName => p.InGameName?.Trim().Contains(SearchText, _comparison) ?? false,
-                    PlayerSortingType.TeamName => p.TeamName?.Trim().Contains(SearchText, _comparison) ?? false,
-                    PlayerSortingType.Stream =>
-                        (p.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
-                        (p.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false),
-                    _ => false
-                }
-            ).ToList();
-
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            FilteredPlayers = new ObservableCollection<PlayerViewModel>(filtered);
-        });
-        
+        UpdateInformationCountText(string.IsNullOrEmpty(SearchText) ? "Restoring..." : "Filtering...", "?");
+        RefreshFilteredCollectionView();
         UpdateInformationCountText();
+        
         IsSearchEnabled = true;
         ShowPlayers = true;
+    }
+
+    private void RefreshFilteredCollectionView()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            FilteredPlayersCollectionView?.Refresh();
+        });
     }
     
     private void UpdateInformationCountText(string header = "Found", string filteredCount = "")
     {
         if (string.IsNullOrEmpty(filteredCount))
-            filteredCount = FilteredPlayers.Count.ToString();
+            filteredCount = FilteredPlayersCollectionView!.Cast<PlayerViewModel>().Count().ToString();
         
         InformationCount = $"{header} {filteredCount}/{Tournament.Players.Count}";
     }
@@ -463,7 +407,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
         Application.Current.Dispatcher.Invoke(() =>
         {
-            FilteredPlayers.Clear();
             int n = Tournament.Players.Count - 1;
             for (var i = n; i >= 0; i--)
             {
@@ -509,7 +452,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     {
         SearchText = string.Empty;
         SortingType = PlayerSortingType.Name;
-        _ = FilterWhitelist();
+        FilterWhitelist(true);
     }
     
     public void SavePreset()

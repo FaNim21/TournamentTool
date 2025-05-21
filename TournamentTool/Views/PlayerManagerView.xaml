@@ -322,7 +322,7 @@
                      VirtualizingStackPanel.IsVirtualizing="True"
                      VirtualizingStackPanel.VirtualizationMode="Recycling"
                      behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
-                     ItemsSource="{Binding FilteredPlayers}"
+                     ItemsSource="{Binding FilteredPlayersCollectionView}"
                      SelectionMode="Extended"
                      Margin="5 0 0 0">
                 <i:Interaction.Behaviors>
