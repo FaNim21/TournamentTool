@@ -344,14 +344,14 @@ public class ObsController : BaseViewModel
     }
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {
-        //TODO: 0 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
+        //TODO: 7 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
         Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
     }
     public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
     {
         Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
-        //TODO: 0 Zrobic wylapywanie dodawania wszystkich elementow tez typu head i text od povow
+        //TODO: 7 Zrobic wylapywanie dodawania wszystkich elementow tez typu head i text od povow
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
@@ -372,7 +372,7 @@ public class ObsController : BaseViewModel
     {
         Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
-        //TODO: 0 Zrobic wylapywanie usuwania wszystkich elementow tez typu head i text od povow
+        //TODO: 7 Zrobic wylapywanie usuwania wszystkich elementow tez typu head i text od povow
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         PointOfView? pov = null;

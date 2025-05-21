@@ -134,7 +134,7 @@ public class TwitchService
             try
             {
                 await UpdateTwitchInformations();
-                Controller.FilterItems();
+                Controller.RefreshFilteredCollection();
             }
             catch (Exception ex)
             {
@@ -198,12 +198,14 @@ public class TwitchService
                 if (isMainStream)
                 {
                     streamData.LiveData.Update(liveData);
+                    streamData.IsLive = liveData.Status.Equals("live");
                     notLivePlayers.RemoveAt(j);
                     j--;
                 }
                 else if (isAltStream)
                 {
                     streamData.LiveData.Update(liveData);
+                    streamData.IsLive = liveData.Status.Equals("live");
                 }
             }
         }
@@ -224,7 +226,7 @@ public class TwitchService
         {
             _twitchWorker?.CancelAsync();
         }
-        catch { }
+        catch { /**/ }
         _cancellationTokenSource?.Cancel();
         _twitchWorker?.Dispose();
         _cancellationTokenSource?.Dispose();

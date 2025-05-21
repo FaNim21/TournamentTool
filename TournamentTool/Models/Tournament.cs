@@ -105,8 +105,8 @@ public class Tournament : IPreset
     public bool IsAlwaysOnTop { get; set; } = true;
     public bool IsUsingTeamNames { get; set; }
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
+    public bool AddUnknownPacemanPlayersToWhitelist { get; set; } = false;
     public bool ShowOnlyLive { get; set; } = true;
-    public bool AddUnknownPlayersToWhitelist { get; set; } = false;
 
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
@@ -134,4 +134,5 @@ public class Tournament : IPreset
     public string RankedRoomDataPath { get; set; } = string.Empty;
     public string RankedRoomDataName { get; set; } = "spectate_match.json";
     public int RankedRoomUpdateFrequency { get; set; } = 1000;
+    public bool AddUnknownRankedPlayersToWhitelist { get; set; }
 }

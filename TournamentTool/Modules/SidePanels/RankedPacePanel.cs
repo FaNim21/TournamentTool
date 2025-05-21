@@ -114,28 +114,28 @@ public class RankedTimeline
     [JsonPropertyName("shown")]
     public bool IsShown { get; set; }
 }
-public class RankedData
+public record RankedData
 {
     [JsonPropertyName("matchType")]
-    public string MatchType { get; set; } = string.Empty;
+    public string MatchType { get; init; } = string.Empty;
 
     [JsonPropertyName("category")] 
-    public string Category { get; set; } = string.Empty;
+    public string Category { get; init; } = string.Empty;
 
     [JsonPropertyName("startTime")]
-    public long StartTime { get; set; }
+    public long StartTime { get; init; }
 
     [JsonPropertyName("players")]
-    public RankedPlayer[] Players { get; set; } = [];
+    public RankedPlayer[] Players { get; init; } = [];
 
     [JsonPropertyName("completes")] 
-    public RankedComplete[] Completes { get; set; } = [];
+    public RankedComplete[] Completes { get; init; } = [];
 
     [JsonPropertyName("inventories")]
-    public Dictionary<string, RankedInventory> Inventories { get; set; } = [];
+    public Dictionary<string, RankedInventory> Inventories { get; init; } = [];
 
     [JsonPropertyName("timelines")]
-    public List<RankedTimeline> Timelines { get; set; } = [];
+    public List<RankedTimeline> Timelines { get; init; } = [];
 }
 
 public class RankedPaceData
@@ -150,7 +150,7 @@ public class RankedPaceData
 public class RankedBestSplit
 {
     public string? PlayerName { get; set; }
-    public RankedSplitType Type { get; set; }
+    public RankedSplitType Type { get; init; }
     public long Time { get; set; }
 }
 

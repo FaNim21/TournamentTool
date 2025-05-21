@@ -1,9 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using OBSStudioClient.Classes;
+using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
@@ -14,7 +13,6 @@ using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
-using Scene = TournamentTool.Modules.OBS.Scene;
 
 namespace TournamentTool.ViewModels;
 
@@ -30,16 +28,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     public Scene MainScene { get; }
     public PreviewScene PreviewScene { get; }
 
-    private ObservableCollection<PlayerViewModel> _filteredPlayers = [];
-    public ObservableCollection<PlayerViewModel> FilteredPlayers
-    {
-        get => _filteredPlayers;
-        set
-        {
-            _filteredPlayers = value;
-            OnPropertyChanged(nameof(FilteredPlayers));
-        }
-    }
     
     public ICollectionView? FilteredPlayersCollectionView { get; set; }
 
@@ -99,7 +87,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         set
         {
             _searchText = value;
-            FilterItems();
+            RefreshFilteredCollection();
             OnPropertyChanged(nameof(SearchText));
         }
     }
@@ -118,7 +106,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
     public ICommand RefreshPOVsCommand { get; set; }
     public ICommand UnSelectItemsCommand { get; set; }
 
-
     public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
@@ -136,15 +123,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
-        
-        var collectionViewSource = new CollectionViewSource { Source = FilteredPlayers };
-        //TODO: 0 nie skonczylem z collection view jaka baza na przyszlosc pod filtrowanie w kontrolerze itd
 
-        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
-
-        FilteredPlayersCollectionView = collectionViewSource.View;
+        var collectionViewSource = CollectionViewSource.GetDefaultView(TournamentViewModel.Players);
+        collectionViewSource.Filter = FilterPlayers;
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+        FilteredPlayersCollectionView = collectionViewSource;
     }
 
     public override bool CanEnable()
@@ -190,8 +173,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _apiWorker.DoWork += UpdateAPI;
         _apiWorker.RunWorkerAsync();
-
-        FilterItems();
         
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
@@ -226,7 +207,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         MainScene.Clear();
         PreviewScene.Clear();
 
-        FilteredPlayers!.Clear();
+        // FilteredPlayers!.Clear();
         CurrentChosenPOV = null;
         SelectedWhitelistPlayer = null;
         CurrentChosenPlayer = null;
@@ -256,17 +237,22 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext
         }
     }
 
-    public void FilterItems()
+    public bool FilterPlayers(object obj)
     {
-        //TODO: 0 przebudowac to tak zeby nie czyscic za kazdym razem
-        Application.Current.Dispatcher.Invoke(FilteredPlayers.Clear);
+        if (obj is not PlayerViewModel player) return false;
 
-        IEnumerable<PlayerViewModel> playersToAdd = TournamentViewModel.Players
-            .Where(player => player.Name!.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase) && !player.StreamData.AreBothNullOrEmpty())
-            .OrderByDescending(player => player.StreamData.LiveData.Status.Equals("live"));
+        bool matchesText = string.IsNullOrWhiteSpace(SearchText) || player.Name?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true;
+        var hasStreamData = !player.StreamData.AreBothNullOrEmpty();
+        
+        return matchesText && hasStreamData;
+    }
 
-        foreach (var player in playersToAdd)
-            Application.Current.Dispatcher.Invoke(() => FilteredPlayers.Add(player));
+    public void RefreshFilteredCollection()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            FilteredPlayersCollectionView?.Refresh();
+        });
     }
 
     public async Task RefreshScenesPOVS()

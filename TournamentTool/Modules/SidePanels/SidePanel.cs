@@ -47,7 +47,7 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgr
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() { return true; }
 
-    protected void FilterControllerPlayers() => Controller.FilterItems();
+    protected void RefreshControllerPlayers() => Controller.RefreshFilteredCollection();
     
     public void ClearSelectedPlayer()
     {

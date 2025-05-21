@@ -20,31 +20,17 @@ public class BackgroundCoordinator : IBackgroundCoordinator
         
         Receiver = receiver;
         Service?.RegisterData(Receiver);
-        string output = Receiver == null ? "\"null\"" : Receiver.GetType().ToString();
-        Console.WriteLine($"Receiver {output} has been connected");
     }
     public void Unregister(IBackgroundDataReceiver? receiver)
     {
         if (receiver == null) return;
         
         Service?.UnregisterData(receiver);
-        Console.WriteLine($"Receiver {receiver.GetType()} has been disconnected");
         Receiver = null;
     }
 
     public void Initialize(IBackgroundService backgroundService)
     {
-        if (_worker != null)
-        {
-            _worker.CancelAsync();
-            _cancellationTokenSource?.Cancel();
-            _worker.DoWork -= Update;
-            _worker.Dispose();
-            _cancellationTokenSource?.Dispose();
-            
-            Console.WriteLine($"Service {Service!.GetType()} just stopped");
-        }
-
         Service = backgroundService;
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -83,14 +69,24 @@ public class BackgroundCoordinator : IBackgroundCoordinator
 
     public void Clear()
     {
-        if (_worker != null)
+        try
         {
-            _worker.CancelAsync();
-            _cancellationTokenSource?.Cancel();
-            _worker.DoWork -= Update;
-            _worker.Dispose();
+            if (_worker != null)
+            {
+                _worker.CancelAsync();
+                _cancellationTokenSource?.Cancel();
+                _worker.DoWork -= Update;
+                _worker.Dispose();
+            }
+            _cancellationTokenSource?.Dispose();
         }
-        _cancellationTokenSource?.Dispose();
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        
+        if (Service == null) return;
+        Console.WriteLine($"Service {Service!.GetType()} just stopped");
         Service = null;
     }
 }

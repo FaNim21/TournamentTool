@@ -21,9 +21,9 @@ public class RankedService : IBackgroundService
     private LeaderboardPanelViewModel Leaderboard { get; }
 
     private IRankedDataReceiver? _rankedDataReceiver;
-
+    private IPlayerManagerReceiver? _playerManagerReceiver;
+    
     private long _startTime;
-    private int _pacesNotFromWhitelistAmount;
     private int _completedRunsCount;
     
     private List<RankedPace> _paces = [];
@@ -53,6 +53,7 @@ public class RankedService : IBackgroundService
         
         if (!File.Exists(_filePath))
         {
+            //TODO: 4 Zrobic prawdziwa wpf mvvm walidacje z podkreslaniem input fielda jak zawarty w nim blad z _filepath i tak samo z spectator name
             DialogBox.Show($"There is not file on: {_filePath}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -63,10 +64,15 @@ public class RankedService : IBackgroundService
         {
             _rankedDataReceiver = ranked;
         }
+        else if (receiver is IPlayerManagerReceiver playerManagerReceiver)
+        {
+            _playerManagerReceiver = playerManagerReceiver;
+        }
     }
     public void UnregisterData(IBackgroundDataReceiver? receiver)
     {
         if (receiver == _rankedDataReceiver) _rankedDataReceiver = null;
+        else if (receiver == _playerManagerReceiver) _playerManagerReceiver = null;
     }
 
     public async Task Update(CancellationToken token)
@@ -104,7 +110,6 @@ public class RankedService : IBackgroundService
         _rankedDataReceiver?.UpdateAPIData(_bestSplits, _completedRunsCount);
     }
     
-    [Time]
     private void FilterJSON(RankedData rankedData)
     {
         if (rankedData.Timelines.Count == 0)
@@ -120,7 +125,6 @@ public class RankedService : IBackgroundService
             _paces.Clear();
         }
 
-        _pacesNotFromWhitelistAmount = 0;
         List<RankedPace> _currentPaces = new(_paces);
         for (int i = 0; i < rankedData.Players.Length; i++)
         {
@@ -187,33 +191,54 @@ public class RankedService : IBackgroundService
     private void AddPace(RankedPaceData data)
     {
         RankedPace pace = new(this);
-        pace.Initialize(data.Player);
-
         int n = TournamentViewModel.Players.Count;
         bool found = false;
+        
         for (int j = 0; j < n; j++)
         {
             var current = TournamentViewModel.Players[j];
-            if (!current.InGameName!.Equals(pace.InGameName, StringComparison.OrdinalIgnoreCase)) continue;
+            if (!current.InGameName!.Equals(data.Player.NickName, StringComparison.OrdinalIgnoreCase)) continue;
             
             found = true;
             pace.Player = current;
             break;
         }
-        if (!found)
+
+        if (!found && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
         {
-            _pacesNotFromWhitelistAmount += 1;
-            return;
+            AddRankedPlayerToWhitelist(pace);
         }
-
-        pace.Inventory.DisplayItems = true;
-        pace.Update(data);
-
+        
+        pace.Initialize(data);
         _paces.Add(pace);
     }
     private void RemovePace(RankedPace pace)
     {
         _paces.Remove(pace);
+    }
+    
+    private void AddRankedPlayerToWhitelist(RankedPace pace)
+    {
+        Player player = new Player()
+        {
+            UUID = pace.UUID,
+            Name = pace.InGameName,
+            InGameName = pace.InGameName,
+        };
+
+        PlayerViewModel playerViewModel = new PlayerViewModel(player);
+        playerViewModel.UpdateHeadImage();
+
+        if (_playerManagerReceiver != null)
+        {
+            _playerManagerReceiver.Add(playerViewModel);
+        }
+        else
+        {
+            TournamentViewModel.AddPlayer(playerViewModel);
+        }
+
+        pace.Player = playerViewModel;
     }
     
     public RankedBestSplit GetBestSplit(RankedSplitType splitType)

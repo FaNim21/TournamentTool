@@ -56,6 +56,7 @@
                                 <Image Source="{Binding HeadImage, Mode=OneWay}"
                                        Width="30"
                                        Height="30"
+                                       Opacity="{Binding HeadImageOpacity, Mode=OneWay}"
                                        Margin="5" />
                                 <TextBlock FontSize="15"
                                            Width="140"
@@ -187,6 +188,8 @@
         </ListBox.ItemsPanel>
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
+                <Setter Property="IsEnabled"
+                        Value="{Binding IsLive}" />
                 <Setter Property="Margin"
                         Value="0 -1 0 -1" />
                 <Setter Property="Padding"

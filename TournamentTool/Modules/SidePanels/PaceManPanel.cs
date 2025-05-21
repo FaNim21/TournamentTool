@@ -90,7 +90,7 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
 
     public void FilterItems()
     {
-        FilterControllerPlayers();
+        RefreshControllerPlayers();
     }
     
     private void SetupPaceManGrouping()

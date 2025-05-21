@@ -240,7 +240,7 @@
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          SelectionMode="Multiple"
                          AllowDrop="True"
-                         ItemsSource="{Binding FilteredPlayers}"
+                         ItemsSource="{Binding FilteredPlayersCollectionView}"
                          SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
                          Margin="6 0 0 0">
                     <i:Interaction.Behaviors>

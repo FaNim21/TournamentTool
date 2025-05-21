@@ -99,17 +99,17 @@ public partial class EditableTextBlock : UserControl
                     return;
                 }
 
-                bool isUnique = true;
                 MainViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as MainViewModel;
                 //TODO: 2 Zrobic w przyszlosci interface do tego zeby sprawdzac unique name dla edytowanego elementu
                 if (DataContext is IPreset)
                 {
                     PresetManagerViewModel? presetManager = main!.NavigationService.SelectedView as PresetManagerViewModel;
-                    isUnique = presetManager!.IsPresetNameUnique(textBlock.Text);
-                    if (!isUnique)
+                    if (!presetManager!.IsPresetNameUnique(textBlock.Text))
+                    {
                         ShowPopup($"Preset item named '{textBlock.Text}' already exists", 2);
+                        return;
+                    }
                 }
-                if (!isUnique) return;
 
                 IRenameItem context = (IRenameItem)DataContext;
                 if (context != null)

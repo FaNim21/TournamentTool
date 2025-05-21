@@ -99,7 +99,7 @@ public class InputController
     }
     public void ChangeHotkey(Hotkey hotkey)
     {
-        //TODO: 0 Zmiana hotkey
+        //TODO: 5 Zmiana hotkey
     }
 
     public List<Hotkey> GetHotkeys()

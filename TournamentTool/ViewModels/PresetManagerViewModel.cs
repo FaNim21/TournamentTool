@@ -213,11 +213,10 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         var service = _backgroundServiceFactory.Create(mode);
 
+        BackgroundCoordinator.Clear();
         if (service != null)
         {
             BackgroundCoordinator.Initialize(service);
-            return;
         }
-        BackgroundCoordinator.Clear();
     }
 }

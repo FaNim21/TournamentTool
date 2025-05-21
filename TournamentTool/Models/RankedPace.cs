@@ -41,6 +41,8 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     public string HeadViewParameter => Player == null ? InGameName : Player.HeadViewParameter;
     public string TwitchName => Player == null ? string.Empty : Player.TwitchName;
     public bool IsFromWhitelist => Player != null;
+
+    public string UUID { get; private set; } = string.Empty;
     
     private string _inGameName { get; set; } = string.Empty;
     public string InGameName
@@ -174,22 +176,41 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
     }
     public string SplitDifferenceTime { get; set; } = "00:00";
 
+    private float _headImageOpacity;
+    public float HeadImageOpacity
+    {
+        get => _headImageOpacity;
+        set
+        {
+            if (_headImageOpacity == value) return;
+            _headImageOpacity = value;
+            OnPropertyChanged(nameof(HeadImageOpacity));
+        }
+    }
+
 
     public RankedPace(RankedService service)
     {
         _service = service;
     }
-    public void Initialize(RankedPlayer player)
+    public void Initialize(RankedPaceData data)
     {
-        InGameName = player.NickName;
-        EloRate = player.EloRate ?? -1;
+        UUID = data.Player.UUID;
+        InGameName = data.Player.NickName;
+        EloRate = data.Player.EloRate ?? -1;
+        
+        Inventory.DisplayItems = true;
 
-        Splits.Add(new RankedTimelineSplit() { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
-        UpdateHeadImage();
+        Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+        
+        Update(data);
     }
 
     public void Update(RankedPaceData data)
     {
+        IsLive = Player != null && !Player.StreamData.AreBothNullOrEmpty();
+        UpdateHeadImage();
+        
         if (Resets != data.Resets)
         {
             Timelines.Clear();
@@ -285,6 +306,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
 
     private void UpdateHeadImage()
     {
+        HeadImageOpacity = HeadImage != null && IsLive ? 1f : .25f;
         if (HeadImage != null) return;
 
         if (Player == null)

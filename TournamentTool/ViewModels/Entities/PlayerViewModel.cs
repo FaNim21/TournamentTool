@@ -128,6 +128,17 @@ public class StreamDataViewModel : BaseViewModel
         }
     }
 
+    private bool _isLive;
+    public bool IsLive
+    {
+        get => _isLive;
+        set
+        {
+            _isLive = value;
+            OnPropertyChanged(nameof(IsLive));
+        }
+    }
+    
     private const StringComparison _ordinalIgnoreCaseComparison = StringComparison.OrdinalIgnoreCase;
 
 
@@ -332,6 +343,8 @@ public class PlayerViewModel : BaseViewModel, IPlayer
             OnPropertyChanged(nameof(IsLive));
         }
     }
+
+    public bool isStreamLive => StreamData.IsLive;
     
     public string DisplayName => Name!;
     public string GetPersonalBest => PersonalBest ?? "Unk";
@@ -431,14 +444,12 @@ public class PlayerViewModel : BaseViewModel, IPlayer
 
     public void UpdateHeadImage()
     {
-        Console.WriteLine($"Updating head image for {InGameName}");
         Task.Run(async () => await UpdateHeadImageAsync());
     }
     public async Task UpdateHeadImageAsync()
     {
         if (string.IsNullOrEmpty(InGameName) || Image != null) return;
         Image = await RequestHeadImage();
-        Console.WriteLine($"- Finished updating head image for {InGameName} with image being null?: {Image == null}");
     }
     public async Task ForceUpdateHeadImage()
     {

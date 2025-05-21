@@ -89,7 +89,7 @@ public class PaceManService : IBackgroundService
 
             PlayerViewModel? player = TournamentViewModel.GetPlayerByIGN(pace.Nickname!);
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
-            if (TournamentViewModel.AddUnknownPlayersToWhitelist && player == null)
+            if (TournamentViewModel.AddUnknownPacemanPlayersToWhitelist && player == null)
             {
                 player = AddPaceManPlayerToWhiteList(pace);
             }

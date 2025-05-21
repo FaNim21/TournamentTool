@@ -1,12 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using TournamentTool.Enums;
 using TournamentTool.Models;
-using TournamentTool.Models.Ranking;
-using TournamentTool.Services;
-using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
 
@@ -92,13 +87,13 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             OnPropertyChanged(nameof(ShowOnlyLive));
         }
     }
-    public bool AddUnknownPlayersToWhitelist
+    public bool AddUnknownPacemanPlayersToWhitelist
     {
-        get => _tournament.AddUnknownPlayersToWhitelist;
+        get => _tournament.AddUnknownPacemanPlayersToWhitelist;
         set
         {
-            _tournament.AddUnknownPlayersToWhitelist = value;
-            OnPropertyChanged(nameof(AddUnknownPlayersToWhitelist));
+            _tournament.AddUnknownPacemanPlayersToWhitelist = value;
+            OnPropertyChanged(nameof(AddUnknownRankedPlayersToWhitelist));
             PresetIsModified();
         }
     }
@@ -358,6 +353,16 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
         }
     }
+    public bool AddUnknownRankedPlayersToWhitelist
+    {
+        get => _tournament.AddUnknownRankedPlayersToWhitelist;
+        set
+        {
+            _tournament.AddUnknownRankedPlayersToWhitelist = value;
+            OnPropertyChanged(nameof(AddUnknownRankedPlayersToWhitelist));
+            PresetIsModified();
+        }
+    }
 
     private bool _isCurrentlyOpened;
     public bool IsCurrentlyOpened
@@ -428,7 +433,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         OnPropertyChanged(nameof(IsUsingTeamNames));
         OnPropertyChanged(nameof(IsUsingWhitelistOnPaceMan));
         OnPropertyChanged(nameof(ShowOnlyLive));
-        OnPropertyChanged(nameof(AddUnknownPlayersToWhitelist));
+        OnPropertyChanged(nameof(AddUnknownPacemanPlayersToWhitelist));
         
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(Password));
@@ -461,6 +466,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         OnPropertyChanged(nameof(RankedRoomDataPath));
         OnPropertyChanged(nameof(RankedRoomDataName));
         OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
+        OnPropertyChanged(nameof(AddUnknownRankedPlayersToWhitelist));
     }
     public void UpdatePlayers()
     {
@@ -598,7 +604,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         IsUsingTeamNames = false;
         IsUsingWhitelistOnPaceMan = true;
         ShowOnlyLive = true;
-        AddUnknownPlayersToWhitelist = false;
+        AddUnknownPacemanPlayersToWhitelist = false;
         
         Port = 4455;
         Password = string.Empty;
@@ -626,6 +632,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         RankedRoomDataPath = string.Empty;
         RankedRoomDataName = "spectate_match.json";
         RankedRoomUpdateFrequency = 1000;
+        AddUnknownRankedPlayersToWhitelist = false;
     }
 
     public void Delete()

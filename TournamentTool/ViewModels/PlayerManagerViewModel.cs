@@ -1,8 +1,11 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
@@ -13,6 +16,7 @@ using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
+using ZLinq;
 
 namespace TournamentTool.ViewModels;
 
@@ -45,6 +49,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             OnPropertyChanged(nameof(SelectedPlayers));
         }
     }
+    
+    public ICollectionView? FilteredPlayersCollectionView { get; set; }
     
     private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
@@ -183,6 +189,11 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         SubmitSearchCommand = new RelayCommand(async () => { await FilterWhitelist(); });
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
         
+        var collectionViewSource = CollectionViewSource.GetDefaultView(tournament.Players);
+        // collectionViewSource.Filter = FilterPlayers;
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+        FilteredPlayersCollectionView = collectionViewSource;
+        
         Task.Run(async () => {
             PaceManEvent[]? eventsData = null;
             try
@@ -292,11 +303,14 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         UpdateInformationCountText();
     }
     
+    [Time]
     public async Task FilterWhitelist(bool forceFilter = false)
     {
         //TODO: 2 Tutaj mozna duzo optymalizacji zrobic zeby zmniejszyc ladowanie, poniewaz nie da sie nie blokowac ui przy tym
         //takze trzeba bedziez aczac od zmniejszenia obciazenie przez sam viewmodel, ktory w tym jest czyli rozbic player i playerviewmodel i tez zrobic oddzielny whitelistplayerviewmodel
         //pod to zeby tylko najwazniejsze rzeczy dawac dla whitelistplayerviewmodel itp itd
+        
+        //Sprobowac tutaj zrobic specjalny viewmodel aktualizujacy tylko Player klase i zobaczyc czy to przyspieszy wyszukiwanie
         
         if (!IsSearchEnabled) return;
         SearchText = SearchText.Trim();
@@ -328,17 +342,20 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         }
         UpdateInformationCountText("Filtering...", "?");
         await Task.Delay(1);
-        
-        var filtered = SortingType switch
-        {
-            PlayerSortingType.Name => Tournament.Players.Where(p => p.Name!.Trim().Contains(SearchText, _comparison)),
-            PlayerSortingType.InGameName => Tournament.Players.Where(p => p.InGameName!.Trim().Contains(SearchText, _comparison)),
-            PlayerSortingType.TeamName => Tournament.Players.Where(p => p.TeamName!.Trim().Contains(SearchText, _comparison)),
-            PlayerSortingType.Stream => Tournament.Players.Where(p =>
-                p.StreamData.Main!.Trim().Contains(SearchText, _comparison) ||
-                p.StreamData.Alt.Trim().Contains(SearchText, _comparison)),
-            _ => []
-        };
+
+        var filtered = Tournament.Players.AsValueEnumerable()
+            .Where(p =>
+                SortingType switch
+                {
+                    PlayerSortingType.Name => p.Name?.Trim().Contains(SearchText, _comparison) ?? false,
+                    PlayerSortingType.InGameName => p.InGameName?.Trim().Contains(SearchText, _comparison) ?? false,
+                    PlayerSortingType.TeamName => p.TeamName?.Trim().Contains(SearchText, _comparison) ?? false,
+                    PlayerSortingType.Stream =>
+                        (p.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
+                        (p.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false),
+                    _ => false
+                }
+            ).ToList();
 
         Application.Current.Dispatcher.Invoke(() =>
         {
