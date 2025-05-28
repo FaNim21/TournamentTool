@@ -214,4 +214,9 @@ public static class Helper
 
         return await response.Content.ReadAsStringAsync();
     }
+
+    public static string ToFormattedTime(this TimeSpan span)
+    {
+        return $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
+    }
 }

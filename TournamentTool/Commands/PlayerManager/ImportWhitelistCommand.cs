@@ -75,10 +75,10 @@ public class ImportWhitelistCommand : BaseCommand
         string text = await File.ReadAllTextAsync(_path, cancellationToken);
         if (string.IsNullOrEmpty(text)) return;
         
-        List<PlayerViewModel>? players = null;
+        List<Player>? players = null;
         try
         {
-            players = JsonSerializer.Deserialize<List<PlayerViewModel>>(text);
+            players = JsonSerializer.Deserialize<List<Player>>(text);
         }
         catch
         {
@@ -90,13 +90,14 @@ public class ImportWhitelistCommand : BaseCommand
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
+            var viewModel = new PlayerViewModel(player);
             progress.Report((float)i/players.Count);
             logProgress.Report($"({i+1}/{players.Count}) Checking for duplicates for player: {player.InGameName}");
-            if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
+            if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
             logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
 
-            player.UpdateHeadBitmap();
-            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
+            viewModel.UpdateHeadBitmap();
+            Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(viewModel); });
         }
         
         logProgress.Report("Loading complete");

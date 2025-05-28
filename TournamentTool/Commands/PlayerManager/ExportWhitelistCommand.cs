@@ -10,13 +10,16 @@ namespace TournamentTool.Commands.PlayerManager;
 public class ExportWhitelistCommand : BaseCommand
 {
     private readonly ITournamentManager _tournamentManager;
-    
+    private readonly Tournament _tournamentData;
+
     private readonly JsonSerializerOptions _serializerOptions;
     private string _path = string.Empty;
     
-    public ExportWhitelistCommand(ITournamentManager tournamentManager)
+    public ExportWhitelistCommand(ITournamentManager tournamentManager, Tournament tournamentData)
     {
         _tournamentManager = tournamentManager;
+        _tournamentData = tournamentData;
+        
         _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
     }
     
@@ -25,7 +28,7 @@ public class ExportWhitelistCommand : BaseCommand
         _path = DialogBox.ShowOpenFolder();
         if (string.IsNullOrEmpty(_path)) return;
         
-        var data = JsonSerializer.Serialize<object>(_tournamentManager.Players, _serializerOptions);
+        var data = JsonSerializer.Serialize<object>(_tournamentData.Players, _serializerOptions);
         string date = DateTimeOffset.Now.ToString("HH.mm_dd-MM-yyyy");
         string fileName = $"{_tournamentManager.Name}-Whitelist {date}.json";
         

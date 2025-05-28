@@ -1,11 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
@@ -23,7 +21,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 {
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
      
-    public TournamentViewModel Tournament { get; set; }
+    public TournamentViewModel Tournament { get; }
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
 
@@ -146,7 +144,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
     private string _lastFilterSearch = "filter";
     private PlayerSortingType _lastSortingType;
-    private string _lastTournamentName = string.Empty;
 
 
     public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
@@ -167,7 +164,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
         ImportPlayersCommand = new ImportWhitelistCommand(this, Tournament, coordinator, PresetService);
-        ExportPlayersCommand = new ExportWhitelistCommand(Tournament);
+        ExportPlayersCommand = new ExportWhitelistCommand(Tournament, tournament.GetData());
 
         LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, Tournament, PresetService, coordinator);
 

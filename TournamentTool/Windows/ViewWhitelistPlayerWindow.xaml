@@ -66,13 +66,19 @@
                     <TextBlock FontSize="12"
                                TextAlignment="Left"
                                VerticalAlignment="Center"
-                               Background="Transparent"
+                               HorizontalAlignment="Left"
                                Foreground="White"
                                Padding="0"
-                               Margin="5 0 0 0">
+                               Margin="5 0 0 0"
+                               Cursor="Hand">
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.UUID}" />
+                        </TextBlock.InputBindings>
+                        
                         <Run Text="UUID: " />
-                        <Run Text="{Binding PlayerViewModel.UUID}"
-                             Foreground="Wheat" />
+                        <Run Text="{Binding PlayerViewModel.UUID}" Foreground="Wheat" />
 
                         <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
@@ -98,11 +104,19 @@
                                VerticalAlignment="Center"
                                Background="Transparent"
                                Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
                                Padding="0"
                                Margin="5 0 0 0">
-                    <Run Text="In Game Name: " />
-                    <Run Text="{Binding PlayerViewModel.InGameName}"
-                         Foreground="Wheat" />
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.InGameName}" />
+                        </TextBlock.InputBindings>
+                        
+                        <Run Text="In Game Name: " />
+                        <Run Text="{Binding PlayerViewModel.InGameName}"
+                             Foreground="Wheat" />
                     </TextBlock>
 
                     <TextBlock FontSize="12"
@@ -110,11 +124,19 @@
                                VerticalAlignment="Center"
                                Background="Transparent"
                                Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
                                Padding="0"
                                Margin="5 0 0 0">
-                    <Run Text="Personal Best: " />
-                    <Run Text="{Binding PlayerViewModel.PersonalBest}"
-                         Foreground="Wheat" />
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.PersonalBest}" />
+                        </TextBlock.InputBindings>
+
+                        <Run Text="Personal Best: " />
+                        <Run Text="{Binding PlayerViewModel.PersonalBest}"
+                             Foreground="Wheat" />
                     </TextBlock>
 
                     <TextBlock FontSize="12"
@@ -122,11 +144,19 @@
                                VerticalAlignment="Center"
                                Background="Transparent"
                                Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
                                Padding="0"
                                Margin="5 0 0 0">
-                    <Run Text="Team Name: " />
-                    <Run Text="{Binding PlayerViewModel.TeamName}"
-                         Foreground="Wheat" />
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.TeamName}" />
+                        </TextBlock.InputBindings>
+
+                        <Run Text="Team Name: " />
+                        <Run Text="{Binding PlayerViewModel.TeamName}"
+                             Foreground="Wheat" />
                     </TextBlock>
 
                     <TextBlock FontSize="12"
@@ -134,11 +164,19 @@
                                VerticalAlignment="Center"
                                Background="Transparent"
                                Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
                                Padding="0"
                                Margin="5 0 0 0">
-                    <Run Text="Twitch Main: " />
-                    <Run Text="{Binding PlayerViewModel.StreamData.Main}"
-                         Foreground="Wheat" />
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.StreamData.Main}" />
+                        </TextBlock.InputBindings>
+
+                        <Run Text="Twitch Main: " />
+                        <Run Text="{Binding PlayerViewModel.StreamData.Main}"
+                             Foreground="Wheat" />
                     </TextBlock>
 
                     <TextBlock FontSize="12"
@@ -146,11 +184,19 @@
                                VerticalAlignment="Center"
                                Background="Transparent"
                                Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
                                Padding="0"
                                Margin="5 0 0 0">
-                    <Run Text="Twitch Alt: " />
-                    <Run Text="{Binding PlayerViewModel.StreamData.Alt}"
-                         Foreground="Wheat" />
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.StreamData.Alt}" />
+                        </TextBlock.InputBindings>
+
+                        <Run Text="Twitch Alt: " />
+                        <Run Text="{Binding PlayerViewModel.StreamData.Alt}"
+                             Foreground="Wheat" />
                     </TextBlock>
 
                 </StackPanel>

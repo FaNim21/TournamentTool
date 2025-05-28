@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Windows.Documents;
-using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
 
@@ -35,8 +34,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         set
         {
             Model.Time = value;
-            var span = TimeSpan.FromMilliseconds(value);
-            TimeText = $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
+            TimeText = TimeSpan.FromMilliseconds(value).ToFormattedTime();
             OnPropertyChanged(nameof(Time));
         } 
     }

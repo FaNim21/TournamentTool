@@ -16,17 +16,20 @@ namespace TournamentTool.Services;
 
 public class RankedService : IBackgroundService
 {
+    private readonly RankedManagementData? _rankedManagementData;
+    
     private TournamentViewModel TournamentViewModel { get; }
     private LeaderboardPanelViewModel Leaderboard { get; }
 
     private IRankedDataReceiver? _rankedDataReceiver;
+    private IRankedManagementDataReceiver? _rankedManagementDataReceiver;
     private IPlayerAddReceiver? _playerManagerReceiver;
     
     private long _startTime;
     private int _completedRunsCount;
     
     private List<RankedPace> _paces = [];
-    private List<RankedBestSplit> _bestSplits = [];
+    private Dictionary<RankedSplitType, RankedBestSplit> _bestSplits = [];
     
     private readonly JsonSerializerOptions _options;
     private readonly string _filePath;
@@ -36,6 +39,8 @@ public class RankedService : IBackgroundService
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
+        
+        _rankedManagementData = TournamentViewModel.ManagementData as RankedManagementData;
         
         string dataName = TournamentViewModel.RankedRoomDataName;
         if(!dataName.EndsWith(".json"))
@@ -67,11 +72,16 @@ public class RankedService : IBackgroundService
         {
             _playerManagerReceiver = playerManagerReceiver;
         }
+        else if (receiver is IRankedManagementDataReceiver rankedManagementDataReceiver)
+        {
+            _rankedManagementDataReceiver = rankedManagementDataReceiver;
+        }
     }
     public void UnregisterData(IBackgroundDataReceiver? receiver)
     {
         if (receiver == _rankedDataReceiver) _rankedDataReceiver = null;
         else if (receiver == _playerManagerReceiver) _playerManagerReceiver = null;
+        else if (receiver == _rankedManagementDataReceiver) _rankedManagementDataReceiver = null;
     }
 
     public async Task Update(CancellationToken token)
@@ -106,7 +116,7 @@ public class RankedService : IBackgroundService
         _rankedDataReceiver?.ReceivePaces(_paces);
         
         _completedRunsCount = rankedData.Completes.Length;
-        _rankedDataReceiver?.UpdateAPIData(_bestSplits, _completedRunsCount);
+        _rankedManagementDataReceiver?.UpdateManagementData(_bestSplits.Values.ToList(), _completedRunsCount, _startTime, _paces.Count);
     }
     
     private void FilterJSON(RankedData rankedData)
@@ -120,8 +130,7 @@ public class RankedService : IBackgroundService
         if(rankedData.StartTime != _startTime)
         {
             _startTime = rankedData.StartTime;
-            _bestSplits.Clear();
-            _paces.Clear();
+            Clear();
         }
 
         List<RankedPace> _currentPaces = new(_paces);
@@ -242,14 +251,20 @@ public class RankedService : IBackgroundService
     
     public RankedBestSplit GetBestSplit(RankedSplitType splitType)
     {
-        for (int i = 0; i < _bestSplits.Count; i++)
-        {
-            var split = _bestSplits[i];
-            if (split.Type.Equals(splitType)) return split;
-        }
+        _bestSplits.TryGetValue(splitType, out var bestSplit);
+        if (bestSplit != null) return bestSplit;
 
-        RankedBestSplit bestSplit = new() { Type = splitType };
-        _bestSplits.Add(bestSplit);
+        bestSplit = new RankedBestSplit { Type = splitType };
+        _bestSplits.Add(bestSplit.Type, bestSplit);
+        _rankedManagementData?.BestSplits.Add(bestSplit);
         return bestSplit;
+    }
+
+    private void Clear()
+    {
+        _bestSplits.Clear();
+        _rankedManagementData?.BestSplits.Clear();
+        _paces.Clear();
+        _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0);
     }
 }

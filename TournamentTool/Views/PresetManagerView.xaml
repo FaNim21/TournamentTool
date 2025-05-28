@@ -61,10 +61,10 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0"
-                               Orientation="Vertical"
-                               Margin="20 10 20 20"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Top">
+                                Orientation="Vertical"
+                                Margin="20 10 20 20"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top">
 
                         <!-- GENERAL -->
                         <TextBlock  Text="General"

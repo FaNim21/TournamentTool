@@ -25,13 +25,11 @@ public static class DialogBox
 
         return model.Result;
     }
-
     public static string ShowOpenFile()
     {
         OpenFileDialog openFileDialog = new() { Filter = "All Files (*.*)|*.*", };
         return openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
     }
-
     public static string ShowOpenFolder()
     {
         OpenFolderDialog openFolderDialog = new();

@@ -256,11 +256,10 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
             for (int j = 0; j < Splits.Count; j++)
             {
                 var current = Splits[j];
-                if (current.Name.Equals(timeline.Type))
-                {
-                    wasFound = true;
-                    break;
-                }
+                if (!current.Name.Equals(timeline.Type)) continue;
+                
+                wasFound = true;
+                break;
             }
             if (wasFound) continue;
 
@@ -281,17 +280,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
 
             if (newSplit == null) continue;
 
-            //TODO: to powinno byc zapisywane inaczej i forowane po wszystkich dla wiekszej pewnosci? poniewaz po resecie aplikacji
-            //ta metoda jest obecnie najwydajniejsza, ale psuje sie po restarcie apki z racji kolejnosci czytania danych z pliku json ktorego sie nie da zmienic
-            RankedBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
-            if(string.IsNullOrEmpty(bestSplit.PlayerName))
-            {
-                bestSplit.PlayerName = InGameName;
-                bestSplit.Time = newSplit.Time;
-            }
-            DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
-            if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
-
+            ValidateBestSplit(newSplit);
             Splits.Add(newSplit);
         }
     }
@@ -321,5 +310,18 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         {
             HeadImage = Player!.Image;
         }
+    }
+
+    private void ValidateBestSplit(RankedTimelineSplit newSplit)
+    {
+        RankedBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
+        
+        if(string.IsNullOrEmpty(bestSplit.PlayerName))
+        {
+            bestSplit.PlayerName = InGameName;
+            bestSplit.Time = newSplit.Time;
+        }
+        DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
+        if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
     }
 }

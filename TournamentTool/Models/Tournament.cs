@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -85,6 +86,7 @@ public class RankedManagementData : ManagementData
 {
     public string CustomText { get; set; } = string.Empty;
     public int Rounds { get; set; } = 0;
+    public List<RankedBestSplit> BestSplits { get; set; } = [];
 }
 
 public class PacemanManagementData : ManagementData

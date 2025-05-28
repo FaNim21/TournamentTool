@@ -141,7 +141,6 @@ public record RankedData
 public class RankedPaceData
 {
     public RankedPlayer Player { get; init; } = new();
-    //eweutnalnie zrobic globaltimeline poniewaz obecny jest tylko dla rzeczywistych splitow
     public List<RankedTimeline> Timelines { get; init; } = [];
     public RankedInventory Inventory { get; set; } = new();
     public RankedComplete Completion { get; set; } = new();
@@ -150,7 +149,7 @@ public class RankedPaceData
 public class RankedBestSplit
 {
     public string? PlayerName { get; set; }
-    public RankedSplitType Type { get; init; }
+    public RankedSplitType Type { get; set; }
     public long Time { get; set; }
 }
 
@@ -166,8 +165,6 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
             OnPropertyChanged(nameof(Paces));
         }
     }
-
-    public int CompletedRunsCount { get; set; }
 
     public ICollectionView? GroupedRankedPaces { get; set; }
 
@@ -221,11 +218,6 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
         });
         
         RefreshGroup();
-    }
-
-    public void UpdateAPIData(List<RankedBestSplit> bestSplits, int completedCount)
-    {
-        CompletedRunsCount = completedCount;
     }
 
     private void RefreshGroup()

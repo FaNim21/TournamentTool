@@ -11,15 +11,16 @@ namespace TournamentTool.ViewModels;
 
 public class ViewWhitelistPlayerViewModel : BaseViewModel
 {
-    private IPresetSaver PresetSaver { get; set; }
-    private ILoadingDialog LoadingDialog { get; set; }
+    private IPresetSaver PresetSaver { get; }
+    private ILoadingDialog LoadingDialog { get; }
 
-    public PlayerViewModel PlayerViewModel { get; private set; }
+    public PlayerViewModel PlayerViewModel { get; }
 
-    public ICommand CorrectPlayerUUIDCommand { get; set; }
-    public ICommand OpenNameMCCommand { get; set; }
+    public ICommand CorrectPlayerUUIDCommand { get; init; }
+    public ICommand OpenNameMCCommand { get; init; }
+    public ICommand CopyDataCommand { get; init; }
 
-    
+
     public ViewWhitelistPlayerViewModel(PlayerViewModel playerViewModel, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
     {
         PlayerViewModel = playerViewModel;
@@ -28,6 +29,7 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
         CorrectPlayerUUIDCommand = new RelayCommand(() => { LoadingDialog.ShowLoading(CompleteUUID, true); });
         OpenNameMCCommand = new RelayCommand(OpenNameMC);
+        CopyDataCommand = new RelayCommand<string>(CopyToClipboard);
     }
 
     private async Task CompleteUUID(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
@@ -74,5 +76,12 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
             Verb = "open"
         };
         Process.Start(processStart);
+    }
+
+    private void CopyToClipboard(string text)
+    {
+        //TODO: 9 jak bede robic popupy to dac info o skopiowaniu do clipboarda
+        if (string.IsNullOrEmpty(text)) return;
+        Clipboard.SetText(text);
     }
 }

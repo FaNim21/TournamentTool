@@ -105,6 +105,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public ICommand RefreshPOVsCommand { get; set; }
     public ICommand UnSelectItemsCommand { get; set; }
 
+    private CancellationTokenSource? _playersRefreshTokenSource;
+    
+
     public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
@@ -167,13 +170,14 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
                     SidePanel = new RankedPacePanel(this);
-                    ManagementPanel = new RankedManagementPanel(this, (RankedPacePanel)SidePanel);
+                    ManagementPanel = new RankedManagementPanel((RankedManagementData)TournamentViewModel.ManagementData!);
                 }
                 break;
         }
         
         _backgroundCoordinator.Register(SidePanel);
         _backgroundCoordinator.Register(this);
+        _backgroundCoordinator.Register(ManagementPanel);
         
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
@@ -196,6 +200,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     {
         _backgroundCoordinator.Unregister(SidePanel);
         _backgroundCoordinator.Unregister(this);
+        _backgroundCoordinator.Unregister(ManagementPanel);
         
         SidePanel?.OnDisable();
         OBS.OnDisable();
@@ -263,11 +268,19 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public void RefreshFilteredCollection()
     {
-        Console.WriteLine("Refreshed collection");
-        Application.Current.Dispatcher.Invoke(() =>
+        _playersRefreshTokenSource?.Cancel();
+        _playersRefreshTokenSource = new CancellationTokenSource();
+        var token = _playersRefreshTokenSource.Token;
+
+        Task.Delay(1000).ContinueWith(_ =>
         {
-            FilteredPlayersCollectionView?.Refresh();
-        });
+            if (token.IsCancellationRequested) return;
+            
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                FilteredPlayersCollectionView?.Refresh();
+            });
+        }, TaskScheduler.Default);
     }
 
     public async Task RefreshScenesPOVS()

@@ -15,7 +15,11 @@ public interface IPacemanDataReceiver : IBackgroundDataReceiver
 public interface IRankedDataReceiver : IBackgroundDataReceiver
 {
     void ReceivePaces(List<RankedPace> paces);
-    void UpdateAPIData(List<RankedBestSplit> bestSplits, int completedCount);
+}
+
+public interface IRankedManagementDataReceiver : IBackgroundDataReceiver
+{
+    void UpdateManagementData(List<RankedBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount);
 }
 
 public interface IPlayerAddReceiver : IBackgroundDataReceiver

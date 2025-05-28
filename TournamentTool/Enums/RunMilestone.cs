@@ -35,6 +35,7 @@ public enum RunMilestone
     // ========== Ranked ============
     // --------------------------------
     
+    [Display(Name = "(Ranked) We Need to Go Deeper", Description = "story.enter_the_nether", ShortName = "enter_the_nether"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloNetherEnter,
     [Display(Name = "(Ranked) Blind Travel", Description = "projectelo.timeline.blind_travel", ShortName = "blind_travel"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloBlindTravel,
     [Display(Name = "(Ranked) Complete", Description = "projectelo.timeline.complete", ShortName = "complete"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloComplete,
     

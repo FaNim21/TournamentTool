@@ -417,7 +417,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         }
         catch (Exception ex)
         {
-            DialogBox.Show("Error: " + ex.Message + " - " + ex.StackTrace, "ERROR completing data", MessageBoxButton.OK, MessageBoxImage.Error);
+            Console.WriteLine("ERROR completing data: " + ex.Message + " - " + ex.StackTrace);
         }
     }
     
