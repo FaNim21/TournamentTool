@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
@@ -53,16 +54,16 @@ public class BackgroundCoordinator : IBackgroundCoordinator
         while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
         {
             if (Service == null) break;
-            
+
             try
             {
                 await Service.Update(cancellationToken);
             }
-            catch (TaskCanceledException) { break; }
+            catch (TaskCanceledException) { Clear(); }
             catch (Exception ex)
             {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                DialogBox.Show($"Error: {ex.Message} while updating background service", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                Clear();
             }
         }
     }

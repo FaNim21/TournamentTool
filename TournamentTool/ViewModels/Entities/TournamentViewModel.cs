@@ -1,14 +1,20 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
-using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Models;
-using ZLinq;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class TournamentViewModel : BaseViewModel, ITournamentManager
+public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager
 {
+    private readonly Dictionary<string, List<string>> _errors = [];
+    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    public bool HasErrors => _errors.Count != 0;
+    
+   
     private Tournament _tournament;
     
     public ManagementData? ManagementData
@@ -302,7 +308,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
     }
     public string? CreditsToText { set; get; }
 
-    public Action<ControllerMode>? OnControllerModeChanged;
+    public Action<ControllerMode, bool>? OnControllerModeChanged;
     public ControllerMode ControllerMode
     {
         get => _tournament.ControllerMode;
@@ -319,7 +325,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             else if (value == ControllerMode.Paceman)
                 ManagementData = new PacemanManagementData();
             
-            OnControllerModeChanged?.Invoke(value);
+            UpdateBackgroundService(value);
         }
     }
     
@@ -331,7 +337,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.RankedRoomDataPath = value;
             PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataPath));
-            OnControllerModeChanged?.Invoke(ControllerMode.Ranked);
+            UpdateBackgroundService(ControllerMode.Ranked);
         }
     }
     public string RankedRoomDataName
@@ -342,7 +348,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
             _tournament.RankedRoomDataName = value;
             PresetIsModified();
             OnPropertyChanged(nameof(RankedRoomDataName));
-            OnControllerModeChanged?.Invoke(ControllerMode.Ranked);
+            UpdateBackgroundService(ControllerMode.Ranked);
         }
     }
     public int RankedRoomUpdateFrequency
@@ -411,7 +417,7 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         IsCurrentlyOpened = true;
         HasBeenRemoved = false;
         
-        OnControllerModeChanged?.Invoke(ControllerMode);
+        UpdateBackgroundService(ControllerMode);
         
         PresetIsSaved();
     }
@@ -658,6 +664,34 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         }
     }
 
+    private void UpdateBackgroundService(ControllerMode mode)
+    {
+        //TODO: 3 Przeniesc wszystkie fieldy do presetmanager usuwaj tutaj baseviewmodel i validacje danych, bo jest to idiotycznie rozwiazane obecnie
+        ClearErrors(nameof(RankedRoomDataName));
+        ClearErrors(nameof(RankedRoomDataPath));
+
+        bool isValidated = true;
+        switch (mode)
+        {
+            case ControllerMode.Ranked:
+                if (string.IsNullOrEmpty(RankedRoomDataName))
+                {
+                    AddError(nameof(RankedRoomDataName), "Ranked name for spectator file cannot be empty");
+                    isValidated = false;
+                }
+                if (string.IsNullOrEmpty(RankedRoomDataPath))
+                {
+                    AddError(nameof(RankedRoomDataPath), "Ranked spectator path cannot be empty");
+                    isValidated = false;
+                }
+                break;
+            case ControllerMode.Paceman:
+                break;
+        }
+        
+        OnControllerModeChanged?.Invoke(mode, isValidated);
+    }
+    
     public void PresetIsModified()
     {
         //TODO: 9 kiedys zrobic bardziej zaawansowane przechwytywanie zmian z weryfikacja powrotu do danych przed zmiana itd
@@ -670,6 +704,24 @@ public class TournamentViewModel : BaseViewModel, ITournamentManager
         IsPresetModified = false;
     }
 
+    public IEnumerable GetErrors(string? propertyName)
+    {
+        return _errors!.GetValueOrDefault(propertyName)!;
+    }
+    protected void AddError(string propertyName, string error)
+    {
+        if (!_errors.ContainsKey(propertyName)) _errors[propertyName] = [];
+        if (_errors[propertyName].Contains(error)) return;
+        
+        _errors[propertyName].Add(error);
+        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+    }
+    protected void ClearErrors(string propertyName)
+    {
+        if (!_errors.Remove(propertyName)) return;
+        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+    }
+    
     private void SetAlwaysOnTop()
     {
         Application.Current?.Dispatcher.Invoke(() =>

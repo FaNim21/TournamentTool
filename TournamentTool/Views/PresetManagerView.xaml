@@ -274,10 +274,13 @@
                                          Width="220"
                                          Height="20"
                                          IsReadOnly="True"
-                                         Text="{Binding TournamentViewModel.RankedRoomDataPath}"
+                                         Text="{Binding TournamentViewModel.RankedRoomDataPath, ValidatesOnNotifyDataErrors=True}"
+                                         ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
+                                         ToolTipService.InitialShowDelay="0"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                </TextBox>
                                 <components:ButtonNormal ContentText="SET"
                                                          Width="35"
                                                          Margin="5 0 0 3"
@@ -294,7 +297,9 @@
                                 <TextBox TextWrapping="NoWrap"
                                          Width="120"
                                          Height="20"
-                                         Text="{Binding TournamentViewModel.RankedRoomDataName}"
+                                         Text="{Binding TournamentViewModel.RankedRoomDataName, ValidatesOnNotifyDataErrors=True}"
+                                         ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
+                                         ToolTipService.InitialShowDelay="0"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />

@@ -54,12 +54,6 @@ public class RankedService : IBackgroundService
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
             PropertyNameCaseInsensitive = true
         };
-        
-        if (!File.Exists(_filePath))
-        {
-            //TODO: 4 Zrobic prawdziwa wpf mvvm walidacje z podkreslaniem input fielda jak zawarty w nim blad z _filepath i tak samo z spectator name
-            DialogBox.Show($"There is not file on: {_filePath}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
     }
     
     public void RegisterData(IBackgroundDataReceiver? receiver)
@@ -93,10 +87,10 @@ public class RankedService : IBackgroundService
     private async Task LoadJsonFileAsync()
     {
         RankedData? rankedData = null;
+        string jsonContent;
+
         try
         {
-            string jsonContent;
-
             await using (FileStream fs = new(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader reader = new(fs))
             {
@@ -105,10 +99,7 @@ public class RankedService : IBackgroundService
 
             rankedData = JsonSerializer.Deserialize<RankedData>(jsonContent, _options);
         }
-        catch (Exception ex)
-        {
-            Trace.WriteLine("Error reading JSON file: " + ex.Message);
-        }
+        catch { /**/ }
 
         if (rankedData == null) return;
 
@@ -126,7 +117,7 @@ public class RankedService : IBackgroundService
             _paces.Clear();
         }
 
-        //Seed change | New match |
+        //Seed change | New match | just new seed
         if(rankedData.StartTime != _startTime)
         {
             _startTime = rankedData.StartTime;

@@ -209,11 +209,12 @@ public class PresetManagerViewModel : SelectableViewModel
         Properties.Settings.Default.Save();
     }
 
-    private void UpdateBackgroundService(ControllerMode mode)
+    private void UpdateBackgroundService(ControllerMode mode, bool isValidated)
     {
-        var service = _backgroundServiceFactory.Create(mode);
-
         BackgroundCoordinator.Clear();
+        if (!isValidated) return;
+        
+        var service = _backgroundServiceFactory.Create(mode);
         if (service != null)
         {
             BackgroundCoordinator.Initialize(service);
