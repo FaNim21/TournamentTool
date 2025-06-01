@@ -17,7 +17,6 @@ public class RemoveEntryCommand : BaseCommand
     {
         if (parameter is not LeaderboardEntryViewModel entry) return;
          
-        _panel.Leaderboard.RemoveLeaderboardEntry(entry);
-        
+        _panel.RemoveLeaderboardEntry(entry);
     }
 }

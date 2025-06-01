@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
-using System.IO;
 using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 
-namespace TournamentTool.Services;
+namespace TournamentTool.Services.Background;
 
 public class BackgroundCoordinator : IBackgroundCoordinator
 {

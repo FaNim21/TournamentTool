@@ -95,7 +95,7 @@
                          Width="380"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
-                         ItemsSource="{Binding Leaderboard.Rules}"
+                         ItemsSource="{Binding Rules}"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          Margin="1 0 1 0">
@@ -153,7 +153,7 @@
                      BorderThickness="0"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
-                     ItemsSource="{Binding Leaderboard.Entries}"
+                     ItemsSource="{Binding Entries}"
                      VirtualizingPanel.IsVirtualizing="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"
                      Margin="5 0 0 0">
@@ -190,7 +190,7 @@
 
                                     <TextBlock Foreground="White">
                                         <Run Text="Points: " />
-                                        <Run Text="XX" />
+                                        <Run Text="{Binding Points}" />
 
                                         <Run Text=" - " />
                                         

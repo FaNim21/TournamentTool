@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Windows;
 using TournamentTool.Enums;
 using TournamentTool.Models;
+using TournamentTool.Models.Ranking;
 
 namespace TournamentTool.ViewModels.Entities;
 
@@ -28,7 +28,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
     }
 
-    public LeaderboardViewModel Leaderboard { get; set; }
+    public Leaderboard Leaderboard => _tournament.Leaderboard;
 
     private ObservableCollection<PlayerViewModel> _players = [];
     public ObservableCollection<PlayerViewModel> Players
@@ -400,17 +400,12 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public TournamentViewModel()
     {
         _tournament = new Tournament();
-        Leaderboard = new LeaderboardViewModel(_tournament, this);
     }
 
     public void ChangeData(Tournament tournament)
     {
         if (tournament == null) return;
-
-        Leaderboard.Clear();
-        
         _tournament = tournament;
-        Leaderboard = new LeaderboardViewModel(_tournament, this);
 
         SetupPreset();
         
@@ -424,11 +419,9 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
 
     private void SetupPreset()
     {
-        Leaderboard.Setup();
         UpdatePlayers();
         UpdateGoodPacesTexts();
         
-        Leaderboard.RefreshUI();
         RefreshUI();
         
         SetAlwaysOnTop();

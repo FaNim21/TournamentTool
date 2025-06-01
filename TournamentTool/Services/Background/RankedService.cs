@@ -7,19 +7,20 @@ using MethodTimer;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.Services;
+namespace TournamentTool.Services.Background;
 
 public class RankedService : IBackgroundService
 {
     private readonly RankedManagementData? _rankedManagementData;
     
     private TournamentViewModel TournamentViewModel { get; }
-    private LeaderboardPanelViewModel Leaderboard { get; }
+    private ILeaderboardManager Leaderboard { get; }
 
     private IRankedDataReceiver? _rankedDataReceiver;
     private IRankedManagementDataReceiver? _rankedManagementDataReceiver;
@@ -35,7 +36,7 @@ public class RankedService : IBackgroundService
     private readonly string _filePath;
     
     
-    public RankedService(TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard)
+    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard)
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
@@ -118,6 +119,7 @@ public class RankedService : IBackgroundService
         }
 
         //Seed change | New match | just new seed
+        Console.WriteLine($"{rankedData.StartTime} ------ {_startTime}");
         if(rankedData.StartTime != _startTime)
         {
             _startTime = rankedData.StartTime;

@@ -17,6 +17,6 @@ public class RemoveRuleCommand : BaseCommand
     {
         if (parameter is not LeaderboardRuleViewModel rule) return;
         
-        _panel.Leaderboard.RemoveRule(rule);
+        _panel.RemoveRule(rule);
     }
 }

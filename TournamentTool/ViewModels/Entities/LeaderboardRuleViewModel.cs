@@ -90,21 +90,6 @@ public class LeaderboardRuleViewModel : BaseViewModel
         RuleTypeText = RuleType.ToString();
     }
 
-    public void Evaluate(LeaderboardPlayerEvaluateData data)
-    {
-        if (data.Milestone != ChosenMilestone) return;
-        if (data.PlayerViewModel == null)
-            Trace.WriteLine($"Player: \"???\" entered {ChosenMilestone} -> checking all subrules");
-        else
-            Trace.WriteLine($"Player: \"{data.PlayerViewModel.InGameName}\" entered {ChosenMilestone} -> checking all subrules");
-        
-        foreach (var subRule in SubRules)
-        {
-            var success = subRule.Evaluate(data);
-            if (success) break;
-        }
-    }
-
     public void FilterSplitsAndAdvancements(ControllerMode controllerMode)
     {
         _controllerMode = controllerMode;

@@ -98,9 +98,9 @@ public class Tournament : IPreset
 {
     public ManagementData? ManagementData { get; set; }
 
-    public Leaderboard Leaderboard { get; set; } = new();
+    public Leaderboard Leaderboard { get; init; } = new();
 
-    public List<Player> Players { get; set; } = [];
+    public List<Player> Players { get; init; } = [];
 
     public string Name { get; set; } = string.Empty;
 

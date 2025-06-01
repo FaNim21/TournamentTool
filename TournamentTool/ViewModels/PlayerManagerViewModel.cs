@@ -10,7 +10,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;

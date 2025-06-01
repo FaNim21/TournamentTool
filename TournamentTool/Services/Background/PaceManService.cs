@@ -3,16 +3,16 @@ using TournamentTool.Utils;
 using System.Text.Json;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.Services;
+namespace TournamentTool.Services.Background;
 
 public class PaceManService : IBackgroundService
 {
     private TournamentViewModel TournamentViewModel { get; }
-    private LeaderboardPanelViewModel Leaderboard { get; }
+    private ILeaderboardManager Leaderboard { get; }
     private IPresetSaver PresetSaver { get; }
 
     private IPacemanDataReceiver? _pacemanSidePanelReceiver;
@@ -22,7 +22,7 @@ public class PaceManService : IBackgroundService
     private List<PaceMan> _paceManData = [];
 
 
-    public PaceManService(TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard, IPresetSaver presetSaver)
+    public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver)
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
@@ -87,7 +87,7 @@ public class PaceManService : IBackgroundService
 
             if (wasPaceFound) continue;
 
-            PlayerViewModel? player = TournamentViewModel.GetPlayerByIGN(pace.Nickname!);
+            PlayerViewModel? player = TournamentViewModel.GetPlayerByIGN(pace.Nickname);
             if (TournamentViewModel.IsUsingWhitelistOnPaceMan && player == null) continue;
             if (TournamentViewModel.AddUnknownPacemanPlayersToWhitelist && player == null)
             {
@@ -168,16 +168,22 @@ public class PaceManService : IBackgroundService
 
     public void EvaluatePlayerInLeaderboard(PaceManViewModel paceman)
     {
+        if (paceman.PlayerViewModel == null) return;
+        
         var split =  paceman.GetLastSplit();
         if (split.SplitName.StartsWith("common.")) return;
-
         var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
-        var data = new LeaderboardPlayerEvaluateData()
+        var mainSplit = new LeaderboardTimeline(milestone, (int)split.IGT);
+        
+        var previousSplit = paceman.GetSplit(2);
+        LeaderboardTimeline? pacemanPreviousSplit = null;
+        if (previousSplit != null)
         {
-            PlayerViewModel = paceman.PlayerViewModel!,
-            Milestone = milestone,
-            Time = (int)split.IGT
-        };
+            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
+            pacemanPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.IGT);
+        }
+        
+        var data = new LeaderboardPacemanEvaluateData(paceman.PlayerViewModel.Data, paceman.WorldID, mainSplit, pacemanPreviousSplit);
         Leaderboard.EvaluatePlayer(data);
     }
 

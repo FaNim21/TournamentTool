@@ -104,21 +104,25 @@
                                       Content="Use team names"
                                       Margin="0 0 0 5" />
 
-                        <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" >
                             <TextBlock Text="Controller Mode"
+                                       HorizontalAlignment="Left"
                                        Foreground="White"
                                        Padding="0" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="None"
+                                         HorizontalAlignment="Left"
                                          IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.None}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="PaceMan"
+                                         HorizontalAlignment="Left"
                                          IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Paceman}}" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="Ranked"
+                                         HorizontalAlignment="Left"
                                          IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}" />
                         </StackPanel>
 
@@ -441,23 +445,28 @@
                                           Margin="0 0 0 5" />
 
                                 <TextBlock Text="Use names for povs"
+                                           HorizontalAlignment="Left"
                                            Foreground="White"
                                            Padding="0" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="None"
+                                             HorizontalAlignment="Left"
                                              IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Twitch"
+                                             HorizontalAlignment="Left"
                                              IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Ign"
+                                             HorizontalAlignment="Left"
                                              IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="Whitelist"
+                                             HorizontalAlignment="Left"
                                              IsChecked="{Binding TournamentViewModel.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                             </StackPanel>
                         </StackPanel>

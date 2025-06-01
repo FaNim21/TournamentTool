@@ -9,8 +9,10 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Factories;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
@@ -21,7 +23,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
     private IBackgroundCoordinator BackgroundCoordinator { get; }
-    private LeaderboardPanelViewModel Leaderboard { get; }
+    private ILeaderboardManager Leaderboard { get; }
     public TournamentViewModel TournamentViewModel { get; }
     public IPresetSaver PresetService { get; }
 
@@ -63,7 +65,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand SetRankedDataPathCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, ILeaderboardManager leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
@@ -132,7 +134,6 @@ public class PresetManagerViewModel : SelectableViewModel
             if (data == null) return;
 
             TournamentViewModel.ChangeData(data);
-            Leaderboard.OnPresetChanged();
         }
         catch
         {

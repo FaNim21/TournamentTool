@@ -1,7 +1,7 @@
 ﻿using TournamentTool.Enums;
 using TournamentTool.Interfaces;
-using TournamentTool.Services;
-using TournamentTool.ViewModels;
+using TournamentTool.Managers;
+using TournamentTool.Services.Background;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Factories;
@@ -9,11 +9,11 @@ namespace TournamentTool.Factories;
 public class BackgroundServiceFactory
 {
     private readonly TournamentViewModel _tournament;
-    private readonly LeaderboardPanelViewModel _leaderboard;
-    private IPresetSaver _presetSaver;
+    private readonly ILeaderboardManager _leaderboard;
+    private readonly IPresetSaver _presetSaver;
 
     
-    public BackgroundServiceFactory(TournamentViewModel tournament, LeaderboardPanelViewModel leaderboard, IPresetSaver presetSaver)
+    public BackgroundServiceFactory(TournamentViewModel tournament, ILeaderboardManager leaderboard, IPresetSaver presetSaver)
     {
         _tournament = tournament;
         _leaderboard = leaderboard;

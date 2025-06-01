@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
 using TournamentTool.Modules;
 using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -26,6 +28,8 @@ public partial class App : Application
         services.AddSingleton<TournamentViewModel>();
         services.AddSingleton<IPresetSaver, PresetService>();
         
+        services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
+        
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ICoordinator, MainViewModelCoordinator>();
         
@@ -35,7 +39,7 @@ public partial class App : Application
         services.AddSingleton<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>();
         
-        services.AddSingleton<LeaderboardPanelViewModel>();
+        services.AddTransient<LeaderboardPanelViewModel>();
         services.AddSingleton<SceneManagementViewModel>();
 
         services.AddSingleton<UpdatesViewModel>();

@@ -1,6 +1,6 @@
 ﻿using TournamentTool.Interfaces;
 
-namespace TournamentTool.Services;
+namespace TournamentTool.Services.Background;
 
 public interface IBackgroundService
 {

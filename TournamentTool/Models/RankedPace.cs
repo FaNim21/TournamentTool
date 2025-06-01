@@ -2,7 +2,7 @@
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Modules.SidePanels;
-using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;

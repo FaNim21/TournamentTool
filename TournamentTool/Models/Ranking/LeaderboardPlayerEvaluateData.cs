@@ -1,11 +1,16 @@
 ﻿using TournamentTool.Enums;
-using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models.Ranking;
 
-public class LeaderboardPlayerEvaluateData
-{
-    public PlayerViewModel PlayerViewModel { get; set; } = new();
-    public RunMilestone Milestone { get; set; } = RunMilestone.None;
-    public int Time { get; set; }
-}
+public record LeaderboardTimeline(RunMilestone Milestone, int Time);
+
+public record LeaderboardPlayerEvaluateData(
+    Player Player,
+    LeaderboardTimeline MainSplit,
+    LeaderboardTimeline? PreviousSplit);
+public record LeaderboardPacemanEvaluateData(
+    Player Player,
+    string WorldID,
+    LeaderboardTimeline MainSplit,
+    LeaderboardTimeline? PreviousSplit)
+    : LeaderboardPlayerEvaluateData(Player, MainSplit, PreviousSplit);

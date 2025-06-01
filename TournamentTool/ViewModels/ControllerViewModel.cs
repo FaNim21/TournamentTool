@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
@@ -11,6 +10,7 @@ using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 

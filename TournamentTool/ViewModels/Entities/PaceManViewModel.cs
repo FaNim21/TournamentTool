@@ -4,7 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Models;
-using TournamentTool.Services;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
@@ -16,6 +16,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     private PaceManService Service { get; }
 
     public string Nickname => _paceMan.Nickname;
+    public string WorldID => _paceMan.WorldID;
 
     private bool _isLive = true;
     public bool IsLive
@@ -240,7 +241,12 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 
     public PacemanPaceMilestone GetLastSplit()
     {
-        var lastSplit = _paceMan.Splits[^1];
+        return GetSplit(1)!;
+    }
+    public PacemanPaceMilestone? GetSplit(int indexFromEnd)
+    {
+        if (indexFromEnd > _paceMan.Splits.Count) return null;
+        var lastSplit = _paceMan.Splits[^indexFromEnd];
         return new PacemanPaceMilestone()
         {
             SplitName = lastSplit.SplitName,
