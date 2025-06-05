@@ -1,25 +1,14 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using TournamentTool.Components.Controls;
-using TournamentTool.Models;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Views;
 
 public partial class PresetManagerView : UserControl
 {
-    public ICommand OnListItemClickCommand
-    {
-        get { return (ICommand)GetValue(OnListItemClickCommandProperty); }
-        set { SetValue(OnListItemClickCommandProperty, value); }
-    }
-    public static readonly DependencyProperty OnListItemClickCommandProperty = DependencyProperty.Register("OnListItemClickCommand", typeof(ICommand), typeof(PresetManagerView), new PropertyMetadata(null));
-
-
     public PresetManagerView()
     {
         InitializeComponent();
@@ -31,30 +20,6 @@ public partial class PresetManagerView : UserControl
         e.Handled = regex.IsMatch(e.Text);
     }
 
-    private void OnItemListClick(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is not ListViewItem item) return;
-
-        Keyboard.Focus(item);
-        OnListItemClickCommand?.Execute((TournamentPreset)item.DataContext);
-    }
-
-    private void ListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        ListViewItem? listViewItem = Helper.GetViewItemFromMousePosition<ListViewItem, ListView>(sender as ListView, e.GetPosition(sender as IInputElement));
-        if (listViewItem == null) return;
-
-        var contextMenu = (ContextMenu)FindResource("ListViewContextMenu");
-        contextMenu.DataContext ??= DataContext;
-
-        var currentItem = listViewItem.DataContext;
-        foreach (var item in contextMenu.Items)
-            if (item is MenuItem menuItem)
-                menuItem.CommandParameter = currentItem;
-
-        listViewItem.ContextMenu ??= contextMenu;
-    }
-    
     private void OpenDonateSite(object sender, RequestNavigateEventArgs e)
     {
         Helper.StartProcess(e.Uri.ToString());

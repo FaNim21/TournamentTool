@@ -143,7 +143,7 @@ public class PaceManService : IBackgroundService
     {
         Player player = new Player()
         {
-            UUID = paceMan.User.UUID!,
+            UUID = paceMan.User.UUID!.Replace("-", ""),
             Name = paceMan.Nickname,
             InGameName = paceMan.Nickname,
         };

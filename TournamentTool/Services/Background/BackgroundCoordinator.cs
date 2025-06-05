@@ -12,7 +12,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator
 
     private BackgroundWorker? _worker;
     private CancellationTokenSource? _cancellationTokenSource;
-    
+
     
     public void Register(IBackgroundDataReceiver? receiver)
     {
@@ -33,17 +33,20 @@ public class BackgroundCoordinator : IBackgroundCoordinator
     {
         Service = backgroundService;
 
-        _cancellationTokenSource = new CancellationTokenSource();
-        _worker = new BackgroundWorker { WorkerSupportsCancellation = true };
-        _worker.DoWork += Update;
-        _worker.RunWorkerAsync();
+        if (_worker == null)
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            _worker = new BackgroundWorker { WorkerSupportsCancellation = true };
+            _worker.DoWork += Update;
+            _worker.RunWorkerAsync();
+        }
 
         for (int i = 0; i < Receivers.Count; i++)
         {
             Service.RegisterData(Receivers[i]);
         }
         
-        Console.WriteLine($"Service {backgroundService.GetType()} just started");
+        Console.WriteLine($"New service {backgroundService.GetType()} just started");
     }
 
     private async void Update(object? sender, DoWorkEventArgs e)
@@ -61,7 +64,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator
             catch (TaskCanceledException) { Clear(); }
             catch (Exception ex)
             {
-                DialogBox.Show($"Error: {ex.Message} while updating background service", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show($"Error: {ex.Message} while updating background service {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 Clear();
             }
         }
@@ -71,10 +74,11 @@ public class BackgroundCoordinator : IBackgroundCoordinator
     {
         if (_worker != null)
         {
+            _worker.CancelAsync();
             try
             {
-                _worker.CancelAsync();
                 _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
             }
             catch (Exception e)
             {
@@ -83,8 +87,8 @@ public class BackgroundCoordinator : IBackgroundCoordinator
             _worker.DoWork -= Update;
             _worker.Dispose();
         }
-        _cancellationTokenSource?.Dispose();
-        
+
+        _worker = null;
         if (Service == null) return;
         Console.WriteLine($"Service {Service!.GetType()} just stopped");
         Service = null;

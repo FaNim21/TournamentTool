@@ -28,7 +28,7 @@
         <converters:BooleanInverterConverter x:Key="BooleanInverterConverter" />
          
         <DataTemplate DataType="{x:Type viewModels:PresetManagerViewModel}">
-            <views:PresetManagerView OnListItemClickCommand="{Binding OnItemListClickCommand}" />
+            <views:PresetManagerView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModels:PlayerManagerViewModel}">
             <views:PlayerManagerView />

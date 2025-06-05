@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+             xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:converters="clr-namespace:TournamentTool.Converters"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
@@ -103,6 +104,7 @@
                         <behaviors:ListBoxUpdateBehavior />
                         <behaviors:ListBoxSelectionBehavior />
                         <behaviors:ListBoxClampScrollBehavior />
+                        <behaviors:ListBoxOrderDragAndDropBehavior MoveItemCommand="{Binding MoveRuleItemCommand}" />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type entitiesViewmodels:LeaderboardRuleViewModel}">
@@ -147,15 +149,16 @@
                      behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
                        -->
 
-            <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
+            <ListBox ItemsSource="{Binding EntriesCollection}"
+                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      Background="Transparent"
                      BorderThickness="0"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
-                     ItemsSource="{Binding Entries}"
-                     VirtualizingPanel.IsVirtualizing="True"
-                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Pixel"
                      Margin="5 0 0 0">
                 <i:Interaction.Behaviors>
                     <behaviors:ListBoxUpdateBehavior />
@@ -169,16 +172,22 @@
                                 Width="500"
                                 Height="50">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="1"
+                                <TextBlock Text="{Binding Position}"
                                            Foreground="White"
                                            FontSize="36"
                                            Margin="5 0 0 0" />
-                                <Image Width="30"
+
+                                <Image Source="{Binding Player.Image}"
+                                       Width="30"
                                        Height="30"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
-                                       Margin="7 10 0 0"
-                                       Source="{Binding Player.Image}" />
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       SnapsToDevicePixels="True"
+                                       UseLayoutRounding="True"
+                                       Margin="7 10 0 0" /> 
+                                
                                 <StackPanel Orientation="Vertical"
                                             Margin="5 4 0 0">
 
@@ -209,7 +218,7 @@
                 </ListBox.ItemTemplate>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel />
+                        <vwp:VirtualizingWrapPanel />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.ItemContainerStyle>

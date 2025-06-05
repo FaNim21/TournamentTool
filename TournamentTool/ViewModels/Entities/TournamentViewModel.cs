@@ -554,7 +554,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     {
         foreach (var player in Players)
         {
-            if (player.UUID != uuid) continue;
+            if (!player.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase)) continue;
             return player;
         }
         
@@ -569,16 +569,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
         
         return null;
-    }
-    public string GetUUIDByIGN(string ign)
-    {
-        foreach (var player in Players)
-        {
-            if (!player.InGameName!.Equals(ign)) continue;
-            return player.UUID;
-        }
-        
-        return string.Empty;
     }
     
     public void ClearPlayerStreamData()

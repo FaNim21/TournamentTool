@@ -212,7 +212,6 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private void UpdateBackgroundService(ControllerMode mode, bool isValidated)
     {
-        BackgroundCoordinator.Clear();
         if (!isValidated) return;
         
         var service = _backgroundServiceFactory.Create(mode);

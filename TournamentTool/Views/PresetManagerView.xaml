@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:enums="clr-namespace:TournamentTool.Enums"
@@ -17,13 +19,17 @@
     <UserControl.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="Clear"
-                      Command="{Binding ClearCurrentPresetCommand}" />
+                      Command="{Binding DataContext.ClearCurrentPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}" />
             <MenuItem Header="Duplicate"
-                      Command="{Binding DuplicateCurrentPresetCommand}" />
+                      Command="{Binding DataContext.DuplicateCurrentPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}" />
             <MenuItem Header="Rename"
-                      Command="{Binding RenameItemCommand}" />
+                      Command="{Binding DataContext.RenameItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}" />
             <MenuItem Header="Delete"
-                      Command="{Binding RemoveCurrentPresetCommand}" />
+                      Command="{Binding DataContext.RemoveCurrentPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}" />
         </ContextMenu>
     </UserControl.Resources>
     <Grid>
@@ -530,19 +536,19 @@
                       SelectionMode="Single"
                       AllowDrop="True"
                       Grid.Row="0"
-                      PreviewMouseRightButtonDown="ListView_PreviewMouseRightButtonDown"
                       ItemsSource="{Binding Presets}"
                       SelectedItem="{Binding CurrentChosen}">
+                <i:Interaction.Behaviors>
+                    <behaviors:ListViewItemFocusBehavior OnItemListClick="{Binding OnItemListClickCommand}" />
+                </i:Interaction.Behaviors>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        <Setter Property="ContextMenu"
+                                Value="{StaticResource ListViewContextMenu}" />
                         <Setter Property="Background"
                                 Value="#404447" />
                         <Setter Property="Foreground"
                                 Value="#bcbcbc" />
-                        <EventSetter Event="PreviewMouseLeftButtonDown"
-                                     Handler="OnItemListClick" />
-                        <EventSetter Event="PreviewMouseRightButtonDown"
-                                     Handler="OnItemListClick" />
                     </Style>
                 </ListView.ItemContainerStyle>
 

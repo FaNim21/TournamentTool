@@ -19,8 +19,7 @@ public class ViewEntryCommand : BaseCommand
     {
         if (parameter is not LeaderboardEntryViewModel entry) return;
 
-        LeaderboardEntryViewViewModel viewModel = new(entry);
-        LeaderboardEntryViewWindow window = new() { DataContext = viewModel };
+        LeaderboardEntryViewWindow window = new() { DataContext = entry };
         
         _dialogWindow.ShowDialog(window);
     }

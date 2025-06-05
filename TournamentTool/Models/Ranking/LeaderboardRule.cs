@@ -1,5 +1,4 @@
 ﻿using TournamentTool.Enums;
-using TournamentTool.Utils;
 
 namespace TournamentTool.Models.Ranking;
 
@@ -17,20 +16,14 @@ public class LeaderboardRule
     public LeaderboardRuleType RuleType { get; set; } = LeaderboardRuleType.Split;
     public RunMilestone ChosenAdvancement { get; set; } = RunMilestone.None;
     public List<LeaderboardSubRule> SubRules { get; set; } = [];
-    
-    
+    public int Priority { get; set; }
+
+
     public LeaderboardSubRule? Evaluate(LeaderboardPlayerEvaluateData data)
     {
         foreach (var subRule in SubRules)
         {
-            if (!subRule.Evaluate(data)) continue;
-            
-            var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
-            var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
-            Console.WriteLine(data.Player == null
-                ? $"Player: ??? just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime}"
-                : $"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime}");
-
+            if (!subRule.Evaluate(data)) continue; 
             return subRule;
         }
 

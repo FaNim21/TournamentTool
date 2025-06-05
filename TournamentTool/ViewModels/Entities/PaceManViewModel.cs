@@ -194,7 +194,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 
         if (PlayerViewModel == null)
         {
-            string url = $"https://minotar.net/helm/{_paceMan.User.UUID}/180.png";
+            string url = $"https://minotar.net/helm/{_paceMan.User.UUID}/8.png";
             HeadImageOpacity = 0.35f;
             Task.Run(async () =>
             {

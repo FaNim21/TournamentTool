@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+             xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:entitiesViewModels="clr-namespace:TournamentTool.ViewModels.Entities"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
@@ -33,8 +34,10 @@
                  Width="273"
                  VerticalAlignment="Top"
                  HorizontalAlignment="Left"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
+                 VirtualizingStackPanel.IsVirtualizing="True"
+                 VirtualizingStackPanel.VirtualizationMode="Recycling"
+                 VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
+                 VirtualizingPanel.ScrollUnit="Pixel"
                  SelectionMode="Multiple"
                  AllowDrop="True"
                  ItemsSource="{Binding GroupedPaceManPlayers}"
@@ -67,7 +70,14 @@
                                     <Image Source="{Binding HeadImage, Mode=OneWay}"
                                            Width="30"
                                            Height="30"
-                                           Opacity="{Binding HeadImageOpacity, Mode=OneWay}" />
+                                           Opacity="{Binding HeadImageOpacity, Mode=OneWay}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                           SnapsToDevicePixels="True"
+                                           UseLayoutRounding="True"
+                                           Margin="0 5 0 0" /> 
 
                                     <TextBlock Text="{Binding Nickname, Mode=OneWay}"
                                                Width="67"
@@ -153,14 +163,14 @@
                     </GroupStyle.HeaderTemplate>
                     <GroupStyle.Panel>
                         <ItemsPanelTemplate>
-                            <StackPanel />
+                            <VirtualizingStackPanel />
                         </ItemsPanelTemplate>
                     </GroupStyle.Panel>
                 </GroupStyle>
             </ListBox.GroupStyle>
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Vertical" />
+                    <vwp:VirtualizingWrapPanel Orientation="Vertical" />
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ListBox.ItemContainerStyle>

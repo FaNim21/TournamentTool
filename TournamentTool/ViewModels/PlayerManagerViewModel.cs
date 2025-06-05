@@ -199,12 +199,16 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     } 
     public override void OnEnable(object? parameter)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        var collectionViewSource = CollectionViewSource.GetDefaultView(Tournament.Players);
+        using (collectionViewSource.DeferRefresh())
         {
-            var collectionViewSource = CollectionViewSource.GetDefaultView(Tournament.Players);
             collectionViewSource.Filter = null;
             collectionViewSource.Filter = FilterPlayers;
             collectionViewSource.SortDescriptions.Clear();
+        }
+        
+        Application.Current.Dispatcher.Invoke(() =>
+        {
             FilteredPlayersCollectionView = collectionViewSource;
         });
         

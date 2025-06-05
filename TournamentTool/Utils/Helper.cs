@@ -117,15 +117,19 @@ public static class Helper
         return result;
     }
 
-    public static T? GetViewItemFromMousePosition<T, U>(U? view, Point mousePosition) where T : Control where U : ItemsControl
+    public static object? GetItemUnderMouse<TItem>(UIElement item, Func<IInputElement, Point> getPosition) where TItem : FrameworkElement
     {
-        HitTestResult hitTestResult = VisualTreeHelper.HitTest(view, mousePosition);
-        DependencyObject? target = hitTestResult?.VisualHit;
+        return GetUIItemUnderMouse<TItem>(item, getPosition)?.DataContext;
+    }
+    public static TItem? GetUIItemUnderMouse<TItem>(UIElement item, Func<IInputElement, Point> getPosition) where TItem : FrameworkElement
+    {
+        var pos = getPosition(item);
+        var element = item.InputHitTest(pos) as DependencyObject;
+    
+        while (element != null && element is not ListBoxItem)
+            element = VisualTreeHelper.GetParent(element);
 
-        while (target != null && target is not T)
-            target = VisualTreeHelper.GetParent(target);
-
-        return target as T;
+        return element as TItem;
     }
 
     public static string GetUniqueName(string oldName, string newName, Func<string, bool> CheckIfUnique)

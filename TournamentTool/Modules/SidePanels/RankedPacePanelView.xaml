@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+             xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:local="clr-namespace:TournamentTool.Modules.SidePanels"
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
@@ -25,6 +26,8 @@
              HorizontalAlignment="Left"
              VirtualizingPanel.IsVirtualizing="True"
              VirtualizingPanel.VirtualizationMode="Recycling"
+             VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+             VirtualizingPanel.ScrollUnit="Pixel"
              SelectionMode="Multiple"
              AllowDrop="True"
              ItemsSource="{Binding GroupedRankedPaces}"
@@ -57,6 +60,12 @@
                                        Width="30"
                                        Height="30"
                                        Opacity="{Binding HeadImageOpacity, Mode=OneWay}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       SnapsToDevicePixels="True"
+                                       UseLayoutRounding="True"
                                        Margin="5" />
                                 <TextBlock FontSize="15"
                                            Width="140"
@@ -176,14 +185,14 @@
                 </GroupStyle.HeaderTemplate>
                 <GroupStyle.Panel>
                     <ItemsPanelTemplate>
-                        <StackPanel />
+                        <VirtualizingStackPanel />
                     </ItemsPanelTemplate>
                 </GroupStyle.Panel>
             </GroupStyle>
         </ListBox.GroupStyle>
         <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
-                <WrapPanel Orientation="Vertical" />
+                <vwp:VirtualizingWrapPanel/>
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemContainerStyle>

@@ -300,7 +300,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
 
         if (Player == null)
         {
-            string url = $"https://minotar.net/helm/{InGameName}/180.png";
+            string url = $"https://minotar.net/helm/{InGameName}/8.png";
             Task.Run(async () =>
             {
                 HeadImage = await Helper.LoadImageFromUrlAsync(url);

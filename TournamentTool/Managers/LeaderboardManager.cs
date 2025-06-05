@@ -1,10 +1,13 @@
 ﻿using TournamentTool.Models.Ranking;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Managers;
 
 public interface ILeaderboardManager
 {
+    event Action<LeaderboardEntry>? OnEntryUpdate;
+    
     void EvaluatePlayer(LeaderboardPlayerEvaluateData data);
 }
 
@@ -12,6 +15,8 @@ public class LeaderboardManager : ILeaderboardManager
 {
     private TournamentViewModel Tournament { get; }
 
+    public event Action<LeaderboardEntry>? OnEntryUpdate;
+    
     
     public LeaderboardManager(TournamentViewModel tournament)
     {
@@ -23,9 +28,11 @@ public class LeaderboardManager : ILeaderboardManager
         if (data.Player == null) return;
         if (Tournament.Leaderboard.Rules.Count == 0) return;
         
+        /*
         Console.WriteLine(data.Player == null
             ? $"Player: ??? achieved milestone -> checking all rules ({data.MainSplit.Milestone})"
             : $"Player: \"{data.Player.InGameName}\" achieved milestone -> checking all rules ({data.MainSplit.Milestone})");
+            */
 
         foreach (var rule in Tournament.Leaderboard.Rules)
         {
@@ -41,22 +48,16 @@ public class LeaderboardManager : ILeaderboardManager
     {
         if (data is LeaderboardPacemanEvaluateData paceman)
         {
-            Console.WriteLine($"Run url: https://paceman.gg/stats/run/{paceman.WorldID}");
+            // Console.WriteLine($"Run url: https://paceman.gg/stats/run/{paceman.WorldID}");
         }
         
-        Console.WriteLine($"Updating entry for: {data.Player.InGameName} with new points: {subRule.BasePoints}");
+        var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
+        var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
+        Console.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}");
 
-        LeaderboardEntry entry = GetOrCreateEntry(data.Player.UUID);
+        LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
         entry.AddPoints(subRule.BasePoints);
-    }
-
-    private LeaderboardEntry GetOrCreateEntry(string uuid)
-    {
-        LeaderboardEntry? entry = Tournament.Leaderboard.GetEntry(uuid);
-        if (entry != null) return entry;
-        
-        entry = new LeaderboardEntry { PlayerUUID = uuid };
-        Tournament.Leaderboard.Entries.Add(entry);
-        return entry;
+        Tournament.Leaderboard.RecalculateEntryPosition(entry);
+        OnEntryUpdate?.Invoke(entry);
     }
 }
