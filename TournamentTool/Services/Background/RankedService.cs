@@ -9,6 +9,7 @@ using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
+using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -240,6 +241,29 @@ public class RankedService : IBackgroundService
         }
 
         pace.Player = playerViewModel;
+    }
+    
+    public void EvaluatePlayerInLeaderboard(RankedPace pace)
+    {
+        if (pace.Player == null) return;
+        
+        /*
+        var split = pace.GetLastSplit();
+        if (split.SplitName.StartsWith("common.")) return;
+        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
+        var mainSplit = new LeaderboardTimeline(milestone, (int)split.IGT);
+        
+        var previousSplit = pace.GetSplit(2);
+        LeaderboardTimeline? pacemanPreviousSplit = null;
+        if (previousSplit != null)
+        {
+            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
+            pacemanPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.IGT);
+        }
+        */
+        
+        var data = new LeaderboardRankedEvaluateData(pace.Player.Data, null, null);
+        //Leaderboard.EvaluatePlayer(data);
     }
     
     public RankedBestSplit GetBestSplit(RankedSplitType splitType)

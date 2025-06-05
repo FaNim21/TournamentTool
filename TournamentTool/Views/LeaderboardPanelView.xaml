@@ -50,6 +50,9 @@
             
             <Grid Grid.Column="0">
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <ToggleButton IsChecked="{Binding EnableLeaderboard}"
+                                  Content="Enable Leaderboard"
+                                  Margin="5 10 0 0" />
                     <components:ButtonNormal ContentText="Add Rule"
                                              FontSize="15"
                                              Width="150"
@@ -61,6 +64,12 @@
                                              Width="150"
                                              Height="30"
                                              OnCommand="{Binding AddEntryCommand}"
+                                             Margin="0 10 0 0" />
+                    <components:ButtonNormal ContentText="Remove all entries"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding RemoveAllEntriesCommand}"
                                              Margin="0 10 0 0" />
                 </StackPanel>
 
@@ -145,10 +154,6 @@
                   Stroke="#000D14"
                   StrokeThickness="3" />
 
-            <!--
-                     behaviors:ListBoxExtendSelection.SynchronizedSelectedItems="{Binding SelectedPlayers}"
-                       -->
-
             <ListBox ItemsSource="{Binding EntriesCollection}"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -202,14 +207,14 @@
                                         <Run Text="{Binding Points}" />
 
                                         <Run Text=" - " />
-                                        
+
                                         <Run Text="Best time: " />
-                                        <Run Text="XX:XX" />
+                                        <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
 
                                         <Run Text=" - " />
 
                                         <Run Text="Average time: " />
-                                        <Run Text="XX:XX" />
+                                        <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
                                     </TextBlock>
                                 </StackPanel>
                             </StackPanel>

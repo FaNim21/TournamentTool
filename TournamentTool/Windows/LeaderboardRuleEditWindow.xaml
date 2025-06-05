@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
+        xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
         xmlns:local="clr-namespace:TournamentTool.Windows"
         xmlns:models="clr-namespace:TournamentTool.Models"
         xmlns:RankingModels="clr-namespace:TournamentTool.Models.Ranking"
@@ -81,6 +83,9 @@
                           AllowDrop="True"
                           SelectedItem="{Binding SelectedSubRule}"
                           ItemsSource="{Binding Rule.SubRules}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ListBoxOrderDragAndDropBehavior MoveItemCommand="{Binding MoveSubRuleCommand}" />
+                    </i:Interaction.Behaviors>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="Background"

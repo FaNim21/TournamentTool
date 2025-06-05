@@ -2,7 +2,6 @@
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
-using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels.Entities;
 
@@ -51,6 +50,8 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
 
     public ICommand AddSubRuleCommand { get; set; }
     public ICommand RemoveSubRuleCommand { get; set; }
+    
+    public ICommand MoveSubRuleCommand { get; set; }
 
 
     public LeaderboardRuleEditViewModel(LeaderboardRuleViewModel rule)
@@ -63,6 +64,8 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         
         AddSubRuleCommand = new RelayCommand(AddSubRule);
         RemoveSubRuleCommand = new RemoveSubRuleCommand(this);
+        
+        MoveSubRuleCommand = new RelayCommand<(int oldIndex, int newIndex)>(MoveSubRuleItem);
     }
 
     private void OpenGeneralConfigRule()
@@ -87,4 +90,21 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         Rule.SubRules.Remove(subRule);
     }
 
+    private void MoveSubRuleItem((int oldIndex, int newIndex) indexTuple)
+    {
+        int oldIndex = indexTuple.oldIndex;
+        int newIndex = indexTuple.newIndex;
+        
+        if (oldIndex < 0 || 
+            newIndex < 0 || 
+            oldIndex == newIndex || 
+            oldIndex >= Rule.SubRules.Count ||
+            newIndex >= Rule.SubRules.Count) return;
+        
+        Rule.SubRules.Move(oldIndex, newIndex);
+
+        var item = _ruleModel.SubRules[oldIndex];
+        _ruleModel.SubRules.RemoveAt(oldIndex);
+        _ruleModel.SubRules.Insert(newIndex, item);
+    }
 }

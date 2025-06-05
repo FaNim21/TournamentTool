@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Windows.Input;
+using TournamentTool.Commands;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 
@@ -76,7 +78,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(TimeText));
         } 
     }
-
+    
     
     public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule)
     {
@@ -85,5 +87,4 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         
         Time = Model.Time;
     }
-
 }

@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
+using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
@@ -26,6 +27,18 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     public ObservableCollection<LeaderboardRuleViewModel> Rules { get; } = [];
 
+    private bool _enableLeaderboard = true;
+    public bool EnableLeaderboard
+    {
+        get => _enableLeaderboard;
+        set
+        {
+            _enableLeaderboard = value;
+            LeaderboardManager.IsLeaderboardWorking = value;
+            OnPropertyChanged(nameof(EnableLeaderboard));
+        }
+    }
+
     public ICommand AddEntryCommand { get; set; }
     public ICommand AddRuleCommand { get; set; }
 
@@ -34,7 +47,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     public ICommand ViewEntryCommand { get; set; }
     public ICommand RemoveEntryCommand { get; set; }
-    
+    public ICommand RemoveAllEntriesCommand { get; set; }
+
     public ICommand RefreshScriptsCommand { get; set; }
     public ICommand OpenScriptsFolderCommand { get; set; }
 
@@ -57,6 +71,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
         RemoveEntryCommand = new RemoveEntryCommand(this);
+        RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
         RefreshScriptsCommand = new RelayCommand(RefreshScripts);
         OpenScriptsFolderCommand = new RelayCommand(() => { Helper.StartProcess(Consts.ScriptsPath);});
@@ -110,6 +125,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         {
             EntriesCollection = collectionViewSource;
         });
+        
+        RefreshAllEntries();
     }
 
     private void OnEntryUpdate(LeaderboardEntry newEntry)
@@ -139,7 +156,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     {
         foreach (var entry in Entries)
         {
-            entry.Refresh();
+            entry.Refresh(Rules[0].ChosenMilestone);
         }
     }
     
@@ -194,10 +211,22 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             newIndex >= Tournament.Leaderboard.Rules.Count) return;
         
         Rules.Move(oldIndex, newIndex);
-        
         var item = Tournament.Leaderboard.Rules[oldIndex];
         Tournament.Leaderboard.Rules.RemoveAt(oldIndex);
         Tournament.Leaderboard.Rules.Insert(newIndex, item);
+        RefreshAllEntries();
+    }
+    
+    private void RemoveAllEntries()
+    {
+        if (DialogBox.Show($"Are you sure you want to remove all entries in leaderboard?",
+                "Removing all leaderboard entries", MessageBoxButton.YesNo, MessageBoxImage.Warning) !=
+            MessageBoxResult.Yes) return;
+        
+        foreach (var entry in Entries.ToList())
+        {
+            RemoveLeaderboardEntry(entry);
+        }
     }
 
     private void RefreshScripts()

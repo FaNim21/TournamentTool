@@ -16,7 +16,6 @@ public class LeaderboardRule
     public LeaderboardRuleType RuleType { get; set; } = LeaderboardRuleType.Split;
     public RunMilestone ChosenAdvancement { get; set; } = RunMilestone.None;
     public List<LeaderboardSubRule> SubRules { get; set; } = [];
-    public int Priority { get; set; }
 
 
     public LeaderboardSubRule? Evaluate(LeaderboardPlayerEvaluateData data)
