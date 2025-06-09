@@ -8,15 +8,15 @@ namespace TournamentTool.Models.Ranking;
 [JsonDerivedType(typeof(EntryPacemanMilestoneData), "paceman")]
 [JsonDerivedType(typeof(EntryRankedMilestoneData), "ranked")]
 public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points);
-public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
-public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points) : EntryMilestoneData(Main, Previous, Points);
+public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
+public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points) : EntryMilestoneData(Main, Previous, Points);
 
 public class BestMilestoneData
 {
     public int BestTime { get; set; } = int.MaxValue;
-    public int AllTimes { get; set; }
+    public long AllTimes { get; set; }
     public int Amount { get; set; }
-    [JsonIgnore] public int Average => AllTimes / Amount;
+    [JsonIgnore] public int Average => (int)(AllTimes / Amount);
     
     public void AddTime(LeaderboardTimeline data)
     {

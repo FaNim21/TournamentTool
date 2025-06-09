@@ -11,11 +11,13 @@ public class LeaderboardSubRule
     public int MaxWinners { get; set; }
     public bool Repeatable { get; set; }
 
-    public List<SubRuleWinnerData> winners = [];
+    public Dictionary<string, SubRuleWinnerData> winners = [];
     
     
     public bool Evaluate(LeaderboardPlayerEvaluateData data)
     {
-        return data.MainSplit.Time <= Time;
+        if (data.MainSplit.Time > Time) return false;
+        
+        return true;
     }
 }

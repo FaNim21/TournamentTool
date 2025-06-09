@@ -8,8 +8,8 @@ public abstract class LeaderboardEntryMilestoneFactory
     {
         return evaluateData switch
         {
-            LeaderboardPacemanEvaluateData data => new EntryPacemanMilestoneData(data.MainSplit, data.MainSplit, Points, data.WorldID),
-            LeaderboardRankedEvaluateData data => new EntryRankedMilestoneData(data.MainSplit, data.MainSplit, Points), 
+            LeaderboardPacemanEvaluateData data => new EntryPacemanMilestoneData(data.MainSplit, data.PreviousSplit, Points, data.WorldID),
+            LeaderboardRankedEvaluateData data => new EntryRankedMilestoneData(data.MainSplit, data.PreviousSplit, Points), 
             _ => null
         };
     }

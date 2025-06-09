@@ -179,7 +179,7 @@ public class PaceManService : IBackgroundService
         LeaderboardTimeline? pacemanPreviousSplit = null;
         if (previousSplit != null)
         {
-            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
+            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(previousSplit.SplitName);
             pacemanPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.IGT);
         }
         
