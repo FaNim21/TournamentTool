@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using MethodTimer;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Components.Controls;
@@ -12,7 +13,7 @@ using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardPanelViewModel : SelectableViewModel
 {
@@ -26,18 +27,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICollectionView? EntriesCollection { get; set; }
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     public ObservableCollection<LeaderboardRuleViewModel> Rules { get; } = [];
-
-    private bool _enableLeaderboard = true;
-    public bool EnableLeaderboard
-    {
-        get => _enableLeaderboard;
-        set
-        {
-            _enableLeaderboard = value;
-            LeaderboardManager.IsLeaderboardWorking = value;
-            OnPropertyChanged(nameof(EnableLeaderboard));
-        }
-    }
 
     public ICommand AddEntryCommand { get; set; }
     public ICommand AddRuleCommand { get; set; }
@@ -152,6 +141,19 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RefreshAllEntries();
     }
 
+    private void RecalculateAllEntries()
+    {
+        foreach (var entry in Entries)
+        {
+            Leaderboard.RecalculateEntryPosition(entry.GetLeaderboardEntry());
+            entry.Refresh(Rules[0].ChosenMilestone);
+        }
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            EntriesCollection?.Refresh();
+        });
+    }
     public void RefreshAllEntries()
     {
         foreach (var entry in Entries)
@@ -214,7 +216,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         var item = Tournament.Leaderboard.Rules[oldIndex];
         Tournament.Leaderboard.Rules.RemoveAt(oldIndex);
         Tournament.Leaderboard.Rules.Insert(newIndex, item);
-        RefreshAllEntries();
+        
+        RecalculateAllEntries();
     }
     
     private void RemoveAllEntries()

@@ -13,6 +13,7 @@ using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Ranking;
 
 namespace TournamentTool.ViewModels;
 

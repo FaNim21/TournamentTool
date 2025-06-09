@@ -3,9 +3,8 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Models.Ranking;
-using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardRuleEditViewModel : BaseViewModel
 {

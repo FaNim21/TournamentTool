@@ -7,6 +7,7 @@
         xmlns:vm="clr-namespace:TournamentTool.ViewModels"
         xmlns:components="clr-namespace:TournamentTool.Components.Controls"
         xmlns:views="clr-namespace:TournamentTool.Views"
+        xmlns:ranking="clr-namespace:TournamentTool.ViewModels.Ranking"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Closed="OnClosed"
@@ -198,7 +199,7 @@
                         <components:HamburgerMenuItem Text="Leaderboard"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Leaderboard"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:LeaderboardPanelViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type ranking:LeaderboardPanelViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Scene Config"
                                                       Command="{Binding SelectViewModelCommand}"

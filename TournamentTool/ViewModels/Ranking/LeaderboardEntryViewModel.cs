@@ -1,8 +1,9 @@
 ﻿using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.ViewModels.Entities;
+namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardEntryViewModel : BaseViewModel
 {
@@ -78,13 +79,13 @@ public class LeaderboardEntryViewModel : BaseViewModel
         var data = _entry.GetBestMilestone(milestone);
         if (data == null)
         {
-            BestTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(0).ToFormattedTime();
-            AverageTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(0).ToFormattedTime(); 
+            BestTimeOnPrioritizeMilestone = "Unknown";
+            AverageTimeOnPrioritizeMilestone = "Unknown"; 
             return;
         }
-        
+
         BestTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(data.BestTime).ToFormattedTime();
-        AverageTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(data.Average).ToFormattedTime(); 
+        AverageTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(data.Average).ToFormattedTime() + $" ({data.Amount})"; 
     }
 
     public LeaderboardEntry GetLeaderboardEntry() => _entry;

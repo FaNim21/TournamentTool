@@ -1,6 +1,5 @@
 ﻿using TournamentTool.Interfaces;
-using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Ranking;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Commands.Leaderboard;

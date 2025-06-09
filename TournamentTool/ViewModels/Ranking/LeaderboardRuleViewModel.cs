@@ -8,7 +8,7 @@ using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 
-namespace TournamentTool.ViewModels.Entities;
+namespace TournamentTool.ViewModels.Ranking;
 
 /// <summary>
 /// Tutaj trzeba bedzie trigerowac tez skrypty Lua pod punktacje

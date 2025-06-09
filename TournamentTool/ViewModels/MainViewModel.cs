@@ -7,6 +7,7 @@ using TournamentTool.Components;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Ranking;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;

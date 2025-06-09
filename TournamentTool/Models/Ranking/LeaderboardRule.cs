@@ -20,6 +20,8 @@ public class LeaderboardRule
 
     public LeaderboardSubRule? Evaluate(LeaderboardPlayerEvaluateData data)
     {
+        if (data.MainSplit.Milestone != ChosenAdvancement) return null;
+        
         foreach (var subRule in SubRules)
         {
             if (!subRule.Evaluate(data)) continue; 

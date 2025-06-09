@@ -4,7 +4,7 @@ using TournamentTool.Commands;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 
-namespace TournamentTool.ViewModels.Entities;
+namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardSubRuleViewModel : BaseViewModel
 {

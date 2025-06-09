@@ -1,16 +1,13 @@
-﻿using MethodTimer;
-
-namespace TournamentTool.Models.Ranking;
+﻿namespace TournamentTool.Models.Ranking;
 
 public record Leaderboard
 {
     public List<LeaderboardEntry> Entries { get; init; } = [];
     public List<LeaderboardRule> Rules { get; init; } = [];
 
-    
-    [Time]
     public void RecalculateEntryPosition(LeaderboardEntry updatedEntry)
     {
+        bool wasChanged = false;
         int index = Entries.IndexOf(updatedEntry);
         if (index == -1) return;
         if (Entries.Count == 1)
@@ -18,7 +15,7 @@ public record Leaderboard
             updatedEntry.Position = 1;
             return;
         }
-            
+        
         //Punkty wzrosly
         while (index > 0 && Entries[index].CompareTo(Entries[index - 1], Rules[0].ChosenAdvancement) >= 0)
         {
@@ -28,6 +25,7 @@ public record Leaderboard
             Entries[index - 1].Position = index;
         
             index--;
+            wasChanged = true;
         }
         
         //Punkty spadly
@@ -39,7 +37,11 @@ public record Leaderboard
             Entries[index + 1].Position = index + 2;
         
             index++;
+            wasChanged = true;
         }
+
+        if (wasChanged) return;
+        Entries[index].Position = index + 1;
     }
     
     public LeaderboardEntry GetOrCreateEntry(string uuid)

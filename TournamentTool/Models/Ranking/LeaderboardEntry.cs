@@ -1,8 +1,12 @@
-﻿using TournamentTool.Enums;
+﻿using System.Text.Json.Serialization;
+using TournamentTool.Enums;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Models.Ranking;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(EntryPacemanMilestoneData), "paceman")]
+[JsonDerivedType(typeof(EntryRankedMilestoneData), "ranked")]
 public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points);
 public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
 public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points) : EntryMilestoneData(Main, Previous, Points);
@@ -12,7 +16,7 @@ public class BestMilestoneData
     public int BestTime { get; set; } = int.MaxValue;
     public int AllTimes { get; set; }
     public int Amount { get; set; }
-    public int Average => AllTimes / Amount;
+    [JsonIgnore] public int Average => AllTimes / Amount;
     
     public void AddTime(LeaderboardTimeline data)
     {
@@ -41,7 +45,6 @@ public sealed class LeaderboardEntry
     {
         Points += points;
     }
-
     public void AddMilestone(EntryMilestoneData data)
     {
         BestMilestones.TryGetValue(data.Main.Milestone, out var bestMilestone);
@@ -51,9 +54,15 @@ public sealed class LeaderboardEntry
             BestMilestones[data.Main.Milestone] = bestMilestone;
         }
         
+        //temp pod debugowanie
         if (data.Main.Time < bestMilestone.BestTime)
         {
-            Console.WriteLine($"Player {PlayerUUID} beats his best time on {data.Main.Milestone} from {TimeSpan.FromMilliseconds(bestMilestone.BestTime).ToFormattedTime()} to {TimeSpan.FromMilliseconds(data.Main.Time).ToFormattedTime()}");
+            string oldTime = "Unknown";
+            if (bestMilestone.BestTime != int.MaxValue)
+                oldTime = TimeSpan.FromMilliseconds(bestMilestone.BestTime).ToFormattedTime();
+            string newTime = TimeSpan.FromMilliseconds(data.Main.Time).ToFormattedTime();
+            
+            Console.WriteLine($"Player {PlayerUUID} beats his best time on {data.Main.Milestone} from {oldTime} to {newTime}");
         }
         bestMilestone.AddTime(data.Main);
         
