@@ -45,8 +45,10 @@ public sealed class LeaderboardEntry
     {
         Points += points;
     }
-    public void AddMilestone(EntryMilestoneData data)
+    public bool AddMilestone(EntryMilestoneData data)
     {
+        if (Milestones.Count > 0 && data == Milestones[^1]) return false;
+        
         BestMilestones.TryGetValue(data.Main.Milestone, out var bestMilestone);
         if (bestMilestone == null)
         {
@@ -57,6 +59,7 @@ public sealed class LeaderboardEntry
         bestMilestone.AddTime(data.Main);
         Milestones.Add(data);
         AddPoints(data.Points);
+        return true;
     }
 
     public BestMilestoneData? GetBestMilestone(RunMilestone milestone)

@@ -44,7 +44,9 @@ public class LeaderboardManager : ILeaderboardManager
         LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
         var milestone = LeaderboardEntryMilestoneFactory.Create(data, subRule.BasePoints);
         if (milestone == null) return;
-        entry.AddMilestone(milestone);
+        
+        var success = entry.AddMilestone(milestone);
+        if (!success) return;
 
         int oldPosition = entry.Position;
         Tournament.Leaderboard.RecalculateEntryPosition(entry);
