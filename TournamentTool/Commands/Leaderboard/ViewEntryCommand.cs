@@ -18,8 +18,8 @@ public class ViewEntryCommand : BaseCommand
     {
         if (parameter is not LeaderboardEntryViewModel entry) return;
 
+        entry.SetupOpeningWindow();
         LeaderboardEntryViewWindow window = new() { DataContext = entry };
-        
         _dialogWindow.ShowDialog(window);
     }
 }

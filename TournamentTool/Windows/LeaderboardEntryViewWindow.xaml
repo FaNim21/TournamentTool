@@ -10,6 +10,7 @@
         xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
         xmlns:entityViewmodel="clr-namespace:TournamentTool.ViewModels.Entities"
         xmlns:rankingViewModels="clr-namespace:TournamentTool.ViewModels.Ranking"
+        xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         d:DataContext="{d:DesignInstance Type=rankingViewModels:LeaderboardEntryViewModel}"
         mc:Ignorable="d"
         d:DesignWidth="400"
@@ -21,8 +22,8 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         WindowStartupLocation="CenterOwner"
-        Width="400"
-        Height="250" >
+        Width="450"
+        Height="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="29" />
@@ -43,11 +44,157 @@
         </Grid>
 
         <Grid Grid.Row="1">
-            <TextBlock Text="Witam leaderboard entry"
-                       Foreground="White"
-                       FontSize="36"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal">
+                <Image Source="{Binding Player.Image}"
+                       Width="30"
+                       Height="30"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Top"
+                       Stretch="Uniform"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       SnapsToDevicePixels="True"
+                       UseLayoutRounding="True"
+                       Margin="10" />
+
+                <StackPanel Orientation="Vertical"
+                            Margin="5 4 0 0">
+                    <TextBlock Text="{Binding Player.InGameName}"
+                               FontWeight="Bold"
+                               FontSize="17"
+                               Foreground="Wheat"
+                               Background="Transparent" />
+                    <TextBlock Foreground="White">
+                        <Run Text="Points: " />
+                        <Run Text="{Binding Points}" />
+
+                        <Run Text=" - " />
+
+                        <Run Text="Best time: " />
+                        <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
+
+                        <Run Text=" - " />
+
+                        <Run Text="Average time: " />
+                        <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding Milestones}"
+                     BorderThickness="0"
+                     SelectionMode="Single"
+                     Background="Transparent"
+                     IsTabStop="False"
+                     Focusable="False"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     ScrollViewer.CanContentScroll="True"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     Margin="5 0 0 0">
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestoneRankedDataViewModel}">
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                Width="420">
+                            <TextBlock Foreground="White"
+                                       Margin="2 2 2 4">
+                                <Run Text="Main: " />
+                                <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
+
+                                <Run Text=" | " />
+
+                                <Run Text="Time: " />
+                                <Run Text="{Binding MainMilestoneTime, Mode=OneTime}" />
+
+                                <LineBreak />
+
+                                <Run Text="Previous: " />
+                                <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
+
+                                <Run Text=" | " />
+
+                                <Run Text="Time: " />
+                                <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}" />
+
+                                <LineBreak />
+
+                                <Run Text="Points: " />
+                                <Run Text="{Binding Points, Mode=OneTime}" />
+                            </TextBlock>
+                        </Border>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestonePacemanDataViewModel}">
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                Width="420">
+                            <TextBlock Foreground="White"
+                                       Margin="2 2 2 4">
+                                <Run Text="Main: " />
+                                <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
+
+                                <Run Text=" | " />
+
+                                <Run Text="Time: " />
+                                <Run Text="{Binding MainMilestoneTime, Mode=OneTime}" />
+
+                                <LineBreak />
+
+                                <Run Text="Previous: " />
+                                <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
+
+                                <Run Text=" | " />
+
+                                <Run Text="Time: " />
+                                <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}" />
+
+                                <LineBreak />
+
+                                <Run Text="Points: " />
+                                <Run Text="{Binding Points, Mode=OneTime}" />
+                                <Hyperlink Command="{Binding DataContext.OpenPacemanWorldIDCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                           CommandParameter="{Binding WorldID}">
+                                    <Run Text="Check this run on paceman" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.Resources>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls:VirtualizingWrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable"
+                                Value="False" />
+                        <Setter Property="IsHitTestVisible"
+                                Value="True" />
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
     </Grid>
 </Window>

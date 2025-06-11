@@ -28,7 +28,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     public ObservableCollection<LeaderboardRuleViewModel> Rules { get; } = [];
 
-    public ICommand AddEntryCommand { get; set; }
     public ICommand AddRuleCommand { get; set; }
 
     public ICommand EditRuleCommand { get; set; }
@@ -52,7 +51,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
         Leaderboard = Tournament.Leaderboard; 
         
-        AddEntryCommand = new RelayCommand( () => AddLeaderboardEntry(new LeaderboardEntry(), null!));
         AddRuleCommand = new RelayCommand(() => AddRule(new LeaderboardRule()));
 
         EditRuleCommand = new EditRuleCommand(coordinator, Tournament);

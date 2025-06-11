@@ -53,5 +53,6 @@ public class LeaderboardManager : ILeaderboardManager
         var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
         Console.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}, advancing from position {oldPosition} to {entry.Position}");
+        Tournament.PresetIsModified();
     }
 }

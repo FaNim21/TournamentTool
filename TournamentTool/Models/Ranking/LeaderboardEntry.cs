@@ -7,7 +7,7 @@ namespace TournamentTool.Models.Ranking;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(EntryPacemanMilestoneData), "paceman")]
 [JsonDerivedType(typeof(EntryRankedMilestoneData), "ranked")]
-public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline Previous, int Points);
+public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points);
 public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
 public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points) : EntryMilestoneData(Main, Previous, Points);
 
@@ -54,18 +54,7 @@ public sealed class LeaderboardEntry
             BestMilestones[data.Main.Milestone] = bestMilestone;
         }
         
-        //temp pod debugowanie
-        if (data.Main.Time < bestMilestone.BestTime)
-        {
-            string oldTime = "Unknown";
-            if (bestMilestone.BestTime != int.MaxValue)
-                oldTime = TimeSpan.FromMilliseconds(bestMilestone.BestTime).ToFormattedTime();
-            string newTime = TimeSpan.FromMilliseconds(data.Main.Time).ToFormattedTime();
-            
-            Console.WriteLine($"Player {PlayerUUID} beats his best time on {data.Main.Milestone} from {oldTime} to {newTime}");
-        }
         bestMilestone.AddTime(data.Main);
-        
         Milestones.Add(data);
         AddPoints(data.Points);
     }

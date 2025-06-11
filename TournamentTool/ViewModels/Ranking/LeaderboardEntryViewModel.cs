@@ -1,15 +1,81 @@
-﻿using TournamentTool.Enums;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
+using TournamentTool.Commands;
+using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Ranking;
 
+public abstract class EntryMilestoneDataViewModel : BaseViewModel;
+public class EntryMilestoneRankedDataViewModel : EntryMilestoneDataViewModel
+{
+    private readonly EntryRankedMilestoneData _data;
+
+    public RunMilestone MainMilestoneType => _data.Main.Milestone;
+    public string MainMilestoneTime => TimeSpan.FromMilliseconds(_data.Main.Time).ToFormattedTime();
+    
+    public RunMilestone PreviousMilestoneType => _data.Previous!.Milestone;
+    public string PreviousMilestoneTime => TimeSpan.FromMilliseconds(_data.Previous!.Time).ToFormattedTime();
+
+    public int Points => _data.Points;
+
+    
+    public EntryMilestoneRankedDataViewModel(EntryRankedMilestoneData data)
+    {
+        _data = data;
+        
+        OnPropertyChanged(nameof(MainMilestoneType));
+        OnPropertyChanged(nameof(MainMilestoneTime));
+        OnPropertyChanged(nameof(PreviousMilestoneType));
+        OnPropertyChanged(nameof(PreviousMilestoneTime));
+        OnPropertyChanged(nameof(Points));
+    }
+}
+public class EntryMilestonePacemanDataViewModel : EntryMilestoneDataViewModel
+{
+    private readonly EntryPacemanMilestoneData _data;
+
+    public RunMilestone MainMilestoneType => _data.Main.Milestone;
+    public string MainMilestoneTime => TimeSpan.FromMilliseconds(_data.Main.Time).ToFormattedTime();
+    
+    public RunMilestone PreviousMilestoneType => _data.Previous!.Milestone;
+    public string PreviousMilestoneTime => TimeSpan.FromMilliseconds(_data.Previous!.Time).ToFormattedTime();
+
+    public string WorldID => _data.WorldID;
+    public int Points => _data.Points;
+
+
+    public EntryMilestonePacemanDataViewModel(EntryPacemanMilestoneData data)
+    {
+        _data = data;
+        
+        OnPropertyChanged(nameof(MainMilestoneType));
+        OnPropertyChanged(nameof(MainMilestoneTime));
+        OnPropertyChanged(nameof(PreviousMilestoneType));
+        OnPropertyChanged(nameof(PreviousMilestoneTime));
+        OnPropertyChanged(nameof(WorldID));
+        OnPropertyChanged(nameof(Points));
+    }
+}
+
 public class LeaderboardEntryViewModel : BaseViewModel
 {
     private readonly LeaderboardEntry _entry;
 
     public PlayerViewModel? Player { get; }
+
+    private ObservableCollection<EntryMilestoneDataViewModel> _milestones = [];
+    public ObservableCollection<EntryMilestoneDataViewModel> Milestones
+    {
+        get => _milestones;
+        set
+        {
+            _milestones = value;
+            OnPropertyChanged(nameof(Milestones));
+        } 
+    }
 
     public string PlayerUUID => _entry.PlayerUUID;
     public int Points
@@ -53,15 +119,16 @@ public class LeaderboardEntryViewModel : BaseViewModel
         }
     }
 
-    //zrobic bool'a do wykrywania czy gracz zostal dodany w kontekscie usuniecia gracza z whitelisty, ktory byl w leaderboardzie
-    // Console.WriteLine($"Run url: https://paceman.gg/stats/run/{paceman.WorldID}");
- 
+    public ICommand OpenPacemanWorldIDCommand { get; private set; }
+
 
     public LeaderboardEntryViewModel(LeaderboardEntry entry, PlayerViewModel? player)
     {
         _entry = entry;
         Player = player;
         Player?.UpdateHeadBitmap();
+
+        OpenPacemanWorldIDCommand = new RelayCommand<string>(OpenPacemanWorldID);
     }
 
     public void Refresh(RunMilestone milestone = RunMilestone.None)
@@ -86,6 +153,31 @@ public class LeaderboardEntryViewModel : BaseViewModel
 
         BestTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(data.BestTime).ToFormattedTime();
         AverageTimeOnPrioritizeMilestone = TimeSpan.FromMilliseconds(data.Average).ToFormattedTime() + $" ({data.Amount})"; 
+    }
+
+    private void OpenPacemanWorldID(string worldID)
+    {
+        Helper.StartProcess($"https://paceman.gg/stats/run/{worldID}");
+    }
+    
+    public void SetupOpeningWindow()
+    {
+        foreach (var milestone in _entry.Milestones)
+        {
+            switch (milestone)
+            {
+                case EntryRankedMilestoneData ranked:
+                    Milestones.Add(new EntryMilestoneRankedDataViewModel(ranked));
+                    break;
+                case EntryPacemanMilestoneData paceman:
+                    Milestones.Add(new EntryMilestonePacemanDataViewModel(paceman));
+                    break;
+            }
+        }
+    }
+    public override void Dispose()
+    {
+        Milestones.Clear();
     }
 
     public LeaderboardEntry GetLeaderboardEntry() => _entry;
