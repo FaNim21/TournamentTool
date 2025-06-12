@@ -15,7 +15,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public bool HasErrors => _errors.Count != 0;
     
    
-    private Tournament _tournament;
+    private Tournament _tournament = new();
     
     public ManagementData? ManagementData
     {
@@ -41,6 +41,10 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
             PresetIsModified();
         }
     }
+    private Dictionary<string, PlayerViewModel> _lookupPlayers = []; 
+    // na razie ciezko to rozwiazac bez mocnej ingerencji w logike whitelist przez to ze uuid jest opcjonalne
+    // i trzeba by bylo przechwytywac aktualizowanie uuid z jego braku w playerze wiec obecnie nie ma z tego uzytku
+    // chociaz fajnie bylo by to wykorzystac i uzywac zamiast GetPlayerByIGN() i wtedy, by to tez usprawnilo rzeczy z leaderboardem
     
     public string Name
     {
@@ -397,11 +401,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public bool HasBeenRemoved { get; set; } = true;
 
 
-    public TournamentViewModel()
-    {
-        _tournament = new Tournament();
-    }
-
     public void ChangeData(Tournament tournament)
     {
         if (tournament == null) return;
@@ -412,6 +411,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         IsCurrentlyOpened = true;
         HasBeenRemoved = false;
         
+        _tournament.Leaderboard.Initialize();
         UpdateBackgroundService(ControllerMode);
         
         PresetIsSaved();
@@ -477,6 +477,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
             var playerViewModel = new PlayerViewModel(player);
             playerViewModel.Initialize();
             Players.Add(playerViewModel);
+            AddPlayerToDictionary(playerViewModel);
         }
     }
     public void UpdateGoodPacesTexts()
@@ -496,12 +497,28 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         time = TimeSpan.FromMilliseconds(CreditsGoodPaceMiliseconds).ToString(@"mm\:ss");
         CreditsToText = $"Finish (sub {time})";
     }
+
+    private void AddPlayerToDictionary(PlayerViewModel player)
+    {
+        if (string.IsNullOrEmpty(player.UUID)) return;
+            
+        try
+        {
+            _lookupPlayers.Add(player.UUID, player);
+        } catch{/**/}
+    }
+    private void RemovePlayerFromDictionary(PlayerViewModel player)
+    {
+        if (string.IsNullOrEmpty(player.UUID)) return;
+        _lookupPlayers.Remove(player.UUID);
+    }
     
     public void AddPlayer(PlayerViewModel playerViewModel)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
             Players.Add(playerViewModel);
+            AddPlayerToDictionary(playerViewModel);
             _tournament.Players.Add(playerViewModel.Data);
             PresetIsModified();
         });
@@ -511,6 +528,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         Application.Current.Dispatcher.Invoke(() =>
         {
             Players.Remove(playerViewModel);
+            RemovePlayerFromDictionary(playerViewModel);
             _tournament.Players.Remove(playerViewModel.Data);
             PresetIsModified();
         });

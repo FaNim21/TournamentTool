@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using TournamentTool.Enums;
-using TournamentTool.Utils;
 
 namespace TournamentTool.Models.Ranking;
 

@@ -88,7 +88,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            foreach (var entry in Leaderboard.Entries)
+            foreach (var entry in Leaderboard.OrderedEntries)
             {
                 var player = Tournament.GetPlayerByUUID(entry.PlayerUUID);
                 Entries.Add(new LeaderboardEntryViewModel(entry, player));
@@ -162,7 +162,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     
     public void AddLeaderboardEntry(LeaderboardEntry entry, PlayerViewModel playerViewModel)
     {
-        Tournament.Leaderboard.Entries.Add(entry);
+        Leaderboard.AddEntry(entry);
         Application.Current.Dispatcher.Invoke(() =>
         {
             Entries.Add(new LeaderboardEntryViewModel(entry, playerViewModel));
@@ -171,7 +171,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     }
     public void RemoveLeaderboardEntry(LeaderboardEntryViewModel entry)
     {
-        Tournament.Leaderboard.Entries.Remove(entry.GetLeaderboardEntry());
+        Leaderboard.RemoveEntry(entry.GetLeaderboardEntry());
         Application.Current.Dispatcher.Invoke(() =>
         {
             Entries.Remove(entry);
@@ -182,7 +182,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public void AddRule(LeaderboardRule rule)
     {
         var ruleViewModel = new LeaderboardRuleViewModel(rule);
-        Tournament.Leaderboard.Rules.Add(rule);
+        Leaderboard.AddRule(rule);
         Application.Current.Dispatcher.Invoke(() =>
         {
             Rules.Add(ruleViewModel);
@@ -191,7 +191,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     }
     public void RemoveRule(LeaderboardRuleViewModel rule)
     {
-        Tournament.Leaderboard.Rules.Remove(rule.GetLeaderboardRule());
+        Leaderboard.RemoveRule(rule.GetLeaderboardRule());
         Application.Current.Dispatcher.Invoke(() =>
         {
             Rules.Remove(rule);
@@ -207,13 +207,11 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         if (oldIndex < 0 || 
             newIndex < 0 || 
             oldIndex == newIndex || 
-            oldIndex >= Tournament.Leaderboard.Rules.Count ||
-            newIndex >= Tournament.Leaderboard.Rules.Count) return;
+            oldIndex >= Leaderboard.Rules.Count ||
+            newIndex >= Leaderboard.Rules.Count) return;
         
         Rules.Move(oldIndex, newIndex);
-        var item = Tournament.Leaderboard.Rules[oldIndex];
-        Tournament.Leaderboard.Rules.RemoveAt(oldIndex);
-        Tournament.Leaderboard.Rules.Insert(newIndex, item);
+        Leaderboard.MoveRule(oldIndex, newIndex);
         
         RecalculateAllEntries();
     }

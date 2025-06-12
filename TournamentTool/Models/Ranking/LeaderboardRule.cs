@@ -30,4 +30,11 @@ public class LeaderboardRule
 
         return null;
     }
+
+    public void Move(int oldIndex, int newIndex)
+    {
+        var item = SubRules[oldIndex];
+        SubRules.RemoveAt(oldIndex);
+        SubRules.Insert(newIndex, item);
+    }
 }

@@ -140,12 +140,21 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
+                            <Setter Property="Focusable"
+                                    Value="False" />
                             <Setter Property="Margin"
                                     Value="0" />
                             <Setter Property="Padding"
                                     Value="0" />
                             <Setter Property="ContextMenu"
                                     Value="{StaticResource RulesContextMenu}" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                    <Setter Property="Cursor"
+                                            Value="Hand" />
+                                </Trigger>
+                            </Style.Triggers>
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
@@ -160,91 +169,106 @@
                   Stroke="#000D14"
                   StrokeThickness="3" />
 
-            <ScrollViewer CanContentScroll="True"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <ListBox ItemsSource="{Binding EntriesCollection}"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         VerticalAlignment="Top"
-                         HorizontalAlignment="Left"
-                         VirtualizingStackPanel.IsVirtualizing="True"
-                         VirtualizingStackPanel.VirtualizationMode="Recycling"
-                         VirtualizingPanel.ScrollUnit="Pixel"
-                         Margin="5 0 0 0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ListBoxUpdateBehavior />
-                        <behaviors:ListBoxSelectionBehavior />
-                        <behaviors:ListBoxClampScrollBehavior />
-                    </i:Interaction.Behaviors>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardEntryViewModel}">
-                            <Border BorderBrush="Gray"
-                                    BorderThickness="1"
-                                    Width="495"
-                                    Height="50">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Position}"
-                                               Foreground="White"
-                                               FontSize="36"
-                                               Margin="5 0 0 0" />
+            <ListBox ItemsSource="{Binding EntriesCollection}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     ScrollViewer.CanContentScroll="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     Margin="5 0 0 0">
+                <i:Interaction.Behaviors>
+                    <behaviors:ListBoxUpdateBehavior />
+                    <behaviors:ListBoxSelectionBehavior />
+                    <behaviors:ListBoxClampScrollBehavior />
+                </i:Interaction.Behaviors>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardEntryViewModel}">
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                Width="495"
+                                Height="50">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Position}"
+                                           Foreground="White"
+                                           FontSize="36"
+                                           Margin="5 0 0 0" />
 
-                                    <Image Source="{Binding Player.Image}"
-                                           Width="30"
-                                           Height="30"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Top"
-                                           Stretch="Uniform"
-                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                           SnapsToDevicePixels="True"
-                                           UseLayoutRounding="True"
-                                           Margin="7 10 0 0" />
+                                <Image Source="{Binding Player.Image}"
+                                       Width="30"
+                                       Height="30"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       SnapsToDevicePixels="True"
+                                       UseLayoutRounding="True"
+                                       Margin="7 10 0 0" />
 
-                                    <StackPanel Orientation="Vertical"
-                                                Margin="5 4 0 0">
+                                <StackPanel Orientation="Vertical"
+                                            Margin="5 4 0 0">
 
-                                        <TextBlock Text="{Binding Player.InGameName}"
-                                                   FontWeight="Bold"
-                                                   FontSize="17"
-                                                   Foreground="Wheat"
-                                                   Background="Transparent" />
+                                    <TextBlock Text="{Binding Player.InGameName}"
+                                               FontWeight="Bold"
+                                               FontSize="17"
+                                               Foreground="Wheat"
+                                               Background="Transparent" />
 
-                                        <TextBlock Foreground="White">
-                                            <Run Text="Points: " />
-                                            <Run Text="{Binding Points}" />
+                                    <TextBlock Foreground="White">
+                                        <Run Text="Points: " />
+                                        <Run Text="{Binding Points}" />
 
-                                            <Run Text=" - " />
+                                        <Run Text=" - " />
 
-                                            <Run Text="Best time: " />
-                                            <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
+                                        <Run Text="Best time: " />
+                                        <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
 
-                                            <Run Text=" - " />
+                                        <Run Text=" - " />
 
-                                            <Run Text="Average time: " />
-                                            <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
-                                        </TextBlock>
-                                    </StackPanel>
+                                        <Run Text="Average time: " />
+                                        <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
+                                    </TextBlock>
                                 </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <vwp:VirtualizingWrapPanel Orientation="Vertical" />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Margin"
-                                    Value="0" />
-                            <Setter Property="Padding"
-                                    Value="0" />
-                            <Setter Property="ContextMenu"
-                                    Value="{StaticResource EntriesContextMenu}" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>
-            </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <vwp:VirtualizingWrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable"
+                                Value="False" />
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
+                        <Setter Property="ContextMenu"
+                                Value="{StaticResource EntriesContextMenu}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter Property="Cursor"
+                                        Value="Hand" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
     </Grid>
 </UserControl>

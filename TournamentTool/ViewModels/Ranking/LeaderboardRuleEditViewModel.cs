@@ -101,9 +101,6 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
             newIndex >= Rule.SubRules.Count) return;
         
         Rule.SubRules.Move(oldIndex, newIndex);
-
-        var item = _ruleModel.SubRules[oldIndex];
-        _ruleModel.SubRules.RemoveAt(oldIndex);
-        _ruleModel.SubRules.Insert(newIndex, item);
+        _ruleModel.Move(oldIndex, newIndex);
     }
 }

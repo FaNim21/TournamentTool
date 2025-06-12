@@ -10,13 +10,20 @@ public class LeaderboardSubRule
     public int BasePoints { get; set; }
     public int MaxWinners { get; set; }
     public bool Repeatable { get; set; }
-
-    public Dictionary<string, SubRuleWinnerData> winners = [];
+    public HashSet<string> Winners { get; set; } = [];
     
     
+    //Zamiast tego bedzie skrypt lua
     public bool Evaluate(LeaderboardPlayerEvaluateData data)
     {
         if (data.MainSplit.Time > Time) return false;
+        
+        /*
+        if (MaxWinners <= 0) return true;
+        if (Winners.Count >= MaxWinners) return false;
+
+        if (Winners.Contains(data.Player.UUID)) return false;
+        */
         
         return true;
     }

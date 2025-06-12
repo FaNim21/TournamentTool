@@ -140,16 +140,6 @@
                                 Width="420">
                             <TextBlock Foreground="White"
                                        Margin="2 2 2 4">
-                                <Run Text="Main: " />
-                                <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
-
-                                <Run Text=" | " />
-
-                                <Run Text="Time: " />
-                                <Run Text="{Binding MainMilestoneTime, Mode=OneTime}" />
-
-                                <LineBreak />
-
                                 <Run Text="Previous: " />
                                 <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
 
@@ -157,6 +147,16 @@
 
                                 <Run Text="Time: " />
                                 <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}" />
+                                
+                                <LineBreak />
+                                
+                                <Run Text="Main: " />
+                                <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
+
+                                <Run Text=" | " />
+
+                                <Run Text="Time: " />
+                                <Run Text="{Binding MainMilestoneTime, Mode=OneTime}" />
 
                                 <LineBreak />
 

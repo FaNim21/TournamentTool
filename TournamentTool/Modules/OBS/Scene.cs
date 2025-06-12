@@ -22,6 +22,7 @@ public enum SceneType
 public class Scene : BaseViewModel
 {
     private readonly object _lock = new();
+    
     public SceneType Type { get; protected set; }
 
     public readonly ControllerViewModel Controller;
