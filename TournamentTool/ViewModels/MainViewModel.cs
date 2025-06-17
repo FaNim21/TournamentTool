@@ -79,7 +79,7 @@ public class MainViewModel : BaseViewModel
         Directory.CreateDirectory(Consts.PresetsPath);
         Directory.CreateDirectory(Consts.LogsPath);
         Directory.CreateDirectory(Consts.ScriptsPath);
-        Directory.CreateDirectory(Consts.LeaderboardRules);
+        Directory.CreateDirectory(Consts.LeaderboardScriptsPath);
 
         OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);

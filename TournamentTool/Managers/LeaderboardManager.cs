@@ -1,4 +1,6 @@
-﻿using TournamentTool.Factories;
+﻿using System.IO;
+using MoonSharp.Interpreter;
+using TournamentTool.Factories;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
@@ -15,13 +17,15 @@ public interface ILeaderboardManager
 public class LeaderboardManager : ILeaderboardManager
 {
     private TournamentViewModel Tournament { get; }
+    private ILuaScriptsManager LuaManager { get; }
 
     public event Action<LeaderboardEntry>? OnEntryUpdate;
 
     
-    public LeaderboardManager(TournamentViewModel tournament)
+    public LeaderboardManager(TournamentViewModel tournament, ILuaScriptsManager luaManager)
     {
         Tournament = tournament;
+        LuaManager = luaManager;
     }
     
     public void EvaluatePlayer(LeaderboardPlayerEvaluateData data)
@@ -42,19 +46,22 @@ public class LeaderboardManager : ILeaderboardManager
     private void UpdateEntry(LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)
     {
         LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
-        var milestone = LeaderboardEntryMilestoneFactory.Create(data, subRule.BasePoints);
-        if (milestone == null) return;
+        LuaAPIContext context = new LuaAPIContext(entry, data, subRule, OnEntryRunRegistered);
         
-        var success = entry.AddMilestone(milestone);
-        if (!success) return;
-
         int oldPosition = entry.Position;
-        Tournament.Leaderboard.RecalculateEntryPosition(entry);
-        OnEntryUpdate?.Invoke(entry);
+        var script = LuaManager.GetOrLoad(subRule.LuaPath);
+        if (script == null) return;
+        
+        script.Run(context);
         
         var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
         Console.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}, advancing from position {oldPosition} to {entry.Position}");
+    }
+    private void OnEntryRunRegistered(LeaderboardEntry entry)
+    {
+        Tournament.Leaderboard.RecalculateEntryPosition(entry);
+        OnEntryUpdate?.Invoke(entry);
         Tournament.PresetIsModified();
     }
 }

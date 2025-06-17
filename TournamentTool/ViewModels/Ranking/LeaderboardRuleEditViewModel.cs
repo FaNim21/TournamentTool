@@ -1,10 +1,33 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
+using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
 
 namespace TournamentTool.ViewModels.Ranking;
+
+public class LuaLeaderboardScriptViewModel : BaseViewModel
+{
+    private readonly LuaLeaderboardScriptEntry _data;
+
+    public string Name => _data.Name;
+    public string FullPath => _data.FullPath;
+    public string Description => _data.Description;
+    public string Version => _data.Version;
+
+    
+    public LuaLeaderboardScriptViewModel(LuaLeaderboardScriptEntry data)
+    {
+        _data = data;
+        
+        OnPropertyChanged(nameof(Name));
+        OnPropertyChanged(nameof(FullPath));
+        OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(Version));
+    }
+}
 
 public class LeaderboardRuleEditViewModel : BaseViewModel
 {
@@ -45,6 +68,17 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         }
     }
 
+    private ObservableCollection<LuaLeaderboardScriptViewModel> _luaScripts = [];
+    public ObservableCollection<LuaLeaderboardScriptViewModel> LuaScripts
+    {
+        get => _luaScripts;
+        set
+        {
+            _luaScripts = value;
+            OnPropertyChanged(nameof(LuaScripts));
+        }
+    }
+
     public ICommand OpenGeneralCommand { get; set; }
 
     public ICommand AddSubRuleCommand { get; set; }
@@ -53,11 +87,26 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
     public ICommand MoveSubRuleCommand { get; set; }
 
 
-    public LeaderboardRuleEditViewModel(LeaderboardRuleViewModel rule)
+    public LeaderboardRuleEditViewModel(LeaderboardRuleViewModel rule, ILuaScriptsManager luaScriptsManager)
     {
         _rule = rule;
         OnPropertyChanged(nameof(Rule));
         _ruleModel = rule.GetLeaderboardRule();
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            LuaScripts.Clear();
+            foreach (var script in luaScriptsManager.GetScriptsList())
+            {
+                var scriptViewModel = new LuaLeaderboardScriptViewModel(script);
+                LuaScripts.Add(scriptViewModel);
+            }
+
+            foreach (var subRule in Rule.SubRules)
+            {
+                subRule.SelectedScript = LuaScripts.FirstOrDefault(s => s.Name.Equals(subRule.LuaPath));
+            }
+        });
 
         OpenGeneralCommand = new RelayCommand(OpenGeneralConfigRule);
         

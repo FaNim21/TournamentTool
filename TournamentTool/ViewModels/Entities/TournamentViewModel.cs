@@ -472,6 +472,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public void UpdatePlayers()
     {
         Players.Clear();
+        _lookupPlayers.Clear();
         foreach (var player in _tournament.Players)
         {
             var playerViewModel = new PlayerViewModel(player);

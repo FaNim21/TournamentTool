@@ -43,7 +43,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand MoveRuleItemCommand { get; set; }
 
 
-    public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver, ILeaderboardManager leaderboardManager) : base(coordinator)
+    public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver, ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager) : base(coordinator)
     {
         Tournament = tournament;
         PresetSaver = presetSaver;
@@ -53,7 +53,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         
         AddRuleCommand = new RelayCommand(() => AddRule(new LeaderboardRule()));
 
-        EditRuleCommand = new EditRuleCommand(coordinator, Tournament);
+        EditRuleCommand = new EditRuleCommand(coordinator, Tournament, luaScriptsManager);
         RemoveRuleCommand = new RemoveRuleCommand(this);
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);

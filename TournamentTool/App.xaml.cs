@@ -30,6 +30,7 @@ public partial class App : Application
         services.AddSingleton<IPresetSaver, PresetService>();
         
         services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
+        services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
         
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ICoordinator, MainViewModelCoordinator>();

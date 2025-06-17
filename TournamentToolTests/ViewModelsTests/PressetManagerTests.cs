@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Meziantou.Xunit;
+﻿using Meziantou.Xunit;
 using Moq;
 using MultiOpener.Entities.Interfaces;
 using TournamentTool.Enums;
@@ -14,7 +12,7 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentToolTests.Tests;
+namespace TournamentToolTests.ViewModelsTests;
 
 public class PresetManagerTests
 {
@@ -32,7 +30,7 @@ public class PresetManagerTests
         _mockTournamentViewModel = new Mock<TournamentViewModel>();
         _mockCoordinator = new Mock<MainViewModelCoordinator>(null!);
         
-        Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>(_mockTournamentViewModel.Object);
+        Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>();
         Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
 
         _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, _mockLeaderboard.Object, _mockBackgroundCoordinator.Object);
@@ -114,7 +112,7 @@ public class PresetManagerTests
             _mockCoordinator = new Mock<ICoordinator>();
             _presetService = new PresetService(_mockTournamentViewModel.Object);
             
-            Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>(_mockTournamentViewModel.Object);
+            Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>();
             Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
 
             _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockLeaderboard.Object, _mockBackgroundCoordinator.Object);

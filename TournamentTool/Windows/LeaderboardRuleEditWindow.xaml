@@ -280,7 +280,10 @@
                             <TextBlock Text="Scripts: "
                                        Foreground="White"
                                        FontSize="16" />
-                            <ComboBox Width="150"
+                            <ComboBox ItemsSource="{Binding LuaScripts}"
+                                      SelectedItem="{Binding SelectedSubRule.SelectedScript, Mode=TwoWay}"
+                                      DisplayMemberPath="Name"
+                                      Width="150"
                                       Height="25"
                                       Style="{StaticResource ComboBoxTest2}" />
                         </StackPanel>
@@ -291,7 +294,7 @@
                                 HorizontalAlignment="Left"
                                 BorderThickness="1"
                                 Margin="0 9 0 0">
-                            <TextBlock Text="Script description"
+                            <TextBlock Text="{Binding SelectedSubRule.SelectedScript.Description}"
                                        Foreground="White"
                                        TextWrapping="Wrap"
                                        FontSize="12"

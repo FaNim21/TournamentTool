@@ -78,8 +78,23 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(TimeText));
         } 
     }
-    
-    
+
+    private LuaLeaderboardScriptViewModel? _selectedScript;
+    public LuaLeaderboardScriptViewModel? SelectedScript
+    {
+        get => _selectedScript;
+        set
+        {
+            if (value == null) return;
+            
+            _selectedScript = value;
+            OnPropertyChanged(nameof(SelectedScript));
+
+            LuaPath = _selectedScript.Name;
+        }
+    }
+
+
     public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule)
     {
         Model = model;
