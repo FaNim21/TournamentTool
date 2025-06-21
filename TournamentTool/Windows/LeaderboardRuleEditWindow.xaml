@@ -128,6 +128,11 @@
                             Visibility="{Binding IsGeneralVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                             Margin="10 10 0 0">
 
+                    <ToggleButton IsChecked="{Binding Rule.IsEnabled}"
+                                  IsEnabled="{Binding IsGeneralVisible}"
+                                  Content="Is Enabled"
+                                  Margin="0 0 0 5" />
+
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 0 0 5">
                         <TextBox TextWrapping="Wrap"
@@ -141,7 +146,6 @@
                                    FontSize="16"
                                    Margin="5 0 0 3" />
                     </StackPanel>
-
 
                     <StackPanel Orientation="Horizontal"
                                 Margin="0 3 0 5">

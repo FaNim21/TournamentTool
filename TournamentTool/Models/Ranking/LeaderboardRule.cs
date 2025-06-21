@@ -13,6 +13,7 @@ public enum LeaderboardRuleType
 public class LeaderboardRule
 {
     public string Name { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; } 
     public LeaderboardRuleType RuleType { get; set; } = LeaderboardRuleType.Split;
     public RunMilestone ChosenAdvancement { get; set; } = RunMilestone.None;
     public List<LeaderboardSubRule> SubRules { get; set; } = [];

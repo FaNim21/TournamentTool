@@ -1,7 +1,4 @@
-﻿using System.IO;
-using MoonSharp.Interpreter;
-using TournamentTool.Factories;
-using TournamentTool.Models.Ranking;
+﻿using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
@@ -35,6 +32,8 @@ public class LeaderboardManager : ILeaderboardManager
         
         foreach (var rule in Tournament.Leaderboard.Rules)
         {
+            if (!rule.IsEnabled) continue;
+            
             var subRule = rule.Evaluate(data);
             if (subRule == null) continue;
             
@@ -43,10 +42,13 @@ public class LeaderboardManager : ILeaderboardManager
         }
     }
 
+    //ranked showdown - 24 punkty i po punkcie dla kazdej osoby co skonczy seeda, natomaist jak jest mniej jak 24 osoby to jest to skalowane 24/ilosc osob i tyle
+    // punktow otrzymuje kolejna osoba
+    
     private void UpdateEntry(LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)
     {
         LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
-        LuaAPIContext context = new LuaAPIContext(entry, data, subRule, OnEntryRunRegistered);
+        LuaAPIContext context = new LuaAPIContext(entry, data, subRule, Tournament, OnEntryRunRegistered);
         
         int oldPosition = entry.Position;
         var script = LuaManager.GetOrLoad(subRule.LuaPath);

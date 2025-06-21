@@ -3,10 +3,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using Microsoft.Xaml.Behaviors.Media;
 using TournamentTool.Attributes;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Ranking;
 
@@ -24,6 +27,23 @@ public class LeaderboardRuleViewModel : BaseViewModel
         {
             _rule.Name = value;
             OnPropertyChanged(nameof(Name));
+        }
+    }
+    public bool IsEnabled
+    {
+        get => _rule.IsEnabled;
+        set
+        {
+            _rule.IsEnabled = value;
+            OnPropertyChanged(nameof(IsEnabled));
+            
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                BrushIsEnabledColor = value ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
+            });
+            OnPropertyChanged(nameof(BrushIsEnabledColor));
+            
+            IsEnabledText = value ? "1": "0";
         }
     }
     public LeaderboardRuleType RuleType
@@ -53,6 +73,19 @@ public class LeaderboardRuleViewModel : BaseViewModel
         }
     }
 
+    public Brush? BrushIsEnabledColor { get; set; }
+    
+    private string _isEnabledText = string.Empty;
+    public string IsEnabledText
+    {
+        get => _isEnabledText;
+        set
+        {
+            _isEnabledText = value == "0" ? "Off" : "On";
+            OnPropertyChanged(nameof(IsEnabledText));
+        } 
+    }
+
     private string _ruleTypeText = string.Empty;
     public string RuleTypeText
     {
@@ -76,6 +109,8 @@ public class LeaderboardRuleViewModel : BaseViewModel
     public LeaderboardRuleViewModel(LeaderboardRule rule)
     {
         _rule = rule;
+
+        IsEnabled = _rule.IsEnabled;
 
         SwitchRuleTypeCommand = new RelayCommand(SwitchRuleType);
         _chosenCopy = ChosenMilestone;

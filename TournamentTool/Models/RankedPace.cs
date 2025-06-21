@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Security.Cryptography;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Modules.SidePanels;
@@ -266,7 +267,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
             RankedTimelineSplit? newSplit = null;
             if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
             {
-                newSplit = new RankedTimelineSplit() { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
+                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
             }
             else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
             {
@@ -275,7 +276,7 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
                 if (Splits[^1].Name.Equals("enter_the_nether"))
                     splitType = RankedSplitType.structure_1;
 
-                newSplit = new RankedTimelineSplit() { Name = timeline.Type, Split = splitType, Time = timeline.Time };
+                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = splitType, Time = timeline.Time };
             }
 
             if (newSplit == null) continue;
@@ -323,5 +324,21 @@ public class RankedPace : BaseViewModel, IPlayer, IPace
         }
         DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
         if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
+    }
+    
+    public RankedTimelineSplit GetLastSplit()
+    {
+        return GetSplit(1)!;
+    }
+    public RankedTimelineSplit? GetSplit(int indexFromEnd)
+    {
+        if (indexFromEnd > Splits.Count) return null;
+        var split = Splits[^indexFromEnd];
+        return new RankedTimelineSplit()
+        {
+            Name = split.Name,
+            Split = split.Split,
+            Time = split.Time
+        };
     }
 }

@@ -115,6 +115,11 @@
                                 <TextBlock Foreground="White"
                                            IsHitTestVisible="False"
                                            Margin="2 2 2 4">
+                                    <Run Text="{Binding IsEnabledText}"
+                                         Foreground="{Binding BrushIsEnabledColor}"/>
+                                    
+                                    <Run Text=" | " />
+                                    
                                     <Run Text="Name: " />
                                     <Run Text="{Binding Name}"
                                          FontWeight="SemiBold"

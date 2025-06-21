@@ -13,7 +13,6 @@ public class LeaderboardSubRule
     public HashSet<string> Winners { get; set; } = [];
     
     
-    //Zamiast tego bedzie skrypt lua
     public bool Evaluate(LeaderboardPlayerEvaluateData data)
     {
         if (data.MainSplit.Time > Time) return false;

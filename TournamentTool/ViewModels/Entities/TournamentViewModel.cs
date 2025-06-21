@@ -61,6 +61,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         get => _tournament.IsAlwaysOnTop;
         set
         {
+            if (value == _tournament.IsAlwaysOnTop) return;
+            
             _tournament.IsAlwaysOnTop = value;
             OnPropertyChanged(nameof(IsAlwaysOnTop));
             PresetIsModified();

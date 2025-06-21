@@ -1,4 +1,5 @@
 ﻿using TournamentTool.Factories;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models.Ranking;
 
@@ -18,19 +19,24 @@ public class LuaAPIContext
     private readonly LeaderboardPlayerEvaluateData _data;
     private readonly LeaderboardSubRule _subRule;
     private readonly LeaderboardEntry _entry;
+
+    private readonly TournamentViewModel _tournament;  // o to to trzeba bedzie pod punkty itp itd
     
     public int PlayerPosition => _entry.Position;
     public int PlayerPoints => _entry.Points;
     public int PlayerMilestoneBestTimeInMiliseconds => _entry.GetBestMilestoneTime(_data.MainSplit.Milestone);
 
     public int BasePoints => _subRule.BasePoints;
-    
 
-    public LuaAPIContext(LeaderboardEntry entry, LeaderboardPlayerEvaluateData data, LeaderboardSubRule subRule, Action<LeaderboardEntry> onEntryRunRegistered)
+    public int Round => _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
+
+
+    public LuaAPIContext(LeaderboardEntry entry, LeaderboardPlayerEvaluateData data, LeaderboardSubRule subRule, TournamentViewModel tournament, Action<LeaderboardEntry> onEntryRunRegistered)
     {
         _entry = entry;
         _data = data;
         _subRule = subRule;
+        _tournament = tournament;
         
         _onEntryRunRegistered = onEntryRunRegistered;
     }

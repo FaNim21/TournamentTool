@@ -120,7 +120,7 @@ public class RankedService : IBackgroundService
         }
 
         //Seed change | New match | just new seed
-        Console.WriteLine($"{rankedData.StartTime} ------ {_startTime}");
+        //Console.WriteLine($"{rankedData.StartTime} ------ {_startTime}");
         if(rankedData.StartTime != _startTime)
         {
             _startTime = rankedData.StartTime;
@@ -247,23 +247,20 @@ public class RankedService : IBackgroundService
     {
         if (pace.Player == null) return;
         
-        /*
         var split = pace.GetLastSplit();
-        if (split.SplitName.StartsWith("common.")) return;
-        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
-        var mainSplit = new LeaderboardTimeline(milestone, (int)split.IGT);
+        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.Split.ToString());
+        var mainSplit = new LeaderboardTimeline(milestone, (int)split.Time);
         
         var previousSplit = pace.GetSplit(2);
-        LeaderboardTimeline? pacemanPreviousSplit = null;
+        LeaderboardTimeline? rankedPreviousSplit = null;
         if (previousSplit != null)
         {
-            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
-            pacemanPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.IGT);
+            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.Split.ToString());
+            rankedPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.Time);
         }
-        */
         
-        var data = new LeaderboardRankedEvaluateData(pace.Player.Data, null, null);
-        //Leaderboard.EvaluatePlayer(data);
+        var data = new LeaderboardRankedEvaluateData(pace.Player.Data, mainSplit, rankedPreviousSplit);
+        Leaderboard.EvaluatePlayer(data);
     }
     
     public RankedBestSplit GetBestSplit(RankedSplitType splitType)

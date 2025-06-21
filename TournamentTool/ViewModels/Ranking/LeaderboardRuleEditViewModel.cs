@@ -53,7 +53,7 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
             _selectedSubRule = value;
             OnPropertyChanged(nameof(SelectedSubRule));
             
-            IsGeneralVisible = false;
+            IsGeneralVisible = value == null;
         }
     }
 
@@ -128,7 +128,9 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(() =>
         {
             _ruleModel.SubRules.Add(subRule);
-            Rule.SubRules.Add(new LeaderboardSubRuleViewModel(subRule, Rule));
+            var subRuleViewModel = new LeaderboardSubRuleViewModel(subRule, Rule);
+            subRuleViewModel.SelectedScript = LuaScripts[0];
+            Rule.SubRules.Add(subRuleViewModel);
         });
     }
 
