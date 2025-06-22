@@ -21,6 +21,8 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
     private RankedPace _data;
 
     private RankedService _service;
+    
+    public RankedPaceData? PaceData { get; private set; }
 
     public PlayerViewModel? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
@@ -196,6 +198,7 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
     }
     public void Initialize(RankedPaceData data)
     {
+        PaceData = data;
         Inventory.DisplayItems = true;
         Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
         
@@ -207,6 +210,8 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
     /// </summary>
     public void Update(RankedPaceData data)
     {
+        PaceData = data;
+        
         IsLive = Player != null && !Player.StreamData.AreBothNullOrEmpty();
         UpdateHeadImage();
         

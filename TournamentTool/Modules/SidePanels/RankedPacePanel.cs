@@ -191,7 +191,7 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
 
     private void SetupRankedPaceGrouping()
     {
-        var collectionViewSource = new CollectionViewSource { Source = Paces };
+        var collectionViewSource = new CollectionViewSource { Source = Paces, IsLiveGroupingRequested = true };
 
         collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(RankedPaceViewModel.SplitName)));
         collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPaceViewModel.SplitType), ListSortDirection.Descending));
@@ -200,61 +200,46 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
         GroupedRankedPaces = collectionViewSource.View;
     }
 
-    [Time]
     public void ReceivePaces(List<RankedPaceViewModel> paces)
     {
         if (paces == null || paces.Count == 0)
         {
             Application.Current.Dispatcher.Invoke(() => { Paces.Clear(); });
-            RefreshGroup();
             return;
         }
 
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            //TODO: 0 to gowno do zmiany
-            Paces.Clear();
-            foreach (var pace in paces)
-            {
-                Paces.Add(pace);
-            }
-        });
-        
-        RefreshGroup();
+        OrganizeReceivedPlayers(paces);
     }
 
     private void OrganizeReceivedPlayers(List<RankedPaceViewModel> paces)
     {
-        List<RankedPaceViewModel> currentPaces = new(paces);
+        List<RankedPaceViewModel> currentPaces = new(Paces);
 
-        foreach (var pace in Paces)
+        Application.Current.Dispatcher.Invoke(() =>
         {
-            bool wasPaceFound = false;
-
-            for (int j = 0; j < currentPaces.Count; j++)
+            foreach (var pace in paces)
             {
-                var currentPace = currentPaces[j];
-                if (!pace.InGameName.Equals(currentPace.InGameName, StringComparison.OrdinalIgnoreCase)) continue;
-                
-                wasPaceFound = true;
-                // currentPace.Update(pace);
-                currentPaces.Remove(currentPace);
-                break;
+                bool wasPaceFound = false;
+
+                for (int j = 0; j < currentPaces.Count; j++)
+                {
+                    var currentPace = currentPaces[j];
+                    if (!pace.InGameName.Equals(currentPace.InGameName, StringComparison.OrdinalIgnoreCase)) continue;
+
+                    wasPaceFound = true;
+                    currentPace.Update(pace.PaceData!);
+                    currentPaces.Remove(currentPace);
+                    break;
+                }
+
+                if (wasPaceFound) continue;
+                Paces.Add(pace);
             }
 
-            if (wasPaceFound) continue;
-
-            //var paceViewModel = new Rankedpac(this, pace, player!);
-            Paces.Add(null);
-        }
-
-        for (int i = 0; i < currentPaces.Count; i++)
-            Paces.Remove(currentPaces[i]);
-    }
-
-    private void RefreshGroup()
-    {
-        if (GroupedRankedPaces == null) return;
-        Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });
+            for (int i = 0; i < currentPaces.Count; i++)
+            {
+                Paces.Remove(currentPaces[i]);
+            }
+        });
     }
 }

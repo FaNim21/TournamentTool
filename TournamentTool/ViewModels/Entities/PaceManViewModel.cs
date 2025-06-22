@@ -160,10 +160,6 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
             StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
         });
     }
-    public void Update()
-    {
-        UpdateHeadImage();
-    }
     
     public void Update(PaceMan paceman)
     {

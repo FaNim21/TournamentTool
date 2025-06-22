@@ -585,7 +585,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     {
         foreach (var player in Players)
         {
-            if (!player.InGameName!.Equals(ign)) continue;
+            if (!player.InGameName!.Equals(ign, StringComparison.OrdinalIgnoreCase)) continue;
             return player;
         }
         

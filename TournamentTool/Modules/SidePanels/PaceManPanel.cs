@@ -75,18 +75,43 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
             return;
         }
         
+        OrganizePaces(players);
+        RefreshGroup(false);
+    }
+    private void OrganizePaces(List<PaceManViewModel> receivedPaces)
+    {
+        List<PaceManViewModel> currentPaces = new(PaceManPlayers);
+        
+        foreach (var pace in receivedPaces)
+        {
+            bool wasPaceFound = false;
+            
+            for (int j = 0; j < currentPaces.Count; j++)
+            {
+                var currentPace = currentPaces[j];
+                if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
+                
+                wasPaceFound = true;
+                currentPace.Update(pace.GetData());
+                currentPaces.Remove(currentPace);
+                break;
+            }
+
+            if (wasPaceFound) continue;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                PaceManPlayers.Add(pace);
+            });
+        }
+
         Application.Current.Dispatcher.Invoke(() =>
         {
-            //TODO: 0 to gowno tez do zmiany
-            PaceManPlayers.Clear();
-            foreach (var player in players)
+            for (int i = 0; i < currentPaces.Count; i++)
             {
-                player.Update();
-                PaceManPlayers.Add(player);
+                PaceManPlayers.Remove(currentPaces[i]);
             }
         });
-        
-        RefreshGroup(false);
     }
 
     public void FilterItems()
@@ -96,25 +121,19 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
     
     private void SetupPaceManGrouping()
     {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            var collectionViewSource = CollectionViewSource.GetDefaultView(PaceManPlayers);
-            collectionViewSource.GroupDescriptions.Clear();
-            collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
-            collectionViewSource.SortDescriptions.Clear();
-            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
-            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
-            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
-            GroupedPaceManPlayers = collectionViewSource;
-        });
+        var collectionViewSource = new CollectionViewSource { Source = PaceManPlayers, IsLiveGroupingRequested = true };
+
+        collectionViewSource.GroupDescriptions.Clear();
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PaceManViewModel.SplitName)));
+        collectionViewSource.SortDescriptions.Clear();
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PaceManViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+
+        GroupedPaceManPlayers = collectionViewSource.View;
     }
     public void RefreshGroup(bool isEmpty)
     {
-        if (GroupedPaceManPlayers != null)
-        {
-            Application.Current.Dispatcher.Invoke(() => { GroupedPaceManPlayers.Refresh(); });
-        }
-
         if (isEmpty == _lastOutput) return;
         EmptyRunsTitle = isEmpty ? "No active pace or stream" : string.Empty;
         _lastOutput = isEmpty;

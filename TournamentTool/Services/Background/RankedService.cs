@@ -194,16 +194,12 @@ public class RankedService : IBackgroundService
         };
         RankedPaceViewModel paceViewModel = new(this, pace);
         bool found = false;
-        
-        int n = TournamentViewModel.Players.Count;
-        for (int j = 0; j < n; j++)
+
+        var player = TournamentViewModel.GetPlayerByIGN(data.Player.NickName);
+        if (player != null)
         {
-            var current = TournamentViewModel.Players[j];
-            if (!current.InGameName!.Equals(data.Player.NickName, StringComparison.OrdinalIgnoreCase)) continue;
-            
             found = true;
-            paceViewModel.Player = current;
-            break;
+            paceViewModel.Player = player;
         }
         
         paceViewModel.Initialize(data);
