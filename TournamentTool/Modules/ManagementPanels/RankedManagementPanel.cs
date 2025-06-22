@@ -17,6 +17,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 {
     private RankedManagementData RankedManagementData { get; set; }
 
+    //TODO: 0 przerobic to na model-viwemodel w formie na biezaco aktualizowania danych managementu
     private string _customText = string.Empty;
     public string CustomText
     {

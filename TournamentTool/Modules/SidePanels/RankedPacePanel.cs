@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Data;
+using MethodTimer;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Models;
@@ -155,8 +156,8 @@ public class RankedBestSplit
 
 public class RankedPacePanel : SidePanel, IRankedDataReceiver
 {
-    private ObservableCollection<RankedPace> _paces = [];
-    public ObservableCollection<RankedPace> Paces
+    private ObservableCollection<RankedPaceViewModel> _paces = [];
+    public ObservableCollection<RankedPaceViewModel> Paces
     {
         get => _paces;
         set
@@ -192,14 +193,15 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
     {
         var collectionViewSource = new CollectionViewSource { Source = Paces };
 
-        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(RankedPace.SplitName)));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPace.SplitType), ListSortDirection.Descending));
-        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPace.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
+        collectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(RankedPaceViewModel.SplitName)));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPaceViewModel.SplitType), ListSortDirection.Descending));
+        collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(RankedPaceViewModel.CurrentSplitTimeMiliseconds), ListSortDirection.Ascending));
 
         GroupedRankedPaces = collectionViewSource.View;
     }
 
-    public void ReceivePaces(List<RankedPace> paces)
+    [Time]
+    public void ReceivePaces(List<RankedPaceViewModel> paces)
     {
         if (paces == null || paces.Count == 0)
         {
@@ -207,9 +209,10 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
             RefreshGroup();
             return;
         }
-        
+
         Application.Current.Dispatcher.Invoke(() =>
         {
+            //TODO: 0 to gowno do zmiany
             Paces.Clear();
             foreach (var pace in paces)
             {
@@ -220,10 +223,38 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
         RefreshGroup();
     }
 
+    private void OrganizeReceivedPlayers(List<RankedPaceViewModel> paces)
+    {
+        List<RankedPaceViewModel> currentPaces = new(paces);
+
+        foreach (var pace in Paces)
+        {
+            bool wasPaceFound = false;
+
+            for (int j = 0; j < currentPaces.Count; j++)
+            {
+                var currentPace = currentPaces[j];
+                if (!pace.InGameName.Equals(currentPace.InGameName, StringComparison.OrdinalIgnoreCase)) continue;
+                
+                wasPaceFound = true;
+                // currentPace.Update(pace);
+                currentPaces.Remove(currentPace);
+                break;
+            }
+
+            if (wasPaceFound) continue;
+
+            //var paceViewModel = new Rankedpac(this, pace, player!);
+            Paces.Add(null);
+        }
+
+        for (int i = 0; i < currentPaces.Count; i++)
+            Paces.Remove(currentPaces[i]);
+    }
+
     private void RefreshGroup()
     {
         if (GroupedRankedPaces == null) return;
-        
         Application.Current.Dispatcher.Invoke(() => { GroupedRankedPaces.Refresh(); });
     }
 }

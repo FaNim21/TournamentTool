@@ -38,7 +38,7 @@
             <behaviors:ListBoxClampScrollBehavior />
         </i:Interaction.Behaviors>
         <ListBox.ItemTemplate>
-            <DataTemplate DataType="models:RankedPace">
+            <DataTemplate DataType="models:RankedPaceViewModel">
                 <Border BorderBrush="#7e8691"
                         BorderThickness="1"
                         Width="263">
@@ -192,7 +192,7 @@
         </ListBox.GroupStyle>
         <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
-                <vwp:VirtualizingWrapPanel/>
+                <vwp:VirtualizingWrapPanel />
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemContainerStyle>

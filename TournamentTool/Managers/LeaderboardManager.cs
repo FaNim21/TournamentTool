@@ -42,7 +42,7 @@ public class LeaderboardManager : ILeaderboardManager
         }
     }
 
-    //ranked showdown - 24 punkty i po punkcie dla kazdej osoby co skonczy seeda, natomaist jak jest mniej jak 24 osoby to jest to skalowane 24/ilosc osob i tyle
+    //ranked showdown - 24 punkty i po punkcie dla kazdej osoby co skonczy seeda, natomaist jak jest mniej jak 24 osoby to jest to skalowane 24/ilosc ukonczen w danej rundzie i tyle
     // punktow otrzymuje kolejna osoba
     
     private void UpdateEntry(LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)

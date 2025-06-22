@@ -30,7 +30,7 @@ public class RankedService : IBackgroundService
     private long _startTime;
     private int _completedRunsCount;
     
-    private List<RankedPace> _paces = [];
+    private List<RankedPaceViewModel> _paces = [];
     private Dictionary<RankedSplitType, RankedBestSplit> _bestSplits = [];
     
     private readonly JsonSerializerOptions _options;
@@ -89,17 +89,11 @@ public class RankedService : IBackgroundService
     private async Task LoadJsonFileAsync()
     {
         RankedData? rankedData = null;
-        string jsonContent;
 
         try
         {
-            await using (FileStream fs = new(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (StreamReader reader = new(fs))
-            {
-                jsonContent = await reader.ReadToEndAsync();
-            }
-
-            rankedData = JsonSerializer.Deserialize<RankedData>(jsonContent, _options);
+            await using FileStream stream = File.OpenRead(_filePath);
+            rankedData = await JsonSerializer.DeserializeAsync<RankedData>(stream, _options);
         }
         catch { /**/ }
 
@@ -127,7 +121,7 @@ public class RankedService : IBackgroundService
             Clear();
         }
 
-        List<RankedPace> _currentPaces = new(_paces);
+        List<RankedPaceViewModel> _currentPaces = new(_paces);
         for (int i = 0; i < rankedData.Players.Length; i++)
         {
             var player = rankedData.Players[i];
@@ -192,34 +186,40 @@ public class RankedService : IBackgroundService
     
     private void AddPace(RankedPaceData data)
     {
-        RankedPace pace = new(this);
-        int n = TournamentViewModel.Players.Count;
+        RankedPace pace = new RankedPace()
+        {
+            UUID = data.Player.UUID,
+            InGameName = data.Player.NickName,
+            EloRate = data.Player.EloRate ?? -1,
+        };
+        RankedPaceViewModel paceViewModel = new(this, pace);
         bool found = false;
         
+        int n = TournamentViewModel.Players.Count;
         for (int j = 0; j < n; j++)
         {
             var current = TournamentViewModel.Players[j];
             if (!current.InGameName!.Equals(data.Player.NickName, StringComparison.OrdinalIgnoreCase)) continue;
             
             found = true;
-            pace.Player = current;
+            paceViewModel.Player = current;
             break;
         }
-
+        
+        paceViewModel.Initialize(data);
         if (!found && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
         {
-            AddRankedPlayerToWhitelist(pace);
+            AddRankedPlayerToWhitelist(paceViewModel);
         }
         
-        pace.Initialize(data);
-        _paces.Add(pace);
+        _paces.Add(paceViewModel);
     }
-    private void RemovePace(RankedPace pace)
+    private void RemovePace(RankedPaceViewModel pace)
     {
         _paces.Remove(pace);
     }
     
-    private void AddRankedPlayerToWhitelist(RankedPace pace)
+    private void AddRankedPlayerToWhitelist(RankedPaceViewModel pace)
     {
         Player player = new Player()
         {
@@ -243,7 +243,7 @@ public class RankedService : IBackgroundService
         pace.Player = playerViewModel;
     }
     
-    public void EvaluatePlayerInLeaderboard(RankedPace pace)
+    public void EvaluatePlayerInLeaderboard(RankedPaceViewModel pace)
     {
         if (pace.Player == null) return;
         

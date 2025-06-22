@@ -77,6 +77,7 @@ public class PaceManPanel : SidePanel, IPacemanDataReceiver
         
         Application.Current.Dispatcher.Invoke(() =>
         {
+            //TODO: 0 to gowno tez do zmiany
             PaceManPlayers.Clear();
             foreach (var player in players)
             {
