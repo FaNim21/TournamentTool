@@ -1,17 +1,14 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
-using MethodTimer;
-using TournamentTool.Components.Controls;
+using System.Windows.Threading;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.SidePanels;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
@@ -30,7 +27,7 @@ public class RankedService : IBackgroundService
     private long _startTime;
     private int _completedRunsCount;
     
-    private List<RankedPaceViewModel> _paces = [];
+    private List<RankedPace> _paces = [];
     private Dictionary<RankedSplitType, RankedBestSplit> _bestSplits = [];
     
     private readonly JsonSerializerOptions _options;
@@ -63,6 +60,10 @@ public class RankedService : IBackgroundService
         if (receiver is IRankedDataReceiver ranked)
         {
             _rankedDataReceiver = ranked;
+            Application.Current.Dispatcher.InvokeAsync(() => 
+            {
+                _rankedDataReceiver?.ReceiveAllPaces(_paces);
+            }, DispatcherPriority.Background);
         }
         else if (receiver is IPlayerAddReceiver playerManagerReceiver)
         {
@@ -100,7 +101,7 @@ public class RankedService : IBackgroundService
         if (rankedData == null) return;
 
         FilterJSON(rankedData);
-        _rankedDataReceiver?.ReceivePaces(_paces);
+        _rankedDataReceiver?.Update();
         
         _completedRunsCount = rankedData.Completes.Length;
         _rankedManagementDataReceiver?.UpdateManagementData(_bestSplits.Values.ToList(), _completedRunsCount, _startTime, _paces.Count);
@@ -121,7 +122,7 @@ public class RankedService : IBackgroundService
             Clear();
         }
 
-        List<RankedPaceViewModel> _currentPaces = new(_paces);
+        List<RankedPace> _currentPaces = new(_paces);
         for (int i = 0; i < rankedData.Players.Length; i++)
         {
             var player = rankedData.Players[i];
@@ -186,36 +187,38 @@ public class RankedService : IBackgroundService
     
     private void AddPace(RankedPaceData data)
     {
-        RankedPace pace = new RankedPace()
+        RankedPace pace = new RankedPace(this)
         {
             UUID = data.Player.UUID,
             InGameName = data.Player.NickName,
             EloRate = data.Player.EloRate ?? -1,
         };
-        RankedPaceViewModel paceViewModel = new(this, pace);
+        
         bool found = false;
 
         var player = TournamentViewModel.GetPlayerByIGN(data.Player.NickName);
         if (player != null)
         {
             found = true;
-            paceViewModel.Player = player;
+            pace.Player = player;
         }
         
-        paceViewModel.Initialize(data);
+        pace.Initialize(data);
         if (!found && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
         {
-            AddRankedPlayerToWhitelist(paceViewModel);
+            AddRankedPlayerToWhitelist(pace);
         }
         
-        _paces.Add(paceViewModel);
+        _paces.Add(pace);
+        _rankedDataReceiver?.AddPace(pace);
     }
-    private void RemovePace(RankedPaceViewModel pace)
+    private void RemovePace(RankedPace pace)
     {
         _paces.Remove(pace);
+        _rankedDataReceiver?.RemovePace(pace);
     }
     
-    private void AddRankedPlayerToWhitelist(RankedPaceViewModel pace)
+    private void AddRankedPlayerToWhitelist(RankedPace pace)
     {
         Player player = new Player()
         {
@@ -238,8 +241,14 @@ public class RankedService : IBackgroundService
 
         pace.Player = playerViewModel;
     }
-    
-    public void EvaluatePlayerInLeaderboard(RankedPaceViewModel pace)
+
+    public void EvaluatePlayerInLeaderboard(RankedPace pace, LeaderboardRuleType ruleType)
+    {
+        if (pace.Player == null) return;
+        
+        
+    }
+    public void EvaluatePlayerInLeaderboard(RankedPace pace)
     {
         if (pace.Player == null) return;
         

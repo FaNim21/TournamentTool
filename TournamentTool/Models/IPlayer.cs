@@ -2,7 +2,7 @@
 
 public interface IPlayer
 {
-    public bool IsLive { get; set; }
+    public bool IsLive { get; }
 
     public bool IsUsedInPov { get; set; }
     public bool IsUsedInPreview { get; set; }

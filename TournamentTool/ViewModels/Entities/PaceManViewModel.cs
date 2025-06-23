@@ -41,7 +41,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     }
 
     public PlayerViewModel? PlayerViewModel { get; set; }
-    public PlayerInventory Inventory { get; set; } = new();
+    public PlayerInventoryViewModel Inventory { get; set; }
 
     private BitmapImage? _headImage;
     public BitmapImage? HeadImage
@@ -140,6 +140,8 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         Service = service;
         _paceMan = paceMan;
         PlayerViewModel = playerViewModel;
+
+        Inventory = new PlayerInventoryViewModel(new PlayerInventory());
         
         Initialize();
         UpdateHeadImage();

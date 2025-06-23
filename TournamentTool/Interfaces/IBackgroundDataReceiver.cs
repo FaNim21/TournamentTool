@@ -14,7 +14,11 @@ public interface IPacemanDataReceiver : IBackgroundDataReceiver
 
 public interface IRankedDataReceiver : IBackgroundDataReceiver
 {
-    void ReceivePaces(List<RankedPaceViewModel> paces);
+    void AddPace(RankedPace pace);
+    void Update();
+    void RemovePace(RankedPace pace);
+
+    void ReceiveAllPaces(List<RankedPace> paces);
 }
 
 public interface IRankedManagementDataReceiver : IBackgroundDataReceiver

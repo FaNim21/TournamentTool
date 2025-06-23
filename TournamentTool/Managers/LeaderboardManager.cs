@@ -8,7 +8,7 @@ public interface ILeaderboardManager
 {
     event Action<LeaderboardEntry>? OnEntryUpdate;
 
-    void EvaluatePlayer(LeaderboardPlayerEvaluateData data);
+    void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None);
 }
 
 public class LeaderboardManager : ILeaderboardManager
@@ -25,7 +25,7 @@ public class LeaderboardManager : ILeaderboardManager
         LuaManager = luaManager;
     }
     
-    public void EvaluatePlayer(LeaderboardPlayerEvaluateData data)
+    public void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
     {
         if (data.Player == null) return;
         if (Tournament.Leaderboard.Rules.Count == 0) return;
@@ -33,6 +33,7 @@ public class LeaderboardManager : ILeaderboardManager
         foreach (var rule in Tournament.Leaderboard.Rules)
         {
             if (!rule.IsEnabled) continue;
+            if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
             
             var subRule = rule.Evaluate(data);
             if (subRule == null) continue;

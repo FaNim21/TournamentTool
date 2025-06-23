@@ -176,18 +176,18 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 break;
         }
         
-        _backgroundCoordinator.Register(SidePanel);
-        _backgroundCoordinator.Register(this);
-        _backgroundCoordinator.Register(ManagementPanel);
+        SidePanel?.OnEnable(null);
+        ManagementPanel?.OnEnable(null);
+        OBS.OnEnable(null);
         
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         _apiWorker.DoWork += UpdateAPI;
         _apiWorker.RunWorkerAsync();
         
-        SidePanel?.OnEnable(null);
-        ManagementPanel?.OnEnable(null);
-        OBS.OnEnable(null);
+        _backgroundCoordinator.Register(this);
+        _backgroundCoordinator.Register(ManagementPanel);
+        _backgroundCoordinator.Register(SidePanel);
 
         if (!TournamentViewModel.IsUsingTwitchAPI)
         {

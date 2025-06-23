@@ -185,6 +185,7 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
     {
         base.OnDisable();
         
+        Paces.Clear();
         GroupedRankedPaces = null;
         return true;
     }
@@ -199,47 +200,40 @@ public class RankedPacePanel : SidePanel, IRankedDataReceiver
 
         GroupedRankedPaces = collectionViewSource.View;
     }
-
-    public void ReceivePaces(List<RankedPaceViewModel> paces)
+    
+    public void AddPace(RankedPace pace)
     {
-        if (paces == null || paces.Count == 0)
-        {
-            Application.Current.Dispatcher.Invoke(() => { Paces.Clear(); });
-            return;
-        }
-
-        OrganizeReceivedPlayers(paces);
-    }
-
-    private void OrganizeReceivedPlayers(List<RankedPaceViewModel> paces)
-    {
-        List<RankedPaceViewModel> currentPaces = new(Paces);
-
+        RankedPaceViewModel viewModel = new(pace);
         Application.Current.Dispatcher.Invoke(() =>
         {
-            foreach (var pace in paces)
-            {
-                bool wasPaceFound = false;
-
-                for (int j = 0; j < currentPaces.Count; j++)
-                {
-                    var currentPace = currentPaces[j];
-                    if (!pace.InGameName.Equals(currentPace.InGameName, StringComparison.OrdinalIgnoreCase)) continue;
-
-                    wasPaceFound = true;
-                    currentPace.Update(pace.PaceData!);
-                    currentPaces.Remove(currentPace);
-                    break;
-                }
-
-                if (wasPaceFound) continue;
-                Paces.Add(pace);
-            }
-
-            for (int i = 0; i < currentPaces.Count; i++)
-            {
-                Paces.Remove(currentPaces[i]);
-            }
+            Paces.Add(viewModel);
         });
+    }
+
+    public void Update()
+    {
+        for (int i = 0; i < Paces.Count; i++)
+        {
+            Paces[i].Update();
+        }
+    }
+
+    public void RemovePace(RankedPace pace)
+    {
+        var paceViewModel = Paces.FirstOrDefault(p => p.Data.InGameName == pace.InGameName);
+        if (paceViewModel == null) return;
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Paces.Remove(paceViewModel);
+        });
+    }
+
+    public void ReceiveAllPaces(List<RankedPace> paces)
+    {
+        for (int i = 0; i < paces.Count; i++)
+        {
+            RankedPaceViewModel viewModel = new(paces[i]);
+            Paces.Add(viewModel);
+        }
     }
 }

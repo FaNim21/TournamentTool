@@ -1,95 +1,24 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
-using TournamentTool.Modules.SidePanels;
-using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
 public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
 {
-    public class RankedTimelineSplit : BaseViewModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public RankedSplitType Split { get; set; }
-        public long Time { get; set; }
-    }
+    public RankedPace Data { get; }
 
-    private RankedPace _data;
+    public PlayerInventoryViewModel Inventory { get; }
 
-    private RankedService _service;
+    public string DisplayName => Data.Player == null ? InGameName : Data.Player.DisplayName;
+    public string GetPersonalBest => Data.Player == null ? "Unk" : Data.Player.GetPersonalBest;
+    public string HeadViewParameter => Data.Player == null ? InGameName : Data.Player.HeadViewParameter;
+    public string TwitchName => Data.Player == null ? string.Empty : Data.Player.TwitchName;
+    public bool IsFromWhitelist => Data.Player != null;
+    public bool IsLive => Data.IsLive;
     
-    public RankedPaceData? PaceData { get; private set; }
-
-    public PlayerViewModel? Player { get; set; }
-    public PlayerInventory Inventory { get; set; } = new();
-
-    public ObservableCollection<RankedTimelineSplit> Splits { get; set; } = [];
-
-    private BitmapImage? _headImage;
-    public BitmapImage? HeadImage
-    {
-        get => _headImage;
-        set
-        {
-            _headImage = value;
-            OnPropertyChanged(nameof(HeadImage));
-        }
-    }
-
-    public string DisplayName => Player == null ? InGameName : Player.DisplayName;
-    public string GetPersonalBest => Player == null ? "Unk" : Player.GetPersonalBest;
-    public string HeadViewParameter => Player == null ? InGameName : Player.HeadViewParameter;
-    public string TwitchName => Player == null ? string.Empty : Player.TwitchName;
-    public bool IsFromWhitelist => Player != null;
-
-    public string UUID
-    {
-        get => _data.UUID;
-        private set => _data.UUID = value;
-    }
-    public string InGameName
-    {
-        get => _data.InGameName;
-        set
-        {
-            _data.InGameName = value;
-            OnPropertyChanged(nameof(InGameName));
-        }
-    }
-    public int EloRate
-    {
-        get => _data.EloRate;
-        set
-        {
-            _data.EloRate = value;
-            OnPropertyChanged(nameof(EloRate));
-        }
-    }
-    public List<string> Timelines
-    {
-        get => _data.Timelines;
-        set
-        {
-            _data.Timelines = value;
-            OnPropertyChanged(nameof(Timelines));
-        }
-    }
-
-    public int _resets;
-    public int Resets
-    {
-        get => _resets;
-        set
-        {
-            _resets = value;
-            OnPropertyChanged(nameof(Resets));
-        }
-    }
-
     private bool _isUsedInPov;
     public bool IsUsedInPov
     {
@@ -111,25 +40,38 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
             OnPropertyChanged(nameof(IsUsedInPreview));
         }
     }
-    
-    private bool _isLive = true;
-    public bool IsLive
+
+    private BitmapImage? _headImage;
+    public BitmapImage? HeadImage
     {
-        get => _isLive;
+        get => _headImage;
         set
         {
-            _isLive = value;
-            OnPropertyChanged(nameof(IsLive));
+            if (_headImage == value) return;
+            _headImage = value;
+            OnPropertyChanged(nameof(HeadImage));
         }
     }
-    
+
+    private string _inGameName = string.Empty;
+    public string InGameName
+    {
+        get => _inGameName;
+        set
+        {
+            if (_inGameName == value) return;
+            _inGameName = value;
+            OnPropertyChanged(nameof(InGameName));
+        }
+    }
+
     private float _headImageOpacity;
     public float HeadImageOpacity
     {
         get => _headImageOpacity;
         set
         {
-            if (_headImageOpacity == value) return;
+            if (Math.Abs(_headImageOpacity - value) < 0.1f) return;
             _headImageOpacity = value;
             OnPropertyChanged(nameof(HeadImageOpacity));
         }
@@ -142,14 +84,23 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         set
         {
             if (_splitType == value) return;
-
             _splitType = value;
-            SplitName = value.ToString().Replace('_', ' ').CaptalizeAll();
             OnPropertyChanged(nameof(SplitType));
-            OnPropertyChanged(nameof(SplitName));
+            SplitName = value.ToString().Replace('_', ' ').CaptalizeAll();
         }
     }
-    public string? SplitName { get; set; }
+
+    private string? _splitName = string.Empty;
+    public string? SplitName
+    {
+        get => _splitName;
+        set
+        {
+            if (_splitName == value) return;
+            _splitName = value;
+            OnPropertyChanged(nameof(SplitName));
+        } 
+    }
 
     private string _lastTimeline = string.Empty;
     public string LastTimeline
@@ -157,6 +108,7 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         get => _lastTimeline;
         set
         {
+            if (_lastTimeline == value) return;
             _lastTimeline = value;
             OnPropertyChanged(nameof(LastTimeline));
         }
@@ -168,13 +120,21 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         get => _currentSplitTimeMiliseconds;
         set
         {
+            if (_currentSplitTimeMiliseconds == value) return;
             _currentSplitTimeMiliseconds = value;
-            TimeSpan time = TimeSpan.FromMilliseconds(_currentSplitTimeMiliseconds);
-            CurrentSplitTime = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
-            OnPropertyChanged(nameof(CurrentSplitTime));
-        }
+            CurrentSplitTime = TimeSpan.FromMilliseconds(value).ToSimpleFormattedTime();
+        } 
     }
-    public string CurrentSplitTime { get; set; } = "00:00";
+    private string _currentSplitTime = "00:00";
+    public string CurrentSplitTime
+    {
+        get => _currentSplitTime;
+        set
+        {
+            _currentSplitTime = value;
+            OnPropertyChanged(nameof(CurrentSplitTime));
+        } 
+    }
 
     private long _differenceSplitTimeMiliseconds;
     public long DifferenceSplitTimeMiliseconds
@@ -182,166 +142,44 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         get => _differenceSplitTimeMiliseconds;
         set
         {
+            if (_differenceSplitTimeMiliseconds == value) return;
             _differenceSplitTimeMiliseconds = value;
-            TimeSpan time = TimeSpan.FromMilliseconds(_differenceSplitTimeMiliseconds);
-            SplitDifferenceTime = string.Format("+{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            SplitDifferenceTime = TimeSpan.FromMilliseconds(value).ToSimpleFormattedTime("+");
+        } 
+    }
+    private string _splitDifferenceTime = "00:00";
+    public string SplitDifferenceTime
+    {
+        get => _splitDifferenceTime;
+        set
+        {
+            _splitDifferenceTime = value;
             OnPropertyChanged(nameof(SplitDifferenceTime));
-        }
+        } 
     }
-    public string SplitDifferenceTime { get; set; } = "00:00";
 
 
-    public RankedPaceViewModel(RankedService service, RankedPace data)
+    public RankedPaceViewModel(RankedPace data)
     {
-        _service = service;
-        _data = data;
-    }
-    public void Initialize(RankedPaceData data)
-    {
-        PaceData = data;
-        Inventory.DisplayItems = true;
-        Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+        Data = data;
+        Inventory = new PlayerInventoryViewModel(data.Inventory);
+        OnPropertyChanged(nameof(Inventory));
         
-        Update(data);
+        Update();
     }
 
-    /// <summary>
-    /// trzeba zrobic prostsze aktualizowanie timelineow etap po etapie, a nie cala na raz
-    /// </summary>
-    public void Update(RankedPaceData data)
+    public void Update()
     {
-        PaceData = data;
+        HeadImage = Data.HeadImage;
+        HeadImageOpacity = Data.HeadImageOpacity;
         
-        IsLive = Player != null && !Player.StreamData.AreBothNullOrEmpty();
-        UpdateHeadImage();
+        InGameName = Data.InGameName;
+        SplitType = Data.SplitType;
+        LastTimeline = Data.LastTimeline;
         
-        if (Resets != data.Resets)
-        {
-            Timelines.Clear();
-            Splits.Clear();
-            Splits.Add(new RankedTimelineSplit() { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
-
-            //TODO: tu moze lepiej zgarnac timeline resetu i pobrac czas zeby na starcie nie bylo 00:00 tylko czas resetu z racji i tak rta czasu reszty splitow 
-            RankedTimelineSplit last = Splits[^1];
-            SplitType = last.Split;
-            CurrentSplitTimeMiliseconds = last.Time;
-            LastTimeline = string.Empty;
-        }
-        if (data.Timelines.Count == 0) return;
-
-        Resets = data.Resets;
-
-        for (int i = 0; i < data.Timelines.Count; i++)
-        {
-            var current = data.Timelines[i];
-            if (Timelines.Count > i && current.Type.Equals(Timelines[i])) continue;
-
-            Timelines.Add(current.Type);
-        }
-
-        UpdateSplits(data.Timelines);
-        UpdateInventory(data.Inventory);
-
-        RankedTimelineSplit lastSplit = Splits[^1];
-        SplitType = lastSplit.Split;
-        CurrentSplitTimeMiliseconds = lastSplit.Time;
-
-        if (Timelines.Count == 0) return;
-        LastTimeline = Timelines[^1].CaptalizeAll();
-    }
-
-    private void UpdateSplits(List<RankedTimeline> timelines)
-    {
-        for (int i = 0; i < timelines.Count; i++)
-        {
-            var timeline = timelines[i];
-            bool wasFound = false;
-
-            for (int j = 0; j < Splits.Count; j++)
-            {
-                var current = Splits[j];
-                if (!current.Name.Equals(timeline.Type)) continue;
-                
-                wasFound = true;
-                break;
-            }
-            if (wasFound) continue;
-
-            RankedTimelineSplit? newSplit = null;
-            if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
-            {
-                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
-            }
-            else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
-            {
-                var splitType = RankedSplitType.structure_2;
-
-                if (Splits[^1].Name.Equals("enter_the_nether"))
-                    splitType = RankedSplitType.structure_1;
-
-                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = splitType, Time = timeline.Time };
-            }
-
-            if (newSplit == null) continue;
-
-            ValidateBestSplit(newSplit);
-            Splits.Add(newSplit);
-        }
-    }
-    private void UpdateInventory(RankedInventory inventory)
-    {
-        Inventory.BlazeRodsCount = inventory.BlazeRod;
-        Inventory.ObsidianCount = inventory.Obsidian;
-        Inventory.BedsCount = inventory.WhiteBed;
-        Inventory.EnderEyeCount = inventory.EnderEye;
-        Inventory.PearlsCount = inventory.EnderPearl;
-    }
-
-    private void UpdateHeadImage()
-    {
-        HeadImageOpacity = HeadImage != null && IsLive ? 1f : .25f;
-        if (HeadImage != null) return;
-
-        if (Player == null)
-        {
-            string url = $"https://minotar.net/helm/{InGameName}/8.png";
-            Task.Run(async () =>
-            {
-                HeadImage = await Helper.LoadImageFromUrlAsync(url);
-            });
-        }
-        else
-        {
-            HeadImage = Player!.Image;
-        }
-    }
-
-    private void ValidateBestSplit(RankedTimelineSplit newSplit)
-    {
-        RankedBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
+        CurrentSplitTimeMiliseconds = Data.CurrentSplitTimeMiliseconds;
+        DifferenceSplitTimeMiliseconds = Data.DifferenceSplitTimeMiliseconds;
         
-        if(string.IsNullOrEmpty(bestSplit.PlayerName))
-        {
-            bestSplit.PlayerName = InGameName;
-            bestSplit.Time = newSplit.Time;
-        }
-        DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
-        if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
-    }
-    
-    public RankedTimelineSplit GetLastSplit()
-    {
-        return GetSplit(1)!;
-    }
-    public RankedTimelineSplit? GetSplit(int indexFromEnd)
-    {
-        if (indexFromEnd > Splits.Count) return null;
-        var split = Splits[^indexFromEnd];
-        return new RankedTimelineSplit()
-        {
-            Name = split.Name,
-            Split = split.Split,
-            Time = split.Time
-        };
+        Inventory.Update();
     }
 }
