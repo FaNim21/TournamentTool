@@ -115,52 +115,10 @@ public class RankedPace
 
         if (newSplit == null) return;
         
-        //TODO: 0 ogarnac leaderboard
-        _service.EvaluatePlayerInLeaderboard(this, LeaderboardRuleType.Split);
-
         ValidateBestSplit(newSplit);
         Splits.Add(newSplit);
     }
-    /*
-    private void UpdateSplits(List<RankedTimeline> timelines)
-    {
-        for (int i = 0; i < timelines.Count; i++)
-        {
-            var timeline = timelines[i];
-            bool wasFound = false;
-
-            for (int j = 0; j < Splits.Count; j++)
-            {
-                var current = Splits[j];
-                if (!current.Name.Equals(timeline.Type)) continue;
-                
-                wasFound = true;
-                break;
-            }
-            if (wasFound) continue;
-
-            RankedTimelineSplit? newSplit = null;
-            if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
-            {
-                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
-            }
-            else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
-            {
-                var splitType = RankedSplitType.structure_2;
-
-                if (Splits[^1].Name.Equals("enter_the_nether"))
-                    splitType = RankedSplitType.structure_1;
-
-                newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = splitType, Time = timeline.Time };
-            }
-
-            if (newSplit == null) continue;
-
-            ValidateBestSplit(newSplit);
-            Splits.Add(newSplit);
-        }
-    }
-    */
+    
     private void UpdateInventory(RankedInventory inventory)
     {
         Inventory.BlazeRodsCount = inventory.BlazeRod;

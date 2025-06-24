@@ -15,49 +15,41 @@ namespace TournamentTool.Modules.ManagementPanels;
 
 public class RankedManagementPanel : ManagementPanel, IRankedManagementDataReceiver
 {
-    private RankedManagementData RankedManagementData { get; set; }
+    private RankedManagementData _data;
 
-    //TODO: 0 przerobic to na model-viwemodel w formie na biezaco aktualizowania danych managementu
-    private string _customText = string.Empty;
     public string CustomText
     {
-        get => _customText; 
+        get => _data.CustomText; 
         set
         {
-            _customText = value;
+            _data.CustomText = value;
             OnPropertyChanged(nameof(CustomText));
         }
     }
-
-    private int _rounds;
     public int Rounds
     {
-        get => _rounds; 
+        get => _data.Rounds; 
         set
         {
-            _rounds = value;
+            _data.Rounds = value;
             OnPropertyChanged(nameof(Rounds));
         }
     }
-
-    private int _completions;
     public int Completions
     {
-        get => _completions; 
+        get => _data.Completions; 
         set
         {
-            _completions = value;
+            _data.Completions = value;
             OnPropertyChanged(nameof(Completions));
         }
     }
-
-    private int _players;
     public int Players
     {
-        get => _players; 
+        get => _data.Players; 
         set
         {
-            _players = value;
+            _data.Players = value;
             OnPropertyChanged(nameof(Players));
         }
     }
@@ -97,7 +89,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 
     public RankedManagementPanel(RankedManagementData managementData)
     {
-        RankedManagementData = managementData;
+        _data = managementData;
         
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubtractRoundCommand = new RelayCommand(() => { Rounds--; });
@@ -108,20 +100,20 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 
     public override void InitializeAPI(APIDataSaver api)
     {
-        if (int.TryParse(api.CheckFile(_rankedPlayerCountFileName), out int players)) { Players = players; }
-        if (int.TryParse(api.CheckFile(_rankedCompletedCountFileName), out int completions)) { Completions = completions; }
-
+        api.CheckFile(_rankedPlayerCountFileName);
+        api.CheckFile(_rankedCompletedCountFileName);
         api.CheckFile(_rankedRoundsFileName);
         api.CheckFile(_rankedCustomTextFileName);
 
-        if (RankedManagementData == null) return;
-        Rounds = RankedManagementData.Rounds;
-        CustomText = RankedManagementData.CustomText;
-
+        OnPropertyChanged(nameof(CustomText));
+        OnPropertyChanged(nameof(Rounds));
+        OnPropertyChanged(nameof(Players));
+        OnPropertyChanged(nameof(Completions));
+        
         Application.Current.Dispatcher.Invoke(() =>
         {
             BestSplits.Clear();
-            foreach (var bestSplit in RankedManagementData.BestSplits)
+            foreach (var bestSplit in _data.BestSplits)
             {
                 var viewModel = new RankedBestSplitViewModel(bestSplit);
                 BestSplits.Add(viewModel);

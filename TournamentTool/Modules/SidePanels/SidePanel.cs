@@ -34,7 +34,7 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgr
 
     public ControllerMode Mode { get; protected set; }
 
-    public ICommand UnselectItemsCommand { get; private set; }
+    public ICommand UnselectItemsCommand { get; set; }
 
 
     protected SidePanel(ControllerViewModel controller)

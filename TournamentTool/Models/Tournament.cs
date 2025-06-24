@@ -84,9 +84,11 @@ public abstract class ManagementData;
 
 public class RankedManagementData : ManagementData
 {
+    public List<RankedBestSplit> BestSplits { get; set; } = [];
     public string CustomText { get; set; } = string.Empty;
     public int Rounds { get; set; } = 0;
-    public List<RankedBestSplit> BestSplits { get; set; } = [];
+    [JsonIgnore] public int Players { get; set; }
+    [JsonIgnore] public int Completions { get; set; }
 }
 
 public class PacemanManagementData : ManagementData

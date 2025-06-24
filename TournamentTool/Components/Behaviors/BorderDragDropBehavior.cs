@@ -21,24 +21,46 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         set => SetValue(DragDataTypeProperty, value);
     }
 
+    private Point _startPoint;
+    private bool _isMouseDown;
 
     protected override void OnAttached()
     {
         base.OnAttached();
         AssociatedObject.MouseMove += OnMouseMove;
-        //AssociatedObject.MouseEnter += MouseEnter;
+        AssociatedObject.MouseLeftButtonDown += OnMouseLeftButtonDown;
+        AssociatedObject.MouseLeftButtonUp += OnMouseLeftButtonUp;
     }
 
     protected override void OnCleanup()
     {
         base.OnCleanup();
         AssociatedObject.MouseMove -= OnMouseMove;
-        //AssociatedObject.MouseEnter -= MouseEnter;
+        AssociatedObject.MouseLeftButtonDown -= OnMouseLeftButtonDown;
+        AssociatedObject.MouseLeftButtonUp -= OnMouseLeftButtonUp;
+    }
+    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _startPoint = e.GetPosition(null);
+        _isMouseDown = true;
+    }
+    
+    private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isMouseDown = false;
     }
 
     private void OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (!_isMouseDown || e.LeftButton != MouseButtonState.Pressed) return;
+
+        Point currentPosition = e.GetPosition(null);
+        Vector diff = _startPoint - currentPosition;
+
+        if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance) return;
+
+        _isMouseDown = false;
+        
         if (OnCommand != null && OnCommand.CanExecute(null))
         {
             OnCommand.Execute(null);

@@ -242,9 +242,10 @@ public class RankedService : IBackgroundService
         pace.Player = playerViewModel;
     }
 
-    public void EvaluatePlayerInLeaderboard(RankedPace pace, LeaderboardRuleType ruleType)
+    //TODO: 0 przekminic zeby moze pod rankedy z racji oceny graczy po skonczeniu rundy dac liste graczy do api lua
+    //czyli zrobic to w formie validowania dopiero po skonczeniu rundy cala lista
+    public void EvaluatePlayerInLeaderboard(List<RankedPace> pace, LeaderboardRuleType ruleType)
     {
-        if (pace.Player == null) return;
         
         
     }

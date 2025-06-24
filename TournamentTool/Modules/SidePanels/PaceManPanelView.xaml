@@ -64,8 +64,10 @@
                                      VerticalAlignment="Top"
                                      Fill="Red"
                                      Margin="5" />
-                            <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Vertical"
+                                        Background="Transparent">
                                 <StackPanel Orientation="Horizontal"
+                                            Background="Transparent"
                                             Margin="5 5 0 5">
                                     <Image Source="{Binding HeadImage, Mode=OneWay}"
                                            Width="30"
@@ -111,6 +113,7 @@
                                 </StackPanel>
                                 <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                             Orientation="Horizontal"
+                                            Background="Transparent"
                                             Margin="2 -4 0 1">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Width="18">

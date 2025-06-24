@@ -29,6 +29,8 @@ public class LuaAPIContext
     public int BasePoints => _subRule.BasePoints;
 
     public int Round => _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
+    public int PlayersInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
+    public int CompletionsInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
 
 
     public LuaAPIContext(LeaderboardEntry entry, LeaderboardPlayerEvaluateData data, LeaderboardSubRule subRule, TournamentViewModel tournament, Action<LeaderboardEntry> onEntryRunRegistered)
