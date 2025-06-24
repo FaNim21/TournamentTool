@@ -1,5 +1,5 @@
 ﻿using TournamentTool.Enums;
-using TournamentTool.Modules.SidePanels;
+using TournamentTool.Models;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;

@@ -17,6 +17,7 @@ public interface IRankedDataReceiver : IBackgroundDataReceiver
     void AddPace(RankedPace pace);
     void Update();
     void RemovePace(RankedPace pace);
+    void Clear();
 
     void ReceiveAllPaces(List<RankedPace> paces);
 }

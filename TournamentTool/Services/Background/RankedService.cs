@@ -63,7 +63,7 @@ public class RankedService : IBackgroundService
             Application.Current.Dispatcher.InvokeAsync(() => 
             {
                 _rankedDataReceiver?.ReceiveAllPaces(_paces);
-            }, DispatcherPriority.Background);
+            }, _paces.Count > 25 ? DispatcherPriority.Background : DispatcherPriority.Normal);
         }
         else if (receiver is IPlayerAddReceiver playerManagerReceiver)
         {
@@ -285,5 +285,7 @@ public class RankedService : IBackgroundService
         _rankedManagementData?.BestSplits.Clear();
         _paces.Clear();
         _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0);
+        
+        _rankedDataReceiver?.Clear();
     }
 }
