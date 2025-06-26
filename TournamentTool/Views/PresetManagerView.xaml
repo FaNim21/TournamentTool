@@ -278,63 +278,45 @@
                                           Content="Add unknown ranked players to whitelist"
                                           ToolTip="It adds players from ranked to whitelist with all information it could get from there"
                                           Margin="0 0 0 5" />
+                                          
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
-                                         Width="220"
+                                         Width="140"
                                          Height="20"
-                                         IsReadOnly="True"
-                                         Text="{Binding TournamentViewModel.RankedRoomDataPath, ValidatesOnNotifyDataErrors=True}"
+                                         Text="{Binding TournamentViewModel.RankedApiKey, ValidatesOnNotifyDataErrors=True}"
                                          ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
                                          ToolTipService.InitialShowDelay="0"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top">
                                 </TextBox>
-                                <components:ButtonNormal ContentText="SET"
-                                                         Width="35"
-                                                         Margin="5 0 0 3"
-                                                         OnCommand="{Binding SetRankedDataPathCommand}" />
-                                <Label Content="Spectator Path"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                <TextBlock Text="Ranked API key"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </StackPanel>
+                            
                             <StackPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
+                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
-                                         Width="120"
+                                         Width="140"
                                          Height="20"
-                                         Text="{Binding TournamentViewModel.RankedRoomDataName, ValidatesOnNotifyDataErrors=True}"
+                                         Text="{Binding TournamentViewModel.RankedApiPlayerName, ValidatesOnNotifyDataErrors=True}"
                                          ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
                                          ToolTipService.InitialShowDelay="0"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <Label Content="Data name"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal"
-                                       Margin="0 0 0 5">
-                                <TextBox TextWrapping="NoWrap"
-                                         Width="120"
-                                         Height="20"
-                                         Text="{Binding TournamentViewModel.RankedRoomUpdateFrequency}"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <Label Content="Spectator update frequency (ms)"
-                                       Foreground="White"
-                                       Height="20"
-                                       FontSize="16"
-                                       Padding="0"
-                                       Margin="5 0 0 3" />
+                                         VerticalAlignment="Top">
+                                </TextBox>
+                                <TextBlock Text="Player name for API"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 3" />
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

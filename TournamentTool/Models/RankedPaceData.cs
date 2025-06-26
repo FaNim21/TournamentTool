@@ -1,34 +1,64 @@
 ﻿using System.Text.Json.Serialization;
+using TournamentTool.Converters.JSON;
 using TournamentTool.Enums;
 
 namespace TournamentTool.Models;
 
-public class RankedPlayer
+[JsonConverter(typeof(PrivRoomMatchStatusConverter))]
+public enum MatchStatus
 {
-    [JsonPropertyName("uuid")] 
-    public string UUID { get; set; } = string.Empty;
-
-    [JsonPropertyName("nickname")] 
-    public string NickName { get; set; } = string.Empty;
-
-    [JsonPropertyName("roleType")]
-    public byte RoleType { get; set; }
-
-    [JsonPropertyName("eloRate")]
-    public int? EloRate { get; set; }
-
-    [JsonPropertyName("eloRank")]
-    public int? EloRank { get; set; }
+    idle,
+    counting,
+    generate,
+    ready,
+    running,
+    done
 }
-public struct RankedComplete
+
+public class PrivRoomAPIResult
 {
-    [JsonPropertyName("player")]
-    public string UUID { get; set; }
-
-    [JsonPropertyName("time")]
-    public long Time { get; set; }
+    [JsonPropertyName("status")] public string Status { get; init; } = string.Empty;
+    [JsonPropertyName("data")] public PrivRoomData Data { get; init; } = new();
 }
-public class RankedInventory
+
+public class PrivRoomData
+{
+    [JsonPropertyName("lastId")] public int? LastID { get; init; }
+    [JsonPropertyName("type")] public int Type { get; init; }
+    [JsonPropertyName("status")] public MatchStatus Status { get; init; }
+    [JsonPropertyName("time")] public int Time { get; init; }
+    
+    [JsonPropertyName("players")] public PrivRoomPlayer[] Players { get; init; } = [];
+    [JsonPropertyName("spectators")] public PrivRoomPlayer[] Spectators { get; init; } = [];
+    [JsonPropertyName("completions")] public PrivRoomCompletion[] Completions { get; init; } = [];
+    
+    [JsonPropertyName("timelines")] public List<PrivRoomTimeline> Timelines { get; init; } = [];
+}
+
+public class PrivRoomPlayer
+{
+    [JsonPropertyName("uuid")] public string UUID { get; init; } = string.Empty;
+    [JsonPropertyName("nickname")] public string InGameName { get; init; } = string.Empty;
+    [JsonPropertyName("roleType")] public byte RoleType { get; init; }
+    [JsonPropertyName("eloRate")] public int? EloRate { get; init; }
+    [JsonPropertyName("eloRank")] public int? EloRank { get; init; }
+    [JsonPropertyName("country")] public string Country { get; init; } = string.Empty;
+}
+
+public class PrivRoomTimeline
+{
+    [JsonPropertyName("uuid")] public string UUID { get; init; } = string.Empty;
+    [JsonPropertyName("time")] public long Time { get; init; }
+    [JsonPropertyName("type")] public string Type { get; init; } = string.Empty;
+}
+
+public class PrivRoomCompletion
+{
+    [JsonPropertyName("uuid")] public string UUID { get; init; } = string.Empty;
+    [JsonPropertyName("time")] public long Time { get; init; }
+}
+
+public class PrivRoomInventory
 {
     [JsonPropertyName("splash_potion")]
     public int? SplashPotions { get; set; }
@@ -84,56 +114,17 @@ public class RankedInventory
     [JsonPropertyName("potion")]
     public int Potion { get; set; }
 }
-public class RankedTimeline
+
+public class PrivRoomPaceData
 {
-    [JsonPropertyName("uuid")] 
-    public string UUID { get; set; } = string.Empty;
-
-    [JsonPropertyName("type")] 
-    public string Type { get; set; } = string.Empty; //maybe enum?? with all types ready
-
-    [JsonPropertyName("time")]
-    public long Time { get; set; }
-
-    [JsonPropertyName("data")] 
-    public int[] Data { get; set; } = [];
-
-    [JsonPropertyName("shown")]
-    public bool IsShown { get; set; }
-}
-public record RankedData
-{
-    [JsonPropertyName("matchType")]
-    public string MatchType { get; init; } = string.Empty;
-
-    [JsonPropertyName("category")] 
-    public string Category { get; init; } = string.Empty;
-
-    [JsonPropertyName("startTime")]
-    public long StartTime { get; init; }
-
-    [JsonPropertyName("players")]
-    public RankedPlayer[] Players { get; init; } = [];
-
-    [JsonPropertyName("completes")] 
-    public RankedComplete[] Completes { get; init; } = [];
-
-    [JsonPropertyName("inventories")]
-    public Dictionary<string, RankedInventory> Inventories { get; init; } = [];
-
-    [JsonPropertyName("timelines")]
-    public List<RankedTimeline> Timelines { get; init; } = [];
-}
-
-public class RankedPaceData
-{
-    public RankedPlayer Player { get; init; } = new();
-    public List<RankedTimeline> Timelines { get; init; } = [];
-    public RankedInventory Inventory { get; set; } = new();
-    public RankedComplete Completion { get; set; } = new();
+    public PrivRoomPlayer Player { get; init; } = new();
+    public List<PrivRoomTimeline> Timelines { get; init; } = [];
+    public PrivRoomInventory Inventory { get; set; } = new();
+    public PrivRoomCompletion Completion { get; set; } = new();
     public int Resets { get; set; }
 }
-public class RankedBestSplit
+
+public class PrivRoomBestSplit
 {
     public string? PlayerName { get; set; }
     public RankedSplitType Type { get; set; }

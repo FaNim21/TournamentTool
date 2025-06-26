@@ -7,7 +7,7 @@ namespace TournamentTool.Components.Behaviors
     {
         private bool _isSetup = true;
         private bool _isHookedUp;
-        private WeakReference _weakTarget;
+        private WeakReference? _weakTarget;
 
         protected virtual void OnSetup() { }
         protected virtual void OnCleanup() { }
@@ -42,7 +42,7 @@ namespace TournamentTool.Components.Behaviors
         {
             if (!_isHookedUp) return;
             _isHookedUp = false;
-            var target = AssociatedObject ?? (T)_weakTarget.Target;
+            var target = AssociatedObject ?? (T)_weakTarget!.Target!;
             if (target != null)
             {
                 target.Unloaded -= OnTarget_Unloaded;

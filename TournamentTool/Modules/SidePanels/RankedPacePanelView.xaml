@@ -13,6 +13,231 @@
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=sidePanels:RankedPacePanel}">
 
+        <ItemsControl ItemsSource="{Binding Groups}"
+                      Width="273"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      VerticalAlignment="Top"
+                      HorizontalAlignment="Left"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.PanningMode="VerticalOnly"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      VirtualizingPanel.CacheLength="2"
+                      VirtualizingPanel.CacheLengthUnit="Page"
+                      Margin="0 0 0 20">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ItemsPresenter />
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsVirtualizing="True"
+                                            VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <Border BorderThickness="1"
+                                BorderBrush="#7e8691"
+                                Background="#7e8691"
+                                Padding="1"
+                                Margin="6 10 2 0">
+                            <TextBlock Foreground="#1e1e1e"
+                                       HorizontalAlignment="Center"
+                                       FontWeight="Bold"
+                                       FontSize="18">
+                                <Run Text="{Binding SplitName}" />
+                                <Run Text="-" />
+                                <Run Text="{Binding PacesAmount}" />
+                            </TextBlock>
+                        </Border>
+
+                        <ListBox ItemsSource="{Binding Paces}"
+                                 SelectedItem="{Binding DataContext.SelectedPlayer, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                 Width="273"
+                                 SelectionMode="Multiple"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 VerticalAlignment="Top"
+                                 HorizontalAlignment="Left"
+                                 AllowDrop="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                            <i:Interaction.Behaviors>
+                                <behaviors:ListBoxUpdateBehavior />
+                                <behaviors:ListBoxSelectionBehavior />
+                                <behaviors:ListBoxClampScrollBehavior />
+                            </i:Interaction.Behaviors>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="models:RankedPaceViewModel">
+                                    <Border BorderBrush="#7e8691"
+                                            BorderThickness="1"
+                                            Width="263">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:BorderDragDropBehavior OnCommand="{Binding DataContext.UnselectItemsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              DragDataType="{x:Type models:IPlayer}" />
+                                        </i:Interaction.Behaviors>
+                                        <Grid>
+                                            <Ellipse Visibility="{Binding IsUsedInPov, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                     Width="7"
+                                                     Height="7"
+                                                     HorizontalAlignment="Right"
+                                                     VerticalAlignment="Top"
+                                                     Fill="Red"
+                                                     Margin="5" />
+                                            <StackPanel Orientation="Vertical"
+                                                        Background="Transparent">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Source="{Binding HeadImage, Mode=OneWay}"
+                                                           Width="30"
+                                                           Height="30"
+                                                           Opacity="{Binding HeadImageOpacity, Mode=OneWay}"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Top"
+                                                           Stretch="Uniform"
+                                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                           SnapsToDevicePixels="True"
+                                                           UseLayoutRounding="True"
+                                                           Margin="5" />
+                                                    <TextBlock FontSize="15"
+                                                               Width="140"
+                                                               FontWeight="SemiBold">
+                                                        <Run Text="{Binding InGameName}"
+                                                             Foreground="LightCyan" />
+                                                        <LineBreak />
+                                                        <Run Text="{Binding LastTimeline}"
+                                                             Foreground="Gold" />
+                                                    </TextBlock>
+                                                    <TextBlock VerticalAlignment="Center"
+                                                               HorizontalAlignment="Left"
+                                                               FontWeight="SemiBold">
+                                                        <Run Text="{Binding SplitDifferenceTime}"
+                                                             FontSize="13"
+                                                             Foreground="#d43f3f" />
+                                                        <LineBreak />
+                                                        <Run Text="{Binding CurrentSplitTime}"
+                                                             FontSize="17"
+                                                             Foreground="White" />
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <StackPanel Visibility="{Binding Inventory.DisplayItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                                            Orientation="Horizontal"
+                                                            Background="Transparent"
+                                                            Margin="2 2 0 1">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Image Width="18">
+                                                            <Image.Source>
+                                                                <BitmapImage DecodePixelWidth="18"
+                                                                             UriSource="/Resources/pearlIcon.png" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock Background="Transparent"
+                                                                   Foreground="White"
+                                                                   FontSize="14"
+                                                                   Text="{Binding Inventory.PearlsCount, Mode=OneWay}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="10 0 0 0"
+                                                                Orientation="Horizontal">
+                                                        <Image Width="16">
+                                                            <Image.Source>
+                                                                <BitmapImage DecodePixelWidth="16"
+                                                                             UriSource="/Resources/blazeRodIcon.png" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock Background="Transparent"
+                                                                   Foreground="White"
+                                                                   FontSize="14"
+                                                                   Text="{Binding Inventory.BlazeRodsCount, Mode=OneWay}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="10 0 0 0"
+                                                                Orientation="Horizontal">
+                                                        <Image Width="16">
+                                                            <Image.Source>
+                                                                <BitmapImage DecodePixelWidth="16"
+                                                                             UriSource="/Resources/bedIcon.png" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock Background="Transparent"
+                                                                   Foreground="White"
+                                                                   FontSize="14"
+                                                                   Text="{Binding Inventory.BedsCount, Mode=OneWay}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="10 0 0 0"
+                                                                Orientation="Horizontal">
+                                                        <Image Width="16">
+                                                            <Image.Source>
+                                                                <BitmapImage DecodePixelWidth="16"
+                                                                             UriSource="/Resources/obsidianIcon.png" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock Background="Transparent"
+                                                                   Foreground="White"
+                                                                   FontSize="14"
+                                                                   Text="{Binding Inventory.ObsidianCount, Mode=OneWay}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="10 0 0 0"
+                                                                Orientation="Horizontal">
+                                                        <Image Width="16">
+                                                            <Image.Source>
+                                                                <BitmapImage DecodePixelWidth="16"
+                                                                             UriSource="/Resources/enderEyeIcon.png" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock Background="Transparent"
+                                                                   Foreground="White"
+                                                                   FontSize="14"
+                                                                   Text="{Binding Inventory.EnderEyeCount, Mode=OneWay}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel IsVirtualizing="True"
+                                                            VirtualizationMode="Recycling" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="IsEnabled"
+                                            Value="{Binding IsLive}" />
+                                    <Setter Property="Margin"
+                                            Value="5 -1 0 -1" />
+                                    <Setter Property="Padding"
+                                            Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                        </ListBox>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+
+    <!--
     <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
              Background="Transparent"
@@ -26,7 +251,7 @@
              VirtualizingPanel.ScrollUnit="Pixel"
              SelectionMode="Multiple"
              AllowDrop="True"
-             ItemsSource="{Binding GroupedRankedPaces}"
+             ItemsSource="{Binding PacesView}"
              SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}">
         <i:Interaction.Behaviors>
             <behaviors:ListBoxUpdateBehavior />
@@ -204,4 +429,5 @@
             </Style>
         </ListBox.ItemContainerStyle>
     </ListBox>
+-->
 </UserControl>

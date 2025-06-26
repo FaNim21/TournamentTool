@@ -335,36 +335,26 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
     }
     
-    public string RankedRoomDataPath
+    public string RankedApiPlayerName
     {
-        get => _tournament.RankedRoomDataPath;
+        get => _tournament.RankedApiPlayerName;
         set
         {
-            _tournament.RankedRoomDataPath = value;
+            _tournament.RankedApiPlayerName = value;
             PresetIsModified();
-            OnPropertyChanged(nameof(RankedRoomDataPath));
+            OnPropertyChanged(nameof(RankedApiPlayerName));
             UpdateBackgroundService(ControllerMode.Ranked);
         }
     }
-    public string RankedRoomDataName
+    public string RankedApiKey
     {
-        get => _tournament.RankedRoomDataName;
+        get => _tournament.RankedApiKey;
         set
         {
-            _tournament.RankedRoomDataName = value;
+            _tournament.RankedApiKey = value;
             PresetIsModified();
-            OnPropertyChanged(nameof(RankedRoomDataName));
+            OnPropertyChanged(nameof(RankedApiKey));
             UpdateBackgroundService(ControllerMode.Ranked);
-        }
-    }
-    public int RankedRoomUpdateFrequency
-    {
-        get => _tournament.RankedRoomUpdateFrequency;
-        set
-        {
-            _tournament.RankedRoomUpdateFrequency = value < 1000 ? 1000 : value;
-            PresetIsModified();
-            OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
         }
     }
     public bool AddUnknownRankedPlayersToWhitelist
@@ -466,9 +456,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         
         OnPropertyChanged(nameof(ControllerMode));
         
-        OnPropertyChanged(nameof(RankedRoomDataPath));
-        OnPropertyChanged(nameof(RankedRoomDataName));
-        OnPropertyChanged(nameof(RankedRoomUpdateFrequency));
+        OnPropertyChanged(nameof(RankedApiPlayerName));
+        OnPropertyChanged(nameof(RankedApiKey));
         OnPropertyChanged(nameof(AddUnknownRankedPlayersToWhitelist));
     }
     public void UpdatePlayers()
@@ -641,9 +630,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         
         ControllerMode = ControllerMode.None;
         
-        RankedRoomDataPath = string.Empty;
-        RankedRoomDataName = "spectate_match.json";
-        RankedRoomUpdateFrequency = 1000;
+        RankedApiPlayerName = string.Empty;
+        RankedApiKey = string.Empty;
         AddUnknownRankedPlayersToWhitelist = false;
     }
 
@@ -671,21 +659,21 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     private void UpdateBackgroundService(ControllerMode mode)
     {
         //TODO: 3 Przeniesc wszystkie fieldy do presetmanager usuwaj tutaj baseviewmodel i validacje danych, bo jest to idiotycznie rozwiazane obecnie
-        ClearErrors(nameof(RankedRoomDataName));
-        ClearErrors(nameof(RankedRoomDataPath));
+        ClearErrors(nameof(RankedApiKey));
+        ClearErrors(nameof(RankedApiPlayerName));
 
         bool isValidated = true;
         switch (mode)
         {
             case ControllerMode.Ranked:
-                if (string.IsNullOrEmpty(RankedRoomDataName))
+                if (string.IsNullOrEmpty(RankedApiKey))
                 {
-                    AddError(nameof(RankedRoomDataName), "Ranked name for spectator file cannot be empty");
+                    AddError(nameof(RankedApiKey), "Ranked api cannot be empty");
                     isValidated = false;
                 }
-                if (string.IsNullOrEmpty(RankedRoomDataPath))
+                if (string.IsNullOrEmpty(RankedApiPlayerName))
                 {
-                    AddError(nameof(RankedRoomDataPath), "Ranked spectator path cannot be empty");
+                    AddError(nameof(RankedApiPlayerName), "Ranked player name for api cannot be empty");
                     isValidated = false;
                 }
                 break;

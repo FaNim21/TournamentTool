@@ -36,18 +36,18 @@ public class WebServer
             var req = ctx.Request;
             var resp = ctx.Response;
 
-            using var writer = new StreamWriter(resp.OutputStream);
-            if (req.QueryString.AllKeys.Any("code".Contains))
+            await using var writer = new StreamWriter(resp.OutputStream);
+            if (req.QueryString.AllKeys.Any("code".Contains!))
             {
-                writer.WriteLine("Successfully authorized!");
-                writer.Flush();
+                await writer.WriteLineAsync("Successfully authorized!");
+                await writer.FlushAsync();
                 var authorization = new Models.Twitch.Authorization(req.QueryString["code"]!);
                 return authorization;
             }
             else
             {
-                writer.WriteLine("No code found in query string!");
-                writer.Flush();
+                await writer.WriteLineAsync("No code found in query string!");
+                await writer.FlushAsync();
             }
         }
         return null!;

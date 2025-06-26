@@ -6,13 +6,13 @@ namespace TournamentTool.Converters;
 
 class EnumToVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value == null || parameter == null)
             return Visibility.Collapsed;
 
-        string enumValue = value.ToString();
-        string targetValue = parameter.ToString();
+        string? enumValue = value.ToString();
+        string? targetValue = parameter.ToString();
 
         if (enumValue!.Equals(targetValue, StringComparison.InvariantCultureIgnoreCase))
             return Visibility.Visible;
@@ -20,7 +20,7 @@ class EnumToVisibilityConverter : IValueConverter
         return Visibility.Collapsed;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return Visibility.Collapsed;
     }

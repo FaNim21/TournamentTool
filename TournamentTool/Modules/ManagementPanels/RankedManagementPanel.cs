@@ -1,14 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Runtime.InteropServices.JavaScript;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.ManagementPanels;
@@ -130,7 +127,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
     }
 
-    public void UpdateManagementData(List<RankedBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount)
+    public void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount)
     {
         if (_saveStartedTime != timeStarted)
         {

@@ -191,7 +191,7 @@ public class PresetManagerViewModel : SelectableViewModel
         string path = DialogBox.ShowOpenFolder();
         if (string.IsNullOrEmpty(path)) return;
 
-        TournamentViewModel.RankedRoomDataPath = path;
+        TournamentViewModel.RankedApiKey = path;
     }
 
     private void OpenPresetFolder()

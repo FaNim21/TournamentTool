@@ -84,7 +84,7 @@ public abstract class ManagementData;
 
 public class RankedManagementData : ManagementData
 {
-    public List<RankedBestSplit> BestSplits { get; set; } = [];
+    public List<PrivRoomBestSplit> BestSplits { get; set; } = [];
     public string CustomText { get; set; } = string.Empty;
     public int Rounds { get; set; } = 0;
     [JsonIgnore] public int Players { get; set; }
@@ -135,8 +135,7 @@ public class Tournament : IPreset
 
     public ControllerMode ControllerMode { get; set; }
 
-    public string RankedRoomDataPath { get; set; } = string.Empty;
-    public string RankedRoomDataName { get; set; } = "spectate_match.json";
-    public int RankedRoomUpdateFrequency { get; set; } = 1000;
+    public string RankedApiPlayerName { get; set; } = string.Empty;
+    public string RankedApiKey { get; set; } = string.Empty;
     public bool AddUnknownRankedPlayersToWhitelist { get; set; }
 }

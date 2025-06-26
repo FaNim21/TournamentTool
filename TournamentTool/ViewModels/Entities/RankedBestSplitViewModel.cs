@@ -6,7 +6,7 @@ namespace TournamentTool.ViewModels.Entities;
 
 public class RankedBestSplitViewModel : BaseViewModel
 {
-    private readonly RankedBestSplit _bestSplit;
+    private readonly PrivRoomBestSplit _bestSplit;
     
     public string? PlayerName
     {
@@ -61,7 +61,7 @@ public class RankedBestSplitViewModel : BaseViewModel
     }
 
 
-    public RankedBestSplitViewModel(RankedBestSplit bestSplit)
+    public RankedBestSplitViewModel(PrivRoomBestSplit bestSplit)
     {
         _bestSplit = bestSplit;
 

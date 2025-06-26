@@ -2,7 +2,7 @@
 
 namespace TournamentTool.Models;
 
-public class PaceMan
+public class PaceManData
 {
     [JsonPropertyName("worldId")] 
     public string WorldID { get; set; } = string.Empty;

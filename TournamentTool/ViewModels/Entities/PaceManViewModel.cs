@@ -11,57 +11,42 @@ namespace TournamentTool.ViewModels.Entities;
 
 public class PaceManViewModel : BaseViewModel, IPlayer, IPace
 {
-    private PaceMan _paceMan;
+    private Paceman _paceman;
 
-    private PaceManService Service { get; }
+    public SplitType ModelSplitType => _paceman.SplitType;
+    public long ModelCurrentSplitTimeMiliseconds => _paceman.CurrentSplitTimeMiliseconds;
+    
+    public string DisplayName => _paceman.PlayerViewModel == null ? _paceman.Data.Nickname : _paceman.PlayerViewModel.DisplayName;
+    public string GetPersonalBest => _paceman.PlayerViewModel == null ? "Unk" : _paceman.PlayerViewModel.GetPersonalBest;
+    public string HeadViewParameter => _paceman.PlayerViewModel == null ? _paceman.Data.User.UUID! : _paceman.PlayerViewModel.HeadViewParameter;
+    public string TwitchName => _paceman.Data.User.TwitchName ?? string.Empty;
+    public bool IsFromWhitelist => _paceman.PlayerViewModel != null;
+    public bool IsLive => _paceman.IsLive;
 
-    public string Nickname => _paceMan.Nickname;
-    public string WorldID => _paceMan.WorldID;
-
-    private bool _isLive = true;
-    public bool IsLive
-    {
-        get => _isLive;
-        set
-        {
-            _isLive = value;
-            OnPropertyChanged(nameof(IsLive));
-        }
-    }
-
-    private Brush? _statusLabelColor = new SolidColorBrush(Consts.DefaultColor);
-    public Brush? StatusLabelColor
-    {
-        get => _statusLabelColor;
-        set
-        {
-            _statusLabelColor = value;
-            OnPropertyChanged(nameof(StatusLabelColor));
-        }
-    }
-
-    public PlayerViewModel? PlayerViewModel { get; set; }
     public PlayerInventoryViewModel Inventory { get; set; }
 
-    private BitmapImage? _headImage;
-    public BitmapImage? HeadImage
+    private string _inGameName = string.Empty;
+    public string InGameName
     {
-        get => _headImage;
+        get => _inGameName;
         set
         {
-            _headImage = value;
-            OnPropertyChanged(nameof(HeadImage));
+            _inGameName = value;
+            OnPropertyChanged(nameof(InGameName));
         }
     }
-
-    public string DisplayName => PlayerViewModel == null ? _paceMan.Nickname : PlayerViewModel.DisplayName;
-    public string GetPersonalBest => PlayerViewModel == null ? "Unk" : PlayerViewModel.GetPersonalBest;
-    public string HeadViewParameter => PlayerViewModel == null ? _paceMan.User.UUID! : PlayerViewModel.HeadViewParameter;
-    public string TwitchName => _paceMan.User.TwitchName ?? string.Empty;
-    public bool IsFromWhitelist => PlayerViewModel != null;
     
-    public float HeadImageOpacity { get; set; }
-
+    private string? _splitName;
+    public string? SplitName
+    {
+        get => _splitName;
+        set
+        {
+            _splitName = value;
+            OnPropertyChanged(nameof(SplitName));
+        }
+    }
+    
     private SplitType _splitType;
     public SplitType SplitType
     {
@@ -76,32 +61,60 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         }
     }
 
-    private string? _splitName;
-    public string? SplitName
+    private BitmapImage? _headImage;
+    public BitmapImage? HeadImage
     {
-        get => _splitName;
+        get => _headImage;
         set
         {
-            _splitName = value;
-            OnPropertyChanged(nameof(SplitName));
-        }
+            if (_headImage == value) return;
+            _headImage = value;
+            OnPropertyChanged(nameof(HeadImage));
+        } 
     }
 
+    private float _headImageOpacity;
+    public float HeadImageOpacity
+    {
+        get => _headImageOpacity;
+        set
+        {
+            if (Math.Abs(_headImageOpacity - value) < 0.1f) return;
+            _headImageOpacity = value;
+            OnPropertyChanged(nameof(HeadImageOpacity));
+        } 
+    }
+    
+    private Brush? _statusLabelColor = new SolidColorBrush(Consts.DefaultColor);
+    public Brush? StatusLabelColor
+    {
+        get => _statusLabelColor;
+        set
+        {
+            _statusLabelColor = value;
+            OnPropertyChanged(nameof(StatusLabelColor));
+        }
+    }
+    
+    public Brush? PaceSplitTimeColor { get; set; }
+    public FontWeight PaceFontWeight { get; set; } = FontWeights.Normal;
+    
     private long _currentSplitTimeMiliseconds;
     public long CurrentSplitTimeMiliseconds
     {
         get => _currentSplitTimeMiliseconds;
         set
         {
+            if (CurrentSplitTimeMiliseconds == value) return;
             _currentSplitTimeMiliseconds = value;
+            OnPropertyChanged(nameof(CurrentSplitTimeMiliseconds));
+            
             TimeSpan time = TimeSpan.FromMilliseconds(_currentSplitTimeMiliseconds);
             CurrentSplitTime = $"{time.Minutes:D2}:{time.Seconds:D2}";
             OnPropertyChanged(nameof(CurrentSplitTime));
         }
     }
     public string CurrentSplitTime { get; set; } = "00:00";
-
-    private PacemanPaceMilestone? LastMilestone { get; set; } = null;
     
     private long _igtTimeMiliseconds;
     public long IGTTimeMiliseconds
@@ -109,151 +122,80 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         get => _igtTimeMiliseconds;
         set
         {
+            if (IGTTimeMiliseconds == value) return;
             _igtTimeMiliseconds = value;
+            OnPropertyChanged(nameof(IGTTimeMiliseconds));
+            
             TimeSpan time = TimeSpan.FromMilliseconds(_igtTimeMiliseconds);
-            IGTTime = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            IGTTime = $"{time.Minutes:D2}:{time.Seconds:D2}";
             OnPropertyChanged(nameof(IGTTime));
         }
     }
     public string IGTTime { get; set; } = "00:00";
-
-    public Brush? PaceSplitTimeColor { get; set; }
-    public FontWeight PaceFontWeight { get; set; } = FontWeights.Normal;
-
+    
     public bool IsUsedInPov
     {
-        get => PlayerViewModel?.IsUsedInPov ?? false;
+        get => _paceman.PlayerViewModel?.IsUsedInPov ?? false;
         set
         {
-            if (PlayerViewModel == null) return;
+            if (_paceman.PlayerViewModel == null) return;
 
-            PlayerViewModel.IsUsedInPov = value;
+            _paceman.PlayerViewModel.IsUsedInPov = value;
             OnPropertyChanged(nameof(IsUsedInPov));
         }
     }
-
     public bool IsUsedInPreview { get; set; }
 
+    private bool _isPacePrioritized;
     
-    public PaceManViewModel(PaceManService service, PaceMan paceMan, PlayerViewModel playerViewModel)
+    
+    public PaceManViewModel(Paceman paceman)
     {
-        Service = service;
-        _paceMan = paceMan;
-        PlayerViewModel = playerViewModel;
-
-        Inventory = new PlayerInventoryViewModel(new PlayerInventory());
+        _paceman = paceman;
+        Inventory = new PlayerInventoryViewModel(_paceman.Inventory);
+        OnPropertyChanged(nameof(Inventory));
         
         Initialize();
-        UpdateHeadImage();
-        UpdateTime();
     }
-    private void Initialize()
+    public void Initialize()
     {
+        SetPacePriority(false);
+        InGameName = _paceman.Nickname;
+        Update();
+        
         Application.Current?.Dispatcher.Invoke(delegate
         {
-            if (_paceMan.ShowOnlyLive)
+            if (_paceman.Data.ShowOnlyLive)
             {
                 StatusLabelColor = new SolidColorBrush(Consts.DefaultColor);
                 return;
             }
             
-            IsLive = _paceMan.IsLive();
-
             StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
         });
     }
-    
-    public void Update(PaceMan paceman)
+
+    public void Update()
     {
-        _paceMan = paceman;
-        Initialize();
+        CheckForPacePriority();
+
+        HeadImage = _paceman.HeadImage;
+        HeadImageOpacity = _paceman.HeadImageOpacity;
         
-        if (_paceMan.Splits.Count == 0) return;
-        UpdateTime();
-    }
-    private void UpdateTime()
-    {
-        PacemanPaceMilestone lastMilestone = GetLastSplit();
-        lastMilestone.SplitName = lastMilestone.SplitName.Replace("rsg.", "");
-
-        if (LastMilestone == null || !LastMilestone!.SplitName.Equals(lastMilestone.SplitName))
-        {
-            string milestone = LastMilestone == null ? "None" : $"{LastMilestone.SplitName}";
-            Trace.WriteLine($"{Nickname} player from {milestone} to {lastMilestone!.SplitName}");
-            UpdateLastSplit(lastMilestone);
-            Service.EvaluatePlayerInLeaderboard(this);
-        }
+        SplitType = _paceman.SplitType;
+        CurrentSplitTimeMiliseconds = _paceman.CurrentSplitTimeMiliseconds;
+        IGTTimeMiliseconds = _paceman.IGTTimeMiliseconds;
         
-        UpdateIGTTime();
+        Inventory.Update();
     }
-    private void UpdateHeadImage()
+
+    private void CheckForPacePriority()
     {
-        if (HeadImage != null) return;
-
-        if (PlayerViewModel == null)
-        {
-            string url = $"https://minotar.net/helm/{_paceMan.User.UUID}/8.png";
-            HeadImageOpacity = 0.35f;
-            Task.Run(async () =>
-            {
-                HeadImage = await Helper.LoadImageFromUrlAsync(url);
-            });
-        }
-        else
-        {
-            HeadImageOpacity = 1f;
-            PlayerViewModel.LoadHead();
-            HeadImage = PlayerViewModel.Image;
-        }
+        if (_isPacePrioritized == _paceman.IsPacePrioritized) return;
+        
+        SetPacePriority(_paceman.IsPacePrioritized);
+        _isPacePrioritized = _paceman.IsPacePrioritized;
     }
-
-    private void UpdateLastSplit(PacemanPaceMilestone lastMilestone)
-    {
-        if (_paceMan.ItemsData.EstimatedCounts != null)
-        {
-            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
-            _paceMan.ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if (_paceMan.Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
-
-            Inventory.BlazeRodsCount = estimatedRods;
-            Inventory.PearlsCount = estimatedPearls;
-        }
-
-        if (_paceMan.Splits.Count > 1 && (lastMilestone.SplitName.Equals("enter_bastion") || lastMilestone.SplitName.Equals("enter_fortress")))
-        {
-            SplitType = _paceMan.Splits[^2].SplitName.Equals("rsg.enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
-        }
-        else
-        {
-            SplitType = Enum.Parse<SplitType>(lastMilestone.SplitName);
-        }
-
-        SetPacePriority(Service.CheckForGoodPace(SplitType, lastMilestone));
-        CurrentSplitTimeMiliseconds = lastMilestone.IGT;
-        LastMilestone = lastMilestone;
-    }
-    private void UpdateIGTTime()
-    {
-        IGTTimeMiliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - _paceMan.LastUpdate + LastMilestone!.IGT;
-    }
-
-    public PacemanPaceMilestone GetLastSplit()
-    {
-        return GetSplit(1)!;
-    }
-    public PacemanPaceMilestone? GetSplit(int indexFromEnd)
-    {
-        if (indexFromEnd > _paceMan.Splits.Count) return null;
-        var lastSplit = _paceMan.Splits[^indexFromEnd];
-        return new PacemanPaceMilestone()
-        {
-            SplitName = lastSplit.SplitName,
-            RTA = lastSplit.RTA,
-            IGT = lastSplit.IGT,
-        };
-    }
-
-    public PaceMan GetData() => _paceMan;
     
     private void SetPacePriority(bool good)
     {

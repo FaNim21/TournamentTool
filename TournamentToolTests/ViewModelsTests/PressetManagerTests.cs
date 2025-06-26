@@ -194,9 +194,8 @@ public class PresetManagerTests
                 
                 ControllerMode = ControllerMode.Ranked,
                 
-                RankedRoomDataPath = "path",
-                RankedRoomDataName = "clear",
-                RankedRoomUpdateFrequency = 1234,
+                RankedApiKey = "asdf",
+                RankedApiPlayerName = "asdf"
             };
 
             _mockTournamentViewModel.Object.ChangeData(tournament);
@@ -232,9 +231,8 @@ public class PresetManagerTests
 
             Assert.Equal(ControllerMode.None, tournamentCleared.ControllerMode);
 
-            Assert.Equal(string.Empty, tournamentCleared.RankedRoomDataPath);
-            Assert.Equal("spectate_match.json", tournamentCleared.RankedRoomDataName);
-            Assert.Equal(1000, tournamentCleared.RankedRoomUpdateFrequency);
+            Assert.Equal(string.Empty, tournamentCleared.RankedApiKey);
+            Assert.Equal(string.Empty, tournamentCleared.RankedApiPlayerName);
         }
 
         [Fact]

@@ -28,9 +28,9 @@ public class RankedPace
     public List<string> Timelines { get; set; } = [];
     public List<RankedTimelineSplit> Splits { get; set; } = [];
     public BitmapImage? HeadImage { get; set; }
+    public float HeadImageOpacity { get; set; }
     public int Resets { get; set; }
     public bool IsLive { get; set; }
-    public float HeadImageOpacity { get; set; }
     public RankedSplitType SplitType { get; set; }
     public string LastTimeline { get; set; } = string.Empty;
     public long CurrentSplitTimeMiliseconds { get; set; }
@@ -43,8 +43,7 @@ public class RankedPace
     {
         _service = service;
     }
-    
-    public void Initialize(RankedPaceData data)
+    public void Initialize(PrivRoomPaceData data)
     {
         Inventory.DisplayItems = true;
         Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
@@ -52,11 +51,10 @@ public class RankedPace
         Update(data);
     }
 
-    public void Update(RankedPaceData data)
+    public void Update(PrivRoomPaceData data)
     {
         UpdateHeadImage();
         
-        if (data.Timelines.Count == 0) return;
         if (Resets != data.Resets)
         {
             Timelines.Clear();
@@ -73,25 +71,27 @@ public class RankedPace
         {
             var current = data.Timelines[i];
             UpdateSplit(current);
-            Timelines.Add(current.Type);
+            Timelines.Add(current.Type.Split('.')[^1]);
         }
-        lastCheckedTimelineIndex = data.Timelines.Count - 1;
+        lastCheckedTimelineIndex = Math.Max(data.Timelines.Count - 1, 0);
 
-        UpdateInventory(data.Inventory);
+        //TODO: 0 Przywrocic inventory jak dodadza do api
+        //UpdateInventory(data.Inventory);
         UpdateLastSplit();
 
         if (Timelines.Count == 0) return;
         LastTimeline = Timelines[^1].CaptalizeAll();
     }
 
-    private void UpdateSplit(RankedTimeline timeline)
+    private void UpdateSplit(PrivRoomTimeline timeline)
     {
         bool wasFound = false;
+        string type = timeline.Type.Split('.')[^1];
 
         for (int j = 0; j < Splits.Count; j++)
         {
             var current = Splits[j];
-            if (!current.Name.Equals(timeline.Type)) continue;
+            if (!current.Name.Equals(type)) continue;
                 
             wasFound = true;
             break;
@@ -99,18 +99,18 @@ public class RankedPace
         if (wasFound) return;
 
         RankedTimelineSplit? newSplit = null;
-        if (Enum.TryParse(typeof(RankedSplitType), timeline.Type, true, out var split))
+        if (Enum.TryParse(typeof(RankedSplitType), type, true, out var split))
         {
-            newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = (RankedSplitType)split, Time = timeline.Time };
+            newSplit = new RankedTimelineSplit { Name = type, Split = (RankedSplitType)split, Time = timeline.Time };
         }
-        else if ((timeline.Type.Equals("find_bastion") || timeline.Type.Equals("find_fortress")) && Splits.Count > 0)
+        else if ((type.Equals("find_bastion") || type.Equals("find_fortress")) && Splits.Count > 0)
         {
             var splitType = RankedSplitType.structure_2;
 
             if (Splits[^1].Name.Equals("enter_the_nether"))
                 splitType = RankedSplitType.structure_1;
 
-            newSplit = new RankedTimelineSplit { Name = timeline.Type, Split = splitType, Time = timeline.Time };
+            newSplit = new RankedTimelineSplit { Name = type, Split = splitType, Time = timeline.Time };
         }
 
         if (newSplit == null) return;
@@ -119,7 +119,7 @@ public class RankedPace
         Splits.Add(newSplit);
     }
     
-    private void UpdateInventory(RankedInventory inventory)
+    private void UpdateInventory(PrivRoomInventory inventory)
     {
         Inventory.BlazeRodsCount = inventory.BlazeRod;
         Inventory.ObsidianCount = inventory.Obsidian;
@@ -155,7 +155,7 @@ public class RankedPace
 
     private void ValidateBestSplit(RankedTimelineSplit newSplit)
     {
-        RankedBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
+        PrivRoomBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
         
         if(string.IsNullOrEmpty(bestSplit.PlayerName))
         {

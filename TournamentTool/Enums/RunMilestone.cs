@@ -42,6 +42,8 @@ public enum RunMilestone
     [Display(Name = "(Ranked) Dragon Death", Description = "projectelo.timeline.dragon_death", ShortName = "dragon_death"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDragonDeath,
     [Display(Name = "(Ranked) Forfeit", Description = "projectelo.timeline.forfeit", ShortName = "forfeit"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloForfeit,
     [Display(Name = "(Ranked) Death", Description = "projectelo.timeline.death", ShortName = "death"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDeath,
+    [Display(Name = "(Ranked) Death Reset", Description = "projectelo.timeline.death_spawnpoint", ShortName = "death_spawnpoint"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDeathReset,
+    
     
     // --------------------------------
     // ========== Advancements ============

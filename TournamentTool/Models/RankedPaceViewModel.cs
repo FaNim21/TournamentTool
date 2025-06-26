@@ -122,10 +122,11 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         {
             if (_currentSplitTimeMiliseconds == value) return;
             _currentSplitTimeMiliseconds = value;
-            CurrentSplitTime = TimeSpan.FromMilliseconds(value).ToSimpleFormattedTime();
+            OnPropertyChanged(nameof(CurrentSplitTimeMiliseconds));
+            CurrentSplitTime = TimeSpan.FromMilliseconds(value).ToFormattedTime();
         } 
     }
-    private string _currentSplitTime = "00:00";
+    private string _currentSplitTime = "00:00.000";
     public string CurrentSplitTime
     {
         get => _currentSplitTime;
@@ -144,10 +145,10 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         {
             if (_differenceSplitTimeMiliseconds == value) return;
             _differenceSplitTimeMiliseconds = value;
-            SplitDifferenceTime = TimeSpan.FromMilliseconds(value).ToSimpleFormattedTime("+");
+            SplitDifferenceTime = TimeSpan.FromMilliseconds(value).ToFormattedTime("+");
         } 
     }
-    private string _splitDifferenceTime = "00:00";
+    private string _splitDifferenceTime = "00:00.000";
     public string SplitDifferenceTime
     {
         get => _splitDifferenceTime;
@@ -174,12 +175,13 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
         HeadImageOpacity = Data.HeadImageOpacity;
         
         InGameName = Data.InGameName;
-        SplitType = Data.SplitType;
         LastTimeline = Data.LastTimeline;
         
-        CurrentSplitTimeMiliseconds = Data.CurrentSplitTimeMiliseconds;
         DifferenceSplitTimeMiliseconds = Data.DifferenceSplitTimeMiliseconds;
         
         Inventory.Update();
+        
+        SplitType = Data.SplitType;
+        CurrentSplitTimeMiliseconds = Data.CurrentSplitTimeMiliseconds;
     }
 }

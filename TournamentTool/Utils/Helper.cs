@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using TournamentTool.Components.Controls;
 using System.Windows.Controls;
 
@@ -218,10 +220,21 @@ public static class Helper
 
         return await response.Content.ReadAsStringAsync();
     }
-
-    public static string ToFormattedTime(this TimeSpan span)
+    public static async Task<Stream> MakeRequestAsStream(string ApiUrl, string key)
     {
-        return $"{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
+        using HttpClient client = new();
+        client.DefaultRequestHeaders.Add("Private-Key", key);
+        
+        HttpResponseMessage response = await client.GetAsync(ApiUrl);
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
+
+        return await response.Content.ReadAsStreamAsync();
+    }
+
+    public static string ToFormattedTime(this TimeSpan span, string prefix = "")
+    {
+        return $"{prefix}{(int)span.TotalMinutes:D2}:{span.Seconds:D2}.{span.Milliseconds:D3}";
     }
     public static string ToSimpleFormattedTime(this TimeSpan span, string prefix = "")
     {
