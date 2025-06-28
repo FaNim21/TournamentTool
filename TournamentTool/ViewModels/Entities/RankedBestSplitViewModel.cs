@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Extensions;
 
 namespace TournamentTool.ViewModels.Entities;
 

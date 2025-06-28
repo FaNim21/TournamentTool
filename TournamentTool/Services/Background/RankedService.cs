@@ -11,6 +11,7 @@ using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
@@ -59,6 +60,8 @@ public class RankedService : IBackgroundService
     
     private readonly Dictionary<string, PrivRoomPaceData> _privRoomPaceDatas = [];
     private readonly Dictionary<string, (string name, RunMilestone milestone)> _timelineTypeCache = new();
+
+    private const int UiSendBatchSize = 10;
     
     
     //TODO: 0 w UI przy dodawaniu subrule pokazac czy sie jest na rankedzie czy pacemanie i wtedy moze ewentualnie inna zawartosc dawac
@@ -83,12 +86,14 @@ public class RankedService : IBackgroundService
         if (receiver is IRankedDataReceiver ranked)
         {
             _rankedDataReceiver = ranked;
-            for (int i = 0; i < _paces.Count; i++)
+            foreach (var batch in _paces.Batch(UiSendBatchSize))
             {
-                var player = _paces[i];
                 Application.Current.Dispatcher.InvokeAsync(() => 
                 {
-                    _rankedDataReceiver?.AddPace(player);
+                    foreach (var player in batch)
+                    {
+                        _rankedDataReceiver?.AddPace(player);
+                    }
                 }, DispatcherPriority.Background);
             }
         }

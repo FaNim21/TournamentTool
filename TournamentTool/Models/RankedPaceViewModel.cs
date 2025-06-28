@@ -2,6 +2,7 @@
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;

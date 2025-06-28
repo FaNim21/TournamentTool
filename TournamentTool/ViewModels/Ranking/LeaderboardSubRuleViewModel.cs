@@ -3,6 +3,7 @@ using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Extensions;
 
 namespace TournamentTool.ViewModels.Ranking;
 

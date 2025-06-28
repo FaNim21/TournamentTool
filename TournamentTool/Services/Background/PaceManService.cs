@@ -7,6 +7,7 @@ using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
@@ -22,6 +23,8 @@ public class PaceManService : IBackgroundService
 
     private List<Paceman> _paces = [];
     private List<PaceManData> _paceManData = [];
+    
+    private const int UiSendBatchSize = 2;
 
 
     public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver)
@@ -36,14 +39,14 @@ public class PaceManService : IBackgroundService
         if (receiver is IPacemanDataReceiver pacemanDataReceiver)
         {
             _pacemanSidePanelReceiver = pacemanDataReceiver;
-            Console.WriteLine("--------- Startup registering Paceman data");
-           
-            for (int i = 0; i < _paces.Count; i++)
+            foreach (var batch in _paces.Batch(UiSendBatchSize))
             {
-                var player = _paces[i];
                 Application.Current.Dispatcher.InvokeAsync(() => 
                 {
-                    _pacemanSidePanelReceiver?.AddPace(player);
+                    foreach (var player in batch)
+                    {
+                        _pacemanSidePanelReceiver?.AddPace(player);
+                    }
                 }, DispatcherPriority.Background);
             }
         }

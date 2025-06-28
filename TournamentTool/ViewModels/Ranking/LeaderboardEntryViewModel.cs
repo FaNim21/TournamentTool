@@ -4,6 +4,7 @@ using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Ranking;
