@@ -116,16 +116,6 @@ public class PrivRoomInventory
     public int Potion { get; set; }
 }
 
-public class PrivRoomPaceData
-{
-    public PlayerViewModel? WhitelistPlayer { get; set; }
-    public PrivRoomPlayer Player { get; init; } = new();
-    public List<RankedPaceTimeline> Timelines { get; init; } = [];
-    public PrivRoomInventory Inventory { get; set; } = new();
-    public PrivRoomCompletion Completion { get; set; } = new();
-    public int Resets { get; set; }
-}
-
 public class PrivRoomBestSplit
 {
     public string? PlayerName { get; set; }

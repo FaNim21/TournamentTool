@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Threading;
 using MethodTimer;
+using Microsoft.VisualBasic;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
@@ -50,15 +51,13 @@ public class RankedService : IBackgroundService
     private int _completedRunsCount;
 
     private Dictionary<RunMilestone, RankedEvaluateTimelineData> _splitDatas = [];
-    
-    private List<RankedPace> _paces = [];
     private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
     private readonly JsonSerializerOptions _options;
     private MatchStatus _lastStatus;
     private int _round;
     
-    private readonly Dictionary<string, PrivRoomPaceData> _privRoomPaceDatas = [];
+    private readonly Dictionary<string, RankedPace> _paces = [];
     private readonly Dictionary<string, (string name, RunMilestone milestone)> _timelineTypeCache = new();
 
     private const int UiSendBatchSize = 10;
@@ -86,7 +85,8 @@ public class RankedService : IBackgroundService
         if (receiver is IRankedDataReceiver ranked)
         {
             _rankedDataReceiver = ranked;
-            foreach (var batch in _paces.Batch(UiSendBatchSize))
+            List<RankedPace> paces = _paces.Values.ToList();
+            foreach (var batch in paces.Batch(UiSendBatchSize))
             {
                 Application.Current.Dispatcher.InvokeAsync(() => 
                 {
@@ -189,63 +189,50 @@ public class RankedService : IBackgroundService
             var time = timeline.Time;
             var paceTimeline = new RankedPaceTimeline(parsedTimeline.name, parsedTimeline.milestone, time);
             
-            if (!_privRoomPaceDatas.TryGetValue(timeline.UUID, out var paceData)) continue;
-            paceData.Timelines.Add(paceTimeline);
-            
-            AddTimelineToEvaluation(paceData);
-
-            if (paceTimeline.Milestone != RunMilestone.ProjectEloReset) continue;
-            paceData.Resets++;
-            paceData.Timelines.Clear();
+            if (!_paces.TryGetValue(timeline.UUID, out var pace)) continue;
+            pace.AddTimeline(paceTimeline);
         }
 
+        foreach (var pace in _paces)
+        {
+            //TODO: 0 TUTAJ INVENTORY JAK DODADZA DO API
+            pace.Value.Update(null);
+        }
+        
+        /*
         for (int i = 0; i < privRoomData.Completions.Length; i++)
         {
             var completion = privRoomData.Completions[i];
 
-            if (!_privRoomPaceDatas.TryGetValue(completion.UUID, out var paceData)) continue;
+            if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
             if (paceData.Completion != null) continue;
-            
+
             paceData.Completion = completion;
         }
-
-        for (int i = 0; i < _paces.Count; i++)
-        {
-            var pace = _paces[i];
-            
-            //tu by tez byloby podpinanie inventory jak juz bedzie
-
-            if (_privRoomPaceDatas.TryGetValue(pace.UUID, out var paceData))
-                pace.Update(paceData);
-        }
+    */
     }
 
-    private void AddPace(PrivRoomPaceData data)
+    private void AddPace(PrivRoomPlayer player)
     {
         RankedPace pace = new RankedPace(this)
         {
-            UUID = data.Player.UUID,
-            InGameName = data.Player.InGameName,
-            EloRate = data.Player.EloRate ?? -1,
+            UUID = player.UUID,
+            InGameName = player.InGameName,
+            EloRate = player.EloRate ?? -1,
+            Player = TournamentViewModel.GetPlayerByIGN(player.InGameName)
         };
+            
+        _paces[player.UUID] = pace;
         
-        bool found = false;
-        if (data.WhitelistPlayer != null)
+        pace.Initialize();
+        if (pace.Player == null && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
         {
-            found = true;
-            pace.Player = data.WhitelistPlayer;
+            AddRankedPlayerToWhitelist(pace);
         }
         
-        pace.Initialize(data);
-        if (!found && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
-        {
-            AddRankedPlayerToWhitelist(pace, data);
-        }
-        
-        _paces.Add(pace);
         _rankedDataReceiver?.AddPace(pace);
     }
-    private void AddRankedPlayerToWhitelist(RankedPace pace, PrivRoomPaceData data)
+    private void AddRankedPlayerToWhitelist(RankedPace pace)
     {
         Player player = new Player()
         {
@@ -267,7 +254,6 @@ public class RankedService : IBackgroundService
         }
 
         pace.Player = playerViewModel;
-        data.WhitelistPlayer = playerViewModel;
     }
 
     public void AddEvaluationData(Player player, RankedPaceTimeline main, RankedPaceTimeline? previous = null)
@@ -313,46 +299,8 @@ public class RankedService : IBackgroundService
         for (int i = 0; i < privRoomData.Players.Length; i++)
         {
             var player = privRoomData.Players[i];
-            
-            PrivRoomPaceData data = new()
-            {
-                Player = player,
-                WhitelistPlayer = TournamentViewModel.GetPlayerByIGN(player.InGameName)
-            };
-
-            _privRoomPaceDatas[player.UUID] = data;
-            AddPace(data);
+            AddPace(player);
         }
-    }
-
-    private void AddTimelineToEvaluation(PrivRoomPaceData paceData)
-    {
-        RankedPaceTimeline mainTimeline = paceData.Timelines[^1];
-        ValidateBestSplit(mainTimeline);
-        
-        RankedPaceTimeline? previousTimeline = null;
-        if (paceData.Timelines.Count > 2)
-        {
-            previousTimeline = paceData.Timelines[^2];
-        }
-
-        if (paceData.WhitelistPlayer == null) return;
-        AddEvaluationData(paceData.WhitelistPlayer.Data, mainTimeline, previousTimeline);
-    }
-
-    private void ValidateBestSplit(RankedPaceTimeline timeline)
-    {
-        /*
-        PrivRoomBestSplit bestSplit = GetBestSplit(newSplit.Split);
-        
-        if(string.IsNullOrEmpty(bestSplit.PlayerName))
-        {
-            bestSplit.PlayerName = InGameName;
-            bestSplit.Time = newSplit.Time;
-        }
-        DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
-        if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
-    */
     }
 
     public PrivRoomBestSplit GetBestSplit(RankedSplitType splitType)
@@ -386,6 +334,6 @@ public class RankedService : IBackgroundService
         _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0, _rankedManagementData!.Rounds);
         
         _rankedDataReceiver?.Clear();
-        _privRoomPaceDatas.Clear();
+        _paces.Clear();
     }
 }

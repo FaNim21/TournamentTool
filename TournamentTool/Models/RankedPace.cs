@@ -31,48 +31,48 @@ public class RankedPace
     public long CurrentSplitTimeMiliseconds { get; set; }
     public long DifferenceSplitTimeMiliseconds { get; set; }
 
-    private int lastCheckedTimelineIndex;
-
 
     public RankedPace(RankedService service)
     {
         _service = service;
     }
-    public void Initialize(PrivRoomPaceData data)
+    public void Initialize()
     {
         Inventory.DisplayItems = true;
         Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
         
-        Update(data);
+        UpdateHeadImage();
     }
 
-    public void Update(PrivRoomPaceData data)
+    public void RestartedSeed()
+    {
+        Splits.Clear();
+        Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
+        LastTimeline = string.Empty;
+
+        UpdateLastTimelineAndSplit();
+        Resets++;
+    }
+
+    public void AddTimeline(RankedPaceTimeline timeline)
+    {
+        if (Timelines.Count > 1 && timeline == Timelines[^1]) return;
+        if (Timelines.Contains(timeline)) return;
+        
+        Timelines.Add(timeline);
+        AddTimelineToEvaluation();
+        
+        UpdateSplit(timeline);
+        UpdateLastTimelineAndSplit();
+        
+        if (timeline.Milestone != RunMilestone.ProjectEloReset) return;
+        RestartedSeed();
+    }
+
+    public void Update(PrivRoomInventory inventory)
     {
         UpdateHeadImage();
-        
-        if (Resets != data.Resets)
-        {
-            Timelines.Clear();
-            Splits.Clear();
-            Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
-            LastTimeline = string.Empty;
-
-            UpdateLastTimelineAndSplit();
-        }
-        Resets = data.Resets;
-        
-        for (int i = lastCheckedTimelineIndex; i < data.Timelines.Count; i++)
-        {
-            var current = data.Timelines[i];
-            
-            Timelines.Add(current);
-            UpdateSplit(current);
-        }
-        
-        lastCheckedTimelineIndex = Math.Max(data.Timelines.Count, 0);
-
-        UpdateInventory(data.Inventory);
-        UpdateLastTimelineAndSplit();
+        UpdateInventory(inventory);
     }
 
     private void UpdateSplit(RankedPaceTimeline timeline)
@@ -110,9 +110,13 @@ public class RankedPace
         ValidateBestSplit(newSplit);
         Splits.Add(newSplit);
     }
-    
     private void UpdateInventory(PrivRoomInventory inventory)
     {
+        if (inventory == null)
+        {
+            Inventory.Clear();
+            return;
+        }
         Inventory.BlazeRodsCount = inventory.BlazeRod;
         Inventory.ObsidianCount = inventory.Obsidian;
         Inventory.BedsCount = inventory.WhiteBed;
@@ -148,6 +152,19 @@ public class RankedPace
         LastTimeline = Timelines[^1].name.CaptalizeAll();
     }
 
+    private void AddTimelineToEvaluation()
+    {
+        RankedPaceTimeline mainTimeline = Timelines[^1];
+        RankedPaceTimeline? previousTimeline = null;
+        if (Timelines.Count > 2)
+        {
+            previousTimeline = Timelines[^2];
+        }
+
+        if (Player == null) return;
+        _service.AddEvaluationData(Player.Data, mainTimeline, previousTimeline);
+    }
+    
     private void ValidateBestSplit(RankedPaceSplit newSplit)
     {
         PrivRoomBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
