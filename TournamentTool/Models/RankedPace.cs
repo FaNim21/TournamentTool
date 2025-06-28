@@ -17,7 +17,7 @@ public class RankedPace
     public PlayerViewModel? Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
 
-    public string UUID { get; set; } = string.Empty;
+    public string UUID { get; init; } = string.Empty;
     public string InGameName { get; init; } = string.Empty;
     public int EloRate { get; set; } = -1;
     public List<RankedPaceTimeline> Timelines { get; set; } = [];

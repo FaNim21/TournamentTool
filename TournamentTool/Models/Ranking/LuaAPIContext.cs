@@ -4,11 +4,6 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models.Ranking;
 
-//TODO: 0 Trzeba zrobic api context dla lua, zeby mozna bylo korzystac ze wszystkich dostepnych funkcji tournament toola w skrypcie
-    
-//TODO: 0 Ustalic zmienne w konfiguracji sub rule, ktore beda definiowac zaleznosci przekazywane dla skryptu do tego zeby miec jak najwiecej zaleznosci pod
-// bardziej zaawansowane mozliwosci ustalania punktow, typu ustalic 
-
 public abstract class LuaAPIBase
 {
     protected readonly Action<LeaderboardEntry> _onEntryRunRegistered;
@@ -80,7 +75,7 @@ public class LuaAPIRankedContext : LuaAPIBase
     public List<LuaPlayerData> Players { get; }
     public int Round => _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
     public int PlayersInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
-    public int CompletionsInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
+    public int CompletionsInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Completions : 1;
     
     
     public LuaAPIRankedContext( LeaderboardSubRule subRule, 

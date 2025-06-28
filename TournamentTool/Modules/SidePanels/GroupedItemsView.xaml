@@ -1,0 +1,107 @@
+﻿<UserControl x:Class="TournamentTool.Modules.SidePanels.GroupedItemsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=sidePanels:IGroupableItem}">
+    <Grid>
+        <TextBlock Text="{Binding EmptyMessage, ElementName=Root}"
+                   Background="Transparent"
+                   TextWrapping="Wrap"
+                   Width="200"
+                   Height="300"
+                   FontSize="32"
+                   Foreground="Wheat"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Center"
+                   Margin="5 30 0 0"
+                   Visibility="{Binding DataContext.ShowEmptyMessage, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+        <ItemsControl ItemsSource="{Binding DataContext.Groups, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      Width="273"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      VerticalAlignment="Top"
+                      HorizontalAlignment="Left"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.PanningMode="VerticalOnly"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      VirtualizingPanel.CacheLength="2"
+                      VirtualizingPanel.CacheLengthUnit="Page"
+                      Margin="0 0 0 20">
+
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ItemsPresenter />
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsVirtualizing="True"
+                                            VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <Border BorderThickness="1"
+                                BorderBrush="#7e8691"
+                                Background="#7e8691"
+                                Padding="1"
+                                Margin="6 10 2 0">
+                            <ContentPresenter Content="{Binding}"
+                                              ContentTemplate="{Binding GroupHeaderTemplate, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" />
+                        </Border>
+
+                        <ListBox ItemsSource="{Binding Items}"
+                                 SelectedItem="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                 SelectionMode="{Binding SelectionMode, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" 
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 AllowDrop="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling" >
+
+                            <b:Interaction.Behaviors>
+                                <behaviors:ListBoxUpdateBehavior />
+                                <behaviors:ListBoxSelectionBehavior />
+                                <behaviors:ListBoxClampScrollBehavior />
+                            </b:Interaction.Behaviors>
+
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel IsVirtualizing="True"
+                                                            VirtualizationMode="Recycling" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="IsEnabled"
+                                            Value="{Binding IsLive}" />
+                                    <Setter Property="Margin"
+                                            Value="5 -1 0 -1" />
+                                    <Setter Property="Padding"
+                                            Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

@@ -90,7 +90,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            //TODO: 0 Tu trzeba sie zastanowic czy nie usunac tego okna poprostu i dac info gdzies w whiteliscie ze,
+            //TODO: 0 Tu trzeba sie zastanowic czy nie usunac tego okna poprostu i dac info gdzies w whiteliscie
             DialogBox.Show($"Error while fetching streaming datas (might be duo to wrong twitch name or exceeding api limit)\n{ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 

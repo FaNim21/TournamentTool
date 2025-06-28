@@ -1,15 +1,22 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
 
-public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
+public class RankedPaceViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
 {
     public RankedPace Data { get; }
+    
+    public string GroupKey => SplitName!;
+    public int GroupSortOrder => (int)SplitType;
+    public long SortValue => CurrentSplitTimeMiliseconds;
+    public string SecondarySortValue => InGameName;
+    public string Identifier => InGameName;
 
     public PlayerInventoryViewModel Inventory { get; }
 
@@ -161,6 +168,7 @@ public class RankedPaceViewModel : BaseViewModel, IPlayer, IPace
     }
 
 
+    public RankedPaceViewModel() { }
     public RankedPaceViewModel(RankedPace data)
     {
         Data = data;

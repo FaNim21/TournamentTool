@@ -1,11 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Threading;
 using MethodTimer;
-using Microsoft.VisualBasic;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
@@ -121,8 +119,8 @@ public class RankedService : IBackgroundService
     {
         PrivRoomData? privRoomData = null;
 
-        string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
         //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
+        string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
         try
         {
             await using FileStream stream = File.OpenRead(path);

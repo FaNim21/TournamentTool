@@ -4,14 +4,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
 using TournamentTool.Models;
+using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class PaceManViewModel : BaseViewModel, IPlayer, IPace
+public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
 {
     private Paceman _paceman;
+    
+    public string GroupKey => SplitName!;
+    public int GroupSortOrder => (int)SplitType;
+    public long SortValue => CurrentSplitTimeMiliseconds;
+    public string SecondarySortValue => InGameName;
+    public string Identifier => InGameName;
 
     public SplitType ModelSplitType => _paceman.SplitType;
     public long ModelCurrentSplitTimeMiliseconds => _paceman.CurrentSplitTimeMiliseconds;
@@ -36,7 +43,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         }
     }
     
-    private string? _splitName;
+    private string? _splitName = string.Empty;
     public string? SplitName
     {
         get => _splitName;
@@ -149,6 +156,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
     private bool _isPacePrioritized;
     
     
+    public PaceManViewModel() { }
     public PaceManViewModel(Paceman paceman)
     {
         _paceman = paceman;
@@ -157,6 +165,7 @@ public class PaceManViewModel : BaseViewModel, IPlayer, IPace
         
         Initialize();
     }
+
     public void Initialize()
     {
         SetPacePriority(false);
