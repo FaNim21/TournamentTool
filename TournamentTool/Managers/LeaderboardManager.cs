@@ -1,4 +1,6 @@
-﻿using TournamentTool.Models.Ranking;
+﻿using TournamentTool.Enums;
+using TournamentTool.Models.Ranking;
+using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
@@ -8,7 +10,7 @@ public interface ILeaderboardManager
 {
     event Action<LeaderboardEntry>? OnEntryUpdate;
 
-    void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None);
+    void EvaluateData(object? data, LeaderboardRuleType ruleType = LeaderboardRuleType.None);
 }
 
 public class LeaderboardManager : ILeaderboardManager
@@ -24,8 +26,54 @@ public class LeaderboardManager : ILeaderboardManager
         Tournament = tournament;
         LuaManager = luaManager;
     }
-    
-    public void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
+
+    public void EvaluateData(object? data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
+    {
+        if (data is null) return;
+
+        switch (data)
+        {
+            case Dictionary<RunMilestone, RankedEvaluateTimelineData> ranked:
+                EvaluateTimelines(ranked, ruleType);
+                break;
+            case LeaderboardPlayerEvaluateData player:
+                EvaluatePlayer(player, ruleType);
+                break;
+        }
+    }
+
+    private void EvaluateTimelines(Dictionary<RunMilestone, RankedEvaluateTimelineData> data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
+    {
+        if (data.Count == 0) return;
+        if (Tournament.Leaderboard.Rules.Count == 0) return;
+
+        foreach (var rule in Tournament.Leaderboard.Rules)
+        {
+            if (!rule.IsEnabled) continue;
+            if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
+            if (!data.TryGetValue(rule.ChosenAdvancement, out RankedEvaluateTimelineData? timelineData)) continue;
+
+            foreach (var subRule in rule.SubRules)
+            {
+                if (timelineData.Evaluations.Count == 0) break;
+                List<LeaderboardRankedEvaluateData> subRuleDatas = [];
+
+                for (var i = 0; i < timelineData.Evaluations.Count; i++)
+                {
+                    var evaluation = timelineData.Evaluations[i];
+                    if (!subRule.EvaluateTime(evaluation.MainSplit.Time)) break;
+
+                    subRuleDatas.Add(evaluation);
+                    timelineData.Remove(evaluation);
+                    i--;
+                }
+
+                if (subRuleDatas.Count == 0) continue;
+                UpdateEntries(subRule, subRuleDatas);
+            }
+        }
+    }
+    private void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
     {
         if (data.Player == null) return;
         if (Tournament.Leaderboard.Rules.Count == 0) return;
@@ -43,8 +91,22 @@ public class LeaderboardManager : ILeaderboardManager
         }
     }
 
-    //ranked showdown - 24 punkty i po punkcie dla kazdej osoby co skonczy seeda, natomaist jak jest mniej jak 24 osoby to jest to skalowane 24/ilosc ukonczen w danej rundzie i tyle
-    // punktow otrzymuje kolejna osoba
+    private void UpdateEntries(LeaderboardSubRule subRule, List<LeaderboardRankedEvaluateData> datas)
+    {
+        List<LuaPlayerData> luaPlayerDatas = [];
+        foreach (var data in datas)
+        {
+            if (data.Player == null) continue;
+            LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
+            LuaPlayerData luaData = new LuaPlayerData(entry, data);
+            luaPlayerDatas.Add(luaData);
+        }
+        
+        LuaAPIRankedContext context = new LuaAPIRankedContext(subRule, Tournament, luaPlayerDatas, OnEntryRunRegistered);
+        RunScript(subRule.LuaPath, context);
+        
+        Console.WriteLine($"Evaluated: {luaPlayerDatas.Count} players for {datas[0].MainSplit.Milestone} for sub rule with desc: {subRule.Description}");
+    }
     
     private void UpdateEntry(LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)
     {
@@ -52,10 +114,7 @@ public class LeaderboardManager : ILeaderboardManager
         LuaAPIContext context = new LuaAPIContext(entry, data, subRule, Tournament, OnEntryRunRegistered);
         
         int oldPosition = entry.Position;
-        var script = LuaManager.GetOrLoad(subRule.LuaPath);
-        if (script == null) return;
-        
-        script.Run(context);
+        RunScript(subRule.LuaPath, context);
         
         var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
@@ -66,5 +125,19 @@ public class LeaderboardManager : ILeaderboardManager
         Tournament.Leaderboard.RecalculateEntryPosition(entry);
         OnEntryUpdate?.Invoke(entry);
         Tournament.PresetIsModified();
+    }
+
+    private void RunScript(string path, object context)
+    {
+        var script = LuaManager.GetOrLoad(path);
+
+        try
+        {
+            script?.Run(context);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

@@ -127,7 +127,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
     }
 
-    public void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount)
+    public void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount, int round)
     {
         if (_saveStartedTime != timeStarted)
         {
@@ -138,6 +138,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         
         Completions = completedCount;
         Players = playersCount;
+        Rounds = round;
         
         Application.Current.Dispatcher.Invoke(() =>
         {

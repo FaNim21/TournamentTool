@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using TournamentTool.Converters.JSON;
 using TournamentTool.Enums;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
@@ -32,7 +33,7 @@ public class PrivRoomData
     [JsonPropertyName("spectators")] public PrivRoomPlayer[] Spectators { get; init; } = [];
     [JsonPropertyName("completions")] public PrivRoomCompletion[] Completions { get; init; } = [];
     
-    [JsonPropertyName("timelines")] public List<PrivRoomTimeline> Timelines { get; init; } = [];
+    [JsonPropertyName("timelines")] public PrivRoomTimeline[] Timelines { get; init; } = [];
 }
 
 public class PrivRoomPlayer
@@ -117,8 +118,9 @@ public class PrivRoomInventory
 
 public class PrivRoomPaceData
 {
+    public PlayerViewModel? WhitelistPlayer { get; set; }
     public PrivRoomPlayer Player { get; init; } = new();
-    public List<PrivRoomTimeline> Timelines { get; init; } = [];
+    public List<RankedPaceTimeline> Timelines { get; init; } = [];
     public PrivRoomInventory Inventory { get; set; } = new();
     public PrivRoomCompletion Completion { get; set; } = new();
     public int Resets { get; set; }

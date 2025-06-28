@@ -23,7 +23,7 @@ public interface IRankedDataReceiver : IBackgroundDataReceiver
 
 public interface IRankedManagementDataReceiver : IBackgroundDataReceiver
 {
-    void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount);
+    void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount, int round);
 }
 
 public interface IPlayerAddReceiver : IBackgroundDataReceiver

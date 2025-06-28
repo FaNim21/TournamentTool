@@ -198,7 +198,7 @@ public class PaceManService : IBackgroundService
         }
         
         var data = new LeaderboardPacemanEvaluateData(paceman.PlayerViewModel.Data, paceman.WorldID, mainSplit, pacemanPreviousSplit);
-        Leaderboard.EvaluatePlayer(data);
+        Leaderboard.EvaluateData(data);
     }
 
     public bool CheckForGoodPace(SplitType splitType, PacemanPaceMilestone lastMilestone)

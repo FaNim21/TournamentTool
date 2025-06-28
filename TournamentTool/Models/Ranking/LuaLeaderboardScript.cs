@@ -36,14 +36,14 @@ public class LuaLeaderboardScript
         var script = new Script(CoreModules.Preset_SoftSandbox);
     
         UserData.RegisterType<LuaAPIContext>();
+        UserData.RegisterType<LuaAPIRankedContext>();
+        UserData.RegisterType<LuaPlayerData>();
         
         script.Globals["print"] = DynValue.NewCallback((context, args) =>
         {
             for (int i = 0; i < args.Count; i++)
             {
                 Console.Write(args[i].ToPrintString());
-                if (i < args.Count - 1)
-                    Console.Write(" ");
             }
             Console.WriteLine();
             return DynValue.Nil;

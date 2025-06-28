@@ -26,4 +26,9 @@ public class LeaderboardSubRule
         
         return true;
     }
+
+    public bool EvaluateTime(int time)
+    {
+        return time <= Time;
+    }
 }

@@ -1,22 +1,17 @@
 ﻿using System.Windows.Media.Imaging;
+using MethodTimer;
 using TournamentTool.Enums;
-using TournamentTool.Models.Ranking;
-using TournamentTool.Modules.SidePanels;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
+public record RankedPaceTimeline(string name, RunMilestone Milestone, long Time);
+public record RankedPaceSplit(string Name, RankedSplitType Split, long Time);
+
 public class RankedPace
 {
-    public class RankedTimelineSplit
-    {
-        public string Name { get; set; } = string.Empty;
-        public RankedSplitType Split { get; set; }
-        public long Time { get; set; }
-    }
-    
     private RankedService _service;
     
     public PlayerViewModel? Player { get; set; }
@@ -25,8 +20,8 @@ public class RankedPace
     public string UUID { get; set; } = string.Empty;
     public string InGameName { get; init; } = string.Empty;
     public int EloRate { get; set; } = -1;
-    public List<string> Timelines { get; set; } = [];
-    public List<RankedTimelineSplit> Splits { get; set; } = [];
+    public List<RankedPaceTimeline> Timelines { get; set; } = [];
+    public List<RankedPaceSplit> Splits { get; set; } = [];
     public BitmapImage? HeadImage { get; set; }
     public float HeadImageOpacity { get; set; }
     public int Resets { get; set; }
@@ -46,7 +41,7 @@ public class RankedPace
     public void Initialize(PrivRoomPaceData data)
     {
         Inventory.DisplayItems = true;
-        Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+        Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
         
         Update(data);
     }
@@ -59,58 +54,55 @@ public class RankedPace
         {
             Timelines.Clear();
             Splits.Clear();
-            Splits.Add(new RankedTimelineSplit { Name = "Start", Split = RankedSplitType.Start, Time = 0 });
+            Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
             LastTimeline = string.Empty;
 
-            //TODO: tu moze lepiej zgarnac timeline resetu i pobrac czas zeby na starcie nie bylo 00:00 tylko czas resetu z racji i tak rta czasu reszty splitow 
-            UpdateLastSplit();
+            UpdateLastTimelineAndSplit();
         }
         Resets = data.Resets;
         
         for (int i = lastCheckedTimelineIndex; i < data.Timelines.Count; i++)
         {
             var current = data.Timelines[i];
+            
+            Timelines.Add(current);
             UpdateSplit(current);
-            Timelines.Add(current.Type.Split('.')[^1]);
         }
-        lastCheckedTimelineIndex = Math.Max(data.Timelines.Count - 1, 0);
+        
+        lastCheckedTimelineIndex = Math.Max(data.Timelines.Count, 0);
 
-        //TODO: 0 Przywrocic inventory jak dodadza do api
-        //UpdateInventory(data.Inventory);
-        UpdateLastSplit();
-
-        if (Timelines.Count == 0) return;
-        LastTimeline = Timelines[^1].CaptalizeAll();
+        UpdateInventory(data.Inventory);
+        UpdateLastTimelineAndSplit();
     }
 
-    private void UpdateSplit(PrivRoomTimeline timeline)
+    private void UpdateSplit(RankedPaceTimeline timeline)
     {
         bool wasFound = false;
-        string type = timeline.Type.Split('.')[^1];
+        string name = timeline.name;
 
         for (int j = 0; j < Splits.Count; j++)
         {
             var current = Splits[j];
-            if (!current.Name.Equals(type)) continue;
+            if (!current.Name.Equals(name)) continue;
                 
             wasFound = true;
             break;
         }
         if (wasFound) return;
 
-        RankedTimelineSplit? newSplit = null;
-        if (Enum.TryParse(typeof(RankedSplitType), type, true, out var split))
+        RankedPaceSplit? newSplit = null;
+        if (Enum.TryParse(typeof(RankedSplitType), name, true, out var split))
         {
-            newSplit = new RankedTimelineSplit { Name = type, Split = (RankedSplitType)split, Time = timeline.Time };
+            newSplit = new RankedPaceSplit(name, (RankedSplitType)split, timeline.Time);
         }
-        else if ((type.Equals("find_bastion") || type.Equals("find_fortress")) && Splits.Count > 0)
+        else if ((name.Equals("find_bastion") || name.Equals("find_fortress")) && Splits.Count > 0)
         {
             var splitType = RankedSplitType.structure_2;
 
             if (Splits[^1].Name.Equals("enter_the_nether"))
                 splitType = RankedSplitType.structure_1;
 
-            newSplit = new RankedTimelineSplit { Name = type, Split = splitType, Time = timeline.Time };
+            newSplit = new RankedPaceSplit(name, splitType, timeline.Time); 
         }
 
         if (newSplit == null) return;
@@ -146,14 +138,17 @@ public class RankedPace
             HeadImage = Player!.Image;
         }
     }
-    private void UpdateLastSplit()
+    private void UpdateLastTimelineAndSplit()
     {
-        RankedTimelineSplit last = GetLastSplit();
+        RankedPaceSplit last = GetLastSplit();
         SplitType = last.Split;
         CurrentSplitTimeMiliseconds = last.Time;
+        
+        if (Timelines.Count == 0) return;
+        LastTimeline = Timelines[^1].name.CaptalizeAll();
     }
 
-    private void ValidateBestSplit(RankedTimelineSplit newSplit)
+    private void ValidateBestSplit(RankedPaceSplit newSplit)
     {
         PrivRoomBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
         
@@ -166,19 +161,14 @@ public class RankedPace
         if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
     }
     
-    public RankedTimelineSplit GetLastSplit()
+    public RankedPaceSplit GetLastSplit()
     {
         return GetSplit(1)!;
     }
-    public RankedTimelineSplit? GetSplit(int indexFromEnd)
+    public RankedPaceSplit? GetSplit(int indexFromEnd)
     {
         if (indexFromEnd > Splits.Count) return null;
         var split = Splits[^indexFromEnd];
-        return new RankedTimelineSplit()
-        {
-            Name = split.Name,
-            Split = split.Split,
-            Time = split.Time
-        };
+        return new RankedPaceSplit(split.Name, split.Split, split.Time);
     }
 }

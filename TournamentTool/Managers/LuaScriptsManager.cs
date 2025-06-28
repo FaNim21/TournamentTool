@@ -44,7 +44,11 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
             var loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath);
             _scripts[name] = loaded;
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+            //TODO: 1 to jest dobre pod wyswietlanie bledow w lua do debugowania skryptow dla ludzi (wiadomo tylko syntax rzeczy da rade sprawdzic)
+            Console.WriteLine(ex.Message);
+        }
     }
 
     public LuaLeaderboardScript? GetOrLoad(string name)

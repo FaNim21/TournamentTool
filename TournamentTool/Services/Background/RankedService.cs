@@ -1,19 +1,38 @@
-﻿using System.IO;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Threading;
+using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
-using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
+
+public class RankedEvaluateTimelineData
+{
+    public readonly List<LeaderboardRankedEvaluateData> Evaluations = [];
+
+    public void Add(LeaderboardRankedEvaluateData data)
+    {
+        if (data == null) return;
+        
+        var duplicate = Evaluations.FirstOrDefault(e => e.Player.InGameName == data.Player.InGameName);
+        if (duplicate != null) return;
+        
+        Evaluations.Add(data);
+    }
+    public void Remove(LeaderboardRankedEvaluateData data)
+    {
+        Evaluations.Remove(data);
+    }
+}
 
 public class RankedService : IBackgroundService
 {
@@ -28,21 +47,30 @@ public class RankedService : IBackgroundService
     
     private long _startTime;
     private int _completedRunsCount;
+
+    private Dictionary<RunMilestone, RankedEvaluateTimelineData> _splitDatas = [];
     
     private List<RankedPace> _paces = [];
-    private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits = [];
+    private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
     private readonly JsonSerializerOptions _options;
     private MatchStatus _lastStatus;
+    private int _round;
+    
+    private readonly Dictionary<string, PrivRoomPaceData> _privRoomPaceDatas = [];
+    private readonly Dictionary<string, (string name, RunMilestone milestone)> _timelineTypeCache = new();
     
     
+    //TODO: 0 w UI przy dodawaniu subrule pokazac czy sie jest na rankedzie czy pacemanie i wtedy moze ewentualnie inna zawartosc dawac
     public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard)
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         
         _rankedManagementData = TournamentViewModel.ManagementData as RankedManagementData;
-        
+        _round = _rankedManagementData!.Rounds;
+        _bestSplits = _rankedManagementData.BestSplits.ToDictionary(b => b.Type, b => b) ?? [];
+
         _options = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
@@ -82,6 +110,9 @@ public class RankedService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
+        if (string.IsNullOrWhiteSpace(TournamentViewModel.RankedApiKey) ||
+            string.IsNullOrWhiteSpace(TournamentViewModel.RankedApiPlayerName)) return;
+        
         await LoadJsonFileAsync();
         await Task.Delay(TimeSpan.FromSeconds(2), token);
     }
@@ -90,8 +121,8 @@ public class RankedService : IBackgroundService
     {
         PrivRoomData? privRoomData = null;
 
-        string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPI.json");
-        /*
+        string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
+        //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
         try
         {
             await using FileStream stream = File.OpenRead(path);
@@ -99,7 +130,7 @@ public class RankedService : IBackgroundService
             if (rankedAPIResult == null) return;
             privRoomData = rankedAPIResult.Data;
         }
-        */
+        /*
         try
         {
             await using Stream responseStream = await Helper.MakeRequestAsStream($"https://mcsrranked.com/api/users/{TournamentViewModel.RankedApiPlayerName}/live", TournamentViewModel.RankedApiKey);
@@ -107,6 +138,7 @@ public class RankedService : IBackgroundService
             if (rankedAPIResult == null) return;
             privRoomData = rankedAPIResult.Data;
         }
+        */
         catch { /**/ }
 
         if (privRoomData == null) return;
@@ -115,7 +147,7 @@ public class RankedService : IBackgroundService
         _rankedDataReceiver?.Update();
         
         _completedRunsCount = privRoomData.Completions.Length;
-        _rankedManagementDataReceiver?.UpdateManagementData(_bestSplits.Values.ToList(), _completedRunsCount, _startTime, _paces.Count);
+        _rankedManagementDataReceiver?.UpdateManagementData(_bestSplits.Values.ToList(), _completedRunsCount, _startTime, _paces.Count, _round);
     }
     
     private void FilterJSON(PrivRoomData privRoomData)
@@ -123,79 +155,66 @@ public class RankedService : IBackgroundService
         if (privRoomData.Status == _lastStatus && privRoomData.Status != MatchStatus.running) return;
         Console.WriteLine(privRoomData.Status);
         
-        //Seed change | New match | just new seed
+        if(privRoomData.Status == MatchStatus.done)
+        {
+            _lastStatus = privRoomData.Status;
+            EvaluateResults();
+            return;
+        }
         if(privRoomData.Status == MatchStatus.generate)
         {
             _lastStatus = privRoomData.Status;
-            _startTime = DateTimeOffset.Now.Millisecond;
-            Clear();
+            SeedStarted();
             return;
         }
-
         if (privRoomData.Status == MatchStatus.ready || _paces.Count == 0)
         {
-            for (int i = 0; i < privRoomData.Players.Length; i++)
-            {
-                var player = privRoomData.Players[i];
-                PrivRoomPaceData data = new() { Player = player };
-                
-                AddPace(data);
-            }
             _lastStatus = privRoomData.Status;
+            ReadySeed(privRoomData);
         }
         
-        if (privRoomData.Timelines.Count == 0) return;
-        for (int i = 0; i < privRoomData.Players.Length; i++)
+        if (privRoomData.Timelines.Length == 0) return;
+        
+        for (int i = 0; i < privRoomData.Timelines.Length; i++)
         {
-            var player = privRoomData.Players[i];
-            PrivRoomPaceData data = new() { Player = player };
+            var timeline = privRoomData.Timelines[i];
+            if (timeline.Type.EndsWith("root")) continue;
+            
+            (string name, RunMilestone milestone) parsedTimeline = ParseTimelineType(timeline.Type);
+            var time = timeline.Time;
+            var paceTimeline = new RankedPaceTimeline(parsedTimeline.name, parsedTimeline.milestone, time);
+            
+            if (!_privRoomPaceDatas.TryGetValue(timeline.UUID, out var paceData)) continue;
+            paceData.Timelines.Add(paceTimeline);
+            
+            AddTimelineToEvaluation(paceData);
 
-            /*
-            privRoomData.Inventories.TryGetValue(player.UUID, out var inventory);
-            data.Inventory = inventory!;
-            if (data.Inventory.SplashPotions == null) continue;
-            */
+            if (paceTimeline.Milestone != RunMilestone.ProjectEloReset) continue;
+            paceData.Resets++;
+            paceData.Timelines.Clear();
+        }
 
-            for (int j = 0; j < privRoomData.Completions.Length; j++)
-            {
-                var completion = privRoomData.Completions[j];
-                if (!completion.UUID.Equals(player.UUID)) continue;
+        for (int i = 0; i < privRoomData.Completions.Length; i++)
+        {
+            var completion = privRoomData.Completions[i];
 
-                data.Completion = completion;
-                break;
-            }
+            if (!_privRoomPaceDatas.TryGetValue(completion.UUID, out var paceData)) continue;
+            if (paceData.Completion != null) continue;
+            
+            paceData.Completion = completion;
+        }
 
-            for (int j = privRoomData.Timelines.Count - 1; j >= 0; j--)
-            {
-                var timeline = privRoomData.Timelines[j];
-                if (timeline.Type.EndsWith("root"))
-                {
-                    privRoomData.Timelines.RemoveAt(j);
-                    continue;
-                }
-                if (!timeline.UUID.Equals(player.UUID)) continue;
+        for (int i = 0; i < _paces.Count; i++)
+        {
+            var pace = _paces[i];
+            
+            //tu by tez byloby podpinanie inventory jak juz bedzie
 
-                if (timeline.Type.EndsWith("reset"))
-                {
-                    data.Resets++;
-                    data.Timelines.Clear();
-                    continue;
-                }
-
-                data.Timelines.Add(timeline);
-                privRoomData.Timelines.RemoveAt(j);
-            }
-
-            for (int j = 0; j < _paces.Count; j++)
-            {
-                var pace = _paces[j];
-                if (!pace.InGameName.Equals(data.Player.InGameName)) continue;
-
-                pace.Update(data);
-            }
+            if (_privRoomPaceDatas.TryGetValue(pace.UUID, out var paceData))
+                pace.Update(paceData);
         }
     }
-    
+
     private void AddPace(PrivRoomPaceData data)
     {
         RankedPace pace = new RankedPace(this)
@@ -206,24 +225,22 @@ public class RankedService : IBackgroundService
         };
         
         bool found = false;
-
-        var player = TournamentViewModel.GetPlayerByIGN(data.Player.InGameName);
-        if (player != null)
+        if (data.WhitelistPlayer != null)
         {
             found = true;
-            pace.Player = player;
+            pace.Player = data.WhitelistPlayer;
         }
         
         pace.Initialize(data);
         if (!found && TournamentViewModel.AddUnknownRankedPlayersToWhitelist)
         {
-            AddRankedPlayerToWhitelist(pace);
+            AddRankedPlayerToWhitelist(pace, data);
         }
         
         _paces.Add(pace);
         _rankedDataReceiver?.AddPace(pace);
     }
-    private void AddRankedPlayerToWhitelist(RankedPace pace)
+    private void AddRankedPlayerToWhitelist(RankedPace pace, PrivRoomPaceData data)
     {
         Player player = new Player()
         {
@@ -245,44 +262,115 @@ public class RankedService : IBackgroundService
         }
 
         pace.Player = playerViewModel;
+        data.WhitelistPlayer = playerViewModel;
     }
 
-    //TODO: 0 przekminic zeby moze pod rankedy z racji oceny graczy po skonczeniu rundy dac liste graczy do api lua
-    //czyli zrobic to w formie validowania dopiero po skonczeniu rundy cala lista
-    public void EvaluatePlayerInLeaderboard(List<RankedPace> pace, LeaderboardRuleType ruleType)
+    public void AddEvaluationData(Player player, RankedPaceTimeline main, RankedPaceTimeline? previous = null)
     {
-        
-        
-    }
-    public void EvaluatePlayerInLeaderboard(RankedPace pace)
-    {
-        if (pace.Player == null) return;
-        
-        var split = pace.GetLastSplit();
-        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.Split.ToString());
-        var mainSplit = new LeaderboardTimeline(milestone, (int)split.Time);
-        
-        var previousSplit = pace.GetSplit(2);
-        LeaderboardTimeline? rankedPreviousSplit = null;
-        if (previousSplit != null)
+        if (!_splitDatas.TryGetValue(main.Milestone, out var evaluateTimelineData))
         {
-            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(split.Split.ToString());
-            rankedPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.Time);
+            evaluateTimelineData = new RankedEvaluateTimelineData();
+            _splitDatas[main.Milestone] = evaluateTimelineData;
+        }
+
+        LeaderboardTimeline mainTimeline = new LeaderboardTimeline(main.Milestone, (int)main.Time);
+        LeaderboardTimeline? previousTimeline = null;
+        if (previous != null)
+        {
+            previousTimeline = new LeaderboardTimeline(previous.Milestone, (int)previous.Time);
         }
         
-        var data = new LeaderboardRankedEvaluateData(pace.Player.Data, mainSplit, rankedPreviousSplit);
-        Leaderboard.EvaluatePlayer(data);
+        var data = new LeaderboardRankedEvaluateData(player, mainTimeline, previousTimeline);
+        evaluateTimelineData.Add(data);
     }
-    
+
+    private void EvaluateResults()
+    {
+        if (_splitDatas.Count == 0) return;
+        
+        _round++;
+        Leaderboard.EvaluateData(_splitDatas);
+    }
+    private void SeedStarted()
+    {
+        //Seed change | New match
+        _startTime = DateTimeOffset.Now.Millisecond;
+        Clear();
+    }
+    private void ReadySeed(PrivRoomData privRoomData)
+    {
+        if (_rankedManagementData!.BestSplits.Count != 0)
+        {
+            _startTime = DateTimeOffset.Now.Millisecond - privRoomData.Time;
+        }
+        
+        //Counting after seed loaded
+        for (int i = 0; i < privRoomData.Players.Length; i++)
+        {
+            var player = privRoomData.Players[i];
+            
+            PrivRoomPaceData data = new()
+            {
+                Player = player,
+                WhitelistPlayer = TournamentViewModel.GetPlayerByIGN(player.InGameName)
+            };
+
+            _privRoomPaceDatas[player.UUID] = data;
+            AddPace(data);
+        }
+    }
+
+    private void AddTimelineToEvaluation(PrivRoomPaceData paceData)
+    {
+        RankedPaceTimeline mainTimeline = paceData.Timelines[^1];
+        ValidateBestSplit(mainTimeline);
+        
+        RankedPaceTimeline? previousTimeline = null;
+        if (paceData.Timelines.Count > 2)
+        {
+            previousTimeline = paceData.Timelines[^2];
+        }
+
+        if (paceData.WhitelistPlayer == null) return;
+        AddEvaluationData(paceData.WhitelistPlayer.Data, mainTimeline, previousTimeline);
+    }
+
+    private void ValidateBestSplit(RankedPaceTimeline timeline)
+    {
+        /*
+        PrivRoomBestSplit bestSplit = GetBestSplit(newSplit.Split);
+        
+        if(string.IsNullOrEmpty(bestSplit.PlayerName))
+        {
+            bestSplit.PlayerName = InGameName;
+            bestSplit.Time = newSplit.Time;
+        }
+        DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
+        if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
+    */
+    }
+
     public PrivRoomBestSplit GetBestSplit(RankedSplitType splitType)
     {
         _bestSplits.TryGetValue(splitType, out var bestSplit);
         if (bestSplit != null) return bestSplit;
 
         bestSplit = new PrivRoomBestSplit { Type = splitType };
-        _bestSplits.Add(bestSplit.Type, bestSplit);
+        _bestSplits[bestSplit.Type] = bestSplit;
         _rankedManagementData?.BestSplits.Add(bestSplit);
         return bestSplit;
+    }
+    
+    private (string name, RunMilestone milestone) ParseTimelineType(string type)
+    {
+        if (_timelineTypeCache.TryGetValue(type, out var cached)) return cached;
+    
+        var name = type.Split('.')[^1];
+        var milestone = EnumExtensions.FromDescription<RunMilestone>(type);
+        var result = (name, milestone);
+    
+        _timelineTypeCache[type] = result;
+        return result;
     }
 
     private void Clear()
@@ -290,8 +378,9 @@ public class RankedService : IBackgroundService
         _bestSplits.Clear();
         _rankedManagementData?.BestSplits.Clear();
         _paces.Clear();
-        _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0);
+        _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0, _rankedManagementData!.Rounds);
         
         _rankedDataReceiver?.Clear();
+        _privRoomPaceDatas.Clear();
     }
 }
