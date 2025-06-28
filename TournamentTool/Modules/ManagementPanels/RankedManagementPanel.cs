@@ -50,6 +50,15 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
             OnPropertyChanged(nameof(Players));
         }
     }
+    public long StartTime 
+    {
+        get => _data.StartTime;
+        set
+        {
+            _data.StartTime = value;  
+            OnPropertyChanged(nameof(StartTime));
+        } 
+    }
     
     private string _timeStartedText = string.Empty;
     public string TimeStartedText
@@ -76,7 +85,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
     public ICommand AddRoundCommand { get; set; }
     public ICommand SubtractRoundCommand { get; set; }
 
-    private long _saveStartedTime;
+    private long _oldStartTime;
 
     private const string _rankedPlayerCountFileName = "Ranked_players_count";
     private const string _rankedCompletedCountFileName = "Ranked_completes_count";
@@ -102,10 +111,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         api.CheckFile(_rankedRoundsFileName);
         api.CheckFile(_rankedCustomTextFileName);
 
-        OnPropertyChanged(nameof(CustomText));
-        OnPropertyChanged(nameof(Rounds));
-        OnPropertyChanged(nameof(Players));
-        OnPropertyChanged(nameof(Completions));
+        Update();
         
         Application.Current.Dispatcher.Invoke(() =>
         {
@@ -127,27 +133,29 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
     }
 
-    public void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount, int round)
+    public void Update()
     {
-        if (_saveStartedTime != timeStarted)
+        if (StartTime != _oldStartTime)
         {
-            _saveStartedTime = timeStarted;
-            DateTime date = DateTimeOffset.FromUnixTimeMilliseconds(timeStarted).ToLocalTime().DateTime;
+            _oldStartTime = StartTime;
+            DateTime date = DateTimeOffset.FromUnixTimeMilliseconds(StartTime).ToLocalTime().DateTime;
             TimeStartedText = date.ToString("dd MMM yyyy hh:mm:ss tt", CultureInfo.CurrentCulture);
         }
-        
-        Completions = completedCount;
-        Players = playersCount;
-        Rounds = round;
-        
+
         Application.Current.Dispatcher.Invoke(() =>
         {
             BestSplits.Clear();
-            foreach (var bestSplit in bestSplits)
+            foreach (var bestSplit in _data.BestSplits)
             {
                 var viewModel = new RankedBestSplitViewModel(bestSplit);
                 BestSplits.Add(viewModel);
             }
         });
+        
+        OnPropertyChanged(nameof(CustomText));
+        OnPropertyChanged(nameof(Rounds));
+        OnPropertyChanged(nameof(Players));
+        OnPropertyChanged(nameof(Completions));
+        OnPropertyChanged(nameof(StartTime));
     }
 }

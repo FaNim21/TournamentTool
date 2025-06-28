@@ -38,7 +38,7 @@ public class RankedEvaluateTimelineData
 
 public class RankedService : IBackgroundService
 {
-    private readonly RankedManagementData? _rankedManagementData;
+    private readonly RankedManagementData _rankedManagementData;
     
     private TournamentViewModel TournamentViewModel { get; }
     private ILeaderboardManager Leaderboard { get; }
@@ -46,16 +46,12 @@ public class RankedService : IBackgroundService
     private IRankedDataReceiver? _rankedDataReceiver;
     private IRankedManagementDataReceiver? _rankedManagementDataReceiver;
     private IPlayerAddReceiver? _playerManagerReceiver;
-    
-    private long _startTime;
-    private int _completedRunsCount;
 
     private Dictionary<RunMilestone, RankedEvaluateTimelineData> _splitDatas = [];
     private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
     private readonly JsonSerializerOptions _options;
     private MatchStatus _lastStatus;
-    private int _round;
     
     private readonly Dictionary<string, RankedPace> _paces = [];
     private readonly Dictionary<string, (string name, RunMilestone milestone)> _timelineTypeCache = new();
@@ -69,8 +65,7 @@ public class RankedService : IBackgroundService
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         
-        _rankedManagementData = TournamentViewModel.ManagementData as RankedManagementData;
-        _round = _rankedManagementData!.Rounds;
+        _rankedManagementData = (TournamentViewModel.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplits.ToDictionary(b => b.Type, b => b) ?? [];
 
         _options = new JsonSerializerOptions
@@ -151,8 +146,9 @@ public class RankedService : IBackgroundService
         FilterJSON(privRoomData);
         _rankedDataReceiver?.Update();
         
-        _completedRunsCount = privRoomData.Completions.Length;
-        _rankedManagementDataReceiver?.UpdateManagementData(_bestSplits.Values.ToList(), _completedRunsCount, _startTime, _paces.Count, _round);
+        _rankedManagementData!.Completions = privRoomData.Completions.Length;
+        _rankedManagementData!.Players = privRoomData.Players.Length;
+        _rankedManagementDataReceiver?.Update();
     }
     
     private void FilterJSON(PrivRoomData privRoomData)
@@ -209,7 +205,7 @@ public class RankedService : IBackgroundService
 
             paceData.Completion = completion;
         }
-    */
+        */
     }
 
     private void AddPace(PrivRoomPlayer player)
@@ -278,21 +274,21 @@ public class RankedService : IBackgroundService
     private void EvaluateResults()
     {
         if (_splitDatas.Count == 0) return;
-        
-        _round++;
+
+        _rankedManagementData.Rounds++;
         Leaderboard.EvaluateData(_splitDatas);
     }
     private void SeedStarted()
     {
         //Seed change | New match
-        _startTime = DateTimeOffset.Now.Millisecond;
+        _rankedManagementData.StartTime = DateTimeOffset.Now.Millisecond;
         Clear();
     }
     private void ReadySeed(PrivRoomData privRoomData)
     {
         if (_rankedManagementData!.BestSplits.Count != 0)
         {
-            _startTime = DateTimeOffset.Now.Millisecond - privRoomData.Time;
+            _rankedManagementData.StartTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - privRoomData.Time;
         }
         
         //Counting after seed loaded
@@ -329,11 +325,13 @@ public class RankedService : IBackgroundService
     private void Clear()
     {
         _bestSplits.Clear();
-        _rankedManagementData?.BestSplits.Clear();
         _paces.Clear();
-        _rankedManagementDataReceiver?.UpdateManagementData([], 0, 0, 0, _rankedManagementData!.Rounds);
+        
+        _rankedManagementData!.BestSplits.Clear();
+        _rankedManagementData.Completions = 0;
+        _rankedManagementData.Players = 0;
+        _rankedManagementData.StartTime = 0;
         
         _rankedDataReceiver?.Clear();
-        _paces.Clear();
     }
 }

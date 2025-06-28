@@ -23,11 +23,7 @@ public interface IRankedDataReceiver : IBackgroundDataReceiver
 
 public interface IRankedManagementDataReceiver : IBackgroundDataReceiver
 {
-    //TODO: 0 Ostatni problem brak mozliwosci zmiany rund w trakcie, poniewaz jedna metoda narzuca ciagle wartosci
-    void InitializeUpdate();
-    void OnFinishedUpdate();
-    
-    void UpdateManagementData(List<PrivRoomBestSplit> bestSplits, int completedCount, long timeStarted, int playersCount, int round);
+    void Update();
 }
 
 public interface IPlayerAddReceiver : IBackgroundDataReceiver
