@@ -120,6 +120,7 @@ public class RankedService : IBackgroundService
         PrivRoomData? privRoomData = null;
 
         //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
+        /*
         string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
         try
         {
@@ -128,7 +129,7 @@ public class RankedService : IBackgroundService
             if (rankedAPIResult == null) return;
             privRoomData = rankedAPIResult.Data;
         }
-        /*
+        */
         try
         {
             await using Stream responseStream = await Helper.MakeRequestAsStream($"https://mcsrranked.com/api/users/{TournamentViewModel.RankedApiPlayerName}/live", TournamentViewModel.RankedApiKey);
@@ -136,7 +137,6 @@ public class RankedService : IBackgroundService
             if (rankedAPIResult == null) return;
             privRoomData = rankedAPIResult.Data;
         }
-        */
         catch { /**/ }
 
         if (privRoomData == null) return;
@@ -152,7 +152,6 @@ public class RankedService : IBackgroundService
     private void FilterJSON(PrivRoomData privRoomData)
     {
         if (privRoomData.Status == _lastStatus && privRoomData.Status != MatchStatus.running) return;
-        Console.WriteLine(privRoomData.Status);
         
         if(privRoomData.Status == MatchStatus.done)
         {
@@ -174,7 +173,7 @@ public class RankedService : IBackgroundService
         
         if (privRoomData.Timelines.Length == 0) return;
         
-        for (int i = 0; i < privRoomData.Timelines.Length; i++)
+        for (int i = privRoomData.Timelines.Length - 1; i >= 0; i--)
         {
             var timeline = privRoomData.Timelines[i];
             if (timeline.Type.EndsWith("root")) continue;
@@ -193,6 +192,8 @@ public class RankedService : IBackgroundService
             pace.Value.Update(null);
         }
         
+        //TODO: 0 Z tym tez cos zrobic jezeli nie naprawia timeline'ow dla defaultowego completionw priv roomie,
+        //bo wtedy na bazie tego trzeba bedzie samemu dorobic ten timeline
         /*
         for (int i = 0; i < privRoomData.Completions.Length; i++)
         {

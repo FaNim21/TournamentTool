@@ -7,7 +7,7 @@ namespace TournamentTool.Models.Ranking;
 public abstract class LuaAPIBase
 {
     protected readonly Action<LeaderboardEntry> _onEntryRunRegistered;
-    protected readonly TournamentViewModel _tournament;  // o to trzeba bedzie pod management, punkty itp itd
+    protected readonly TournamentViewModel _tournament;
     protected readonly LeaderboardSubRule _subRule;
     public int BasePoints => _subRule.BasePoints;
 

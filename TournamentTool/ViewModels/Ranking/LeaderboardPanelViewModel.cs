@@ -17,8 +17,9 @@ namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardPanelViewModel : SelectableViewModel
 {
+    private readonly ILuaScriptsManager _luaScriptsManager;
+    
     public IPresetSaver PresetSaver { get; private set; }
-
     private ILeaderboardManager LeaderboardManager { get; }
 
     private TournamentViewModel Tournament { get; }
@@ -48,6 +49,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         Tournament = tournament;
         PresetSaver = presetSaver;
         LeaderboardManager = leaderboardManager;
+        _luaScriptsManager = luaScriptsManager;
 
         Leaderboard = Tournament.Leaderboard; 
         
@@ -230,6 +232,13 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     private void RefreshScripts()
     {
+        _luaScriptsManager.LoadLuaScripts();
         
+        //TODO: 0 Zrobic kompilacje skryptow pod wykrywanie w nich bledow
+        //TODO: 0 Przy okazji tez dodac nowa zmienna w skryptach czyli tryb jak: Ranked, Normal i od razu z pobierania listy skryptow trzeba zwracac te z obecnie wybranego skryptu
+        foreach (var script in _luaScriptsManager.GetScriptsList())
+        {
+            
+        }
     }
 }

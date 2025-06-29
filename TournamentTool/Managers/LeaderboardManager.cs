@@ -107,7 +107,6 @@ public class LeaderboardManager : ILeaderboardManager
         
         Console.WriteLine($"Evaluated: {luaPlayerDatas.Count} players for {datas[0].MainSplit.Milestone} for sub rule with desc: {subRule.Description}");
     }
-    
     private void UpdateEntry(LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)
     {
         LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
@@ -120,6 +119,7 @@ public class LeaderboardManager : ILeaderboardManager
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
         Console.WriteLine($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}, advancing from position {oldPosition} to {entry.Position}");
     }
+    
     private void OnEntryRunRegistered(LeaderboardEntry entry)
     {
         Tournament.Leaderboard.RecalculateEntryPosition(entry);
