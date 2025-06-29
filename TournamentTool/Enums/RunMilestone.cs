@@ -8,10 +8,41 @@ public enum RunMilestone
 {
     [Display(Name = "None", Description = "none", ShortName = "none"), EnumRuleContext(ControllerMode.All, LeaderboardRuleType.All)] None,
     
+    
+    
+    
     // --------------------------------
-    // ========== Paceman ============
+    // ========== Splits ============
     // --------------------------------
     //
+    
+    // ====== Paceman ======
+    [Display(Name = "(Paceman) Enter nether", Description = "rsg.enter_nether", ShortName = "enter_nether"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterNether,
+    [Display(Name = "(Paceman) Enter bastion", Description = "rsg.enter_bastion", ShortName = "enter_bastion"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterBastion,
+    [Display(Name = "(Paceman) Enter fortress", Description = "rsg.enter_fortress", ShortName = "enter_fortress"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterFortress,
+    [Display(Name = "(Paceman) First portal", Description = "rsg.first_portal", ShortName = "first_portal"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanFirstPortal,
+    [Display(Name = "(Paceman) Second portal", Description = "rsg.second_portal", ShortName = "second_portal"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanSecondPortal,
+    [Display(Name = "(Paceman) Enter stronghold", Description = "rsg.enter_stronghold", ShortName = "enter_stronghold"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterStronghold,
+    [Display(Name = "(Paceman) Enter end", Description = "rsg.enter_end", ShortName = "enter_end"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterEnd,
+    [Display(Name = "(Paceman) Credits", Description = "rsg.credits", ShortName = "credits"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanCredits,
+    
+    // ====== Ranked ======
+    [Display(Name = "We Need to Go Deeper", Description = "story.enter_the_nether", ShortName = "enter_the_nether"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] StoryEnterTheNether,
+    [Display(Name = "Those Were the Days", Description = "nether.find_bastion", ShortName = "find_bastion"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] NetherFindBastion,
+    [Display(Name = "A Terrible Fortress", Description = "nether.find_fortress", ShortName = "find_fortress"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] NetherFindFortress,
+    [Display(Name = "(Ranked) Blind Travel", Description = "projectelo.timeline.blind_travel", ShortName = "blind_travel"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloBlindTravel,
+    [Display(Name = "Eye Spy", Description = "story.follow_ender_eye", ShortName = "follow_ender_eye"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] StoryFollowEnderEye,
+    [Display(Name = "The End?", Description = "story.enter_the_end", ShortName = "enter_the_end"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] StoryEnterTheEnd,
+    [Display(Name = "(Ranked) Complete", Description = "projectelo.timeline.complete", ShortName = "complete"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloComplete,
+    
+    
+    
+    
+    // --------------------------------
+    // ========== Advancements ============
+    // --------------------------------
+    
+    // ====== Paceman ======
     [Display(Name = "(Paceman) Obtain iron ingot", Description = "rsg.obtain_iron_ingot", ShortName = "obtain_iron_ingot"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PaceObtainIronIngot,
     [Display(Name = "(Paceman) Obtain iron pickaxe", Description = "rsg.obtain_iron_pickaxe", ShortName = "obtain_iron_pickaxe"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainIronPickaxe,
     [Display(Name = "(Paceman) Obtain lava bucket", Description = "rsg.obtain_lava_bucket", ShortName = "obtain_iron_bucket"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainLavaBucket,
@@ -22,34 +53,12 @@ public enum RunMilestone
     [Display(Name = "(Paceman) distract piglin", Description = "rsg.distract_piglin", ShortName = "distract_piglin"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanDistractPiglin,
     [Display(Name = "(Paceman) killed dragon", Description = "rsg.killed_dragon", ShortName = "killed_dragon"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanKilledDragon,
     
-    [Display(Name = "(Paceman) Enter nether", Description = "rsg.enter_nether", ShortName = "enter_nether"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterNether,
-    [Display(Name = "(Paceman) Enter bastion", Description = "rsg.enter_bastion", ShortName = "enter_bastion"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterBastion,
-    [Display(Name = "(Paceman) Enter fortress", Description = "rsg.enter_fortress", ShortName = "enter_fortress"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterFortress,
-    [Display(Name = "(Paceman) First portal", Description = "rsg.first_portal", ShortName = "first_portal"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanFirstPortal,
-    [Display(Name = "(Paceman) Second portal", Description = "rsg.second_portal", ShortName = "second_portal"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanSecondPortal,
-    [Display(Name = "(Paceman) Enter stronghold", Description = "rsg.enter_stronghold", ShortName = "enter_stronghold"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterStronghold,
-    [Display(Name = "(Paceman) Enter end", Description = "rsg.enter_end", ShortName = "enter_end"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanEnterEnd,
-    [Display(Name = "(Paceman) Credits", Description = "rsg.credits", ShortName = "credits"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Split)] PacemanCredits,
-    
-    // --------------------------------
-    // ========== Ranked ============
-    // --------------------------------
-    
-    [Display(Name = "(Ranked) We Need to Go Deeper", Description = "story.enter_the_nether", ShortName = "enter_the_nether"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloNetherEnter,
-    [Display(Name = "(Ranked) Blind Travel", Description = "projectelo.timeline.blind_travel", ShortName = "blind_travel"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloBlindTravel,
-    [Display(Name = "(Ranked) Complete", Description = "projectelo.timeline.complete", ShortName = "complete"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Split)] ProjectEloComplete,
-    
+    // ====== Ranked ======
     [Display(Name = "(Ranked) Dragon Death", Description = "projectelo.timeline.dragon_death", ShortName = "dragon_death"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDragonDeath,
     [Display(Name = "(Ranked) Forfeit", Description = "projectelo.timeline.forfeit", ShortName = "forfeit"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloForfeit,
     [Display(Name = "(Ranked) Death", Description = "projectelo.timeline.death", ShortName = "death"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDeath,
     [Display(Name = "(Ranked) Death Reset", Description = "projectelo.timeline.death_spawnpoint", ShortName = "death_spawnpoint"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloDeathReset,
     [Display(Name = "(Ranked) Reset", Description = "projectelo.timeline.reset", ShortName = "reset"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] ProjectEloReset,
-    
-    
-    
-    // --------------------------------
-    // ========== Advancements ============
-    // --------------------------------
     
     // ====== Story Advancements ======
     [Display(Name = "Minecraft", Description = "story.root", ShortName = "story"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryRoot,
@@ -62,24 +71,19 @@ public enum RunMilestone
     [Display(Name = "Not Today, Thank You", Description = "story.deflect_arrow", ShortName = "deflect_arrow"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryDeflectArrow,
     [Display(Name = "Ice Bucket Challenge", Description = "story.form_obsidian", ShortName = "form_obsidian"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryFormObsidian,
     [Display(Name = "Diamonds!", Description = "story.mine_diamond", ShortName = "mine_diamond"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryMineDiamond,
-    [Display(Name = "We Need to Go Deeper", Description = "story.enter_the_nether", ShortName = "enter_the_nether"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryEnterTheNether,
     [Display(Name = "Cover Me with Diamonds", Description = "story.shiny_gear", ShortName = "shiny_gear"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryShinyGear,
     [Display(Name = "Enchanter", Description = "story.enchant_item", ShortName = "enchant_item"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryEnchantItem,
     [Display(Name = "Zombie Doctor", Description = "story.cure_zombie_villager", ShortName = "cure_zombie_villager"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryCureZombieVillager,
-    [Display(Name = "Eye Spy", Description = "story.follow_ender_eye", ShortName = "follow_ender_eye"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryFollowEnderEye,
-    [Display(Name = "The End?", Description = "story.enter_the_end", ShortName = "enter_the_end"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] StoryEnterTheEnd,
 
     // ====== Nether Advancements ======
     [Display(Name = "Nether", Description = "nether.root", ShortName = "nether"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherRoot,
     [Display(Name = "Return to Sender", Description = "nether.return_to_sender", ShortName = "return_to_sender"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherReturnToSender,
-    [Display(Name = "Those Were the Days", Description = "nether.find_bastion", ShortName = "find_bastion"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherFindBastion,
     [Display(Name = "Hidden in the Depths", Description = "nether.obtain_ancient_debris", ShortName = "obtain_ancient_debris"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherObtainAncientDebris,
     [Display(Name = "Subspace Bubble", Description = "nether.fast_travel", ShortName = "fast_travel"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherFastTravel,
-    [Display(Name = "A Terrible Fortress", Description = "nether.find_fortress", ShortName = "find_fortress"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherFindFortress,
     [Display(Name = "Who is Cutting Onions?", Description = "nether.obtain_crying_obsidian", ShortName = "obtain_crying_obsidian"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherObtainCryingObsidian,
     [Display(Name = "Oh Shiny", Description = "nether.distract_piglin", ShortName = "distract_piglin"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherDistractPiglin,
     [Display(Name = "This Boat Has Legs", Description = "nether.ride_strider", ShortName = "ride_strider"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherRideStrider,
-    [Display(Name = "Uneasy Rankediance", Description = "nether.uneasy_alliance", ShortName = "uneasy_alliance"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherUneasyRankediance,
+    [Display(Name = "Uneasy Alliance", Description = "nether.uneasy_alliance", ShortName = "uneasy_alliance"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherUneasyAlliance,
     [Display(Name = "War Pigs", Description = "nether.loot_bastion", ShortName = "loot_bastion"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherLootBastion,
     [Display(Name = "Country Lode, Take Me Home", Description = "nether.use_lodestone", ShortName = "use_lodestone"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherUseLodestone,
     [Display(Name = "Cover Me in Debris", Description = "nether.netherite_armor", ShortName = "netherite_armor"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] NetherNetheriteArmor,
@@ -108,6 +112,7 @@ public enum RunMilestone
 
     // ====== Adventure Advancements =======
     [Display(Name = "Adventure", Description = "adventure.root", ShortName = "adventure"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureRoot,
+    [Display(Name = "Heart Transplanter", Description = "adventure.heart_transplanter", ShortName = "heart_transplanter"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureHeartTransplanter,
     [Display(Name = "Voluntary Exile", Description = "adventure.voluntary_exile", ShortName = "voluntary_exile"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureVoluntaryExile,
     [Display(Name = "Is It a Bird?", Description = "adventure.spyglass_at_parrot", ShortName = "spyglass_at_parrot"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureSpyglassAtParrot,
     [Display(Name = "Monster Hunter", Description = "adventure.kill_a_mob", ShortName = "kill_a_mob"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureKillAMob,
@@ -142,12 +147,22 @@ public enum RunMilestone
     [Display(Name = "Very Very Frightening", Description = "adventure.very_very_frightening", ShortName = "very_very_frightening"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureVeryVeryFrightening,
     [Display(Name = "Sniper Duel", Description = "adventure.sniper_duel", ShortName = "sniper_duel"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureSniperDuel,
     [Display(Name = "Bullseye", Description = "adventure.bullseye", ShortName = "bullseye"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureBullseye,
+    [Display(Name = "Isn't It Scute?", Description = "adventure.brush_armadillo", ShortName = "brush_armadillo"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureBrushArmadillo,
+    [Display(Name = "Minecraft: Trail(s) Edition", Description = "adventure.minecraft_trials_edition", ShortName = "minecraft_trials_edition"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureTrialsEdition,
+    [Display(Name = "Crafters Crafting Crafters", Description = "adventure.crafters_crafting_crafters", ShortName = "crafters_crafting_crafters"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureCraters,
+    [Display(Name = "Lighten Up", Description = "adventure.lighten_up", ShortName = "lighten_up"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureLightenUp,
+    [Display(Name = "Who Needs Rockets?", Description = "adventure.who_needs_rockets", ShortName = "who_needs_rockets"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureWhoNeedsRockets,
+    [Display(Name = "Under Lock Key", Description = "adventure.under_lock_and_key", ShortName = "under_lock_and_key"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureUnderLockKey,
+    [Display(Name = "Revaulting", Description = "adventure.revaulting", ShortName = "revaulting"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureRevaulting,
+    [Display(Name = "Blowback", Description = "adventure.blowback", ShortName = "blowback"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureBlowBack,
+    [Display(Name = "Over-Overkill", Description = "adventure.overoverkill", ShortName = "overoverkill"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] AdventureOverOverkill,
 
     // ====== Husbandry Advancements ======
     [Display(Name = "Husbandry", Description = "husbandry.root", ShortName = "husbandry"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRoot,
+    [Display(Name = "Stay Hydrated!", Description = "husbandry/place_dried_ghast_in_water", ShortName = "place_dried_ghast_in_water"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryStayHydrated,
     [Display(Name = "Bee Our Guest", Description = "husbandry.safely_harvest_honey", ShortName = "safely_harvest_honey"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandrySafelyHarvestHoney,
     [Display(Name = "The Parrots and the Bats", Description = "husbandry.breed_an_animal", ShortName = "breed_an_animal"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryBreedAnAnimal,
-    [Display(Name = "You've Got a Friend in Me", Description = "husbandry.allay_deliver_item_to_player", ShortName = "allay_deliver_item_to_player"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRankedayDeliverItemToPlayer,
+    [Display(Name = "You've Got a Friend in Me", Description = "husbandry.allay_deliver_item_to_player", ShortName = "allay_deliver_item_to_player"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRankedDeliverItemToPlayer,
     [Display(Name = "Whatever Floats Your Goat!", Description = "husbandry.ride_a_boat_with_a_goat", ShortName = "ride_a_boat_with_a_goat"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRideABoatWithAGoat,
     [Display(Name = "Best Friends Forever", Description = "husbandry.tame_an_animal", ShortName = "tame_an_animal"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryTameAnAnimal,
     [Display(Name = "Glow and Behold!", Description = "husbandry.make_a_sign_glow", ShortName = "make_a_sign_glow"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryMakeASignGlow,
@@ -158,7 +173,7 @@ public enum RunMilestone
     [Display(Name = "A Seedy Place", Description = "husbandry.plant_seed", ShortName = "plant_seed"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryPlantSeed,
     [Display(Name = "Wax On", Description = "husbandry.wax_on", ShortName = "wax_on"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryWaxOn,
     [Display(Name = "Two by Two", Description = "husbandry.bred_all_animals", ShortName = "bred_all_animals"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryBredRankedAnimals,
-    [Display(Name = "Birthday Song", Description = "husbandry.allay_deliver_cake_to_note_block", ShortName = "allay_deliver_cake_to_note_block"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRankedayDeliverCakeToNoteBlock,
+    [Display(Name = "Birthday Song", Description = "husbandry.allay_deliver_cake_to_note_block", ShortName = "allay_deliver_cake_to_note_block"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRankedDeliverCakeToNoteBlock,
     [Display(Name = "A Complete Catalogue", Description = "husbandry.complete_catalogue", ShortName = "complete_catalogue"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryCompleteCatalogue,
     [Display(Name = "Tactical Fishing", Description = "husbandry.tactical_fishing", ShortName = "tactical_fishing"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryTacticalFishing,
     [Display(Name = "When the Squad Hops into Town", Description = "husbandry.leash_all_frog_variants", ShortName = "leash_all_frog_variants"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryLeashRankedFrogVariants,
@@ -170,4 +185,7 @@ public enum RunMilestone
     [Display(Name = "With Our Powers Combined!", Description = "husbandry.froglights", ShortName = "froglights"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryFroglights,
     [Display(Name = "Planting the Past", Description = "husbandry.plant_any_sniffer_seed", ShortName = "plant_any_sniffer_seed"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryPlantAnySnifferSeed,
     [Display(Name = "The Healing Power of Friendship!", Description = "husbandry.kill_axolotl_target", ShortName = "kill_axolotl_target"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryKillAxolotlTarget,
+    [Display(Name = "Good as New", Description = "husbandry.repair_wolf_armor", ShortName = "repair_wolf_armor"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryRepairWolfArmor,
+    [Display(Name = "The Whole Pack", Description = "husbandry.whole_pack", ShortName = "whole_pack"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryWholePack,
+    [Display(Name = "Shear Brilliance", Description = "husbandry.remove_wolf_armor", ShortName = "remove_wolf_armor"), EnumRuleContext(ControllerMode.Ranked, LeaderboardRuleType.Advancement)] HusbandryShearBrilliance,
 }
