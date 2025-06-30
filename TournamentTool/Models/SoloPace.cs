@@ -1,6 +1,6 @@
 ﻿namespace TournamentTool.Models;
 
-public interface IManagementData
+public class SoloPace
 {
-
+    
 }

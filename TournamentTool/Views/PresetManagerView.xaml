@@ -130,6 +130,13 @@
                                          Content="Ranked"
                                          HorizontalAlignment="Left"
                                          IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}" />
+                            <!--
+                            <RadioButton GroupName="ControllerMode"
+                                         Foreground="White"
+                                         Content="Solo"
+                                         HorizontalAlignment="Left"
+                                         IsChecked="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static enums:ControllerMode.Solo}}" />
+                        -->
                         </StackPanel>
 
                         <!-- PACEMAN -->
@@ -319,6 +326,12 @@
                                            Margin="5 0 0 3" />
                             </StackPanel>
                         </StackPanel>
+                        
+                        <!-- SOLO -->
+                        <StackPanel>
+                            
+                        </StackPanel>
+                        
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
@@ -331,7 +344,6 @@
                                                  OnCommand="{Binding OpenControllerCommand}"
                                                  Margin="30 30 30 5" />
 
-                        <!-- Tutaj chyba dam panel do zarzadzania opcjami do ustawiania punktow za ukonczenie itp itd???? -->
                         <components:ButtonNormal ContentText="Leaderboard"
                                                  Width="350"
                                                  Height="40"

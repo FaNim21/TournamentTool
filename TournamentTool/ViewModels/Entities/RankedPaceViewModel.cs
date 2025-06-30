@@ -1,12 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Media.Imaging;
+﻿using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
+using TournamentTool.Models;
 using TournamentTool.Modules.SidePanels;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
-using TournamentTool.ViewModels;
 
-namespace TournamentTool.Models;
+namespace TournamentTool.ViewModels.Entities;
 
 public class RankedPaceViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
 {

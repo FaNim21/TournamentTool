@@ -8,6 +8,7 @@
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
              xmlns:sidePanels="clr-namespace:TournamentTool.Modules.SidePanels"
+             xmlns:entities="clr-namespace:TournamentTool.ViewModels.Entities"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800"
@@ -27,7 +28,7 @@
         </DataTemplate>
 
         <!-- Cialo -->
-        <DataTemplate DataType="{x:Type models:RankedPaceViewModel}">
+        <DataTemplate DataType="{x:Type entities:RankedPaceViewModel}">
             <Border BorderBrush="#7e8691"
                     BorderThickness="1"
                     Width="263">

@@ -1,7 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using TournamentTool.Models;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.Models;
+namespace TournamentTool.Interfaces;
 
 public interface ITournamentManager
 {

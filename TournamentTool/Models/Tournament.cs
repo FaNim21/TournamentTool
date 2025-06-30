@@ -78,6 +78,7 @@ public class TournamentPreset : BaseViewModel, IRenameItem, IPreset
     }
 }
 
+[JsonDerivedType(typeof(SoloManagementData), typeDiscriminator: "Solo")]
 [JsonDerivedType(typeof(PacemanManagementData), typeDiscriminator: "Paceman")]
 [JsonDerivedType(typeof(RankedManagementData), typeDiscriminator: "Ranked")]
 public abstract class ManagementData;
@@ -94,7 +95,13 @@ public class RankedManagementData : ManagementData
 
 public class PacemanManagementData : ManagementData
 {
-    //TODO: 1 dane od api i rzeczy z zarzadzania pacemanem w kontrolerze
+    //TODO: 5 dane od api i rzeczy z zarzadzania pacemanem w kontrolerze
+}
+
+public class SoloManagementData : ManagementData
+{
+    public string LastFileName { get; set; } = string.Empty;
+    //TODO: 0 Tez jakas zmienna pod ostatni timeline i fajny bylby record tutaj
 }
 
 public class Tournament : IPreset

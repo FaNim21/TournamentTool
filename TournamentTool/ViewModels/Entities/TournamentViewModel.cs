@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 
@@ -330,6 +331,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
                 ManagementData = new RankedManagementData();
             else if (value == ControllerMode.Paceman)
                 ManagementData = new PacemanManagementData();
+            else if (value == ControllerMode.Solo)
+                ManagementData = new SoloManagementData();
             
             UpdateBackgroundService(value);
         }

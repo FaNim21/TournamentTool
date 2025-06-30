@@ -3,6 +3,7 @@ using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using TournamentTool.Interfaces;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.SidePanels;
 

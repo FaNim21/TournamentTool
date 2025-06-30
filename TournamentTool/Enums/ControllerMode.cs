@@ -6,5 +6,6 @@ public enum ControllerMode
     None,
     Paceman,
     Ranked,
+    Solo,
     All,
 }

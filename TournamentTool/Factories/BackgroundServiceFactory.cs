@@ -25,6 +25,7 @@ public class BackgroundServiceFactory
         {
             ControllerMode.Paceman => new PaceManService(_tournament, _leaderboard, _presetSaver),
             ControllerMode.Ranked => new RankedService(_tournament, _leaderboard),
+            ControllerMode.Solo => new SoloService(_tournament, _leaderboard),
             _ => null,
         };
 }
