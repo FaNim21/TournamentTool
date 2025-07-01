@@ -1,15 +1,19 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using MethodTimer;
+using MoonSharp.Interpreter;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
@@ -230,15 +234,43 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         }
     }
 
+    // TO ODSWIEZANIE Z WALIDACJA SA POKI NIE BEDZIE ODDZIELNEGO MIEJSCA DO SPRAWDZANIA SKRYPTOW
     private void RefreshScripts()
     {
-        _luaScriptsManager.LoadLuaScripts();
-        
-        //TODO: 0 Zrobic kompilacje skryptow pod wykrywanie w nich bledow
-        //TODO: 0 Przy okazji tez dodac nowa zmienna w skryptach czyli tryb jak: Ranked, Normal i od razu z pobierania listy skryptow trzeba zwracac te z obecnie wybranego skryptu
-        foreach (var script in _luaScriptsManager.GetScriptsList())
+        var scripts = Directory.GetFiles(Consts.LeaderboardScriptsPath, "*.lua", SearchOption.TopDirectoryOnly).AsSpan();
+        for (int i = 0; i < scripts.Length; i++)
         {
-            
+            var script = scripts[i];
+            var name = Path.GetFileNameWithoutExtension(script);
+
+            string output = ValidateScript(name);
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                string finalOutput = $"Error in: {name}.lua\n" + output;
+                DialogBox.Show(finalOutput, $"Script Validation ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                break;
+            }
+
+            try
+            {
+                _luaScriptsManager.AddOrReload(name);
+            }
+            catch{ /**/ }
         }
+    }
+    public string ValidateScript(string scriptName)
+    {
+        var scriptPath = Path.Combine(Consts.LeaderboardScriptsPath, $"{scriptName}.lua");
+        var expectedType = Tournament.ControllerMode == ControllerMode.Ranked ? LuaLeaderboardType.ranked : LuaLeaderboardType.normal;
+        var result = LuaScriptValidator.ValidateScriptWithRuntime(scriptPath, expectedType);
+
+        if (result.IsValid) return string.Empty;
+        
+        var errors = new List<string>();
+        if (result.SyntaxError != null)
+            errors.Add($"Syntax: {result.SyntaxError.Message}");
+                    
+        errors.AddRange(result.RuntimeErrors.Select(e => $"Runtime: {e.Message}"));
+        return string.Join("\n", errors);
     }
 }

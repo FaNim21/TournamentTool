@@ -6,13 +6,13 @@ namespace TournamentTool.Models.Ranking;
 
 public abstract class LuaAPIBase
 {
-    protected readonly Action<LeaderboardEntry> _onEntryRunRegistered;
+    protected readonly Action<LeaderboardEntry>? _onEntryRunRegistered;
     protected readonly TournamentViewModel _tournament;
     protected readonly LeaderboardSubRule _subRule;
     public int BasePoints => _subRule.BasePoints;
 
 
-    protected LuaAPIBase(TournamentViewModel tournament, LeaderboardSubRule subRule, Action<LeaderboardEntry> onEntryRunRegistered)
+    protected LuaAPIBase(TournamentViewModel tournament, LeaderboardSubRule subRule, Action<LeaderboardEntry>? onEntryRunRegistered)
     {
         _subRule = subRule;
         _tournament = tournament;
@@ -36,7 +36,7 @@ public class LuaAPIContext : LuaAPIBase
         LeaderboardPlayerEvaluateData data, 
         LeaderboardSubRule subRule, 
         TournamentViewModel tournament, 
-        Action<LeaderboardEntry> onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
+        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
     {
         _entry = entry;
         _data = data;
@@ -48,7 +48,7 @@ public class LuaAPIContext : LuaAPIBase
         var success = _entry.AddMilestone(milestone);
         if (!success) return;
 
-        _onEntryRunRegistered.Invoke(_entry);
+        _onEntryRunRegistered?.Invoke(_entry);
     }
 }
 
@@ -81,7 +81,7 @@ public class LuaAPIRankedContext : LuaAPIBase
     public LuaAPIRankedContext( LeaderboardSubRule subRule, 
         TournamentViewModel tournament, 
         List<LuaPlayerData> players,
-        Action<LeaderboardEntry> onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
+        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
     {
         Players = players;
     }
@@ -92,6 +92,6 @@ public class LuaAPIRankedContext : LuaAPIBase
         var success = player.entry.AddMilestone(milestone);
         if (!success) return;
 
-        _onEntryRunRegistered.Invoke(player.entry);
+        _onEntryRunRegistered?.Invoke(player.entry);
     }
 }

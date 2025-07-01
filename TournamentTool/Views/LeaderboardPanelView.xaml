@@ -140,7 +140,7 @@
                     </ListBox.ItemTemplate>
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel />
+                            <vwp:VirtualizingWrapPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>

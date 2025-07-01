@@ -101,7 +101,7 @@ public class PacemanManagementData : ManagementData
 public class SoloManagementData : ManagementData
 {
     public string LastFileName { get; set; } = string.Empty;
-    //TODO: 0 Tez jakas zmienna pod ostatni timeline i fajny bylby record tutaj
+    //TODO: 5 Tez jakas zmienna pod ostatni timeline i fajny bylby record tutaj
 }
 
 public class Tournament : IPreset

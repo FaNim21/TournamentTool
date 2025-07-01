@@ -129,11 +129,12 @@ public class LeaderboardManager : ILeaderboardManager
 
     private void RunScript(string path, object context)
     {
-        var script = LuaManager.GetOrLoad(path);
+        var script = LuaManager.Get(path);
+        if (script == null) return;
 
         try
         {
-            script?.Run(context);
+            script.Run(context);
         }
         catch (Exception ex)
         {
