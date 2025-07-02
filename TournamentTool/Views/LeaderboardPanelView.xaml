@@ -195,12 +195,15 @@
                     <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardEntryViewModel}">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
-                                Width="495"
+                                Width="515"
                                 Height="50">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Position}"
                                            Foreground="White"
                                            FontSize="36"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center"
+                                           Width="60"
                                            Margin="5 0 0 0" />
 
                                 <Image Source="{Binding Player.Image}"
@@ -223,20 +226,25 @@
                                                Foreground="Wheat"
                                                Background="Transparent" />
 
-                                    <TextBlock Foreground="White">
-                                        <Run Text="Points: " />
-                                        <Run Text="{Binding Points}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Foreground="White"
+                                                   Width="100">
+                                            <Run Text="Points: " />
+                                            <Run Text="{Binding Points}" />
+                                        </TextBlock>
 
-                                        <Run Text=" - " />
+                                        <TextBlock Foreground="White"
+                                                   Width="120">
+                                            <Run Text="Best: " />
+                                            <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
+                                        </TextBlock>
 
-                                        <Run Text="Best time: " />
-                                        <Run Text="{Binding BestTimeOnPrioritizeMilestone}" />
-
-                                        <Run Text=" - " />
-
-                                        <Run Text="Average time: " />
-                                        <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
-                                    </TextBlock>
+                                        <TextBlock Foreground="White"
+                                                   Width="160">
+                                            <Run Text="Average: " />
+                                            <Run Text="{Binding AverageTimeOnPrioritizeMilestone}" />
+                                        </TextBlock>
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

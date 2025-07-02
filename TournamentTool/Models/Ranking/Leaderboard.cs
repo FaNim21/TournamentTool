@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using MethodTimer;
 
 namespace TournamentTool.Models.Ranking;
 

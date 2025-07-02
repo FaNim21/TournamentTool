@@ -46,11 +46,11 @@ public enum RunMilestone
     [Display(Name = "(Paceman) Obtain iron ingot", Description = "rsg.obtain_iron_ingot", ShortName = "obtain_iron_ingot"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PaceObtainIronIngot,
     [Display(Name = "(Paceman) Obtain iron pickaxe", Description = "rsg.obtain_iron_pickaxe", ShortName = "obtain_iron_pickaxe"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainIronPickaxe,
     [Display(Name = "(Paceman) Obtain lava bucket", Description = "rsg.obtain_lava_bucket", ShortName = "obtain_iron_bucket"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainLavaBucket,
+    [Display(Name = "(Paceman) distract piglin", Description = "rsg.distract_piglin", ShortName = "distract_piglin"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanDistractPiglin,
+    [Display(Name = "(Paceman) Loot bastion", Description = "rsg.loot_bastion", ShortName = "loot_bastion"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanLootBastion,
     [Display(Name = "(Paceman) Obtain Obsidian", Description = "rsg.obtain_obsidian", ShortName = "obtain_obsidian"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainObsidian,
     [Display(Name = "(Paceman) Obtain crying obsidian", Description = "rsg.obtain_crying_obsidian", ShortName = "obtain_crying_obsidian"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainCryingObsidian,
     [Display(Name = "(Paceman) Obtain blaze rod", Description = "rsg.obtain_blaze_rod", ShortName = "obtain_crying_obsidian"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanObtainBlazeRod,
-    [Display(Name = "(Paceman) Loot bastion", Description = "rsg.loot_bastion", ShortName = "loot_bastion"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanLootBastion,
-    [Display(Name = "(Paceman) distract piglin", Description = "rsg.distract_piglin", ShortName = "distract_piglin"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanDistractPiglin,
     [Display(Name = "(Paceman) killed dragon", Description = "rsg.killed_dragon", ShortName = "killed_dragon"), EnumRuleContext(ControllerMode.Paceman, LeaderboardRuleType.Advancement)] PacemanKilledDragon,
     
     // ====== Ranked ======

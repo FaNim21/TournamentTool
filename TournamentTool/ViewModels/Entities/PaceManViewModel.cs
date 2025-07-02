@@ -23,10 +23,10 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public SplitType ModelSplitType => _paceman.SplitType;
     public long ModelCurrentSplitTimeMiliseconds => _paceman.CurrentSplitTimeMiliseconds;
     
-    public string DisplayName => _paceman.PlayerViewModel == null ? _paceman.Data.Nickname : _paceman.PlayerViewModel.DisplayName;
+    public string DisplayName => _paceman.PlayerViewModel == null ? _paceman.Nickname : _paceman.PlayerViewModel.DisplayName;
     public string GetPersonalBest => _paceman.PlayerViewModel == null ? "Unk" : _paceman.PlayerViewModel.GetPersonalBest;
-    public string HeadViewParameter => _paceman.PlayerViewModel == null ? _paceman.Data.User.UUID! : _paceman.PlayerViewModel.HeadViewParameter;
-    public string TwitchName => _paceman.Data.User.TwitchName ?? string.Empty;
+    public string HeadViewParameter => _paceman.PlayerViewModel == null ? _paceman.UUID! : _paceman.PlayerViewModel.HeadViewParameter;
+    public string TwitchName => _paceman.TwitchName ?? string.Empty;
     public bool IsFromWhitelist => _paceman.PlayerViewModel != null;
     public bool IsLive => _paceman.IsLive;
 
@@ -174,7 +174,7 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
         
         Application.Current?.Dispatcher.Invoke(delegate
         {
-            if (_paceman.Data.ShowOnlyLive)
+            if (_paceman.ShowOnlyLive)
             {
                 StatusLabelColor = new SolidColorBrush(Consts.DefaultColor);
                 return;

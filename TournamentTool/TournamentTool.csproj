@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Updates\" />
+    <Folder Include="Resources\StatusBarIcons\" />
     <Folder Include="Resources\Scripts\" />
   </ItemGroup>
   <ItemGroup>

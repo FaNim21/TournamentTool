@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Threading;
+using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
@@ -10,6 +11,7 @@ using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
+using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
@@ -51,9 +53,8 @@ public class RankedService : IBackgroundService
     private MatchStatus _lastStatus;
     
     private readonly Dictionary<string, RankedPace> _paces = [];
-    private readonly Dictionary<string, (string name, RunMilestone milestone)> _timelineTypeCache = new();
 
-    private const int UiSendBatchSize = 10;
+    private const int UiSendBatchSize = 7;
     
     
     //TODO: 0 w UI przy dodawaniu subrule pokazac czy sie jest na rankedzie czy pacemanie i wtedy moze ewentualnie inna zawartosc dawac
@@ -177,9 +178,9 @@ public class RankedService : IBackgroundService
             var timeline = privRoomData.Timelines[i];
             if (timeline.Type.EndsWith("root")) continue;
             
-            (string name, RunMilestone milestone) parsedTimeline = ParseTimelineType(timeline.Type);
+            RunMilestoneData parsedTimeline = RunMilestoneParser.Parse(timeline.Type);
             var time = timeline.Time;
-            var paceTimeline = new RankedPaceTimeline(parsedTimeline.name, parsedTimeline.milestone, time);
+            var paceTimeline = new RankedPaceTimeline(parsedTimeline.Name, parsedTimeline.Milestone, time);
             
             if (!_paces.TryGetValue(timeline.UUID, out var pace)) continue;
             pace.AddTimeline(paceTimeline);
@@ -308,18 +309,6 @@ public class RankedService : IBackgroundService
         return bestSplit;
     }
     
-    private (string name, RunMilestone milestone) ParseTimelineType(string type)
-    {
-        if (_timelineTypeCache.TryGetValue(type, out var cached)) return cached;
-    
-        var name = type.Split('.')[^1];
-        var milestone = EnumExtensions.FromDescription<RunMilestone>(type);
-        var result = (name, milestone);
-    
-        _timelineTypeCache[type] = result;
-        return result;
-    }
-
     private void Clear()
     {
         _bestSplits.Clear();

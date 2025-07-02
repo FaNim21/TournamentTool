@@ -25,6 +25,7 @@ public class PaceManService : IBackgroundService
     private List<PaceManData> _paceManData = [];
     
     private const int UiSendBatchSize = 2;
+    private bool _blockFirstPacemanRefresh = true;
 
 
     public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver)
@@ -115,12 +116,13 @@ public class PaceManService : IBackgroundService
             RemovePaceMan(currentPaces[i]);
 
         _pacemanSidePanelReceiver?.Update();
+        _blockFirstPacemanRefresh = false;
     }
     
     private void AddPaceMan(Paceman paceman)
     {
         _paces.Add(paceman);
-        UpdatePlayerStreamData(paceman.Data.Nickname, paceman.Data.User.TwitchName);
+        UpdatePlayerStreamData(paceman.Nickname, paceman.TwitchName);
         _pacemanSidePanelReceiver?.AddPace(paceman);
     }
     private void RemovePaceMan(Paceman paceman)
@@ -183,28 +185,15 @@ public class PaceManService : IBackgroundService
         return playerViewModel;
     }
 
-    public void EvaluatePlayerInLeaderboard(Paceman paceman)
+    public void AddEvaluationData(Player player, string worldId, LeaderboardTimeline main, LeaderboardTimeline? previous = null)
     {
-        if (paceman.PlayerViewModel == null) return;
+        if (_blockFirstPacemanRefresh) return;
         
-        var split =  paceman.GetLastSplit();
-        if (split.SplitName.StartsWith("common.")) return;
-        var milestone = EnumExtensions.FromDescription<RunMilestone>(split.SplitName);
-        var mainSplit = new LeaderboardTimeline(milestone, (int)split.IGT);
-        
-        var previousSplit = paceman.GetSplit(2);
-        LeaderboardTimeline? pacemanPreviousSplit = null;
-        if (previousSplit != null)
-        {
-            var previousMilestone = EnumExtensions.FromDescription<RunMilestone>(previousSplit.SplitName);
-            pacemanPreviousSplit = new LeaderboardTimeline(previousMilestone, (int)previousSplit.IGT);
-        }
-        
-        var data = new LeaderboardPacemanEvaluateData(paceman.PlayerViewModel.Data, paceman.WorldID, mainSplit, pacemanPreviousSplit);
+        var data = new LeaderboardPacemanEvaluateData(player, worldId, main, previous);
         Leaderboard.EvaluateData(data);
     }
 
-    public bool CheckForGoodPace(SplitType splitType, PacemanPaceMilestone lastMilestone)
+    public bool CheckForGoodPace(SplitType splitType, PacemanTimeline lastMilestone)
     {
         bool isPacePriority = splitType switch
         {

@@ -17,7 +17,7 @@ public class PaceManData
     public List<PacemanPaceMilestone> Splits { get; set; } = [];
 
     [JsonPropertyName("contextEventList")]
-    public List<PacemanPaceMilestone> Advacements { get; set; } = [];
+    public List<PacemanPaceMilestone> Advancements { get; set; } = [];
 
     [JsonPropertyName("itemData")]
     public PaceItemData ItemsData { get; set; } = new();
@@ -55,10 +55,10 @@ public class PacemanPaceMilestone
 public class PaceManUser
 {
     [JsonPropertyName("uuid")] 
-    public string? UUID { get; set; } = string.Empty;
+    public string UUID { get; set; } = string.Empty;
 
     [JsonPropertyName("liveAccount")]
-    public string? TwitchName { get; set; }
+    public string TwitchName { get; set; } = string.Empty;
 }
 
 public struct PaceManStreamData

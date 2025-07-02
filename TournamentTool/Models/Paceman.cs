@@ -1,23 +1,34 @@
 ﻿using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using TournamentTool.Enums;
+using TournamentTool.Models.Ranking;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
+public record PacemanTimeline(string name, RunMilestone Milestone, long RTA, long IGT);
+
 public class Paceman
 {
-    public PaceManData Data { get; private set; }
-
     private PaceManService Service { get; }
 
-    public string Nickname => Data.Nickname;
-    public string WorldID => Data.WorldID;
+    public string UUID { get; }
+    public string Nickname { get; }
+    public string WorldID { get; }
+    public string TwitchName { get; }
+    public bool ShowOnlyLive { get; private set; }
 
     public PlayerViewModel? PlayerViewModel { get; set; }
     public PlayerInventory Inventory { get; set; }
+    
+    public List<PacemanTimeline> Splits { get; set; } = [];
+    public List<PacemanTimeline> Advancements { get; set; } = [];
+    
+    public PacemanTimeline? LastTimeline { get; private set; }
+    public PacemanTimeline? LastAdvancement { get; private set; }
 
     public BitmapImage? HeadImage { get; set; }
     public float HeadImageOpacity { get; set; }
@@ -29,51 +40,79 @@ public class Paceman
     
     public bool IsPacePrioritized { get; set; }
 
-    private PacemanPaceMilestone? LastMilestone { get; set; } = null;
+    private long _lastUpdate;
+    private int _lastTimelineIndex = 0;
+    private int _lastAdvancementIndex = 0;
 
     
     public Paceman(PaceManService service, PaceManData data, PlayerViewModel playerViewModel)
     {
         Service = service;
-        Data = data;
         PlayerViewModel = playerViewModel;
+        
+        Nickname = data.Nickname;
+        WorldID = data.WorldID;
+        UUID = data.User.UUID;
+        TwitchName = data.User.TwitchName;
 
         Inventory = new PlayerInventory();
-        if (!Data.ShowOnlyLive) IsLive = Data.IsLive();
+        if (!data.ShowOnlyLive) IsLive = data.IsLive();
         
         UpdateHeadImage();
-        UpdateTime();
+        Update(data);
     }
     
     public void Update(PaceManData paceman)
     {
-        Data = paceman;
+        ShowOnlyLive = paceman.ShowOnlyLive;
+        _lastUpdate = paceman.LastUpdate;
+        if (paceman.Splits.Count == 0) return;
         
-        if (Data.Splits.Count == 0) return;
-        UpdateTime();
-    }
-    private void UpdateTime()
-    {
-        PacemanPaceMilestone lastMilestone = GetLastSplit();
-        lastMilestone.SplitName = lastMilestone.SplitName.Replace("rsg.", "");
-
-        if (LastMilestone == null || !LastMilestone!.SplitName.Equals(lastMilestone.SplitName))
+        for (; _lastTimelineIndex < paceman.Splits.Count; _lastTimelineIndex++)
         {
-            string milestone = LastMilestone == null ? "None" : $"{LastMilestone.SplitName}";
-            Trace.WriteLine($"{Nickname} player from {milestone} to {lastMilestone!.SplitName}");
-            UpdateLastSplit(lastMilestone);
-            Service.EvaluatePlayerInLeaderboard(this);
+            var current = paceman.Splits[_lastTimelineIndex];
+            var milestone = RunMilestoneParser.Parse(current.SplitName);
+            var timeline = new PacemanTimeline(milestone.Name, milestone.Milestone, current.RTA, current.IGT);
+            
+            Splits.Add(timeline);
+            UpdateSplit(timeline);
+
+            PacemanTimeline? previous = null;
+            if (Splits.Count > 1)
+            {
+                previous = Splits[^2];
+            }
+            AddTimelineToEvaluation(timeline, previous);
         }
         
+        for (; _lastAdvancementIndex < paceman.Advancements.Count; _lastAdvancementIndex++)
+        {
+            var current = paceman.Advancements[_lastAdvancementIndex];
+            var milestone = RunMilestoneParser.Parse(current.SplitName);
+            var timeline = new PacemanTimeline(milestone.Name, milestone.Milestone, current.RTA, current.IGT);
+            
+            Advancements.Add(timeline);
+            LastAdvancement = timeline;
+            
+            PacemanTimeline? previous = null;
+            if (Advancements.Count > 1)
+            {
+                previous = Advancements[^2];
+            }
+            AddTimelineToEvaluation(timeline, previous);
+        }
+        
+        UpdateInventory(paceman.ItemsData);
         UpdateIGTTime();
     }
+    
     private void UpdateHeadImage()
     {
         if (HeadImage != null) return;
 
         if (PlayerViewModel == null)
         {
-            string url = $"https://minotar.net/helm/{Data.User.UUID}/8.png";
+            string url = $"https://minotar.net/helm/{UUID}/8.png";
             HeadImageOpacity = 0.35f;
             Task.Run(async () =>
             {
@@ -88,52 +127,51 @@ public class Paceman
         }
     }
 
-    private void UpdateLastSplit(PacemanPaceMilestone lastMilestone)
+    private void UpdateInventory(PaceItemData items)
     {
-        if (Data.ItemsData.EstimatedCounts != null)
-        {
-            Data.ItemsData.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
-            Data.ItemsData.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
-            if (Data.Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
+        if (items.EstimatedCounts == null) return;
+        
+        items.EstimatedCounts.TryGetValue("minecraft:ender_pearl", out int estimatedPearls);
+        items.EstimatedCounts.TryGetValue("minecraft:blaze_rod", out int estimatedRods);
+        if (Splits.Count > 2 && !Inventory.DisplayItems) Inventory.DisplayItems = true;
 
-            Inventory.BlazeRodsCount = estimatedRods;
-            Inventory.PearlsCount = estimatedPearls;
-        }
-
-        if (Data.Splits.Count > 1 && (lastMilestone.SplitName.Equals("enter_bastion") || lastMilestone.SplitName.Equals("enter_fortress")))
+        Inventory.BlazeRodsCount = estimatedRods;
+        Inventory.PearlsCount = estimatedPearls;
+    }
+    private void UpdateSplit(PacemanTimeline timeline)
+    {
+        if (Splits.Count > 1 && timeline.Milestone is RunMilestone.PacemanEnterBastion or RunMilestone.PacemanEnterFortress)
         {
-            SplitType = Data.Splits[^2].SplitName.Equals("rsg.enter_nether") ? SplitType.structure_1 : SplitType.structure_2;
+            SplitType = Splits[^2].Milestone == RunMilestone.PacemanEnterNether ? SplitType.structure_1 : SplitType.structure_2;
         }
         else
         {
-            SplitType = Enum.Parse<SplitType>(lastMilestone.SplitName);
+            SplitType = Enum.Parse<SplitType>(timeline.name);
         }
 
-        SetPacePriority(Service.CheckForGoodPace(SplitType, lastMilestone));
-        CurrentSplitTimeMiliseconds = lastMilestone.IGT;
-        LastMilestone = lastMilestone;
+        SetPacePriority(Service.CheckForGoodPace(SplitType, timeline));
+        CurrentSplitTimeMiliseconds = timeline.IGT;
+        LastTimeline = timeline;
     }
     private void UpdateIGTTime()
     {
-        IGTTimeMiliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - Data.LastUpdate + LastMilestone!.IGT;
+        var lastTimelineIGT = LastTimeline?.IGT ?? 0;
+        IGTTimeMiliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - _lastUpdate + lastTimelineIGT;
     }
 
-    public PacemanPaceMilestone GetLastSplit()
+    private void AddTimelineToEvaluation(PacemanTimeline main, PacemanTimeline? previous)
     {
-        return GetSplit(1)!;
-    }
-    public PacemanPaceMilestone? GetSplit(int indexFromEnd)
-    {
-        if (indexFromEnd > Data.Splits.Count) return null;
-        var lastSplit = Data.Splits[^indexFromEnd];
-        return new PacemanPaceMilestone()
+        LeaderboardTimeline mainTimeline = new LeaderboardTimeline(main.Milestone, (int)main.IGT);
+        LeaderboardTimeline? previousTimeline = null;
+        if (previous != null)
         {
-            SplitName = lastSplit.SplitName,
-            RTA = lastSplit.RTA,
-            IGT = lastSplit.IGT,
-        };
-    }
+            previousTimeline = new LeaderboardTimeline(previous.Milestone, (int)previous.IGT);
+        }
 
+        if (PlayerViewModel == null) return;
+        Service.AddEvaluationData(PlayerViewModel.Data, WorldID, mainTimeline, previousTimeline);
+    }
+    
     private void SetPacePriority(bool good)
     {
         IsPacePrioritized = good;
