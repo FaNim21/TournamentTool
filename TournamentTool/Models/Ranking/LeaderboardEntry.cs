@@ -46,6 +46,7 @@ public sealed class LeaderboardEntry
     }
     public bool AddMilestone(EntryMilestoneData data)
     {
+        if (Milestones.Contains(data)) return false;
         if (Milestones.Count > 0 && data == Milestones[^1]) return false;
         
         BestMilestones.TryGetValue(data.Main.Milestone, out var bestMilestone);

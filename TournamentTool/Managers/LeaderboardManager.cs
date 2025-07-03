@@ -1,4 +1,5 @@
-﻿using TournamentTool.Enums;
+﻿using System.Security.Cryptography;
+using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils.Extensions;
@@ -58,14 +59,17 @@ public class LeaderboardManager : ILeaderboardManager
                 if (timelineData.Evaluations.Count == 0) break;
                 List<LeaderboardRankedEvaluateData> subRuleDatas = [];
 
+                int count = 0;
                 for (var i = 0; i < timelineData.Evaluations.Count; i++)
                 {
+                    if (subRule.MaxWinners <= count && subRule.MaxWinners > 0) break;
                     var evaluation = timelineData.Evaluations[i];
                     if (!subRule.EvaluateTime(evaluation.MainSplit.Time)) break;
 
                     subRuleDatas.Add(evaluation);
                     timelineData.Remove(evaluation);
                     i--;
+                    count++;
                 }
 
                 if (subRuleDatas.Count == 0) continue;

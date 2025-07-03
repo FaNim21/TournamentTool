@@ -220,10 +220,13 @@ public static class Helper
 
         return await response.Content.ReadAsStringAsync();
     }
-    public static async Task<Stream> MakeRequestAsStream(string ApiUrl, string key)
+    public static async Task<Stream> MakeRequestAsStream(string ApiUrl, string? key = null)
     {
         using HttpClient client = new();
-        client.DefaultRequestHeaders.Add("Private-Key", key);
+        if (!string.IsNullOrEmpty(key))
+        {
+            client.DefaultRequestHeaders.Add("Private-Key", key);
+        }
         
         HttpResponseMessage response = await client.GetAsync(ApiUrl);
         if (!response.IsSuccessStatusCode)

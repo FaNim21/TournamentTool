@@ -3,6 +3,7 @@ using TournamentTool.Utils;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Threading;
+using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;

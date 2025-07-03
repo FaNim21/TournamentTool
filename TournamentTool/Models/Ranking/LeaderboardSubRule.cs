@@ -8,7 +8,7 @@ public class LeaderboardSubRule
     public string Description { get; set; } = string.Empty;
     public int Time { get; set; }
     public int BasePoints { get; set; }
-    public int MaxWinners { get; set; }
+    public int MaxWinners { get; set; } = -1;
     public bool Repeatable { get; set; }
     public HashSet<string> Winners { get; set; } = [];
     

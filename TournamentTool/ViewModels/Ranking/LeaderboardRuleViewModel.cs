@@ -96,6 +96,17 @@ public class LeaderboardRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(RuleTypeText));
         }
     }
+    
+    private ControllerMode _controllerMode;
+    public ControllerMode ControllerMode
+    {
+        get => _controllerMode;
+        set
+        {
+            _controllerMode = value;
+            OnPropertyChanged(nameof(ControllerMode));
+        }
+    }
 
     public ObservableCollection<LeaderboardSubRuleViewModel> SubRules { get; set; } = [];
 
@@ -103,9 +114,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
 
     public ICommand SwitchRuleTypeCommand { get; set; }
 
-    private ControllerMode _controllerMode;
-    
-    
+
     public LeaderboardRuleViewModel(LeaderboardRule rule)
     {
         _rule = rule;
@@ -127,7 +136,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
 
     public void FilterSplitsAndAdvancements(ControllerMode controllerMode)
     {
-        _controllerMode = controllerMode;
+        ControllerMode = controllerMode;
         
         IEnumerable<RunMilestone> filtered = Enum.GetValues<RunMilestone>()
             .Where(mode =>
@@ -137,7 +146,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
                 if (attr == null) return false;
 
                 bool ruleMatch = RuleType.Equals(attr.RuleType) || attr.RuleType == LeaderboardRuleType.All;
-                bool modeMatch = attr.ControllerMode == _controllerMode || attr.ControllerMode == ControllerMode.All;
+                bool modeMatch = attr.ControllerMode == ControllerMode || attr.ControllerMode == ControllerMode.All;
                 return ruleMatch && modeMatch;
             });
 
@@ -152,7 +161,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
     private void SwitchRuleType()
     {
         RuleType = RuleType == LeaderboardRuleType.Split ? LeaderboardRuleType.Advancement : LeaderboardRuleType.Split;
-        FilterSplitsAndAdvancements(_controllerMode);
+        FilterSplitsAndAdvancements(ControllerMode);
     }
     
     public LeaderboardRule GetLeaderboardRule() => _rule;
