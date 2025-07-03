@@ -8,19 +8,20 @@
         xmlns:components="clr-namespace:TournamentTool.Components.Controls"
         xmlns:views="clr-namespace:TournamentTool.Views"
         xmlns:ranking="clr-namespace:TournamentTool.ViewModels.Ranking"
+        xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Closed="OnClosed"
         Width="1082"
-        Height="601"
+        Height="628"
         Title="Tournament Tool"
         BorderThickness="0.75"
         BorderBrush="Black"
         WindowStyle="None"
-        ResizeMode="CanResizeWithGrip"
+        ResizeMode="CanResize"
         AllowsTransparency="True"
         MinWidth="1082"
-        MinHeight="601"
+        MinHeight="628"
         MaxHeight="{Binding Source={x:Static SystemParameters.MaximizedPrimaryScreenHeight}}"
         Background="#383A3f">
     <WindowChrome.WindowChrome>
@@ -48,6 +49,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="29" />
             <RowDefinition />
+            <RowDefinition Height="27"/>
         </Grid.RowDefinitions>
 
         <!--HEADER-->
@@ -173,13 +175,13 @@
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Controller"
                                                       Foreground="LimeGreen"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:ControllerViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:ControllerViewModel}}"
                                                       GroupName="MenuItem" />
                         <Grid>
                             <components:HamburgerMenuItem Text="Presets"
                                                           Command="{Binding SelectViewModelCommand}"
                                                           CommandParameter="Presets"
-                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PresetManagerViewModel}}"
+                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:PresetManagerViewModel}}"
                                                           GroupName="MenuItem"/>
                             
                             <TextBlock Visibility="{Binding TournamentViewModel.IsPresetModified, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -194,17 +196,17 @@
                         <components:HamburgerMenuItem Text="Whitelist"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Whitelist"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:PlayerManagerViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:PlayerManagerViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Leaderboard"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Leaderboard"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type ranking:LeaderboardPanelViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:LeaderboardPanelViewModel}}"
                                                       GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Scene Config"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="SceneManagement"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SceneManagementViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:SceneManagementViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
 
@@ -213,7 +215,7 @@
                             <components:HamburgerMenuItem Text="Updates"
                                                           Command="{Binding SelectViewModelCommand}"
                                                           CommandParameter="Updates"
-                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:UpdatesViewModel}}"
+                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:UpdatesViewModel}}"
                                                           GroupName="MenuItem" />
                             <Border Visibility="{Binding NewUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Background="Red"
@@ -233,7 +235,7 @@
                         <components:HamburgerMenuItem Text="Settings"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Settings"
-                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type vm:SettingsViewModel}}"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:SettingsViewModel}}"
                                                       GroupName="MenuItem" />
                     </StackPanel>
                 </Grid>
@@ -244,5 +246,56 @@
                 Visibility="{Binding IsWindowBlocked, Converter={StaticResource BoolToVisibilityConverter}}"
                 Background="Black"
                 Opacity="0.5" />
+
+        <Border Grid.Row="2"
+                BorderThickness="0 0.75 0 0"
+                Background="#2a2a2a"
+                BorderBrush="Black">
+            <Grid Margin="4 1 2 1"
+                  VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0"
+                      HorizontalAlignment="Left">
+                    <TextBlock Text="Leaderboard Test"
+                               FontSize="16"
+                               Foreground="White" />
+                </Grid>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0 0 0 0">
+
+                    <Image Width="18"
+                           Margin="3 0 3 0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="18"
+                                         UriSource="/Resources/StatusBarIcons/twitch-off.png" />
+                        </Image.Source>
+                    </Image>
+
+                    <Image Width="18"
+                           Margin="3 0 3 0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="18"
+                                         UriSource="/Resources/StatusBarIcons/obs-off.png" />
+                        </Image.Source>
+                    </Image>
+
+                    <Image Width="18"
+                           Margin="15 0 3 0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="18"
+                                         UriSource="/Resources/StatusBarIcons/bell-off.png" />
+                        </Image.Source>
+                    </Image>
+
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

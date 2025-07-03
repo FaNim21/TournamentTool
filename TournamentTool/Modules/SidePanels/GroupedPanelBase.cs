@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.SidePanels;
 

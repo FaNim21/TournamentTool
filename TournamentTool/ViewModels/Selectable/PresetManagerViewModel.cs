@@ -16,7 +16,7 @@ using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class PresetManagerViewModel : SelectableViewModel
 {

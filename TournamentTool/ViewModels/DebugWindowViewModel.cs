@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.ViewModels;
 

@@ -2,6 +2,7 @@
 using TournamentTool.Commands;
 using TournamentTool.Models;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.ViewModels;
 

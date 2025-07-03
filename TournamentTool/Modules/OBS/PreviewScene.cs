@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using TournamentTool.Interfaces;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.OBS;
 

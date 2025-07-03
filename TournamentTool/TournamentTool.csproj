@@ -17,6 +17,14 @@
     <None Remove="Resources\obsidianIcon.png" />
     <None Remove="Resources\pearlIcon.png" />
     <None Remove="FodyWeavers.xml" />
+    <None Remove="Resources\StatusBarIcons\bell-off.png" />
+    <None Remove="Resources\StatusBarIcons\bell-on.png" />
+    <None Remove="Resources\StatusBarIcons\obs-off.png" />
+    <None Remove="Resources\StatusBarIcons\obs-on.png" />
+    <None Remove="Resources\StatusBarIcons\obs-wait.png" />
+    <None Remove="Resources\StatusBarIcons\twitch-off.png" />
+    <None Remove="Resources\StatusBarIcons\twitch-on.png" />
+    <None Remove="Resources\StatusBarIcons\twitch-wait.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TT.ico" />
@@ -48,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Updates\" />
-    <Folder Include="Resources\StatusBarIcons\" />
     <Folder Include="Resources\Scripts\" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +69,14 @@
     <Resource Include="Resources\pearlIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\StatusBarIcons\bell-off.png" />
+    <Resource Include="Resources\StatusBarIcons\bell-on.png" />
+    <Resource Include="Resources\StatusBarIcons\obs-off.png" />
+    <Resource Include="Resources\StatusBarIcons\obs-on.png" />
+    <Resource Include="Resources\StatusBarIcons\obs-wait.png" />
+    <Resource Include="Resources\StatusBarIcons\twitch-off.png" />
+    <Resource Include="Resources\StatusBarIcons\twitch-on.png" />
+    <Resource Include="Resources\StatusBarIcons\twitch-wait.png" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windows\LeaderboardRuleEditWindow.xaml">

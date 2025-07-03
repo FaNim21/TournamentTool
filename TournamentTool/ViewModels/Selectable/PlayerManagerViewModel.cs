@@ -15,7 +15,7 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlayerAddReceiver
 {

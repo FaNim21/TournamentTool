@@ -17,6 +17,7 @@ using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.OBS;
 

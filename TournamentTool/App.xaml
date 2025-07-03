@@ -4,7 +4,8 @@
              xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
              xmlns:rankingViewModels="clr-namespace:TournamentTool.ViewModels.Ranking"
              xmlns:views="clr-namespace:TournamentTool.Views"
-             xmlns:converters="clr-namespace:TournamentTool.Converters">
+             xmlns:converters="clr-namespace:TournamentTool.Converters"
+             xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable">
     <Application.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                               TrueValue="Visible"
@@ -28,25 +29,25 @@
         <converters:ExpandCollapseConverter x:Key="ExpandCollapseConverter" />
         <converters:BooleanInverterConverter x:Key="BooleanInverterConverter" />
          
-        <DataTemplate DataType="{x:Type viewModels:PresetManagerViewModel}">
+        <DataTemplate DataType="{x:Type selectable:PresetManagerViewModel}">
             <views:PresetManagerView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:PlayerManagerViewModel}">
+        <DataTemplate DataType="{x:Type selectable:PlayerManagerViewModel}">
             <views:PlayerManagerView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:ControllerViewModel}">
+        <DataTemplate DataType="{x:Type selectable:ControllerViewModel}">
             <views:ControllerView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardPanelViewModel}">
+        <DataTemplate DataType="{x:Type selectable:LeaderboardPanelViewModel}">
             <views:LeaderboardPanelView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:SceneManagementViewModel}">
+        <DataTemplate DataType="{x:Type selectable:SceneManagementViewModel}">
             <views:SceneManagementView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
+        <DataTemplate DataType="{x:Type selectable:SettingsViewModel}">
             <views:SettingsView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:UpdatesViewModel}">
+        <DataTemplate DataType="{x:Type selectable:UpdatesViewModel}">
             <views:UpdatesView />
         </DataTemplate>
 

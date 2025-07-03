@@ -1,6 +1,6 @@
 ﻿using TournamentTool.Interfaces;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class SelectableViewModel : BaseViewModel
 {

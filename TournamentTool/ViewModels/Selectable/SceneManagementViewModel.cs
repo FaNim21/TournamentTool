@@ -1,7 +1,7 @@
 ﻿using TournamentTool.Interfaces;
 using TournamentTool.Modules;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class SceneManagementViewModel : SelectableViewModel
 {

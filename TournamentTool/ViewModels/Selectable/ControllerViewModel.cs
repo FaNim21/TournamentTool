@@ -15,7 +15,7 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Ranking;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, IPlayerAddReceiver
 {

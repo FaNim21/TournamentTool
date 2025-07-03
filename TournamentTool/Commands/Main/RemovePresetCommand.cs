@@ -3,6 +3,7 @@ using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Commands.Main;
 

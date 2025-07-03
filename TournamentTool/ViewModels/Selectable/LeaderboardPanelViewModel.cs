@@ -16,8 +16,9 @@ using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Ranking;
 
-namespace TournamentTool.ViewModels.Ranking;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class LeaderboardPanelViewModel : SelectableViewModel
 {

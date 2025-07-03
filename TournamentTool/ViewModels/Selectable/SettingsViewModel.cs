@@ -4,7 +4,7 @@ using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Utils;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class SettingsViewModel : SelectableViewModel
 {

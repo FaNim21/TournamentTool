@@ -14,7 +14,7 @@ using TournamentTool.Modules;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Parsers;
 
-namespace TournamentTool.ViewModels;
+namespace TournamentTool.ViewModels.Selectable;
 
 public class UpdatesViewModel : SelectableViewModel
 {

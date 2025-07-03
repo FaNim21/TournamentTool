@@ -4,6 +4,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Properties;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Selectable;
 using TournamentTool.Windows;
 
 namespace TournamentTool;
