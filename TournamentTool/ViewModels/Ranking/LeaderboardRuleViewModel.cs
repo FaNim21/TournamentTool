@@ -13,9 +13,6 @@ using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Ranking;
 
-/// <summary>
-/// Tutaj trzeba bedzie trigerowac tez skrypty Lua pod punktacje
-/// </summary>
 public class LeaderboardRuleViewModel : BaseViewModel
 {
     private readonly LeaderboardRule _rule;
@@ -108,11 +105,34 @@ public class LeaderboardRuleViewModel : BaseViewModel
         }
     }
 
+    private bool _isCollapsed;
+    public bool IsCollapsed
+    {
+        get => _isCollapsed;
+        set
+        {
+            _isCollapsed = value;
+            OnPropertyChanged(nameof(IsCollapsed));
+        }
+    }
+
+    private string _collapseButtonName = ">";
+    public string CollapseButtonName
+    {
+        get => _collapseButtonName;
+        set
+        {
+            _collapseButtonName = value;
+            OnPropertyChanged(nameof(CollapseButtonName));
+        }
+    }
+
     public ObservableCollection<LeaderboardSubRuleViewModel> SubRules { get; set; } = [];
 
     public List<RunMilestone> FilteredMilestones { get; set; } = [];
 
     public ICommand SwitchRuleTypeCommand { get; set; }
+    public ICommand ShowCollapseCommand { get; set; }
 
 
     public LeaderboardRuleViewModel(LeaderboardRule rule)
@@ -122,6 +142,8 @@ public class LeaderboardRuleViewModel : BaseViewModel
         IsEnabled = _rule.IsEnabled;
 
         SwitchRuleTypeCommand = new RelayCommand(SwitchRuleType);
+        ShowCollapseCommand = new RelayCommand(SwitchSubRulesVisibility);
+        
         _chosenCopy = ChosenMilestone;
 
         foreach (var subRule in rule.SubRules)
@@ -162,6 +184,11 @@ public class LeaderboardRuleViewModel : BaseViewModel
     {
         RuleType = RuleType == LeaderboardRuleType.Split ? LeaderboardRuleType.Advancement : LeaderboardRuleType.Split;
         FilterSplitsAndAdvancements(ControllerMode);
+    }
+    private void SwitchSubRulesVisibility()
+    {
+        IsCollapsed = !IsCollapsed;
+        CollapseButtonName = IsCollapsed ? "v" : ">";
     }
     
     public LeaderboardRule GetLeaderboardRule() => _rule;

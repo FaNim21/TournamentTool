@@ -111,36 +111,85 @@
                         <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardRuleViewModel}">
                             <Border BorderBrush="Gray"
                                     BorderThickness="1"
-                                    Width="359" >
-                                <TextBlock Foreground="White"
-                                           IsHitTestVisible="False"
-                                           Margin="2 2 2 4">
-                                    <Run Text="{Binding IsEnabledText}"
-                                         Foreground="{Binding BrushIsEnabledColor}"/>
-                                    
-                                    <Run Text=" | " />
-                                    
-                                    <Run Text="Name: " />
-                                    <Run Text="{Binding Name}"
-                                         FontWeight="SemiBold"
-                                         Foreground="Wheat" />
+                                    Width="359">
+                                <StackPanel>
+                                    <TextBlock Foreground="White"
+                                               IsHitTestVisible="False"
+                                               Margin="2 2 2 4">
+                                        <Run Text="{Binding IsEnabledText}"
+                                             Foreground="{Binding BrushIsEnabledColor}" />
 
-                                    <LineBreak />
+                                        <Run Text=" | " />
 
-                                    <Run Text="Type: " />
-                                    <Run Text="{Binding RuleTypeText}" />
+                                        <Run Text="Name: "
+                                             Foreground="#d3d3d3" />
+                                        <Run Text="{Binding Name}"
+                                             FontWeight="SemiBold"
+                                             Foreground="Wheat" />
 
-                                    <Run Text=" | " />
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <components:ButtonNormal ContentText="{Binding CollapseButtonName}"
+                                                                 Height="19"
+                                                                 Width="19"
+                                                                 OnCommand="{Binding ShowCollapseCommand}" />
 
-                                    <Run Text="Milestone: " />
-                                    <Run Text="{Binding ChosenMilestone}" />
-                                </TextBlock>
+                                        <TextBlock Foreground="White"
+                                                   IsHitTestVisible="False"
+                                                   Margin="2 2 2 4">
+                                            <Run Text="Type: "
+                                                 Foreground="#d3d3d3" />
+                                            <Run Text="{Binding RuleTypeText}" />
+
+                                            <Run Text=" | " />
+
+                                            <Run Text="Milestone: "
+                                                 Foreground="#d3d3d3" />
+                                            <Run Text="{Binding ChosenMilestone}" />
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <ItemsControl ItemsSource="{Binding SubRules}"
+                                                  Visibility="{Binding IsCollapsed, Mode=TwoWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardSubRuleViewModel}">
+                                                <TextBlock Foreground="White"
+                                                           IsHitTestVisible="False"
+                                                           Margin="2 2 2 4">
+                                                    <Run Text="Time: "
+                                                         Foreground="#d3d3d3" />
+                                                    <Run Text="{Binding TimeText}"
+                                                         Foreground="LightBlue" />
+
+                                                    <Run Text=" | " />
+
+                                                    <Run Text="Desc: "
+                                                         Foreground="#d3d3d3" />
+                                                    <Run Text="{Binding Description}"
+                                                         Foreground="Wheat" />
+
+                                                    <LineBreak />
+
+                                                    <Run Text="Base points: "
+                                                         Foreground="#d3d3d3" />
+                                                    <Run Text="{Binding BasePoints}" />
+
+                                                    <Run Text=" | " />
+
+                                                    <Run Text="Script: "
+                                                         Foreground="#d3d3d3" />
+                                                    <Run Text="{Binding LuaPath}" />
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <vwp:VirtualizingWrapPanel />
+                            <WrapPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
