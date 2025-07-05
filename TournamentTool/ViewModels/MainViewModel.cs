@@ -29,6 +29,17 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    private StatusBarViewModel? _statusBar;
+    public StatusBarViewModel? StatusBar
+    {
+        get => _statusBar;
+        set
+        {
+            _statusBar = value;
+            OnPropertyChanged(nameof(StatusBar));
+        }
+    }
+
     private bool _isHamburgerMenuOpen = false;
     public bool IsHamburgerMenuOpen
     {
@@ -72,10 +83,11 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; set; }
 
 
-    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel)
+    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel, StatusBarViewModel statusBar)
     {
         NavigationService = navigationService;
         TournamentViewModel = tournamentViewModel;
+        StatusBar = statusBar;
 
         Directory.CreateDirectory(Consts.PresetsPath);
         Directory.CreateDirectory(Consts.LogsPath);

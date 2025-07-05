@@ -247,55 +247,7 @@
                 Background="Black"
                 Opacity="0.5" />
 
-        <Border Grid.Row="2"
-                BorderThickness="0 0.75 0 0"
-                Background="#2a2a2a"
-                BorderBrush="Black">
-            <Grid Margin="4 1 2 1"
-                  VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Column="0"
-                      HorizontalAlignment="Left">
-                    <TextBlock Text="Leaderboard Test"
-                               FontSize="16"
-                               Foreground="White" />
-                </Grid>
-
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Margin="0 0 0 0">
-
-                    <Image Width="18"
-                           Margin="3 0 3 0">
-                        <Image.Source>
-                            <BitmapImage DecodePixelWidth="18"
-                                         UriSource="/Resources/StatusBarIcons/twitch-off.png" />
-                        </Image.Source>
-                    </Image>
-
-                    <Image Width="18"
-                           Margin="3 0 3 0">
-                        <Image.Source>
-                            <BitmapImage DecodePixelWidth="18"
-                                         UriSource="/Resources/StatusBarIcons/obs-off.png" />
-                        </Image.Source>
-                    </Image>
-
-                    <Image Width="18"
-                           Margin="15 0 3 0">
-                        <Image.Source>
-                            <BitmapImage DecodePixelWidth="18"
-                                         UriSource="/Resources/StatusBarIcons/bell-off.png" />
-                        </Image.Source>
-                    </Image>
-
-                </StackPanel>
-            </Grid>
-        </Border>
+        <ContentPresenter Grid.Row="2"
+                          Content="{Binding StatusBar}" />
     </Grid>
 </Window>

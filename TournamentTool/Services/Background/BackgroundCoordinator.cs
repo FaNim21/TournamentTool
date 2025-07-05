@@ -53,20 +53,21 @@ public class BackgroundCoordinator : IBackgroundCoordinator
     {
         var cancellationToken = _cancellationTokenSource!.Token;
 
-        while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
+        try
         {
-            if (Service == null) break;
-
-            try
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+            
+            while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
             {
+                if (Service == null) break;
                 await Service.Update(cancellationToken);
             }
-            catch (TaskCanceledException) { Clear(); }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} while updating background service {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                Clear();
-            }
+        }
+        catch (TaskCanceledException) { Clear(); }
+        catch (Exception ex)
+        {
+            DialogBox.Show($"Error: {ex.Message} while updating background service {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Clear();
         }
     }
 

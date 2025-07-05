@@ -135,28 +135,16 @@ public class PaceManService : IBackgroundService
     protected void UpdatePlayerStreamData(string inGameName, string? twitchName)
     {
         if (string.IsNullOrWhiteSpace(twitchName)) return;
+
+        var player = TournamentViewModel.GetPlayerByIGN(inGameName);
+        if (player == null) return;
         
-        int n = TournamentViewModel.Players.Count;
-        bool updatedPlayer = false;
-        
-        for (int i = 0; i < n; i++)
+        player.StreamData.SetName(twitchName);
+        if (!TournamentViewModel.IsUsingTwitchAPI)
         {
-            var player = TournamentViewModel.Players[i];
-            if (!player.InGameName!.Equals(inGameName, StringComparison.OrdinalIgnoreCase)) continue;
-            
-            updatedPlayer = true;
-            player.StreamData.SetName(twitchName);
-            if (!TournamentViewModel.IsUsingTwitchAPI)
-            {
-                player.StreamData.LiveData.Clear(false);
-            }
-            _pacemanSidePanelReceiver?.FilterItems();
+            player.StreamData.LiveData.Clear(false);
         }
-        
-        if (updatedPlayer)
-        {
-            PresetSaver.SavePreset();
-        }
+        PresetSaver.SavePreset();
     }
 
     private PlayerViewModel AddPaceManPlayerToWhiteList(PaceManData paceManData)

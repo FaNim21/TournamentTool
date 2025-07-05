@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
-             xmlns:rankingViewModels="clr-namespace:TournamentTool.ViewModels.Ranking"
              xmlns:views="clr-namespace:TournamentTool.Views"
              xmlns:converters="clr-namespace:TournamentTool.Converters"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable">
@@ -50,7 +49,9 @@
         <DataTemplate DataType="{x:Type selectable:UpdatesViewModel}">
             <views:UpdatesView />
         </DataTemplate>
-
+        <DataTemplate DataType="{x:Type viewModels:StatusBarViewModel}">
+            <views:StatusBarView />
+        </DataTemplate>
 
         <Style x:Key="ComboBoxTest2"
                TargetType="{x:Type ComboBox}">
