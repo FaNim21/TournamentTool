@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Modules;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Ranking;
 using TournamentTool.ViewModels.Selectable;
-using TournamentTool.Views;
 
 namespace TournamentTool;
 
@@ -35,6 +33,7 @@ public partial class App : Application
         
         services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
         services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
+        services.AddSingleton<ObsController>();
 
         services.AddSingleton<StatusBarViewModel>();
         

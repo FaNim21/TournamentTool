@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
@@ -306,10 +307,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
     private void RefreshFilteredCollectionView()
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             FilteredPlayersCollectionView?.Refresh();
-        });
+        }, DispatcherPriority.Background);
     }
     
     private void UpdateInformationCountText(string header = "Found", string filteredCount = "")

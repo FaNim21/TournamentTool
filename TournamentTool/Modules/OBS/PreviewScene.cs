@@ -10,22 +10,22 @@ public class PreviewScene : Scene
     public string TransitionSceneName { get; set; } = string.Empty;
 
 
-    public PreviewScene(ControllerViewModel controllerViewModel, IDialogWindow dialogWindow) : base(controllerViewModel, dialogWindow)
+    public PreviewScene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow) : base(sceneController, dialogWindow)
     {
         Type = SceneType.Preview;
     }
 
     public override async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
-        Trace.WriteLine($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {Controller.MainScene.SceneName}");
-        if (Controller.MainScene.SceneName!.Equals(scene))
+        Trace.WriteLine($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {SceneController.MainScene.SceneName}");
+        if (SceneController.MainScene.SceneName!.Equals(scene))
         {
-            if (!Controller.OBS.IsConnectedToWebSocket) return;
+            if (!SceneController.OBS.IsConnectedToWebSocket) return;
 
             MainText = "NOT SUPPORTED";
             Clear();
             SetSceneName(scene);
-            await Controller.OBS.Client.SetCurrentPreviewScene(scene);
+            await SceneController.OBS.Client.SetCurrentPreviewScene(scene);
             return;
         }
 

@@ -38,38 +38,26 @@
                     HorizontalAlignment="Right"
                     Margin="0 0 0 0">
 
-            <Image Width="18"
-                   Margin="3 0 5 0">
-                <Image.Source>
-                    <BitmapImage DecodePixelWidth="18"
-                                 UriSource="/Resources/StatusBarIcons/ranked-icon.png" />
-                </Image.Source>
-            </Image>
+            <Image Source="{Binding BackgroundServiceImage}"
+                   Width="18"
+                   Height="18"
+                   Margin="3 0 5 0" /> 
+            
+            <Image Source="{Binding TwitchImage}"
+                   Width="18"
+                   Height="18"
+                   Margin="3 1 5 0" /> 
+            
+            <Image Source="{Binding ObsImage}"
+                   Width="18"
+                   Height="18"
+                   Margin="3 1 5 0" /> 
 
-            <Image Width="18"
-                   Margin="3 0 3 0">
-                <Image.Source>
-                    <BitmapImage DecodePixelWidth="18"
-                                 UriSource="/Resources/StatusBarIcons/twitch-off.png" />
-                </Image.Source>
-            </Image>
-
-            <Image Width="18"
-                   Margin="3 0 3 0">
-                <Image.Source>
-                    <BitmapImage DecodePixelWidth="18"
-                                 UriSource="/Resources/StatusBarIcons/obs-off.png" />
-                </Image.Source>
-            </Image>
-
-            <Image Width="18"
-                   Margin="15 0 3 0">
-                <Image.Source>
-                    <BitmapImage DecodePixelWidth="18"
-                                 UriSource="/Resources/StatusBarIcons/bell-off.png" />
-                </Image.Source>
-            </Image>
-
+            <Image Source="{Binding BellImage}"
+                   Width="18"
+                   Height="18"
+                   Margin="15 0 5 0" /> 
+            
         </StackPanel>
     </Grid>
 </UserControl>

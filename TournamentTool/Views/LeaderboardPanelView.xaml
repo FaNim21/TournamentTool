@@ -247,7 +247,8 @@
                                 BorderThickness="1"
                                 Width="515"
                                 Height="50">
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal"
+                                        Background="Transparent">
                                 <TextBlock Text="{Binding Position}"
                                            Foreground="White"
                                            FontSize="36"

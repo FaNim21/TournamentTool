@@ -205,11 +205,24 @@ public static class Helper
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Rrror: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             return null;
         }
     }
-
+    public static BitmapImage LoadImageFromResources(string url)
+    {
+        var uri = new Uri($"pack://application:,,,/Resources/{url}", UriKind.Absolute);
+        
+        var bitmap = new BitmapImage();
+        bitmap.BeginInit();
+        bitmap.UriSource = uri;
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.EndInit();
+        bitmap.Freeze();
+        
+        return bitmap;
+    }
+    
     public static async Task<string> MakeRequestAsString(string ApiUrl)
     {
         using HttpClient client = new();

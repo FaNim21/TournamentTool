@@ -26,12 +26,10 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     
     private BackgroundWorker? _apiWorker;
     private CancellationTokenSource? _cancellationTokenSource;
-    public Scene MainScene { get; }
-    public PreviewScene PreviewScene { get; }
+
+    public SceneControllerViewmodel SceneController { get; }
 
     public ICollectionView? FilteredPlayersCollectionView { get; private set; }
-
-    public ObsController OBS { get; }
 
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
@@ -67,17 +65,10 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }
     }
 
-    private PointOfView? _currentChosenPOV;
     public PointOfView? CurrentChosenPOV
     {
-        get => _currentChosenPOV;
-        set
-        {
-            if (value == null)
-                _currentChosenPOV?.UnFocus();
-            _currentChosenPOV = value;
-            OnPropertyChanged(nameof(CurrentChosenPOV));
-        }
+        get => SceneController.CurrentChosenPOV;
+        set => SceneController.CurrentChosenPOV = value;
     }
 
     private string _searchText = string.Empty;
@@ -103,28 +94,23 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }
     }
 
-    public ICommand RefreshPOVsCommand { get; set; }
     public ICommand UnSelectItemsCommand { get; set; }
+    
 
     private CancellationTokenSource? _playersRefreshTokenSource;
     
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         Leaderboard = leaderboard;
         _backgroundCoordinator = backgroundCoordinator;
 
+        SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel);
         _api = new APIDataSaver();
-
-        MainScene = new Scene(this, coordinator);
-        PreviewScene = new PreviewScene(this, coordinator);
-
-        OBS = new ObsController(this);
         _twitch = new TwitchService(this);
 
-        RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
 
@@ -178,7 +164,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
-        OBS.OnEnable(null);
+        SceneController.OnEnable(null);
         
         _cancellationTokenSource = new CancellationTokenSource();
         _apiWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
@@ -204,9 +190,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _backgroundCoordinator.Unregister(ManagementPanel);
         
         SidePanel?.OnDisable();
-        OBS.OnDisable();
         _twitch?.OnDisable();
         ManagementPanel?.OnDisable();
+        SceneController.OnDisable();
 
         _apiWorker?.CancelAsync();
         _cancellationTokenSource?.Cancel();
@@ -216,9 +202,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _apiWorker = null;
 
         TournamentViewModel.ClearFromController();
-
-        MainScene.Clear();
-        PreviewScene.Clear();
 
         // FilteredPlayers!.Clear();
         CurrentChosenPOV = null;
@@ -284,17 +267,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }, TaskScheduler.Default);
     }
 
-    public async Task RefreshScenesPOVS()
-    { 
-        await MainScene.RefreshPovs();
-        await PreviewScene.RefreshPovs();
-    }
-    public async Task RefreshScenes()
-    {
-        await MainScene.Refresh();
-        await PreviewScene.Refresh();
-    }
-
     public void SetPovAfterClickedCanvas(IPlayer chosenPlayer)
     {
         CurrentChosenPlayer = chosenPlayer;
@@ -322,11 +294,5 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public void SavePreset()
     {
         PresetService.SavePreset();
-    }
-
-    public void ClearScenes()
-    {
-        MainScene.ClearPovs();
-        PreviewScene.ClearPovs();
     }
 }

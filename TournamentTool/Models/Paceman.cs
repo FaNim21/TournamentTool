@@ -140,15 +140,28 @@ public class Paceman
     }
     private void UpdateSplit(PacemanTimeline timeline)
     {
-        if (Splits.Count > 1 && timeline.Milestone is RunMilestone.PacemanEnterBastion or RunMilestone.PacemanEnterFortress)
+        if (Splits.Count > 1 && timeline.Milestone is RunMilestone.PacemanEnterNether) return;
+        
+        if (timeline.Milestone is RunMilestone.PacemanEnterBastion or RunMilestone.PacemanEnterFortress)
         {
-            SplitType = Splits[^2].Milestone == RunMilestone.PacemanEnterNether ? SplitType.structure_1 : SplitType.structure_2;
+            if (Splits.Count > 2 && Splits[^2].Milestone == RunMilestone.PacemanEnterNether)
+            {
+                SplitType = SplitType.structure_2;
+            }
+            else if (Splits.Count > 1)
+            {
+                SplitType = Splits[^2].Milestone == RunMilestone.PacemanEnterNether ? SplitType.structure_1 : SplitType.structure_2;
+            }
+            else
+            {
+                SplitType = SplitType.structure_1;
+            }
         }
         else
         {
             SplitType = Enum.Parse<SplitType>(timeline.name);
         }
-
+        
         SetPacePriority(Service.CheckForGoodPace(SplitType, timeline));
         CurrentSplitTimeMiliseconds = timeline.IGT;
         LastTimeline = timeline;

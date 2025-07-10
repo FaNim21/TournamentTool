@@ -41,7 +41,7 @@ public partial class SceneCanvas : UserControl
         }
 
         if (string.IsNullOrEmpty(pov.DisplayedPlayer)) return;
-        scene.Controller.UnSelectItems(true);
+        scene.SceneController.Controller.UnSelectItems(true);
     }
 
     private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)

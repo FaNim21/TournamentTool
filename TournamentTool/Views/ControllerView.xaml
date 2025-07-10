@@ -29,42 +29,31 @@
 
         <Grid Grid.Row="0"
               Background="#000D14">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock FontSize="15"
-                           Height="25"
-                           Padding="0 3 0 0"
-                           Margin="5 0 0 0"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top">
-                <Run Foreground="#CCCCCC"
-                     Text="Connected:" />
-                <Run Foreground="{Binding OBS.IsConnectedColor, Mode=OneWay}"
-                     Text="{Binding OBS.IsConnectedToWebSocket, Mode=OneWay}" />
-                </TextBlock>
-
+            <StackPanel Orientation="Horizontal"
+                        Visibility="{Binding SceneController.Connected, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid Width="195">
                     <TextBlock FontSize="15"
                                Padding="0 3 0 0"
-                               Margin="15 0 0 0"
+                               Margin="5 0 0 0"
                                Foreground="#CCCCCC">
                     <Run Text="Studio Mode:" />
-                    <Run Text="{Binding OBS.StudioMode, Mode=OneWay}"
+                    <Run Text="{Binding SceneController.StudioMode, Mode=OneWay}"
                          Foreground="#ffffff" />
                     </TextBlock>
 
                     <components:ButtonNormal Margin="145 0 0 0"
                                              ContentText="Switch"
                                              Width="50"
-                                             OnCommand="{Binding OBS.SwitchStudioModeCommand}" />
+                                             OnCommand="{Binding SceneController.SwitchStudioModeCommand}" />
                 </Grid>
 
-                <TextBlock Visibility="{Binding OBS.StudioMode, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                <TextBlock Visibility="{Binding SceneController.StudioMode, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
                            FontSize="15"
                            Padding="0 3 0 0"
                            Margin="5 0 0 0"
                            Foreground="#CCCCCC">
                     <Run Text="Scene:" />
-                    <Run Text="{Binding MainScene.SceneName, Mode=OneWay}"
+                    <Run Text="{Binding SceneController.MainScene.SceneName, Mode=OneWay}"
                          Foreground="#ffffff" />
                 </TextBlock>
             </StackPanel>
@@ -97,49 +86,49 @@
 
                 <Grid Grid.Row="0"
                       Background="#525252">
-                    <Grid Visibility="{Binding OBS.StudioMode, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
-                        <local2:SceneCanvas DataContext="{Binding MainScene}" />
+                    <Grid Visibility="{Binding SceneController.StudioMode, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
+                        <local2:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
                     </Grid>
 
-                    <Grid Visibility="{Binding OBS.StudioMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Visibility="{Binding SceneController.StudioMode, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Column="0">
-                            <TextBlock Text="{Binding PreviewScene.SceneName}"
+                            <TextBlock Text="{Binding SceneController.PreviewScene.SceneName}"
                                        Foreground="White"
                                        FontWeight="Bold"
                                        FontSize="20"
                                        HorizontalAlignment="Center" 
                                        Margin="0 16 0 0"/>
-                            <local2:SceneCanvas DataContext="{Binding PreviewScene}" />
+                            <local2:SceneCanvas DataContext="{Binding SceneController.PreviewScene}" />
 
                             <ComboBox Style="{StaticResource ComboBoxTest2}"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Bottom"
-                                      ItemsSource="{Binding OBS.Scenes}"
-                                      SelectedItem="{Binding OBS.SelectedScene, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding SceneController.Scenes}"
+                                      SelectedItem="{Binding SceneController.SelectedScene, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="140"
                                       Height="20"
                                       Margin="0 0 0 22" />
                         </Grid>
                         <Grid Grid.Column="1">
-                            <TextBlock Text="{Binding MainScene.SceneName}"
+                            <TextBlock Text="{Binding SceneController.MainScene.SceneName}"
                                        Foreground="White"
                                        FontWeight="Bold"
                                        FontSize="20"
                                        HorizontalAlignment="Center"
                                        Margin="0 16 0 0" />
-                            <local2:SceneCanvas DataContext="{Binding MainScene}" />
+                            <local2:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
 
                             <components:ButtonNormal Width="150"
                                                      Height="35"
                                                      HorizontalAlignment="Center"
                                                      VerticalAlignment="Bottom"
                                                      ContentText="Transition"
-                                                     OnCommand="{Binding OBS.StudioModeTransitionCommand}"
+                                                     OnCommand="{Binding SceneController.StudioModeTransitionCommand}"
                                                      FontSize="14" 
                                                      Margin="0 0 0 15"/>
                         </Grid>
@@ -158,14 +147,14 @@
                                                      FontSize="15"
                                                      Width="150"
                                                      Height="30"
-                                                     OnCommand="{Binding OBS.RefreshOBSCommand}"
+                                                     OnCommand="{Binding SceneController.RefreshOBSCommand}"
                                                      Margin="0 5 0 0" />
 
                             <components:ButtonNormal ContentText="Refresh All POVS"
                                                      FontSize="15"
                                                      Width="150"
                                                      Height="30"
-                                                     OnCommand="{Binding RefreshPOVsCommand}"
+                                                     OnCommand="{Binding SceneController.RefreshPOVsCommand}"
                                                      Margin="0 5 0 0" />
 
                             <!-- TO MOZE BARDZIEJ JAKO POV MANAGER JAKO VIEW ZASTEPUJACE KONTROLER DO TEGO ZEBY PRZERZEC SCENY W OBSIE i zarzadzac nimi
@@ -173,7 +162,7 @@
                                                      FontSize="15"
                                                      Width="150"
                                                      Height="30"
-                                                     OnCommand="{Binding OBS.AddPovItemToOBSCommand}"
+                                                     OnCommand="{Binding SceneController.AddPovItemToOBSCommand}"
                                                      Margin="0 5 0 0" />
                             -->
 

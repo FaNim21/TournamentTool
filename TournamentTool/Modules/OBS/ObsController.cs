@@ -2,157 +2,107 @@
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
-using TournamentTool.Commands;
+using OBSStudioClient.Classes;
+using OBSStudioClient.Responses;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
-using TournamentTool.Utils;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.OBS;
 
-public class ObsController : BaseViewModel
+public enum OBSConnectionState
 {
-    private readonly object _lock = new();
+    Disconnected,
+    Connected,
+    Connecting,
+    Disconnecting,
+}
+public class ConnectionStateChangedEventArgs : EventArgs
+{
+    public OBSConnectionState OldState { get; }
+    public OBSConnectionState NewState { get; }
 
-    public ControllerViewModel Controller { get; private set; }
-
-    private ObservableCollection<string> _scenes = [];
-    public ObservableCollection<string> Scenes
+    public ConnectionStateChangedEventArgs(OBSConnectionState oldState, OBSConnectionState newState)
     {
-        get { return _scenes; }
-        set
-        {
-            if (_scenes != value)
-            {
-                _scenes = value;
-                OnPropertyChanged(nameof(Scenes));
-            }
-        }
+        OldState = oldState;
+        NewState = newState;
     }
+}
 
-    private string _selectedScene = string.Empty;
-    public string SelectedScene
-    {
-        get => _selectedScene;
-        set
-        {
-            if (_selectedScene != value)
-            {
-                LoadPreviewScene(value);
-            }
-        }
-    }
+public class ObsController
+{
+    public TournamentViewModel Tournament { get; }
     
-    public ObsClient Client { get; set; }
     private CancellationTokenSource _cancellationTokenSource;
+
+    public ObsClient Client { get; private set; }
  
-    public Brush? IsConnectedColor { get; set; }
+    // takie rzeczy to do statusbarviewmodel
+    // public Brush? IsConnectedColor { get; set; }
 
-    private bool _isConnectedToWebSocket;
-    public bool IsConnectedToWebSocket
-    {
-        get => _isConnectedToWebSocket;
-        set
-        {
-            _isConnectedToWebSocket = value;
-            OnPropertyChanged(nameof(IsConnectedToWebSocket));
-        }
-    }
+    public event EventHandler<SceneNameEventArgs>? SceneItemUpdateRequested;
+    public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+    public event EventHandler<SceneNameEventArgs>? CurrentProgramSceneChanged;
+    public event EventHandler<SceneNameEventArgs>? CurrentPreviewSceneChanged;
+    public event EventHandler? SceneTransitionStarted;
+    public event EventHandler? StudioModeChanged;
 
+    public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
  
-    public ICommand RefreshOBSCommand { get; set; }
-    public ICommand AddPovItemToOBSCommand { get; set; }
-    public ICommand SwitchStudioModeCommand {  get; set; }
-    public ICommand StudioModeTransitionCommand { get; set; }
-
     private bool _startedTransition;
 
 
-    /// <summary>
-    /// Zrobic w niedalekiej przyszlosci logike, ktora zapobiegnie czyszczeniu czegokolwiek z polaczen, a tylko bedzie to robic przy zmianie presetu - mozna to jeszcze lepiej rozwinac
-    /// </summary>
-    public ObsController(ControllerViewModel controller)
+    public ObsController(TournamentViewModel tournament)
     {
-        Controller = controller;
+        Tournament = tournament;
+        
+        Client = new ObsClient { RequestTimeout = 10000 };
 
-        _cancellationTokenSource = new();
-        Client = new() { RequestTimeout = 10000 };
-
-        RefreshOBSCommand = new RelayCommand(async () => { await Refresh(); });
-        AddPovItemToOBSCommand = new RelayCommand(async () => { await CreateNestedSceneItem("PovSceneLOL"); });
-        SwitchStudioModeCommand = new RelayCommand(() =>
-        {
-            if (!IsConnectedToWebSocket) return;
-
-            Client.SetStudioModeEnabled(!StudioMode);
-        });
-        StudioModeTransitionCommand = new RelayCommand(() =>
-        {
-            if (!IsConnectedToWebSocket || Controller.MainScene.SceneName!.Equals(Controller.PreviewScene.SceneName)) return;
-
-            Client.TriggerStudioModeTransition();
-        });
-    }
- 
-    public override void OnEnable(object? parameter)
-    {
-        _cancellationTokenSource = new();
+        _cancellationTokenSource = new CancellationTokenSource();
         Task.Factory.StartNew(async () =>
         {
-            await Connect(Controller.TournamentViewModel.Password!, Controller.TournamentViewModel.Port);
+            await Connect(Tournament.Password!, Tournament.Port);
         }, _cancellationTokenSource.Token);
+        
+        // AddPovItemToOBSCommand = new RelayCommand(async () => { await OBS.CreateNestedSceneItem("PovSceneLOL"); });
     }
-    public override bool OnDisable()
+ 
+    public void SwitchStudioMode()
     {
-        Task.Run(Disconnect);
-        Controller.MainScene.Clear();
-        Controller.PreviewScene.Clear();
-        SelectedScene = string.Empty;
-        StudioMode = false;
-        Scenes.Clear();
-
-        return true;
+        if (!IsConnectedToWebSocket) return;
+        Client.SetStudioModeEnabled(!StudioMode);
+    }
+    public void TransitionStudioMode()
+    {
+        if (!IsConnectedToWebSocket) return;
+        Client.TriggerStudioModeTransition();
     }
 
     public async Task Connect(string password, int port)
     {
-        if (Controller.TournamentViewModel == null) return;
-
-        EventSubscriptions subscription = EventSubscriptions.All;
+        const EventSubscriptions subscription = EventSubscriptions.All;
         await Client.ConnectAsync(true, password, "localhost", port, subscription);
         Client.PropertyChanged += OnPropertyChanged;
     }
-
     private async Task OnConnected()
     {
+        if (IsConnectedToWebSocket) return;
         try
         {
-            if (!string.IsNullOrEmpty(Controller.TournamentViewModel.SceneCollection))
-                await Client.SetCurrentSceneCollection(Controller.TournamentViewModel.SceneCollection);
-
-            var settings = await Client.GetVideoSettings();
-            Controller.MainScene.CalculateProportionsRatio(settings.BaseWidth);
-            Controller.PreviewScene.CalculateProportionsRatio(settings.BaseWidth);
-
-            string mainScene = await Client.GetCurrentProgramScene();
-            await Controller.MainScene.GetCurrentSceneItems(mainScene);
+            if (!string.IsNullOrEmpty(Tournament.SceneCollection))
+            {
+                await Client.SetCurrentSceneCollection(Tournament.SceneCollection);
+            }
 
             bool studioMode = await Client.GetStudioModeEnabled();
             ChangeStudioMode(studioMode, false);
-
-            Controller.MainScene.RefreshItems();
 
             Client.StudioModeStateChanged += OnStudioModeStateChanged;
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
@@ -161,16 +111,16 @@ public class ObsController : BaseViewModel
             Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
             Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
             Client.SceneTransitionStarted += OnSceneTransitionStarted;
+            
+            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(OBSConnectionState.Disconnected, OBSConnectionState.Connected));
+            IsConnectedToWebSocket = true;
         }
-
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Console.WriteLine($"Error: {ex.Message} - {ex.StackTrace}");
             await Disconnect();
-            return;
         }
     }
- 
     public async Task Disconnect()
     {
         if (!IsConnectedToWebSocket) return;
@@ -185,37 +135,21 @@ public class ObsController : BaseViewModel
         Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
         Client.SceneTransitionStarted -= OnSceneTransitionStarted;
 
-        _cancellationTokenSource.Cancel();
+        await _cancellationTokenSource.CancelAsync();
         _cancellationTokenSource.Dispose();
 
         Client.Disconnect();
-        Client.Dispose();
 
         while (Client.ConnectionState != ConnectionState.Disconnected)
+        {
             await Task.Delay(100);
-        Client = new();
+        }
+        
+        Client.Dispose();
+        Client = new ObsClient();
         IsConnectedToWebSocket = false;
-    }
- 
-    public async Task Refresh()
-    {
-        if(!IsConnectedToWebSocket)
-        {
-            await Connect(Controller.TournamentViewModel.Password!, Controller.TournamentViewModel.Port);
-        }
-
-        Controller.TournamentViewModel.ClearPlayersFromPOVS();
-        await Controller.RefreshScenes();
-    }
-
-    private async Task UpdateSceneItems(string scene)
-    {
-        if(scene.Equals(Controller.MainScene.SceneName))
-        {
-            await Controller.MainScene.GetCurrentSceneItems(scene, true);
-            return;
-        }
-        await Controller.PreviewScene.GetCurrentSceneItems(scene, true);
+        
+        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(OBSConnectionState.Connected, OBSConnectionState.Disconnected));
     }
 
     public void SetBrowserURL(PointOfView pov)
@@ -223,9 +157,9 @@ public class ObsController : BaseViewModel
         if (pov == null) return;
         if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
 
-        if (Controller.TournamentViewModel.SetPovHeadsInBrowser) pov.UpdateHead();
-        if (Controller.TournamentViewModel.DisplayedNameType != DisplayedNameType.None) pov.UpdateNameTextField();
-        if (Controller.TournamentViewModel.SetPovPBText) pov.UpdatePersonalBestTextField();
+        if (Tournament.SetPovHeadsInBrowser) pov.UpdateHead();
+        if (Tournament.DisplayedNameType != DisplayedNameType.None) pov.UpdateNameTextField();
+        if (Tournament.SetPovPBText) pov.UpdatePersonalBestTextField();
     }
     public bool SetBrowserURL(string sceneItemName, string path)
     {
@@ -286,7 +220,6 @@ public class ObsController : BaseViewModel
 
         try
         {
-
             var existingItem = await Client.GetSceneItemId(sceneName, newSceneItemName);
             if (existingItem > 0)
             {
@@ -300,7 +233,7 @@ public class ObsController : BaseViewModel
         await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
     }
 
-    private async Task CreateNestedSceneItem(string sceneName)
+    public async Task CreateNestedSceneItem(string sceneName)
     {
         if (Client.ConnectionState == ConnectionState.Disconnected) return;
 
@@ -316,43 +249,53 @@ public class ObsController : BaseViewModel
         //await Client.CreateSceneItem(CurrentSceneName, sceneName);
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == "ConnectionState")
+        try
         {
-            bool option = Client!.ConnectionState == ConnectionState.Connected;
-            if (option == IsConnectedToWebSocket) return;
-            Trace.WriteLine("Connection with obs changed");
-
-            Application.Current?.Dispatcher.Invoke(async delegate
+            if (e.PropertyName == "ConnectionState")
             {
-                if (!option)
+                bool isConnected = Client!.ConnectionState == ConnectionState.Connected;
+                if (isConnected == IsConnectedToWebSocket) return;
+                Trace.WriteLine($"Connection with obs changed to: {Client!.ConnectionState}");
+
+                if (!isConnected)
                 {
-                    IsConnectedColor = new SolidColorBrush(Consts.OfflineColor);
-                    Controller.TournamentViewModel.ClearPlayersFromPOVS();
-                    Controller.ClearScenes();
+                    // IsConnectedColor = new SolidColorBrush(Consts.OfflineColor);
+                    // TODO: 0
+                    // Tu moze nie jest dobrym pomyslem robic full disconnect w formie robienia client.dispose
+                    // zeby tez sprobowac lapac stala kontrole na zmianami w kwesti polaczenia
+                    // wiec trzeba po prostu czyscic eventy zeby nie robic memeory leakow tylko z tym,
+                    // a tak to trzeymac onproperty w kwestii zmian
+                    await Disconnect();
                 }
                 else
                 {
-                    IsConnectedColor = new SolidColorBrush(Consts.LiveColor);
+                    // IsConnectedColor = new SolidColorBrush(Consts.LiveColor);
                     await OnConnected();
                 }
-            });
-
-            IsConnectedToWebSocket = option;
-            OnPropertyChanged(nameof(IsConnectedColor));
+            }
+            // OnPropertyChanged(nameof(IsConnectedColor));
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
         }
     }
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {
         //TODO: 7 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
-        Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
-    }
-    public void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
-    {
-        Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
+        // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
+        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+    }
+    private void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
+    {
         //TODO: 7 Zrobic wylapywanie dodawania wszystkich elementow tez typu head i text od povow
+        // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
+        
+        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+        
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
@@ -369,11 +312,13 @@ public class ObsController : BaseViewModel
         };
         Controller.AddPov(pov);*/
     }
-    public void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
+    private void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
     {
-        Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
-
         //TODO: 7 Zrobic wylapywanie usuwania wszystkich elementow tez typu head i text od povow
+        // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
+
+        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+        
         /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
         PointOfView? pov = null;
@@ -393,13 +338,7 @@ public class ObsController : BaseViewModel
     private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
     {
         if (StudioMode) return;
-
-        string scene = e.SceneName;
-        bool isDuplicate = scene.Equals(Controller.MainScene.SceneName);
-        Trace.WriteLine($"Program scene: {scene}, duplicate: {isDuplicate}");
-        if (isDuplicate) return;
-
-        Task.Run(async () => {await Controller.MainScene.GetCurrentSceneItems(scene); });
+        CurrentProgramSceneChanged?.Invoke(this, e);
     }
     private void OnCurrentPreviewSceneChanged(object? sender, SceneNameEventArgs e)
     {
@@ -408,17 +347,7 @@ public class ObsController : BaseViewModel
             _startedTransition = false;
             return;
         }
-
-        string sceneName = e.SceneName;
-        if (sceneName.Equals(Controller.PreviewScene.SceneName)) return;
-
-        Trace.WriteLine("Loading Preview scene: " + sceneName);
-        Task.Run(async () =>
-        {
-            await LoadScenesForStudioMode(false);
-            await Controller.PreviewScene.GetCurrentSceneItems(sceneName);
-            LoadPreviewScene(sceneName, true);
-        });
+        CurrentPreviewSceneChanged?.Invoke(this, e);
     }
 
     private void OnStudioModeStateChanged(object? sender, StudioModeStateChangedEventArgs e)
@@ -428,91 +357,45 @@ public class ObsController : BaseViewModel
     private void ChangeStudioMode(bool option, bool refresh = true)
     {
         Trace.WriteLine($"StudioMode: {option}");
-
         StudioMode = option;
-        OnPropertyChanged(nameof(StudioMode));
-
-        Controller.MainScene.SetStudioMode(option);
-        Controller.PreviewScene.SetStudioMode(option);
-
-        if (refresh)
-        {
-            Controller.MainScene.RefreshItems();
-            Controller.PreviewScene.RefreshItems();
-        }
-
-        if (StudioMode)
-        {
-            Application.Current?.Dispatcher.Invoke(async () => {
-                await LoadScenesForStudioMode();
-                await Controller.PreviewScene.GetCurrentSceneItems(Controller.MainScene.SceneName, true);
-                LoadPreviewScene(Controller.MainScene.SceneName);
-            });
-        }
-    }
-
-    private async Task LoadScenesForStudioMode(bool force = true)
-    {
-        await Task.Delay(50);
-        var loadedScenes = await Client.GetSceneList();
-
-        lock (_lock)
-        {
-            if (!force && loadedScenes.Scenes.Length == Scenes.Count) return;
-
-            Trace.WriteLine("Loading preview scenes list");
-            Application.Current.Dispatcher.Invoke(Scenes.Clear);
-
-            for (int i = loadedScenes.Scenes.Length - 1; i >= 0; i--)
-            {
-                var current = loadedScenes.Scenes[i];
-                Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
-            }
-        }
-    }
-
-    private void LoadPreviewScene(string sceneName, bool isFromApi = false)
-    {
-        if(!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
-        Trace.WriteLine($"loading preview - {sceneName}");
-
-        UpdateSelectedScene(sceneName);
-
-        if (isFromApi || SelectedScene.Equals(Controller.PreviewScene.SceneName)) return;
-        Client.SetCurrentPreviewScene(SelectedScene);
-    }
-
-    private void UpdateSelectedScene(string sceneName)
-    {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            for (int i = 0; i < Scenes.Count; i++)
-            {
-                var current = Scenes[i];
-                if(current.Equals(sceneName))
-                {
-                    _selectedScene = current;
-                    OnPropertyChanged(nameof(SelectedScene));
-                }
-            }
-        });
+        
+        StudioModeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnSceneTransitionStarted(object? sender, TransitionNameEventArgs e)
     {
-        if (!StudioMode || Controller.MainScene.SceneName!.Equals(Controller.PreviewScene.SceneName)) return;
-        _startedTransition = true;
+        if (!StudioMode) return;
+        SceneTransitionStarted?.Invoke(this, EventArgs.Empty);
+    }
 
-        Trace.WriteLine("Started Transition");
-        Task.Run(async () =>
-        {
-            string previewScene = Controller.PreviewScene.SceneName;
-            string mainScene = Controller.MainScene.SceneName;
+    public async Task<VideoSettingsResponse> GetVideoSettings()
+    {
+        return await Client.GetVideoSettings();
+    }
+    public async Task<string> GetCurrentProgramScene()
+    {
+        return await Client.GetCurrentProgramScene();
+    }
+    public async Task<SceneItem[]> GetSceneItemList(string scene)
+    {
+        return await Client.GetSceneItemList(scene);
+    }
+    public async Task<SceneItem[]> GetGroupSceneItemList(string group)
+    {
+        return await Client.GetGroupSceneItemList(group);
+    }
+    public async Task<SceneListResponse> GetSceneList()
+    {
+        return await Client.GetSceneList();
+    }
 
-            await Controller.MainScene.GetCurrentSceneItems(previewScene);
-            await Controller.PreviewScene.GetCurrentSceneItems(mainScene);
+    public async Task SetCurrentPreviewScene(string scene)
+    {
+        await Client.SetCurrentPreviewScene(scene);
+    }
 
-            UpdateSelectedScene(mainScene);
-        });
+    public void SetStartedTransition(bool option)
+    {
+        _startedTransition = option;
     }
 }

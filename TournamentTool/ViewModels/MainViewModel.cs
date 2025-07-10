@@ -171,7 +171,7 @@ public class MainViewModel : BaseViewModel
             Action = () =>
             {
                 if (NavigationService.SelectedView is not ControllerViewModel controller) return;
-                controller.OBS.SwitchStudioModeCommand.Execute(null);
+                controller.SceneController.SwitchStudioModeCommand.Execute(null);
             }
         };
 

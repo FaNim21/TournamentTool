@@ -9,7 +9,6 @@ using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Selectable;
 using TournamentTool.Windows;
 
 namespace TournamentTool.Modules.OBS;
@@ -22,12 +21,10 @@ public enum SceneType
 
 public class Scene : BaseViewModel
 {
-    private readonly object _lock = new();
-    
-    public SceneType Type { get; protected set; }
+    private readonly Lock _lock = new();
+    public SceneType Type { get; protected init; }
 
-    public readonly ControllerViewModel Controller;
-
+    public SceneControllerViewmodel SceneController { get; }
     private readonly IDialogWindow _dialogWindow;
 
     private ObservableCollection<PointOfView> _povs = [];
@@ -81,7 +78,7 @@ public class Scene : BaseViewModel
     }
 
     public float BaseWidth {  get; set; } 
-    public float ProportionsRatio { get => BaseWidth / CanvasWidth; }
+    public float ProportionsRatio => BaseWidth / CanvasWidth;
 
     private string _mainText { get; set; } = string.Empty;
     public string MainText
@@ -99,9 +96,9 @@ public class Scene : BaseViewModel
     public ICommand ShowInfoWindowCommand { get; set; }
 
 
-    public Scene(ControllerViewModel controllerViewModel, IDialogWindow dialogWindow)
+    public Scene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow)
     {
-        Controller = controllerViewModel;
+        SceneController = sceneController;
         _dialogWindow = dialogWindow;
         Type = SceneType.Main;
         
@@ -116,24 +113,24 @@ public class Scene : BaseViewModel
 
     public void OnPOVClick(PointOfView clickedPov)
     {
-        Controller.CurrentChosenPOV?.UnFocus();
-        PointOfView? previousPOV = Controller.CurrentChosenPOV;
-        Controller.CurrentChosenPOV = clickedPov;
-        Controller.CurrentChosenPOV.Focus();
+        SceneController.CurrentChosenPOV?.UnFocus();
+        PointOfView? previousPOV = SceneController.CurrentChosenPOV;
+        SceneController.CurrentChosenPOV = clickedPov;
+        SceneController.CurrentChosenPOV.Focus();
 
-        if (Controller.CurrentChosenPlayer == null)
+        if (SceneController.Controller.CurrentChosenPlayer == null)
         {
             if (previousPOV == null || previousPOV.Scene.Type != Type) return;
 
-            Controller.CurrentChosenPOV.Swap(previousPOV);
-            Controller.CurrentChosenPOV = null;
+            SceneController.CurrentChosenPOV.Swap(previousPOV);
+            SceneController.CurrentChosenPOV = null;
             return;
         }
 
-        clickedPov.SetPOV(Controller.CurrentChosenPlayer);
+        clickedPov.SetPOV(SceneController.Controller.CurrentChosenPlayer);
 
-        Controller.CurrentChosenPOV.UnFocus();
-        Controller.UnSelectItems(true);
+        SceneController.CurrentChosenPOV.UnFocus();
+        SceneController.Controller.UnSelectItems(true);
     }
 
     public void SetStudioMode(bool option)
@@ -161,7 +158,7 @@ public class Scene : BaseViewModel
         SetSceneName(scene);
         ClearPovs();
 
-        SceneItem[] sceneItems = await Controller.OBS.Client.GetSceneItemList(scene);
+        SceneItem[] sceneItems = await SceneController.OBS.GetSceneItemList(scene);
         List<SceneItem> additionals = [];
         List<(SceneItem, SceneItem?)> povItems = [];
 
@@ -169,14 +166,14 @@ public class Scene : BaseViewModel
         {
             if (item.IsGroup == true)
             {
-                SceneItem[] groupItems = await Controller.OBS.Client.GetGroupSceneItemList(item.SourceName);
+                SceneItem[] groupItems = await SceneController.OBS.GetGroupSceneItemList(item.SourceName);
                 foreach (var groupItem in groupItems)
                 {
                     if (string.IsNullOrEmpty(groupItem.InputKind)) continue;
                     if (CheckForAdditionals(additionals, groupItem)) continue;
 
                     if (groupItem.InputKind!.Equals("browser_source") &&
-                        groupItem.SourceName.StartsWith(Controller.TournamentViewModel.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                        groupItem.SourceName.StartsWith(SceneController.Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
                     {
                         povItems.Add((groupItem, item));
                     }
@@ -187,13 +184,13 @@ public class Scene : BaseViewModel
             if (CheckForAdditionals(additionals, item)) continue;
 
             if (item.InputKind!.Equals("browser_source") &&
-                item.SourceName.StartsWith(Controller.TournamentViewModel.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                item.SourceName.StartsWith(SceneController.Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
             {
                 povItems.Add((item, null));
             }
         }
 
-        if (updatePlayersInPov) Controller.TournamentViewModel.ClearPlayersFromPOVS();
+        if (updatePlayersInPov) SceneController.Tournament.ClearPlayersFromPOVS();
 
         povItems.Reverse();
         for (int i = 0; i < povItems.Count; i++)
@@ -237,7 +234,7 @@ public class Scene : BaseViewModel
             height *= group.SceneItemTransform.ScaleY;
         }
 
-        PointOfView pov = new(Controller.OBS, this, groupName)
+        PointOfView pov = new(SceneController.OBS, SceneController.Tournament, this, groupName)
         {
             SceneName = SceneName,
             SceneItemName = item.SourceName,
@@ -253,7 +250,7 @@ public class Scene : BaseViewModel
         };
         pov.UpdateTransform(ProportionsRatio);
 
-        (string? currentName, float volume) = await Controller.OBS.GetBrowserURLTwitchName(pov.SceneItemName);
+        (string? currentName, float volume) = await SceneController.OBS.GetBrowserURLTwitchName(pov.SceneItemName);
 
         foreach (var additional in additionals)
         {
@@ -276,7 +273,7 @@ public class Scene : BaseViewModel
 
         if (!string.IsNullOrEmpty(currentName))
         {
-            PlayerViewModel? player = Controller.TournamentViewModel.GetPlayerByTwitchName(currentName);
+            PlayerViewModel? player = SceneController.Tournament.GetPlayerByTwitchName(currentName);
             if (player != null) pov.SetPOV(player);
         }
 

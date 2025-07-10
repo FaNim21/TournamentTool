@@ -5,12 +5,14 @@ using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
 public class PointOfView : BaseViewModel
 {
     private readonly ObsController _obs;
+    private readonly TournamentViewModel _tournament;
 
     public Scene Scene { get; set; }
 
@@ -117,9 +119,10 @@ public class PointOfView : BaseViewModel
     public ICommand RefreshCommand { get; set; }
 
 
-    public PointOfView(ObsController obs, Scene scene, string? groupName = "")
+    public PointOfView(ObsController obs, TournamentViewModel tournament, Scene scene, string? groupName = "")
     {
         _obs = obs;
+        _tournament = tournament;
         Scene = scene;
 
         UnFocus();
@@ -270,7 +273,7 @@ public class PointOfView : BaseViewModel
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
 
         string name = string.Empty;
-        switch (_obs.Controller.TournamentViewModel.DisplayedNameType)
+        switch (_tournament.DisplayedNameType)
         {
             case DisplayedNameType.Twitch:
                 name = TwitchName;

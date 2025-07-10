@@ -40,27 +40,7 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0"
-                  Margin="0 0 0 0"
-                  Background="#2a2a2a">
-                <TextBlock FontSize="28"
-                           Height="40"
-                           HorizontalAlignment="Center">
-                    <Run Foreground="White"
-                         FontWeight="Thin"
-                         Text="Current Preset: " />
-                    <Run Foreground="AntiqueWhite"
-                         FontWeight="Bold"
-                         Text="{Binding CurrentChosen.Name, Mode=OneWay, Converter={StaticResource EmptyStringConverter}}" />
-                </TextBlock>
-            </Grid>
-
-            <ScrollViewer Grid.Row="1">
+            <ScrollViewer>
                 <Grid Visibility="{Binding TournamentViewModel.IsCurrentlyOpened, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -142,7 +122,7 @@
 
                         <!-- PACEMAN -->
                         <StackPanel Orientation="Vertical"
-                                   Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Paceman}}">
+                                    Visibility="{Binding TournamentViewModel.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Paceman}}">
                             <TextBlock  Text="Paceman"
                                         Foreground="Wheat"
                                         FontWeight="SemiBold"
@@ -475,8 +455,7 @@
                 </Grid>
             </ScrollViewer>
 
-            <WrapPanel Grid.Row="1"
-                       Width="130"
+            <WrapPanel Width="130"
                        Height="30"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Bottom"

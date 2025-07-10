@@ -78,9 +78,10 @@
     <Resource Include="Resources\StatusBarIcons\twitch-on.png" />
     <Resource Include="Resources\StatusBarIcons\twitch-wait.png" />
     <None Remove="Resources\StatusBarIcons\paceman-icon.webp" />
-    <Resource Include="Resources\StatusBarIcons\paceman-icon.webp" />
     <None Remove="Resources\StatusBarIcons\ranked-icon.png" />
     <Resource Include="Resources\StatusBarIcons\ranked-icon.png" />
+    <None Remove="Resources\StatusBarIcons\paceman-icon.png" />
+    <Resource Include="Resources\StatusBarIcons\paceman-icon.png" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windows\LeaderboardRuleEditWindow.xaml">
