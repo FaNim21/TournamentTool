@@ -1,18 +1,34 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
 
-public class BackgroundCoordinator : IBackgroundCoordinator
+public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
 {
+    private readonly TournamentViewModel _tournament;
+    private readonly BackgroundServiceFactory _backgroundServiceFactory;
+    
+    public event EventHandler<ServiceRegistryEventArgs>? ServiceChanged;
+    
     public IBackgroundService? Service { get; private set; }
-    public List<IBackgroundDataReceiver> Receivers { get; private set; } = [];
+    public List<IBackgroundDataReceiver> Receivers { get; } = [];
 
     private BackgroundWorker? _worker;
     private CancellationTokenSource? _cancellationTokenSource;
 
+    
+    public BackgroundCoordinator(TournamentViewModel tournament, ILeaderboardManager leaderboard, IPresetSaver saver)
+    {
+        _tournament = tournament;
+        
+        _backgroundServiceFactory = new BackgroundServiceFactory(tournament, leaderboard, saver);
+    }
     
     public void Register(IBackgroundDataReceiver? receiver)
     {
@@ -29,9 +45,16 @@ public class BackgroundCoordinator : IBackgroundCoordinator
         Service?.UnregisterData(receiver);
     }
 
-    public void Initialize(IBackgroundService backgroundService)
+    public void Initialize(ControllerMode mode, bool isValidated)
     {
-        Service = backgroundService;
+        if (!isValidated || mode == ControllerMode.None)
+        {
+            ClearService();
+            return;
+        }
+        
+        var service = _backgroundServiceFactory.Create(mode)!;
+        Service = service;
 
         if (_worker == null)
         {
@@ -46,15 +69,15 @@ public class BackgroundCoordinator : IBackgroundCoordinator
             Service.RegisterData(Receivers[i]);
         }
         
-        Console.WriteLine($"New service {backgroundService.GetType()} just started");
+        Console.WriteLine($"New service {service.GetType()} just started");
+        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournament.ControllerMode, true));
     }
 
     private async void Update(object? sender, DoWorkEventArgs e)
     {
-        var cancellationToken = _cancellationTokenSource!.Token;
-
         try
         {
+            var cancellationToken = _cancellationTokenSource!.Token;
             await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
             
             while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
@@ -90,8 +113,14 @@ public class BackgroundCoordinator : IBackgroundCoordinator
         }
 
         _worker = null;
+        ClearService();
+    }
+    private void ClearService()
+    {
         if (Service == null) return;
         Console.WriteLine($"Service {Service!.GetType()} just stopped");
         Service = null;
+        
+        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournament.ControllerMode, false));
     }
 }

@@ -1,4 +1,5 @@
-﻿using TournamentTool.Interfaces;
+﻿using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 
 namespace TournamentTool.Services.Background;
 

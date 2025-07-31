@@ -82,6 +82,8 @@
     <Resource Include="Resources\StatusBarIcons\ranked-icon.png" />
     <None Remove="Resources\StatusBarIcons\paceman-icon.png" />
     <Resource Include="Resources\StatusBarIcons\paceman-icon.png" />
+    <None Remove="Resources\none-icon.png" />
+    <Resource Include="Resources\none-icon.png" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windows\LeaderboardRuleEditWindow.xaml">

@@ -195,5 +195,4 @@ public class PaceManService : IBackgroundService
         };
         return isPacePriority;
     }
-
 }

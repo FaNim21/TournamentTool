@@ -47,8 +47,6 @@ public class PresetManagerViewModel : SelectableViewModel
         }
     }
 
-    private readonly BackgroundServiceFactory _backgroundServiceFactory;
-
     public ICommand OpenControllerCommand { get; set; }
     public ICommand OpenLeaderboardCommand { get; set; }
 
@@ -71,8 +69,6 @@ public class PresetManagerViewModel : SelectableViewModel
         PresetService = presetService;
         Leaderboard = leaderboard;
         BackgroundCoordinator = backgroundCoordinator;
-        
-        _backgroundServiceFactory = new BackgroundServiceFactory(TournamentViewModel, Leaderboard, PresetService);
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -212,12 +208,6 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private void UpdateBackgroundService(ControllerMode mode, bool isValidated)
     {
-        if (!isValidated) return;
-        
-        var service = _backgroundServiceFactory.Create(mode);
-        if (service != null)
-        {
-            BackgroundCoordinator.Initialize(service);
-        }
+        BackgroundCoordinator.Initialize(mode, isValidated);
     }
 }
