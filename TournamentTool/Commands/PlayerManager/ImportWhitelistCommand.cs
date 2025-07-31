@@ -126,7 +126,7 @@ public class ImportWhitelistCommand : BaseCommand
         
             PlayerViewModel player = new() 
             {
-                Name = fields[0].Trim(),
+                Name = fields[0],
                 InGameName = fields[1].Trim(),
                 UUID = fields[2].Replace("-", ""),
                 PersonalBest = fields[3]
@@ -174,7 +174,7 @@ public class ImportWhitelistCommand : BaseCommand
      
                 PlayerViewModel player = new()
                 {
-                    Name = loadedPlayer.DisplayName.Trim(),
+                    Name = loadedPlayer.DisplayName,
                     InGameName = loadedPlayer.IGN.Trim(),
                 };
                 player.StreamData.SetName(loadedPlayer.Twitch.Trim());

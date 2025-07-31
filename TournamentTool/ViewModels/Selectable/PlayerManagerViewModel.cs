@@ -341,7 +341,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
     public async Task<bool> SavePlayer(PlayerViewModel playerViewModel, bool isEditing)
     {
-        if (string.IsNullOrEmpty(playerViewModel.Name))
+        if (string.IsNullOrEmpty(playerViewModel.Name?.Trim()))
         {
             DialogBox.Show($"Name cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
@@ -391,7 +391,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     {
         if (Tournament.ContainsDuplicates(windowsData.Data, excludeID)) return false;
 
-        playerViewModel.Name = windowsData.Name!.Trim();
+        playerViewModel.Name = windowsData.Name!;
         playerViewModel.InGameName = windowsData.InGameName!.Trim();
         playerViewModel.PersonalBest = windowsData.PersonalBest;
         playerViewModel.TeamName = windowsData.TeamName?.Trim();

@@ -6,11 +6,11 @@ using OBSStudioClient.Events;
 using TournamentTool.Commands;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.ViewModels;
+using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
 
-namespace TournamentTool.Modules.OBS;
+namespace TournamentTool.ViewModels.Controller;
 
 public class SceneControllerViewmodel : BaseViewModel
 {
@@ -98,7 +98,6 @@ public class SceneControllerViewmodel : BaseViewModel
         if (Connected)
         {
             OnOBSConnected();
-            Task.Run(Initialize);
         }
         else
         {
@@ -130,7 +129,7 @@ public class SceneControllerViewmodel : BaseViewModel
         PreviewScene.CalculateProportionsRatio(settings.BaseWidth);
         
         string mainScene = await OBS.GetCurrentProgramScene();
-        await MainScene.GetCurrentSceneItems(mainScene);
+        await MainScene.GetCurrentSceneItems(mainScene, true);
         
         MainScene.RefreshItems();
     }
@@ -144,6 +143,7 @@ public class SceneControllerViewmodel : BaseViewModel
     private void OnOBSConnected()
     {
         UpdateView();
+        Task.Run(Initialize);
     }
     private void OnOBSDisconnected()
     {
@@ -156,10 +156,10 @@ public class SceneControllerViewmodel : BaseViewModel
     {
         switch (e.NewState)
         {
-            case OBSConnectionState.Connected: OnOBSConnected(); break;
-            case OBSConnectionState.Disconnected: OnOBSDisconnected(); break;
-            case OBSConnectionState.Connecting:
-            case OBSConnectionState.Disconnecting: break;
+            case ConnectionState.Connected: OnOBSConnected(); break;
+            case ConnectionState.Disconnected: OnOBSDisconnected(); break;
+            case ConnectionState.Connecting:
+            case ConnectionState.Disconnecting: break;
         }
     }
     private async void OnSceneUpdateRequested(object? sender, SceneNameEventArgs e)

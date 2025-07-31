@@ -6,37 +6,47 @@ using System.Windows;
 using TournamentTool.Components.Controls;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using System.ComponentModel;
-using TournamentTool.Models;
-using TournamentTool.ViewModels;
+using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
+using TwitchLib.Api.Core.Exceptions;
 
 namespace TournamentTool.Services;
 
+/// <summary>
+/// Tutaj musi byc:
+/// - Glowna kontrola rzeczy zwiazanych z przechwytywaniem stream'ow
+/// - Klipowanie w przyszlosci
+/// - 
+/// </summary>
 public class TwitchService
 {
-    private ControllerViewModel Controller { get; set; }
-
     private readonly TwitchAPI _api;
 
-    private BackgroundWorker? _twitchWorker;
-    private CancellationTokenSource? _cancellationTokenSource;
+    public bool IsConnected { get; private set; }
 
+    private string _refreshToken = string.Empty;
 
-    public TwitchService(ControllerViewModel controllerViewModel)
+    public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+    
+    public TwitchService()
     {
-        Controller = controllerViewModel;
-
-        _api = new TwitchAPI();
-        _api.Settings.ClientId = Consts.ClientID;
+        _api = new TwitchAPI
+        {
+            Settings =
+            {
+                ClientId = Consts.ClientID
+            }
+        };
     }
 
-    public async Task AuthorizeAsync()
+    public async Task ConnectAsync()
     {
         if (!string.IsNullOrEmpty(_api.Settings.AccessToken)) return;
 
         var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
         string auth = _api.Auth.GetAuthorizationCodeUrl(Consts.RedirectURL, authScopes, true, null, _api.Settings.AccessToken);
+        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Disconnected, ConnectionState.Connecting));
 
         try
         {
@@ -54,20 +64,51 @@ public class TwitchService
                 DialogBox.Show($"Error with listening for twitch authentication", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var resp = await _api.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, Consts.RedirectURL, Consts.ClientID);
-            _api.Settings.AccessToken = resp.AccessToken;
+
+            var response = await _api.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, Consts.RedirectURL, Consts.ClientID);
+            _api.Settings.AccessToken = response.AccessToken;
+            _refreshToken = response.RefreshToken;
+            IsConnected = true;
+            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connecting, ConnectionState.Connected));
         }
         catch (Exception ex)
         {
             DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Disconnect();
         }
     }
-
+    public void Disconnect()
+    {
+        _api.Settings.AccessToken = null;
+        _refreshToken = string.Empty;
+        IsConnected = false;
+        
+        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connected, ConnectionState.Disconnected));
+    }
+    
+    public async Task RefreshAccessTokenAsync()
+    {
+        if (string.IsNullOrEmpty(_refreshToken)) return;
+        
+        var oldToken = _refreshToken;
+        try
+        {
+            var response = await _api.Auth.RefreshAuthTokenAsync(_refreshToken, Consts.SecretID, Consts.ClientID);
+            _api.Settings.AccessToken = response.AccessToken;
+            _refreshToken = response.RefreshToken;
+        }
+        catch (Exception)
+        {
+            Disconnect();
+        }
+        
+        Console.WriteLine($"Refreshing AccessToken, old: {oldToken}, new: {_refreshToken}");
+    }
+    
     public async Task<List<Stream>> GetAllStreamsAsync(List<string> logins)
     {
         var allStreams = new List<Stream>();
         const int batchSize = 100;
-        string cursor = string.Empty;
 
         try
         {
@@ -79,7 +120,7 @@ public class TwitchService
 
             foreach (var batch in loginBatches)
             {
-                cursor = string.Empty;
+                var cursor = string.Empty;
 
                 do
                 {
@@ -89,149 +130,34 @@ public class TwitchService
                 } while (!string.IsNullOrEmpty(cursor));
             }
         }
+        catch (TokenExpiredException)
+        {
+            await RefreshAccessTokenAsync();
+            await GetAllStreamsAsync(logins);
+        }
+        catch (BadRequestException)
+        {
+            DialogBox.Show("Error requesting streams - probably wrong twitch name", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
         catch (Exception ex)
         {
-            //TODO: 0 Tu trzeba sie zastanowic czy nie usunac tego okna poprostu i dac info gdzies w whiteliscie
-            DialogBox.Show($"Error while fetching streaming datas (might be duo to wrong twitch name or exceeding api limit)\n{ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Console.WriteLine($"Error while fetching streaming datas - {ex.Message}\n{ex.StackTrace}");
         }
 
         return allStreams.DistinctBy(stream => stream.UserId).ToList();
     }
-
     public async Task<CreatedClipResponse?> CreateClipAsync(string broadcasterID)
     {
         CreatedClipResponse? response = null;
         try
         {
-
             response = await _api.Helix.Clips.CreateClipAsync(broadcasterID);
-            //string url = response.CreatedClips[0].EditUrl;
+            string url = response.CreatedClips[0].EditUrl;
         }
         catch (Exception ex)
         {
             DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         return response;
-    }
-
-    public async Task ConnectTwitchAPIAsync()
-    {
-        _twitchWorker = new() { WorkerSupportsCancellation = true };
-        _cancellationTokenSource = new();
-
-        await AuthorizeAsync();
-
-        if (_twitchWorker == null) return;
-        _twitchWorker.DoWork += TwitchUpdate;
-        _twitchWorker.RunWorkerAsync();
-    }
-
-    private async void TwitchUpdate(object? sender, DoWorkEventArgs e)
-    {
-        var cancellationToken = _cancellationTokenSource!.Token;
-
-        while (!_twitchWorker!.CancellationPending && !cancellationToken.IsCancellationRequested)
-        {
-            try
-            {
-                await UpdateTwitchInformations();
-                Controller.RefreshFilteredCollection();
-            }
-            catch (Exception ex)
-            {
-                DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            try
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(60000), cancellationToken);
-            }
-            catch (TaskCanceledException) { break; }
-        }
-    }
-    private async Task UpdateTwitchInformations()
-    {
-        List<string> logins = [];
-        List<StreamDataViewModel> notLivePlayers = [];
-
-        for (int i = 0; i < Controller.TournamentViewModel.Players.Count; i++)
-        {
-            var current = Controller.TournamentViewModel.Players[i];
-            current.StreamData.LiveData.WasUpdated = false;
-
-            if (!string.IsNullOrEmpty(current.StreamData.Main))
-                logins.Add(current.StreamData.Main!);
-            if (!string.IsNullOrEmpty(current.StreamData.Alt))
-                logins.Add(current.StreamData.Alt!);
-
-            notLivePlayers.Add(current.StreamData);
-        }
-
-        var streams = await GetAllStreamsAsync(logins);
-        for (int i = 0; i < streams.Count; i++)
-        {
-            var current = streams[i];
-
-            for (int j = 0; j < notLivePlayers.Count; j++)
-            {
-                var streamData = notLivePlayers[j];
-                if (!streamData.ExistName(current.UserLogin)) continue;
-
-                bool isMainStream = current.UserLogin.Equals(streamData.Main, StringComparison.OrdinalIgnoreCase);
-                bool isAltStream = current.UserLogin.Equals(streamData.Alt, StringComparison.OrdinalIgnoreCase);
-
-                TwitchStreamDataViewModel liveData = new()
-                {
-                    ID = current.Id,
-                    BroadcasterID = current.UserId,
-                    UserLogin = current.UserLogin,
-                    GameName = current.GameName,
-                    StartedAt = current.StartedAt,
-                    Language = current.Language,
-                    UserName = current.UserName,
-                    Title = current.Title,
-                    ThumbnailUrl = current.ThumbnailUrl,
-                    ViewerCount = current.ViewerCount,
-                    Status = current.Type,
-                };
-
-                if (isMainStream)
-                {
-                    streamData.LiveData.Update(liveData);
-                    streamData.IsLive = liveData.Status.Equals("live");
-                    notLivePlayers.RemoveAt(j);
-                    j--;
-                }
-                else if (isAltStream)
-                {
-                    streamData.LiveData.Update(liveData);
-                    streamData.IsLive = liveData.Status.Equals("live");
-                }
-            }
-        }
-
-        for (int i = 0; i < notLivePlayers.Count; i++)
-        {
-            var toClear = notLivePlayers[i];
-            if (toClear.LiveData.WasUpdated) continue;
-
-            toClear.LiveData.Clear();
-        }
-        notLivePlayers.Clear();
-    }
-
-    public void OnDisable()
-    {
-        try
-        {
-            _twitchWorker?.CancelAsync();
-        }
-        catch { /**/ }
-        _cancellationTokenSource?.Cancel();
-        _twitchWorker?.Dispose();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-        _twitchWorker = null;
     }
 }

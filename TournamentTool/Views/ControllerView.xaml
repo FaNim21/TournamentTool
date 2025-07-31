@@ -29,7 +29,14 @@
 
         <Grid Grid.Row="0"
               Background="#000D14">
-            <StackPanel Orientation="Horizontal"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="435"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
                         Visibility="{Binding SceneController.Connected, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid Width="195">
                     <TextBlock FontSize="15"
@@ -58,17 +65,30 @@
                 </TextBlock>
             </StackPanel>
 
-            <TextBlock Text="Search: "
-                       FontSize="18"
-                       HorizontalAlignment="Right"
-                       Foreground="#CCCCCC"
-                       Margin="0 0 207 0" />
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200"
-                     Height="18"
-                     Background="LightGray"
-                     HorizontalAlignment="Right"
-                     Margin="0 0 5 0" />
+            <StackPanel Grid.Column="1"
+                        Visibility="{Binding TournamentViewModel.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}" 
+                        Orientation="Horizontal" >
+               <TextBlock Text="Stream update: "
+                          FontSize="18"
+                          Foreground="#CCCCCC">
+                   <Run Text="{Binding TwitchUpdateProgressText}" />
+               </TextBlock>
+           </StackPanel>
+
+            <StackPanel Grid.Column="2" 
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Margin="0 0 5 0">
+               <TextBlock Text="Search: "
+                          FontSize="18"
+                          HorizontalAlignment="Right"
+                          Foreground="#CCCCCC" />
+               <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                        Width="200"
+                        Height="18"
+                        Background="LightGray"
+                        HorizontalAlignment="Right" />
+           </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">

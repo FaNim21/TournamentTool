@@ -9,6 +9,7 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Ranking;
 using TournamentTool.ViewModels.Selectable;
+using TournamentTool.ViewModels.StatusBar;
 using TournamentTool.Windows;
 
 namespace TournamentTool.ViewModels;

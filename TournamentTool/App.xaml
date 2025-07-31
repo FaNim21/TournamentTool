@@ -4,7 +4,8 @@
              xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
              xmlns:views="clr-namespace:TournamentTool.Views"
              xmlns:converters="clr-namespace:TournamentTool.Converters"
-             xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable">
+             xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable"
+             xmlns:statusBar="clr-namespace:TournamentTool.ViewModels.StatusBar">
     <Application.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                               TrueValue="Visible"
@@ -49,7 +50,7 @@
         <DataTemplate DataType="{x:Type selectable:UpdatesViewModel}">
             <views:UpdatesView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:StatusBarViewModel}">
+        <DataTemplate DataType="{x:Type statusBar:StatusBarViewModel}">
             <views:StatusBarView />
         </DataTemplate>
 
@@ -413,5 +414,43 @@
             </Setter>
         </Style>
 
+        <Style x:Key="MenuSeparatorStyle"
+               TargetType="{x:Type Separator}">
+            <Setter Property="Height"
+                    Value="1" />
+            <Setter Property="Margin"
+                    Value="-25 4 4 4" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="#444444" />
+        </Style>
+        <Style x:Key="StatusMenuStyle"
+               TargetType="ContextMenu">
+            <Setter Property="Background"
+                    Value="#2D2D2D" />
+            <Setter Property="BorderBrush"
+                    Value="#555555" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2"
+                                                  BlurRadius="8"
+                                                  Opacity="0.3" />
+                            </Border.Effect>
+                            <StackPanel IsItemsHost="True"
+                                        Margin="0,0" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
     </Application.Resources>
 </Application>

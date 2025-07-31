@@ -1,5 +1,4 @@
 ﻿using TournamentTool.Interfaces;
-using TournamentTool.Models;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;

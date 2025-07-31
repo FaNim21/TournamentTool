@@ -485,8 +485,6 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     public void ClearFromController()
     {
         IsUsedInPov = false;
-    
-        StreamData.LiveData.Clear();
     }
     
     public void CleanUpUUID()
@@ -499,14 +497,14 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     public bool EqualsNoDialog(Player player)
     {
         if (!string.IsNullOrEmpty(UUID) && !string.IsNullOrEmpty(player.UUID) && UUID.Equals(player.UUID)) return true;
-        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison)) return true;
+        if (Name!.Trim().Equals(player.Name!.Trim(), _ordinalIgnoreCaseComparison)) return true;
         if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison)) return true;
         return StreamData.EqualsNoDialog(player.StreamData);
     }
         
     public bool Equals(Player player)
     {
-        if (Name!.Equals(player.Name, _ordinalIgnoreCaseComparison))
+        if (Name!.Trim().Equals(player.Name!.Trim(), _ordinalIgnoreCaseComparison))
         {
             DialogBox.Show($"Player with name \"{player.Name}\" already exists", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return true;

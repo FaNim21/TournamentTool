@@ -214,16 +214,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
     }
     
-    public int ApiRefreshRateMiliseconds
-    {
-        get => _tournament.ApiRefreshRateMiliseconds;
-        set
-        {
-            _tournament.ApiRefreshRateMiliseconds = value < 1000 ? 1000 : value;
-            OnPropertyChanged(nameof(ApiRefreshRateMiliseconds));
-            PresetIsModified();
-        }
-    }
     public int PaceManRefreshRateMiliseconds
     {
         get => _tournament.PaceManRefreshRateMiliseconds;
@@ -443,7 +433,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         OnPropertyChanged(nameof(IsUsingTwitchAPI));
         OnPropertyChanged(nameof(ShowStreamCategory));
         
-        OnPropertyChanged(nameof(ApiRefreshRateMiliseconds));
         OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
         
         OnPropertyChanged(nameof(Structure2ToText));
@@ -471,6 +460,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         {
             var playerViewModel = new PlayerViewModel(player);
             playerViewModel.Initialize();
+            playerViewModel.StreamData.LiveData.Clear(false);
             Players.Add(playerViewModel);
             AddPlayerToDictionary(playerViewModel);
         }
@@ -622,7 +612,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         IsUsingTwitchAPI = false;
         ShowStreamCategory = true;
 
-        ApiRefreshRateMiliseconds = 1000;
         PaceManRefreshRateMiliseconds = 3000;
     
         Structure2GoodPaceMiliseconds = 270000;
@@ -734,5 +723,4 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     }
 
     public Tournament GetData() => _tournament;
-
 }

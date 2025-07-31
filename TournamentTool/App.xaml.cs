@@ -10,6 +10,7 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
+using TournamentTool.ViewModels.StatusBar;
 
 namespace TournamentTool;
 
@@ -34,6 +35,7 @@ public partial class App : Application
         services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
         services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
         services.AddSingleton<ObsController>();
+        services.AddSingleton<TwitchService>();
 
         services.AddSingleton<StatusBarViewModel>();
         
@@ -47,10 +49,10 @@ public partial class App : Application
         services.AddSingleton<PlayerManagerViewModel>();
         
         services.AddTransient<LeaderboardPanelViewModel>();
-        services.AddSingleton<SceneManagementViewModel>();
+        services.AddTransient<SceneManagementViewModel>();
 
         services.AddSingleton<UpdatesViewModel>();
-        services.AddSingleton<SettingsViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
@@ -78,6 +80,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _serviceProvider.Dispose();
         base.OnExit(e);
     }
 }

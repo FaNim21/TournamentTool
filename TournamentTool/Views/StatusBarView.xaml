@@ -4,19 +4,109 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
-             xmlns:local="clr-namespace:TournamentTool.Views"
              xmlns:models="clr-namespace:TournamentTool.Models"
              xmlns:enums="clr-namespace:TournamentTool.Enums"
              xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
              xmlns:local2="clr-namespace:TournamentTool.Components"
-             xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
-             d:DataContext="{d:DesignInstance Type=viewmodels:StatusBarViewModel}"
+             xmlns:statusBar="clr-namespace:TournamentTool.ViewModels.StatusBar"
+             d:DataContext="{d:DesignInstance Type=statusBar:StatusBarViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="27"
              d:DesignWidth="1024"
              BorderThickness="0 0.75 0 0"
              Background="#2a2a2a"
              BorderBrush="Black">
+    <UserControl.Resources>
+        <!-- Styl dla przycisku status item -->
+        <Style x:Key="StatusButtonStyle"
+               TargetType="Button">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="6,2" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#3C3C3C" />
+                            </Trigger>
+                            <Trigger Property="IsPressed"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#505050" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Styl dla MenuItem -->
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground"
+                    Value="#E0E0E0" />
+            <Setter Property="Width"
+                    Value="150" />
+            <Setter Property="Padding"
+                    Value="10,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="border"
+                                Background="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{TemplateBinding Header}"
+                                           VerticalAlignment="Center" />
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{TemplateBinding InputGestureText}"
+                                           Foreground="#808080"
+                                           Margin="20,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#094771" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled"
+                                     Value="False">
+                                <Setter Property="Foreground"
+                                        Value="#666666" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
     
     <Grid Margin="4 1 2 1"
           VerticalAlignment="Center">
@@ -33,31 +123,42 @@
                        Foreground="AntiqueWhite" />
         </Grid>
 
-        <StackPanel Grid.Column="1"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0 0 0 0">
+        <!-- Status Items -->
+        <ItemsControl Grid.Column="1"
+                      ItemsSource="{Binding StatusItems}"
+                      FlowDirection="RightToLeft"
+                      VerticalAlignment="Center">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-            <Image Source="{Binding BackgroundServiceImage}"
-                   Width="18"
-                   Height="18"
-                   Margin="3 0 5 0" /> 
-            
-            <Image Source="{Binding TwitchImage}"
-                   Width="18"
-                   Height="18"
-                   Margin="3 1 5 0" /> 
-            
-            <Image Source="{Binding ObsImage}"
-                   Width="18"
-                   Height="18"
-                   Margin="3 1 5 0" /> 
-
-            <Image Source="{Binding BellImage}"
-                   Width="18"
-                   Height="18"
-                   Margin="15 0 5 0" /> 
-            
-        </StackPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button FlowDirection="LeftToRight"
+                            Style="{StaticResource StatusButtonStyle}"
+                            Command="{Binding ShowMenuCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
+                            ToolTipService.ShowDuration="99999"
+                            ToolTipService.InitialShowDelay="200"
+                            ToolTip="{Binding ToolTip}"
+                            Margin="2,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding CurrentImage}"
+                                   Width="16"
+                                   Height="16" />
+                            <TextBlock Text="{Binding StatusText}"
+                                       Foreground="#E0E0E0"
+                                       FontSize="11"
+                                       Margin="4,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding ShowText, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        
     </Grid>
 </UserControl>

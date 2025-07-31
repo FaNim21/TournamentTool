@@ -16,7 +16,7 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.OBS;
 
-public enum OBSConnectionState
+public enum ConnectionState
 {
     Disconnected,
     Connected,
@@ -25,10 +25,10 @@ public enum OBSConnectionState
 }
 public class ConnectionStateChangedEventArgs : EventArgs
 {
-    public OBSConnectionState OldState { get; }
-    public OBSConnectionState NewState { get; }
+    public ConnectionState OldState { get; }
+    public ConnectionState NewState { get; }
 
-    public ConnectionStateChangedEventArgs(OBSConnectionState oldState, OBSConnectionState newState)
+    public ConnectionStateChangedEventArgs(ConnectionState oldState, ConnectionState newState)
     {
         OldState = oldState;
         NewState = newState;
@@ -43,9 +43,6 @@ public class ObsController
 
     public ObsClient Client { get; private set; }
  
-    // takie rzeczy to do statusbarviewmodel
-    // public Brush? IsConnectedColor { get; set; }
-
     public event EventHandler<SceneNameEventArgs>? SceneItemUpdateRequested;
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
     public event EventHandler<SceneNameEventArgs>? CurrentProgramSceneChanged;
@@ -55,8 +52,10 @@ public class ObsController
 
     public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
- 
+    public ConnectionState State { get; private set; }
+
     private bool _startedTransition;
+    private bool _tryingToConnect;
 
 
     public ObsController(TournamentViewModel tournament)
@@ -66,10 +65,7 @@ public class ObsController
         Client = new ObsClient { RequestTimeout = 10000 };
 
         _cancellationTokenSource = new CancellationTokenSource();
-        Task.Factory.StartNew(async () =>
-        {
-            await Connect(Tournament.Password!, Tournament.Port);
-        }, _cancellationTokenSource.Token);
+        Task.Factory.StartNew(async () => { await Connect(); }, _cancellationTokenSource.Token);
         
         // AddPovItemToOBSCommand = new RelayCommand(async () => { await OBS.CreateNestedSceneItem("PovSceneLOL"); });
     }
@@ -85,11 +81,14 @@ public class ObsController
         Client.TriggerStudioModeTransition();
     }
 
-    public async Task Connect(string password, int port)
+    public async Task Connect()
     {
-        const EventSubscriptions subscription = EventSubscriptions.All;
-        await Client.ConnectAsync(true, password, "localhost", port, subscription);
+        if (_tryingToConnect) return;
+        _tryingToConnect = true;
+        
         Client.PropertyChanged += OnPropertyChanged;
+        const EventSubscriptions subscription = EventSubscriptions.All;
+        await Client.ConnectAsync(true, Tournament.Password!, "localhost", Tournament.Port, subscription);
     }
     private async Task OnConnected()
     {
@@ -112,8 +111,9 @@ public class ObsController
             Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
             Client.SceneTransitionStarted += OnSceneTransitionStarted;
             
-            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(OBSConnectionState.Disconnected, OBSConnectionState.Connected));
             IsConnectedToWebSocket = true;
+            State = ConnectionState.Connected;
+            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Disconnected, ConnectionState.Connected));
         }
         catch (Exception ex)
         {
@@ -137,19 +137,22 @@ public class ObsController
 
         await _cancellationTokenSource.CancelAsync();
         _cancellationTokenSource.Dispose();
+        _cancellationTokenSource = new CancellationTokenSource();
 
         Client.Disconnect();
 
-        while (Client.ConnectionState != ConnectionState.Disconnected)
+        while (Client.ConnectionState != OBSStudioClient.Enums.ConnectionState.Disconnected)
         {
             await Task.Delay(100);
         }
         
         Client.Dispose();
-        Client = new ObsClient();
+        Client = new ObsClient { RequestTimeout = 10000 };
         IsConnectedToWebSocket = false;
         
-        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(OBSConnectionState.Connected, OBSConnectionState.Disconnected));
+        State = ConnectionState.Disconnected;
+        _tryingToConnect = false;
+        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, ConnectionState.Disconnected));
     }
 
     public void SetBrowserURL(PointOfView pov)
@@ -216,7 +219,7 @@ public class ObsController
 
     private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
     {
-        if (Client.ConnectionState == ConnectionState.Disconnected) return;
+        if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
 
         try
         {
@@ -235,7 +238,7 @@ public class ObsController
 
     public async Task CreateNestedSceneItem(string sceneName)
     {
-        if (Client.ConnectionState == ConnectionState.Disconnected) return;
+        if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
 
         await Client.CreateScene(sceneName);
 
@@ -255,27 +258,24 @@ public class ObsController
         {
             if (e.PropertyName == "ConnectionState")
             {
-                bool isConnected = Client!.ConnectionState == ConnectionState.Connected;
-                if (isConnected == IsConnectedToWebSocket) return;
-                Trace.WriteLine($"Connection with obs changed to: {Client!.ConnectionState}");
-
-                if (!isConnected)
+                bool isConnected = Client!.ConnectionState == OBSStudioClient.Enums.ConnectionState.Connected;
+                if (Client.ConnectionState is OBSStudioClient.Enums.ConnectionState.Connecting or OBSStudioClient.Enums.ConnectionState.Disconnected)
                 {
-                    // IsConnectedColor = new SolidColorBrush(Consts.OfflineColor);
-                    // TODO: 0
-                    // Tu moze nie jest dobrym pomyslem robic full disconnect w formie robienia client.dispose
-                    // zeby tez sprobowac lapac stala kontrole na zmianami w kwesti polaczenia
-                    // wiec trzeba po prostu czyscic eventy zeby nie robic memeory leakow tylko z tym,
-                    // a tak to trzeymac onproperty w kwestii zmian
-                    await Disconnect();
+                    var state = Client.ConnectionState is OBSStudioClient.Enums.ConnectionState.Connecting ? ConnectionState.Connecting : ConnectionState.Disconnecting;
+                    ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, state));
+                    State = state;
+                }
+                if (isConnected == IsConnectedToWebSocket) return;
+                
+                if (isConnected)
+                {
+                    await OnConnected();
                 }
                 else
                 {
-                    // IsConnectedColor = new SolidColorBrush(Consts.LiveColor);
-                    await OnConnected();
+                    await Disconnect();
                 }
             }
-            // OnPropertyChanged(nameof(IsConnectedColor));
         }
         catch (Exception exception)
         {
