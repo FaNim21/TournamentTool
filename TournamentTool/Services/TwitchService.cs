@@ -55,7 +55,7 @@ public class TwitchService
             var auth2 = await server.Listen();
             if (auth2 == null)
             {
-                DialogBox.Show($"Error with listening for twitch authentication", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                Logger.Error("Error while listening for twitch authentication");
                 return;
             }
 
@@ -67,7 +67,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
             Disconnect();
         }
     }

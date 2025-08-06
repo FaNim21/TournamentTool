@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using TournamentTool.Components.Controls;
 using System.Windows.Controls;
+using TournamentTool.Modules.Logging;
 
 namespace TournamentTool.Utils;
 
@@ -205,7 +206,7 @@ public static class Helper
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            LogService.Error($"Error: {ex.Message} - {ex.StackTrace}");
             return null;
         }
     }

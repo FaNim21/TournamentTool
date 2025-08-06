@@ -4,6 +4,7 @@ using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -14,6 +15,7 @@ namespace TournamentTool.Commands.PlayerManager;
 public class LoadDataFromPacemanCommand : BaseCommand
 {
     private PlayerManagerViewModel PlayerManager { get; }
+    private ILoggingService Logger { get; }
 
     private readonly ITournamentManager _tournamentManager;
     private readonly IPresetSaver _presetSaver;
@@ -24,9 +26,10 @@ public class LoadDataFromPacemanCommand : BaseCommand
 
     private PaceManEvent? _chosenEvent;
 
-    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
+    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, IPresetSaver presetSaver, ILoadingDialog loadingDialog, ILoggingService logger)
     {
         PlayerManager = playerManager;
+        Logger = logger;
         _tournamentManager = tournamentManager;
         _presetSaver = presetSaver;
         _loadingDialog = loadingDialog;
@@ -69,7 +72,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         }
         catch (Exception ex)
         {
-            DialogBox.Show(ex.Message);
+            Logger.Error(ex.Message);
         }
 
         if (_twitchNames == null) return;
@@ -79,7 +82,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         logProgress.Report("Loading complete");
         progress.Report(1);
         _presetSaver.SavePreset();
-        DialogBox.Show("Done loading data from paceman event");
+        Logger.Information($"Done loading data from paceman event: {_chosenEvent.Name}");
     }
 
     private async Task UpdateWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)

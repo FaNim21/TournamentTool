@@ -170,7 +170,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         ImportPlayersCommand = new ImportWhitelistCommand(this, Tournament, coordinator, PresetService, Logger);
         ExportPlayersCommand = new ExportWhitelistCommand(Tournament, tournament.GetData());
 
-        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, Tournament, PresetService, coordinator);
+        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, Tournament, PresetService, coordinator, Logger);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { Coordinator.ShowLoading(FixPlayersHeads); });
@@ -449,7 +449,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             await current.ForceUpdateHeadImage();
         }
 
-        DialogBox.Show("Done fixing players head skins");
+        Logger.Information("Done fixing players head skins");
         SavePreset();
     }
 

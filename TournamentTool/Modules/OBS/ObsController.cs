@@ -3,14 +3,10 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Threading;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
-using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels.Entities;
@@ -229,7 +225,7 @@ public class ObsController
             var existingItem = await Client.GetSceneItemId(sceneName, newSceneItemName);
             if (existingItem > 0)
             {
-                DialogBox.Show($"Scene item '{newSceneItemName}' already exists in scene '{sceneName}'.");
+                Logger.Warning($"Scene item '{newSceneItemName}' already exists in scene '{sceneName}'.");
                 return;
             }
         }
