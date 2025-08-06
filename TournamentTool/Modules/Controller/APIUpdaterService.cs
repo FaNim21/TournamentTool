@@ -30,7 +30,6 @@ public class APIUpdaterService : IServiceUpdater
 
     public Task UpdateAsync(CancellationToken token)
     {
-        Logger.Error("api update hehe");
         _controller.ManagementPanel?.UpdateAPI(_api);
         return Task.CompletedTask;
     }

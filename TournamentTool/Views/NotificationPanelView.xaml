@@ -24,7 +24,7 @@
               Width="300">
             <Grid Background="#2a2a2a"
                   Height="30">
-                <TextBlock Text="Notifications (Errors, Warnings, Info)"
+                <TextBlock Text="Notifications - Errors, Warnings, Info"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Foreground="Wheat" 
@@ -55,36 +55,91 @@
 
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type entities:LogEntryViewModel}">
-                            <Border BorderBrush="Red"
+                            <Border BorderBrush="{Binding BorderBrushColor}"
                                     Width="280"
-                                    BorderThickness="1">
-                                <Grid>
+                                    BorderThickness="0.5">
+                                <StackPanel Orientation="Vertical"
+                                            Margin="3 2 4 4">
+                                    <Grid>
+                                        <TextBlock Foreground="white">
+                                            <Run Text="{Binding DateMonth, Mode=OneTime}" />
+                                            <Run Text="{Binding Date, Mode=OneTime}" />
+                                            <Run Text=" - " />
+                                            <Run Text="{Binding Level, Mode=OneTime}"
+                                                 Foreground="{Binding BorderBrushColor}" />
+                                        </TextBlock>
+                                        <Button FontFamily="Segoe MDL2 Assets"
+                                                Content="&#xE8C8;"
+                                                HorizontalAlignment="Right"
+                                                Command="{Binding DataContext.CopyNotificationToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding .}"
+                                                Height="16"
+                                                Width="16"
+                                                Foreground="White"
+                                                ToolTip="Copy notification to clipboard"
+                                                ToolTipService.InitialShowDelay="0"
+                                                ToolTipService.ShowDuration="4000"
+                                                BorderThickness="0">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Cursor"
+                                                            Value="Hand" />
+                                                    <Setter Property="Background"
+                                                            Value="Transparent" />
+                                                    <Setter Property="Foreground"
+                                                            Value="White" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        CornerRadius="4">
+                                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver"
+                                                                             Value="True">
+                                                                        <Setter Property="Background"
+                                                                                Value="#66FFFFFF" />
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsPressed"
+                                                                             Value="True">
+                                                                        <Setter Property="Background"
+                                                                                Value="#AAFFFFFF" />
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
                                     <TextBlock Text="{Binding Message, Mode=OneTime}"
+                                               TextWrapping="Wrap"
+                                               MaxHeight="48"
                                                Foreground="white" />
-                                </Grid>
+                                </StackPanel>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
 
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <controls:VirtualizingWrapPanel Orientation="Horizontal" />
+                            <VirtualizingStackPanel />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
 
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <!--
                             <Setter Property="Focusable"
                                     Value="False" />
-                            -->
                             <Setter Property="IsHitTestVisible"
                                     Value="True" />
-                            <Setter Property="Margin"
-                                    Value="0" />
                             <Setter Property="Padding"
                                     Value="0" />
-                            <!--
+                            <Setter Property="Margin"
+                                    Value="0 2 0 2" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
@@ -92,7 +147,6 @@
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
-                        -->
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>

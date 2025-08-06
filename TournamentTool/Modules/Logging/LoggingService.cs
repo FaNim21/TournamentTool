@@ -14,12 +14,14 @@ public class LoggingService : ILoggingService
 
     public void Log(object message, LogLevel level = LogLevel.Normal)
     {
+        if (message is null) return;
+
+        string logMessage = message.ToString() ?? string.Empty;
+        _logStore.AddLog(logMessage, level);
+        
         string date = $"[{DateTime.Now:HH:mm:ss}] ";
         string type = level == LogLevel.Normal ? "" : $"[{level}] ";
-        
-        _logStore.AddLog(date + type + message, level);
-        
-        ConsoleLogging(date, type + message, level);
+        ConsoleLogging(date, type + logMessage, level);
     }
 
     public void Error(object message) => Log(message, LogLevel.Error);
@@ -29,13 +31,13 @@ public class LoggingService : ILoggingService
 
     private void ConsoleLogging(string date, string message, LogLevel level)
     {
-        Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.Write(date);
         
         Console.ForegroundColor = GetLevelColor(level);
         Console.Write(message);
         Console.ResetColor();
+        Console.WriteLine();
     }
 
     private ConsoleColor GetLevelColor(LogLevel level) => level switch

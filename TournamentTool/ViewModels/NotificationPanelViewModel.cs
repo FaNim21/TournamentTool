@@ -1,10 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.JavaScript;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TournamentTool.Commands;
-using TournamentTool.Commands.Controller;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -35,7 +33,7 @@ public class NotificationPanelViewModel : BaseViewModel
         }
     }
     
-    private const int _maxNotifications = 50;
+    private const int _maxNotifications = 100;
     private const LogLevel _minimumLevel = LogLevel.Info;
     private DateTime _lastClearedTimestamp = DateTime.MinValue;
     private bool _isOpened;
@@ -44,6 +42,7 @@ public class NotificationPanelViewModel : BaseViewModel
     
     public ICommand HidePanelCommand { get; private set; }
     public ICommand ClearPanelCommand { get; private set; }
+    public ICommand CopyNotificationToClipboardCommand { get; private set; }
 
 
     public NotificationPanelViewModel(LogStore store)
@@ -53,6 +52,7 @@ public class NotificationPanelViewModel : BaseViewModel
         
         HidePanelCommand = new RelayCommand(HidePanel);
         ClearPanelCommand = new RelayCommand(Clear);
+        CopyNotificationToClipboardCommand = new RelayCommand<LogEntryViewModel>(CopyNotificationToClipboard);
     }
     public override void Dispose()
     {
@@ -62,13 +62,14 @@ public class NotificationPanelViewModel : BaseViewModel
     public override void OnEnable(object? parameter)
     {
         _isOpened = true;
+        
         var logs = _store.Logs.AsValueEnumerable()
             .Where(e => e.Level >= _minimumLevel)
             .Where(e => e.Date > _lastClearedTimestamp)
             .TakeLast(_maxNotifications)
             .Select(e => new LogEntryViewModel(e)).ToList();
         
-        foreach (var logsChunk in logs.Batch(5))
+        foreach (var logsChunk in logs.Batch(10))
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -92,8 +93,8 @@ public class NotificationPanelViewModel : BaseViewModel
     public void ShowPanel()
     {
         PanelOpened?.Invoke(this, EventArgs.Empty);
-        OnEnable(null);
         IsNotificationPanelOpen = true;
+        OnEnable(null);
     }
     public void HidePanel()
     {
@@ -111,6 +112,11 @@ public class NotificationPanelViewModel : BaseViewModel
         }
 
         NotificationReceived?.Invoke(this, log);
+    }
+    
+    private void CopyNotificationToClipboard(LogEntryViewModel log)
+    {
+        Clipboard.SetText($"[{log.Level}] {log.Message}");
     }
     
     private void Clear()

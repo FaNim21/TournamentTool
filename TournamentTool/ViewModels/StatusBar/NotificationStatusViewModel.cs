@@ -45,11 +45,23 @@ public class NotificationStatusViewModel : StatusItemViewModel
     protected override void BuildContextMenu(ContextMenu menu)
     {
         menu.Items.Clear();
-        menu.Items.Add(new MenuItem 
-        { 
-            Header = "View",
-            Command = new RelayCommand(ShowNotifications)
-        });
+
+        if (!_notificationPanel.IsNotificationPanelOpen)
+        {
+            menu.Items.Add(new MenuItem 
+            { 
+                Header = "View",
+                Command = new RelayCommand(ShowNotifications)
+            });
+        }
+        else
+        {
+            menu.Items.Add(new MenuItem 
+            { 
+                Header = "Close",
+                Command = new RelayCommand(_notificationPanel.HidePanel)
+            });
+        }
         menu.Items.Add(new MenuItem 
         { 
             Header = "Mark as read",

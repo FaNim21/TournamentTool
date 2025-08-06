@@ -134,17 +134,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
-        Logger.Error("Error xd");
-        Logger.Warning("Warning xd");
-        Logger.Warning("Warning xd");
-        Logger.Error("Error xd");
-        Logger.Information("Info xd");
-        Logger.Warning("Warning xd");
-        Logger.Error("Error xd");
-        Logger.Information("Info xd");
-        Logger.Error("Error xd");
-
-        
         Application.Current.Dispatcher.Invoke(() =>
         {
             var collectionViewSource = CollectionViewSource.GetDefaultView(TournamentViewModel.Players);
