@@ -11,6 +11,7 @@ using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
@@ -23,7 +24,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
     private IBackgroundCoordinator BackgroundCoordinator { get; }
-    private ILeaderboardManager Leaderboard { get; }
+    public ILoggingService Logger { get; }
     public TournamentViewModel TournamentViewModel { get; }
     public IPresetSaver PresetService { get; }
 
@@ -60,15 +61,13 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RenameItemCommand { get; set; }
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
-    public ICommand SetRankedDataPathCommand { get; set; }
 
-
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, ILeaderboardManager leaderboard, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
-        Leaderboard = leaderboard;
         BackgroundCoordinator = backgroundCoordinator;
+        Logger = logger;
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -87,11 +86,9 @@ public class PresetManagerViewModel : SelectableViewModel
         RenameItemCommand = new RenamePresetCommand(PresetService);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this);
 
-        SetRankedDataPathCommand = new RelayCommand(SetRankedDataPath);
-
         LoadStartupPreset();
     }
-    ~PresetManagerViewModel()
+    public override void Dispose()
     {
         TournamentViewModel.OnControllerModeChanged -= UpdateBackgroundService;
     }
@@ -133,7 +130,7 @@ public class PresetManagerViewModel : SelectableViewModel
         }
         catch
         {
-            Trace.WriteLine($"Error loading current preset: {opened}");
+            Logger.Error($"Error loading current preset: {opened}");
         }
     }
     private void LoadPresetsList()
@@ -180,14 +177,6 @@ public class PresetManagerViewModel : SelectableViewModel
             TournamentViewModel.Delete();
         }
         File.Delete(item.GetPath());
-    }
-
-    public void SetRankedDataPath()
-    {
-        string path = DialogBox.ShowOpenFolder();
-        if (string.IsNullOrEmpty(path)) return;
-
-        TournamentViewModel.RankedApiKey = path;
     }
 
     private void OpenPresetFolder()

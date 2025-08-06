@@ -11,6 +11,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
@@ -25,6 +26,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     public TournamentViewModel Tournament { get; }
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
+    public ILoggingService Logger { get; }
 
     private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
     public ObservableCollection<PlayerViewModel> SelectedPlayers
@@ -147,16 +149,17 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private PlayerSortingType _lastSortingType;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator) : base(coordinator)
+    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger) : base(coordinator)
     {
         Tournament = tournament;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
+        Logger = logger;
 
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { Coordinator.ShowLoading(ValidateAllPlayers); });
 
-        ViewPlayerInfoCommand = new ViewPlayerInfoCommand(this, coordinator, coordinator, PresetService);
+        ViewPlayerInfoCommand = new ViewPlayerInfoCommand(this, coordinator, coordinator, PresetService, Logger);
         EditPlayerCommand = new EditPlayerCommand(this);
         ValidatePlayerCommand = new ValidatePlayerCommand(this, coordinator, PresetService);
         FixPlayerHeadCommand = new FixPlayerHeadCommand(this, coordinator, PresetService);
@@ -164,7 +167,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
 
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
-        ImportPlayersCommand = new ImportWhitelistCommand(this, Tournament, coordinator, PresetService);
+        ImportPlayersCommand = new ImportWhitelistCommand(this, Tournament, coordinator, PresetService, Logger);
         ExportPlayersCommand = new ExportWhitelistCommand(Tournament, tournament.GetData());
 
         LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, Tournament, PresetService, coordinator);
@@ -184,7 +187,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             }
             catch
             {
-                DialogBox.Show("Can't load paceman events", "Error", MessageBoxButton.OK, MessageBoxImage.Warning); 
+                Logger.Error("Can't load paceman events"); 
             }
 
             if (eventsData == null) return;

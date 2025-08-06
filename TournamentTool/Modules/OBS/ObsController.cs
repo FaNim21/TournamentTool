@@ -12,6 +12,7 @@ using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.OBS;
@@ -38,7 +39,8 @@ public class ConnectionStateChangedEventArgs : EventArgs
 public class ObsController
 {
     public TournamentViewModel Tournament { get; }
-    
+    public ILoggingService Logger { get; }
+
     private CancellationTokenSource _cancellationTokenSource;
 
     public ObsClient Client { get; private set; }
@@ -58,10 +60,11 @@ public class ObsController
     private bool _tryingToConnect;
 
 
-    public ObsController(TournamentViewModel tournament)
+    public ObsController(TournamentViewModel tournament, ILoggingService logger)
     {
         Tournament = tournament;
-        
+        Logger = logger;
+
         Client = new ObsClient { RequestTimeout = 10000 };
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -117,7 +120,7 @@ public class ObsController
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message} - {ex.StackTrace}");
+            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
             await Disconnect();
         }
     }
@@ -279,7 +282,7 @@ public class ObsController
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
+            Logger.Error(exception);
         }
     }
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
@@ -356,7 +359,7 @@ public class ObsController
     }
     private void ChangeStudioMode(bool option, bool refresh = true)
     {
-        Trace.WriteLine($"StudioMode: {option}");
+        Logger.Log($"StudioMode: {option}");
         StudioMode = option;
         
         StudioModeChanged?.Invoke(this, EventArgs.Empty);

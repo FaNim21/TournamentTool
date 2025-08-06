@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Media.Imaging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
@@ -13,11 +12,11 @@ public class StatusBarViewModel : BaseViewModel
     public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
 
     
-    public StatusBarViewModel(TournamentViewModel tournament, ObsController obs, TwitchService twitch, IBackgroundCoordinator backgroundCoordinator)
+    public StatusBarViewModel(TournamentViewModel tournament, ObsController obs, TwitchService twitch, IBackgroundCoordinator backgroundCoordinator, NotificationPanelViewModel notificationPanelViewModel)
     {
         Tournament = tournament;
 
-        var notifications = new NotificationStatusViewModel();
+        var notifications = new NotificationStatusViewModel(notificationPanelViewModel);
         var obsStatus = new OBSStatusViewModel(obs);
         var backgroundServiceStatus = new BackgroundServiceStatusViewModel(backgroundCoordinator, (IBackgroundServiceRegistry)backgroundCoordinator);
         var twitchStatus = new TwitchStatusViewModel(twitch, tournament);

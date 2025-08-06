@@ -6,6 +6,7 @@ using OBSStudioClient.Events;
 using TournamentTool.Commands;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
@@ -18,6 +19,7 @@ public class SceneControllerViewmodel : BaseViewModel
     
     public ControllerViewModel Controller { get; }
     public TournamentViewModel Tournament { get; }
+    public ILoggingService Logger { get; }
     public ObsController OBS { get; }
     
     public Scene MainScene { get; }
@@ -67,14 +69,15 @@ public class SceneControllerViewmodel : BaseViewModel
     public ICommand SwitchStudioModeCommand {  get; set; }
     public ICommand StudioModeTransitionCommand { get; set; }
 
-    public SceneControllerViewmodel(ControllerViewModel controller, ICoordinator coordinator, ObsController obs, TournamentViewModel tournament)
+    public SceneControllerViewmodel(ControllerViewModel controller, ICoordinator coordinator, ObsController obs, TournamentViewModel tournament, ILoggingService logger)
     {
         Controller = controller;
         OBS = obs;
         Tournament = tournament;
+        Logger = logger;
 
-        MainScene = new Scene(this, coordinator);
-        PreviewScene = new PreviewScene(this, coordinator);
+        MainScene = new Scene(this, coordinator, logger);
+        PreviewScene = new PreviewScene(this, coordinator, logger);
         
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
@@ -170,7 +173,7 @@ public class SceneControllerViewmodel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
     private async void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)
@@ -181,7 +184,7 @@ public class SceneControllerViewmodel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
     private async void OnCurrentPreviewSceneChanged(object? sender, SceneNameEventArgs e)
@@ -192,7 +195,7 @@ public class SceneControllerViewmodel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
     private async void OnSceneTransitionStarted(object? sender, EventArgs e)
@@ -203,7 +206,7 @@ public class SceneControllerViewmodel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
     private async void OnStudioModeChanged(object? sender, EventArgs e)
@@ -214,7 +217,7 @@ public class SceneControllerViewmodel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
 
@@ -239,7 +242,7 @@ public class SceneControllerViewmodel : BaseViewModel
     private async Task CurrentMainSceneChanged(string scene)
     {
         bool isDuplicate = scene.Equals(MainScene.SceneName);
-        Trace.WriteLine($"Program scene: {scene}, duplicate: {isDuplicate}");
+        Logger.Log($"Program scene: {scene}, duplicate: {isDuplicate}");
         if (isDuplicate) return;
 
         await MainScene.GetCurrentSceneItems(scene);
@@ -247,7 +250,7 @@ public class SceneControllerViewmodel : BaseViewModel
     private async Task CurrentPreviewSceneChanged(string scene)
     {
         if (scene.Equals(PreviewScene.SceneName)) return;
-        Trace.WriteLine("Loading Preview scene: " + scene);
+        Logger.Log("Loading Preview scene: " + scene);
         
         await LoadScenesForStudioMode(false);
         await PreviewScene.GetCurrentSceneItems(scene);
@@ -259,7 +262,7 @@ public class SceneControllerViewmodel : BaseViewModel
         if (MainScene.SceneName!.Equals(PreviewScene.SceneName)) return;
         OBS.SetStartedTransition(true);
 
-        Trace.WriteLine("Started Transition");
+        Logger.Log("Started Transition");
         string previewScene = PreviewScene.SceneName;
         string mainScene = MainScene.SceneName;
 
@@ -298,7 +301,7 @@ public class SceneControllerViewmodel : BaseViewModel
     public async Task LoadPreviewScene(string sceneName, bool isFromApi = false)
     {
         if(!OBS.IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
-        Trace.WriteLine($"loading preview - {sceneName}");
+        Logger.Log($"loading preview - {sceneName}");
 
         UpdateSelectedScene(sceneName);
 
@@ -330,7 +333,7 @@ public class SceneControllerViewmodel : BaseViewModel
         {
             if (!force && loadedScenes.Scenes.Length == Scenes.Count) return;
 
-            Trace.WriteLine("Loading preview scenes list");
+            Logger.Log("Loading preview scenes list");
             Application.Current.Dispatcher.Invoke(Scenes.Clear);
 
             for (int i = loadedScenes.Scenes.Length - 1; i >= 0; i--)

@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Models.Ranking;
@@ -163,17 +165,23 @@ public class LeaderboardEntryViewModel : BaseViewModel
     
     public void SetupOpeningWindow()
     {
-        foreach (var milestone in _entry.Milestones)
+        foreach (var milestones in _entry.Milestones.Batch(5))
         {
-            switch (milestone)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                case EntryRankedMilestoneData ranked:
-                    Milestones.Add(new EntryMilestoneRankedDataViewModel(ranked));
-                    break;
-                case EntryPacemanMilestoneData paceman:
-                    Milestones.Add(new EntryMilestonePacemanDataViewModel(paceman));
-                    break;
-            }
+                foreach (var milestone in milestones)
+                {
+                    switch (milestone)
+                    {
+                        case EntryRankedMilestoneData ranked:
+                            Milestones.Add(new EntryMilestoneRankedDataViewModel(ranked));
+                            break;
+                        case EntryPacemanMilestoneData paceman:
+                            Milestones.Add(new EntryMilestonePacemanDataViewModel(paceman));
+                            break;
+                    }
+                }
+            }, DispatcherPriority.Background);
         }
     }
     public override void Dispose()

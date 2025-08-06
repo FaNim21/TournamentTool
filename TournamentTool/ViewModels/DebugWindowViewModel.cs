@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.ViewModels;
@@ -237,7 +238,7 @@ public class DebugWindowViewModel : BaseViewModel
 
                 if (collection is INotifyCollectionChanged notifyCollection)
                 {
-                    Trace.WriteLine($"Added Collection changed to: {collectionName}");
+                    LogService.Log($"Added Collection changed to: {collectionName}");
                     notifyCollection.CollectionChanged += OnCollectionChanged;
                     if (!_viewModelToVariablesMap.ContainsKey(notifyCollection))
                     {
@@ -281,7 +282,7 @@ public class DebugWindowViewModel : BaseViewModel
 
             if (value is INotifyCollectionChanged collection)
             {
-                Trace.WriteLine($"Added Collection changed to: {variableName}");
+                LogService.Log($"Added Collection changed to: {variableName}");
                 collection.CollectionChanged += OnCollectionChanged;
             }
 
@@ -552,7 +553,7 @@ public class DebugWindowViewModel : BaseViewModel
 
             if (kvp.Key is INotifyCollectionChanged collection)
             {
-                Trace.WriteLine($"Cleared Collection changed in: {kvp.Key}");
+                LogService.Log($"Cleared Collection changed in: {kvp.Key}");
                 collection.CollectionChanged -= OnCollectionChanged;
             }
 

@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Components.Controls;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 
 namespace TournamentTool.ViewModels.Entities;
@@ -417,7 +418,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         }
         catch (Exception ex)
         {
-            Console.WriteLine("ERROR completing data: " + ex.Message + " - " + ex.StackTrace);
+            LogService.Error("ERROR completing data: " + ex.Message + " - " + ex.StackTrace);
         }
     }
     

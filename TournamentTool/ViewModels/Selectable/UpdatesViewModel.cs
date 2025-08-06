@@ -11,6 +11,7 @@ using TournamentTool.Commands;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Parsers;
 
@@ -18,6 +19,8 @@ namespace TournamentTool.ViewModels.Selectable;
 
 public class UpdatesViewModel : SelectableViewModel
 {
+    public ILoggingService Logger { get; }
+
     private struct Releases
     {
         [JsonPropertyName("tag_name")] public string Version { get; set; }
@@ -114,8 +117,10 @@ public class UpdatesViewModel : SelectableViewModel
     private bool canDownloadUpdate;
 
 
-    public UpdatesViewModel(ICoordinator coordinator) : base(coordinator)
+    public UpdatesViewModel(ICoordinator coordinator, ILoggingService logger) : base(coordinator)
     {
+        Logger = logger;
+        
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
         DownloadCommand = new RelayCommand(() =>
@@ -156,7 +161,7 @@ public class UpdatesViewModel : SelectableViewModel
 
             if (!releasesResponse.IsSuccessStatusCode)
             {
-                Trace.WriteLine("Error while searching for update: " + releasesResponse.StatusCode);
+                Logger.Error("Error while searching for update: " + releasesResponse.StatusCode);
                 canDownloadUpdate = false;
                 return;
             }
@@ -177,13 +182,13 @@ public class UpdatesViewModel : SelectableViewModel
             }
             else
             {
-                Trace.WriteLine("No releases found in the repository.");
+                Logger.Log("No releases found in the repository.");
                 canDownloadUpdate = false;
             }
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"Error: {ex.Message} {ex.StackTrace}");
+            Logger.Error($"Error: {ex.Message} {ex.StackTrace}");
             canDownloadUpdate = false;
         }
         finally
@@ -224,13 +229,13 @@ public class UpdatesViewModel : SelectableViewModel
                 }
             }
 
-            Trace.WriteLine("Download completed successfully.");
+            Logger.Log("Download completed successfully.");
 
             ReplaceExecutable();
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"Error: {ex.Message} {ex.StackTrace}");
+            Logger.Error($"Error: {ex.Message} {ex.StackTrace}");
         }
         finally
         {
@@ -257,7 +262,7 @@ public class UpdatesViewModel : SelectableViewModel
                 }
                 else
                 {
-                    Trace.WriteLine($"{executableFileName} not found in the zip file.");
+                    Logger.Log($"{executableFileName} not found in the zip file.");
                     return;
                 }
             }
@@ -279,7 +284,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"Error replacing executable: {ex.Message}\n{ex.StackTrace}");
+            Logger.Error($"Error replacing executable: {ex.Message}\n{ex.StackTrace}");
         }
         Downloading = false;
     }

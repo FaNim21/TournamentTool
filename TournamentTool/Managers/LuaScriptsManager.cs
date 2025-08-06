@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using NuGet.Versioning;
 using TournamentTool.Enums;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
@@ -20,13 +21,15 @@ public interface ILuaScriptsManager
 
 public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
 {
+    private ILoggingService Logger { get; }
     private readonly TournamentViewModel _tournament;
     
     private readonly Dictionary<string, LuaLeaderboardScript> _leaderboardScripts = [];
 
     
-    public LuaScriptsManager(TournamentViewModel tournament)
+    public LuaScriptsManager(TournamentViewModel tournament, ILoggingService logger)
     {
+        Logger = logger;
         _tournament = tournament;
         
         LoadLuaScripts();
@@ -73,7 +76,7 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to update default script: {name} - {ex.Message}");
+                Logger.Error($"Failed to update default script: {name} - {ex.Message}");
             }
         }
     }

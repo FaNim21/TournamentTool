@@ -6,6 +6,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Modules;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
@@ -14,6 +15,15 @@ using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentToolTests.ViewModelsTests;
+
+public class TestLogger : ILoggingService
+{
+    public void Log(object message, LogLevel level = LogLevel.Normal) { }
+    public void Error(object message) { }
+    public void Warning(object message) { }
+    public void Information(object message) { }
+    public void Debug(object message) { }
+}
 
 public class PresetManagerTests
 {
@@ -31,10 +41,9 @@ public class PresetManagerTests
         _mockTournamentViewModel = new Mock<TournamentViewModel>();
         _mockCoordinator = new Mock<MainViewModelCoordinator>(null!);
         
-        Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>();
         Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
 
-        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, _mockLeaderboard.Object, _mockBackgroundCoordinator.Object);
+        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, _mockBackgroundCoordinator.Object, new TestLogger());
     }
 
     [Fact]
@@ -116,7 +125,7 @@ public class PresetManagerTests
             Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>();
             Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
 
-            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockLeaderboard.Object, _mockBackgroundCoordinator.Object);
+            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger());
         }
 
         [Fact]
@@ -184,7 +193,6 @@ public class PresetManagerTests
                 IsUsingTwitchAPI = true,
                 ShowStreamCategory = false,
                 
-                ApiRefreshRateMiliseconds = 3000,
                 PaceManRefreshRateMiliseconds = 10000,
                 
                 Structure2GoodPaceMiliseconds = 20,
@@ -221,7 +229,6 @@ public class PresetManagerTests
             Assert.False(tournamentCleared.IsUsingTwitchAPI);
             Assert.True(tournamentCleared.ShowStreamCategory);
 
-            Assert.Equal(1000, tournamentCleared.ApiRefreshRateMiliseconds);
             Assert.Equal(3000, tournamentCleared.PaceManRefreshRateMiliseconds);
 
             Assert.Equal(270000, tournamentCleared.Structure2GoodPaceMiliseconds);

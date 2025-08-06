@@ -1,16 +1,20 @@
-﻿using TournamentTool.Utils;
+﻿using TournamentTool.Modules.Logging;
+using TournamentTool.Utils;
 using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.Controller;
 
-public class APIUpdaterService : ServiceUpdater
+public class APIUpdaterService : IServiceUpdater
 {
+    private ILoggingService Logger { get; }
+    
     private readonly ControllerViewModel _controller;
     private readonly APIDataSaver _api;
 
     
-    public APIUpdaterService(ControllerViewModel controller)
+    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger)
     {
+        Logger = logger;
         _controller = controller;
         
         _api = new APIDataSaver();
@@ -26,6 +30,7 @@ public class APIUpdaterService : ServiceUpdater
 
     public Task UpdateAsync(CancellationToken token)
     {
+        Logger.Error("api update hehe");
         _controller.ManagementPanel?.UpdateAPI(_api);
         return Task.CompletedTask;
     }

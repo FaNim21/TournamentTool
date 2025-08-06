@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using TournamentTool.Interfaces;
+using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Controller;
 using TournamentTool.ViewModels.Selectable;
@@ -11,14 +12,14 @@ public class PreviewScene : Scene
     public string TransitionSceneName { get; set; } = string.Empty;
 
 
-    public PreviewScene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow) : base(sceneController, dialogWindow)
+    public PreviewScene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow, ILoggingService logger) : base(sceneController, dialogWindow, logger)
     {
         Type = SceneType.Preview;
     }
 
     public override async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
-        Trace.WriteLine($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {SceneController.MainScene.SceneName}");
+        Logger.Log($"LOADING PREVIEW: {scene}, current: {SceneName}, main: {SceneController.MainScene.SceneName}");
         if (SceneController.MainScene.SceneName!.Equals(scene))
         {
             if (!SceneController.OBS.IsConnectedToWebSocket) return;

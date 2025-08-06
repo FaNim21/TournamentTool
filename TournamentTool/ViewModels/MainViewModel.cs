@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Components;
+using TournamentTool.Modules.Logging;
+using TournamentTool.Modules.Updates;
 using TournamentTool.Services;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
@@ -41,7 +43,20 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    private bool _isHamburgerMenuOpen = false;
+    public NotificationPanelViewModel? notificationPanel;
+    public NotificationPanelViewModel? NotificationPanel
+    {
+        get => notificationPanel;
+        set
+        {
+            notificationPanel = value;
+            OnPropertyChanged(nameof(NotificationPanel));
+        }
+    }
+    
+    public ILoggingService Logger { get; }
+
+    private bool _isHamburgerMenuOpen;
     public bool IsHamburgerMenuOpen
     {
         get => _isHamburgerMenuOpen;
@@ -50,11 +65,12 @@ public class MainViewModel : BaseViewModel
             if (NavigationService.SelectedView is UpdatesViewModel updates && updates.Downloading) return;
             if (_isHamburgerMenuOpen == value) return;
 
+            NotificationPanel?.HidePanel();
             _isHamburgerMenuOpen = value;
             OnPropertyChanged(nameof(IsHamburgerMenuOpen));
         }
     }
-
+    
     private bool _newUpdate; 
     public bool NewUpdate
     {
@@ -80,22 +96,24 @@ public class MainViewModel : BaseViewModel
     public bool IsDebugWindowOpened { get; set; }
     public string VersionText { get; }
     
-    public ICommand OnHamburgerClick { get; set; }
-    public ICommand SelectViewModelCommand { get; set; }
+    public ICommand SelectViewModelCommand { get; private set; }
 
 
-    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel, StatusBarViewModel statusBar)
+    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel)
     {
         NavigationService = navigationService;
         TournamentViewModel = tournamentViewModel;
         StatusBar = statusBar;
+        Logger = logger;
+        NotificationPanel = notificationPanel;
+
+        NotificationPanel.PanelOpened += (_, _) => { IsHamburgerMenuOpen = false; };
 
         Directory.CreateDirectory(Consts.PresetsPath);
         Directory.CreateDirectory(Consts.LogsPath);
         Directory.CreateDirectory(Consts.ScriptsPath);
         Directory.CreateDirectory(Consts.LeaderboardScriptsPath);
 
-        OnHamburgerClick = new RelayCommand(() => { IsHamburgerMenuOpen = !IsHamburgerMenuOpen; });
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
 
         VersionText = Consts.Version;
@@ -132,7 +150,7 @@ public class MainViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex);
+            Logger.Error(ex);
         }
 
         NewUpdate = isNewUpdate;

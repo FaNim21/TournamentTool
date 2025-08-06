@@ -6,6 +6,7 @@ using System.Windows.Input;
 using TournamentTool.Commands.Controller;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Controller;
@@ -26,6 +27,7 @@ public class Scene : BaseViewModel
     public SceneType Type { get; protected init; }
 
     public SceneControllerViewmodel SceneController { get; }
+    public ILoggingService Logger { get; }
     private readonly IDialogWindow _dialogWindow;
 
     private ObservableCollection<PointOfView> _povs = [];
@@ -97,9 +99,10 @@ public class Scene : BaseViewModel
     public ICommand ShowInfoWindowCommand { get; set; }
 
 
-    public Scene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow)
+    public Scene(SceneControllerViewmodel sceneController, IDialogWindow dialogWindow, ILoggingService logger)
     {
         SceneController = sceneController;
+        Logger = logger;
         _dialogWindow = dialogWindow;
         Type = SceneType.Main;
         
@@ -137,7 +140,7 @@ public class Scene : BaseViewModel
     public void SetStudioMode(bool option)
     {
         string output = option?"<Smaller>" : "<Bigger>";
-        Trace.WriteLine($"Resizing scene ([{Type}] - {SceneName}) to {output}");
+        Logger.Log($"Resizing scene ([{Type}] - {SceneName}) to {output}");
         if (option)
         {
             CanvasWidth = 210;

@@ -5,6 +5,7 @@ using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels;
@@ -13,6 +14,7 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 {
     private IPresetSaver PresetSaver { get; }
     private ILoadingDialog LoadingDialog { get; }
+    private ILoggingService Logger { get; }
 
     public PlayerViewModel PlayerViewModel { get; }
 
@@ -21,11 +23,12 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
     public ICommand CopyDataCommand { get; init; }
 
 
-    public ViewWhitelistPlayerViewModel(PlayerViewModel playerViewModel, IPresetSaver presetSaver, ILoadingDialog loadingDialog)
+    public ViewWhitelistPlayerViewModel(PlayerViewModel playerViewModel, IPresetSaver presetSaver, ILoadingDialog loadingDialog, ILoggingService logger)
     {
         PlayerViewModel = playerViewModel;
         PresetSaver = presetSaver;
         LoadingDialog = loadingDialog;
+        Logger = logger;
 
         CorrectPlayerUUIDCommand = new RelayCommand(() => { LoadingDialog.ShowLoading(CompleteUUID, true); });
         OpenNameMCCommand = new RelayCommand(OpenNameMC);
@@ -80,8 +83,11 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
     private void CopyToClipboard(string text)
     {
-        //TODO: 9 jak bede robic popupy to dac info o skopiowaniu do clipboarda
         if (string.IsNullOrEmpty(text)) return;
+        string currentText = Clipboard.GetText();
+        if (currentText.Equals(text)) return;
+        
         Clipboard.SetText(text);
+        Logger.Information($"copied to clipboard: {text}");
     }
 }

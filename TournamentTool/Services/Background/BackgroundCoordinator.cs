@@ -5,12 +5,15 @@ using TournamentTool.Enums;
 using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
+using TournamentTool.Modules.Logging;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Services.Background;
 
 public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
 {
+    private ILoggingService Logger { get; }
+    
     private readonly TournamentViewModel _tournament;
     private readonly BackgroundServiceFactory _backgroundServiceFactory;
     
@@ -23,8 +26,9 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     private CancellationTokenSource? _cancellationTokenSource;
 
     
-    public BackgroundCoordinator(TournamentViewModel tournament, ILeaderboardManager leaderboard, IPresetSaver saver)
+    public BackgroundCoordinator(TournamentViewModel tournament, ILeaderboardManager leaderboard, IPresetSaver saver, ILoggingService logger)
     {
+        Logger = logger;
         _tournament = tournament;
         
         _backgroundServiceFactory = new BackgroundServiceFactory(tournament, leaderboard, saver);
@@ -69,7 +73,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
             Service.RegisterData(Receivers[i]);
         }
         
-        Console.WriteLine($"New service {service.GetType()} just started");
+        Logger.Log($"New service {service.GetType()} just started");
         ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournament.ControllerMode, true));
     }
 
@@ -82,14 +86,14 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
             
             while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
             {
-                if (Service == null) break;
+                if (Service == null) continue;
                 await Service.Update(cancellationToken);
             }
         }
         catch (TaskCanceledException) { Clear(); }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} while updating background service {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error($"Error: {ex.Message} while updating background service {ex.StackTrace}");
             Clear();
         }
     }
@@ -106,7 +110,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Logger.Error(e);
             }
             _worker.DoWork -= Update;
             _worker.Dispose();
@@ -118,7 +122,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     private void ClearService()
     {
         if (Service == null) return;
-        Console.WriteLine($"Service {Service!.GetType()} just stopped");
+        Logger.Log($"Service {Service!.GetType()} just stopped");
         Service = null;
         
         ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournament.ControllerMode, false));

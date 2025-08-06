@@ -132,7 +132,6 @@ public class Tournament : IPreset
     public bool IsUsingTwitchAPI { get; set; }
     public bool ShowStreamCategory { get; set; } = true;
     
-    public int ApiRefreshRateMiliseconds { get; set; } = 1000;
     public int PaceManRefreshRateMiliseconds { get; set; } = 3000;
 
     public int Structure2GoodPaceMiliseconds { get; set; } = 270000; 

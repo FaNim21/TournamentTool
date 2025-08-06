@@ -1,10 +1,11 @@
-﻿using NuGet.Versioning;
-using System.Diagnostics;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NuGet.Versioning;
+using TournamentTool.Modules.Logging;
+using TournamentTool.Utils;
 
-namespace TournamentTool.Utils;
+namespace TournamentTool.Modules.Updates;
 
 public struct Release
 {
@@ -35,7 +36,7 @@ public class UpdateChecker
 
                 if (!string.IsNullOrEmpty(latestRelease.Version) && !IsUpToDate(latestRelease.Version, version))
                 {
-                    Trace.WriteLine($"Found new update - {latestRelease.Version}");
+                    LogService.Warning($"Found new update - {latestRelease.Version}");
                     return true;
                 }
             }
@@ -45,7 +46,7 @@ public class UpdateChecker
             }
         }
 
-        Trace.WriteLine($"You are up to date - {version}");
+        LogService.Log($"You are up to date - {version}");
         return false;
     }
 

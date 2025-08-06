@@ -7,6 +7,7 @@ using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Controller;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.ManagementPanels;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Modules.SidePanels;
@@ -34,6 +35,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public TournamentViewModel TournamentViewModel { get; }
     public LeaderboardPanelViewModel Leaderboard { get; }
+    public ILoggingService Logger { get; }
     public IPresetSaver PresetService { get; }
 
     private IPlayer? _currentChosenPlayer;
@@ -111,16 +113,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private CancellationTokenSource? _playersRefreshTokenSource;
     
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs, TwitchService twitch) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs, TwitchService twitch, ILoggingService logger) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         Leaderboard = leaderboard;
+        Logger = logger;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
-
-        SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel);
-        _serviceHub = new ControllerServiceHub(this, twitch);
+        
+        SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel, logger);
+        _serviceHub = new ControllerServiceHub(this, twitch, logger);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
@@ -131,6 +134,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
+        Logger.Error("Error xd");
+        Logger.Warning("Warning xd");
+        Logger.Warning("Warning xd");
+        Logger.Error("Error xd");
+        Logger.Information("Info xd");
+        Logger.Warning("Warning xd");
+        Logger.Error("Error xd");
+        Logger.Information("Info xd");
+        Logger.Error("Error xd");
+
+        
         Application.Current.Dispatcher.Invoke(() =>
         {
             var collectionViewSource = CollectionViewSource.GetDefaultView(TournamentViewModel.Players);

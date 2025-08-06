@@ -4,23 +4,16 @@ using TournamentTool.Utils;
 using System.Diagnostics;
 using System.Windows;
 using TournamentTool.Components.Controls;
+using TournamentTool.Modules.Logging;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
-using System.ComponentModel;
 using TournamentTool.Modules.OBS;
-using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Selectable;
 using TwitchLib.Api.Core.Exceptions;
 
 namespace TournamentTool.Services;
 
-/// <summary>
-/// Tutaj musi byc:
-/// - Glowna kontrola rzeczy zwiazanych z przechwytywaniem stream'ow
-/// - Klipowanie w przyszlosci
-/// - 
-/// </summary>
 public class TwitchService
 {
+    public ILoggingService Logger { get; }
     private readonly TwitchAPI _api;
 
     public bool IsConnected { get; private set; }
@@ -29,8 +22,9 @@ public class TwitchService
 
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
     
-    public TwitchService()
+    public TwitchService(ILoggingService logger)
     {
+        Logger = logger;
         _api = new TwitchAPI
         {
             Settings =
@@ -102,7 +96,7 @@ public class TwitchService
             Disconnect();
         }
         
-        Console.WriteLine($"Refreshing AccessToken, old: {oldToken}, new: {_refreshToken}");
+        Logger.Log($"Refreshing AccessToken, old: {oldToken}, new: {_refreshToken}");
     }
     
     public async Task<List<Stream>> GetAllStreamsAsync(List<string> logins)
@@ -137,11 +131,11 @@ public class TwitchService
         }
         catch (BadRequestException)
         {
-            DialogBox.Show("Error requesting streams - probably wrong twitch name", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error("Error requesting streams - probably wrong twitch name");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error while fetching streaming datas - {ex.Message}\n{ex.StackTrace}");
+            Logger.Error($"Error while fetching streaming datas - {ex.Message}\n{ex.StackTrace}");
         }
 
         return allStreams.DistinctBy(stream => stream.UserId).ToList();
@@ -152,11 +146,11 @@ public class TwitchService
         try
         {
             response = await _api.Helix.Clips.CreateClipAsync(broadcasterID);
-            string url = response.CreatedClips[0].EditUrl;
+            // string url = response.CreatedClips[0].EditUrl;
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
         }
         return response;
     }

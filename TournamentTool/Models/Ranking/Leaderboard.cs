@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using MethodTimer;
+using TournamentTool.Modules.Logging;
 
 namespace TournamentTool.Models.Ranking;
 
@@ -12,6 +13,7 @@ public class Leaderboard
 
     public void Initialize()
     {
+        _lookupEntries.Clear();
         for (int i = 0; i < OrderedEntries.Count; i++)
         {
             var entry = OrderedEntries[i];
@@ -21,7 +23,7 @@ public class Leaderboard
             }
             catch
             {
-                Console.WriteLine("Cannot add player because its already in dictionary");
+                LogService.Log($"Cannot add player with UUID {entry.PlayerUUID} because its already in lookup dictionary");
             }
         }
     }
@@ -35,7 +37,7 @@ public class Leaderboard
         }
         catch
         {
-            Console.WriteLine("Cannot add player because its already in dictionary");
+            LogService.Log($"Cannot add player with UUID {entry.PlayerUUID} because its already in lookup dictionary");
         }
     }
     public void RemoveEntry(LeaderboardEntry entry)
@@ -47,7 +49,7 @@ public class Leaderboard
         }
         catch
         {
-            Console.WriteLine($"Player with uuid {entry.PlayerUUID} doesn't exist in entries");
+            LogService.Log($"Player with UUID {entry.PlayerUUID} doesn't exist in lookup dictionary");
         }
     }
 

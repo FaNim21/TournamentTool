@@ -97,7 +97,6 @@ public class PointOfView : BaseViewModel
         get => _isMuted;
         set
         {
-            Trace.WriteLine(value + " muted");
             _isMuted = value;
             OnPropertyChanged(nameof(IsMuted));
         }

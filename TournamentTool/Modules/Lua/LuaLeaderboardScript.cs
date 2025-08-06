@@ -1,7 +1,9 @@
 ﻿using System.IO;
+using System.Text;
 using MoonSharp.Interpreter;
 using NuGet.Versioning;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Modules.Lua;
@@ -175,11 +177,12 @@ public class LuaLeaderboardScript
     {
         _script!.Globals["print"] = DynValue.NewCallback((context, args) =>
         {
+            StringBuilder output = new();
             for (int i = 0; i < args.Count; i++)
             {
-                Console.Write(args[i].ToPrintString());
+                output.Append(args[i].ToPrintString());
             }
-            Console.WriteLine();
+            LogService.Log(output);
             return DynValue.Nil;
         });
     }

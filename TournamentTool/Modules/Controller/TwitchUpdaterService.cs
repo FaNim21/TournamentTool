@@ -4,12 +4,12 @@ using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.Controller;
 
-public class TwitchUpdaterService : ServiceUpdater
+public class TwitchUpdaterService : IServiceUpdater, IServiceUpdaterTimer
 {
     private readonly ControllerViewModel _controller;
     private readonly TwitchService _twitch;
-    
-    
+
+
     public TwitchUpdaterService(ControllerViewModel controller, TwitchService twitch)
     {
         _controller = controller;
@@ -100,5 +100,10 @@ public class TwitchUpdaterService : ServiceUpdater
             toClear.LiveData.Clear();
         }
         notLivePlayers.Clear();
+    }
+
+    public void UpdateTimer(string time)
+    {
+        _controller.TwitchUpdateProgressText = time;
     }
 }

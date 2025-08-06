@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -32,17 +33,20 @@ public class ImportWhitelistCommand : BaseCommand
     }
 
     private PlayerManagerViewModel PlayerManager { get; }
+    public ILoggingService Logger { get; }
 
     private readonly ITournamentManager _tournamentManager;
     private readonly IPresetSaver _presetSaver;
     private readonly ILoadingDialog _loadingDialog;
     private string _path = string.Empty;
+    private string _fileName = string.Empty;
 
     
-    public ImportWhitelistCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver)
+    public ImportWhitelistCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, ILoadingDialog loadingDialog, IPresetSaver presetSaver, ILoggingService logger)
     {
         PlayerManager = playerManager;
-        
+        Logger = logger;
+
         _loadingDialog = loadingDialog;
         _tournamentManager = tournamentManager;
         _presetSaver = presetSaver;
@@ -53,6 +57,7 @@ public class ImportWhitelistCommand : BaseCommand
         OpenFileDialog openFileDialog = new() { Filter = "All Files (*.json, *.ranked, *.csv)|*.json;*.ranked;*.csv", };
         _path = openFileDialog.ShowDialog() == true ? openFileDialog.FileName : string.Empty;
         if (string.IsNullOrEmpty(_path)) return;
+        _fileName = Path.GetFileName(_path);
         
         string extension = Path.GetExtension(_path).ToLower();
         switch (extension)
@@ -83,7 +88,7 @@ public class ImportWhitelistCommand : BaseCommand
         }
         catch
         {
-            Trace.WriteLine("Error loading player from whitelist");
+            Logger.Error("Error loading player from whitelist");
         }
 
         if (players == null) return;
@@ -103,7 +108,7 @@ public class ImportWhitelistCommand : BaseCommand
         
         logProgress.Report("Loading complete");
         progress.Report(1);
-        DialogBox.Show("Done loading data from .json whitelist file");
+        Logger.Information($"Done loading data from {_fileName} whitelist file");
     }
     private async Task ImportCSV(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
@@ -152,7 +157,7 @@ public class ImportWhitelistCommand : BaseCommand
         
         logProgress.Report("Loading complete");
         progress.Report(1);
-        DialogBox.Show("Done loading data from .csv file");
+        Logger.Information($"Done loading data from {_fileName} file");
     }
     private async Task ImportRanked(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
@@ -194,11 +199,11 @@ public class ImportWhitelistCommand : BaseCommand
      
             logProgress.Report("Loading complete");
             progress.Report(1);
-            DialogBox.Show("Done loading data from .ranked file");
+            Logger.Information($"Done loading data from {_fileName} ranked file");
         }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error loading json data: {ex.Message}", "", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            Logger.Error($"Error loading json data: {ex.Message}");
         }   
     }
     

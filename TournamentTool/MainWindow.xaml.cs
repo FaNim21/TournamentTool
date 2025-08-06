@@ -53,7 +53,6 @@ public partial class MainWindow : Window
         string output = $"UnhandledException: {e.Exception.Message}\n" +
                         $"StackTrace: {e.Exception.StackTrace}";
 
-        //Nie wiem czy sens jest wyswietlac info podczas crasha?
         DialogBox.Show($"Unhandled exception: {e.Exception.Message}", "Application crash", MessageBoxButton.OK, MessageBoxImage.Error);
 
         Helper.SaveLog(output, "crash_log");

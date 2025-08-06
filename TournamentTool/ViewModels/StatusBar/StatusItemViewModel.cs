@@ -11,6 +11,10 @@ namespace TournamentTool.ViewModels.StatusBar;
 
 public abstract class StatusItemViewModel : BaseViewModel
 {
+    protected abstract string Name { get; }
+
+    protected readonly Dictionary<string, BitmapImage> StateImages = new();
+
     private BitmapImage? _currentImage;
     public BitmapImage? CurrentImage
     {
@@ -22,11 +26,30 @@ public abstract class StatusItemViewModel : BaseViewModel
         }
     }
 
-    protected readonly Dictionary<string, BitmapImage> StateImages = new();
+    private bool _badgeVisibility;
+    public bool BadgeVisibility
+    {
+        get => _badgeVisibility;
+        set
+        {
+            if (_badgeVisibility == value) return;
+            _badgeVisibility = value;
+            OnPropertyChanged(nameof(BadgeVisibility));
+        }
+    }
 
-    protected abstract string Name { get; }
-    public string ToolTip { get; private set; } = string.Empty;
-    
+    private string? _badgeCount;
+    public string? BadgeCount
+    {
+        get => _badgeCount;
+        set
+        {
+            if (_badgeCount == value) return;
+            _badgeCount = value;
+            OnPropertyChanged(nameof(BadgeCount));
+        }
+    }
+
     private string? _statusText;
     public string? StatusText
     {
@@ -49,6 +72,8 @@ public abstract class StatusItemViewModel : BaseViewModel
         }
     }
     
+    public string ToolTip { get; private set; } = string.Empty;
+
     public ICommand ShowMenuCommand { get; }
 
     
@@ -110,6 +135,12 @@ public abstract class StatusItemViewModel : BaseViewModel
         {
             contextMenu.IsOpen = true;
         }
+    }
+
+    protected void SetBadge(int count)
+    {
+        BadgeVisibility = count > 0;
+        BadgeCount = count <= 9 ? count.ToString() : "9+";
     }
 
     protected Separator GetSeparator()

@@ -1,11 +1,16 @@
 ﻿using System.Windows;
 using TournamentTool.Components.Controls;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Services;
 using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.Controller;
 
-public interface ServiceUpdater
+public interface IServiceUpdaterTimer
+{
+    public void UpdateTimer(string time);
+}
+public interface IServiceUpdater
 {
     Task UpdateAsync(CancellationToken token);
     void OnEnable();
@@ -14,10 +19,12 @@ public interface ServiceUpdater
 
 public class ControllerServiceHub
 {
+    private ILoggingService Logger { get; }
+
     private class ServiceRunner
     {
         public string Name { get; }
-        public ServiceUpdater Service { get; }
+        public IServiceUpdater Service { get; }
         public TimeSpan Interval { get; }
         public Task? RunningTask { get; set; }
         public bool IsEnabled { get; set; } = true;
@@ -25,7 +32,7 @@ public class ControllerServiceHub
         public DateTime LastUpdate { get; set; }
 
         
-        public ServiceRunner(string name, ServiceUpdater service, TimeSpan interval)
+        public ServiceRunner(string name, IServiceUpdater service, TimeSpan interval)
         {
             Name = name;
             Service = service;
@@ -33,23 +40,21 @@ public class ControllerServiceHub
         }
     }
 
-    private readonly ControllerViewModel _controller;
-    
     private readonly Dictionary<string, ServiceRunner> _services = new();
     private readonly CancellationTokenSource _cancellationSource = new();
     
     private Timer? _uiUpdateTimer;
 
-    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch)
+    
+    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger)
     {
-        _controller = controller;
-        
+        Logger = logger;
         _uiUpdateTimer = new Timer(UpdateTimers, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
         
         TwitchUpdaterService twitchUpdater = new(controller, twitch);
         AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60));
 
-        APIUpdaterService apiUpdater = new(controller);
+        APIUpdaterService apiUpdater = new(controller, logger);
         AddService("API-data", apiUpdater, TimeSpan.FromSeconds(1));
     }
     public void OnEnable()
@@ -69,7 +74,7 @@ public class ControllerServiceHub
         }
     }
     
-    public void AddService(string name, ServiceUpdater service, TimeSpan interval)
+    public void AddService(string name, IServiceUpdater service, TimeSpan interval)
     {
         if (_services.ContainsKey(name)) return;
             
@@ -77,7 +82,6 @@ public class ControllerServiceHub
         _services[name] = runner;
         
         runner.RunningTask = RunServiceAsync(runner);
-        return;
     }
     
     private async Task RunServiceAsync(ServiceRunner runner)
@@ -95,7 +99,7 @@ public class ControllerServiceHub
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error in service '{runner.Name}': {ex.Message}");
+                        Logger.Error($"Error in service '{runner.Name}': {ex.Message}");
                     }
                 }
                 
@@ -105,7 +109,7 @@ public class ControllerServiceHub
         catch (TaskCanceledException) { }
         catch (Exception ex)
         {
-            DialogBox.Show($"Error: {ex.Message} - {ex.StackTrace}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
         }
     }
     
@@ -113,15 +117,18 @@ public class ControllerServiceHub
     {
         Application.Current?.Dispatcher.Invoke(() =>
         {
-            var runner = _services["Twitch-streams"];
-            if (runner.LastUpdate == DateTime.MinValue) return;
+            foreach (var runner in _services.Values)
+            {
+                if (runner.Service is not IServiceUpdaterTimer timer) continue;
+                if (runner.LastUpdate == DateTime.MinValue) continue;
                 
-            var elapsed = DateTime.Now - runner.LastUpdate;
-            var remaining = runner.Interval - elapsed;
+                var elapsed = DateTime.Now - runner.LastUpdate;
+                var remaining = runner.Interval - elapsed;
                     
-            var time = remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
-            string TimeToNextUpdateText = time.TotalSeconds > 0 ? $"{time:mm\\:ss}" : "Updating...";
-            _controller.TwitchUpdateProgressText = TimeToNextUpdateText;
+                var time = remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+                string TimeToNextUpdateText = time.TotalSeconds > 0 ? $"{time:mm\\:ss}" : "Updating...";
+                timer.UpdateTimer(TimeToNextUpdateText);
+            }
         });
     }
 }

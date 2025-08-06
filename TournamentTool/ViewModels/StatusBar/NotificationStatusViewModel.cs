@@ -1,29 +1,35 @@
 ﻿using System.Windows.Controls;
 using TournamentTool.Commands;
+using TournamentTool.Models;
 
 namespace TournamentTool.ViewModels.StatusBar;
 
 public class NotificationStatusViewModel : StatusItemViewModel
 {
-    // private readonly INotificationService _notificationService;
-    private bool _hasUnreadNotifications;
+    private readonly NotificationPanelViewModel _notificationPanel;
 
     protected override string Name => "Notifications";
-    /*
-    public override string ToolTip => _hasUnreadNotifications 
-        ? $"~ unread notifications" 
-        : "No new notifications";
-        */
 
-    
-    //TODO: 0 Zrobic dzialajace powiadomienia
-    public NotificationStatusViewModel()
+    private int _errorsCount;
+    public int ErrorsCount
     {
-        /*
-        _notificationService = notificationService;
-        _notificationService.NotificationReceived += OnNotificationReceived;
-        _notificationService.NotificationsRead += OnNotificationsRead;
-    */
+        get => _errorsCount;
+        set
+        {
+            _errorsCount = value;
+            OnPropertyChanged(nameof(ErrorsCount));
+        }
+    }
+
+
+    public NotificationStatusViewModel(NotificationPanelViewModel notificationPanel)
+    {
+        _notificationPanel = notificationPanel;
+        _notificationPanel.NotificationReceived += OnNotificationReceived;
+    }
+    public override void Dispose()
+    {
+        _notificationPanel.NotificationReceived -= OnNotificationReceived;
     }
 
     protected override void InitializeImages()
@@ -33,34 +39,44 @@ public class NotificationStatusViewModel : StatusItemViewModel
     }
     protected override void InitializeState()
     {
-        SetState("off");
+        Clear();
     }
     
     protected override void BuildContextMenu(ContextMenu menu)
     {
-        
-        /*
-        AddMenuItem("Connect Twitch APi", new RelayCommand(() => _tournament.IsUsingTwitchAPI = true));
-        AddMenuItem("Disconnect Twitch API", new RelayCommand(() => _tournament.IsUsingTwitchAPI = false));
-    */
+        menu.Items.Clear();
+        menu.Items.Add(new MenuItem 
+        { 
+            Header = "View",
+            Command = new RelayCommand(ShowNotifications)
+        });
+        menu.Items.Add(new MenuItem 
+        { 
+            Header = "Mark as read",
+            Command = new RelayCommand(Clear)
+        });
     }
 
-    private void OnNotificationReceived(object? sender, EventArgs e)
+    private void OnNotificationReceived(object? sender, LogEntry log)
     {
-        _hasUnreadNotifications = true;
         SetState("on");
-        OnPropertyChanged(nameof(ToolTip));
-    }
+        SetToolTip("Unread notifications");
 
-    private void OnNotificationsRead(object? sender, EventArgs e)
-    {
-        // _hasUnreadNotifications = _notificationService.UnreadCount > 0;
-        SetState(_hasUnreadNotifications ? "on" : "off");
-        OnPropertyChanged(nameof(ToolTip));
+        if (log.Level != LogLevel.Error) return;
+        ErrorsCount++;
+        SetBadge(ErrorsCount);
     }
 
     private void ShowNotifications()
     {
-        // Pokaż panel powiadomień
+        Clear();
+        _notificationPanel.ShowPanel();
+    }
+    private void Clear()
+    {
+        ErrorsCount = 0;
+        SetBadge(ErrorsCount);
+        SetState("off");
+        SetToolTip("No new notifications");
     }
 }

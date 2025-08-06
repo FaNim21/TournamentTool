@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using TournamentTool.Modules.Logging;
 
 namespace TournamentTool.Utils;
 
@@ -37,7 +38,7 @@ public class APIDataSaver
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"Error updating api file {fileName}: {ex.Message}");
+            LogService.Error($"Error updating api file {fileName}: {ex.Message}");
         }
     }
 }

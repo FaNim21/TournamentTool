@@ -3,6 +3,7 @@ using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Modules;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
@@ -29,11 +30,16 @@ public partial class App : Application
             DataContext = provider.GetRequiredService<MainViewModel>()
         });
 
+        services.AddSingleton<ILoggingService, LoggingService>();
+        services.AddSingleton<LogStore>();
+        services.AddSingleton<NotificationPanelViewModel>();
+        
         services.AddSingleton<TournamentViewModel>();
         services.AddSingleton<IPresetSaver, PresetService>();
         
         services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
         services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
+        
         services.AddSingleton<ObsController>();
         services.AddSingleton<TwitchService>();
 
@@ -47,10 +53,8 @@ public partial class App : Application
         services.AddSingleton<ControllerViewModel>();
         services.AddSingleton<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>();
-        
         services.AddTransient<LeaderboardPanelViewModel>();
         services.AddTransient<SceneManagementViewModel>();
-
         services.AddSingleton<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
 
@@ -58,6 +62,9 @@ public partial class App : Application
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
 
         _serviceProvider = services.BuildServiceProvider();
+
+        var loggingService = _serviceProvider.GetRequiredService<ILoggingService>();
+        LogService.Initialize(loggingService);
     }
 
     protected override void OnStartup(StartupEventArgs e)
