@@ -16,8 +16,8 @@
         xmlns:enums="clr-namespace:TournamentTool.Enums"
         d:DataContext="{d:DesignInstance Type=rankingViewModels:LeaderboardRuleEditViewModel}"
         mc:Ignorable="d"
-        d:DesignWidth="500"
-        d:DesignHeight="350"
+        d:DesignWidth="600"
+        d:DesignHeight="450"
         Background="#1E1E1E"
         Title="Rule Edit"
         BorderThickness="0.75"
@@ -60,7 +60,6 @@
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -194,6 +193,7 @@
                                    FontWeight="SemiBold"
                                    Margin="0 0 0 10" />
 
+                        <!-- DESCRIPTION -->
                         <StackPanel Orientation="Horizontal"
                                     Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
@@ -208,6 +208,7 @@
                                        Margin="5 0 0 3" />
                         </StackPanel>
 
+                        <!-- TIME -->
                         <StackPanel Orientation="Horizontal"
                                     Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
@@ -224,6 +225,7 @@
                                        Margin="5 0 0 3" />
                         </StackPanel>
 
+                        <!-- BASE POINTS -->
                         <StackPanel Orientation="Horizontal"
                                     Margin="0 0 0 5">
                             <TextBox TextWrapping="Wrap"
@@ -240,6 +242,7 @@
                                        Margin="5 0 0 3" />
                         </StackPanel>
 
+                        <!-- MAX WINNERS (RANKED) -->
                         <StackPanel Orientation="Horizontal"
                                     Visibility="{Binding Rule.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}"
                                     Margin="0 0 0 5">
@@ -256,7 +259,7 @@
                                        FontSize="16"
                                        Margin="5 0 0 3" />
                         </StackPanel>
-
+                        
                     </StackPanel>
 
                     <Line X1="0"

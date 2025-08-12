@@ -29,7 +29,9 @@ public class EditPlayerCommand : BaseCommand
             StreamData =
             {
                 Main = playerViewModel.StreamData.Main ?? string.Empty,
-                Alt = playerViewModel.StreamData.Alt ?? string.Empty
+                Alt = playerViewModel.StreamData.Alt ?? string.Empty,
+                Other = playerViewModel.StreamData.Other ?? string.Empty,
+                OtherType = playerViewModel.StreamData.OtherType
             }
         };
 

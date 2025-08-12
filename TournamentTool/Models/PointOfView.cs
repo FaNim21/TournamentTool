@@ -1,8 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
+using TournamentTool.Enums;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -86,12 +87,50 @@ public class PointOfView : BaseViewModel
     public string DisplayedPlayer { get; set; } = string.Empty;
     public string PersonalBest { get; set; } = string.Empty;
     public string HeadViewParametr { get; set; } = string.Empty;
-    public string TwitchName { get; set; } = string.Empty;
+    public StreamDisplayInfo StreamDisplayInfo { get; set; } = new("", StreamType.twitch);
 
-    public float Volume { get; set; } = 0;
-    public string TextVolume { get => $"{(int)(NewVolume * 100)}%"; }
+    private string _customStreamName = string.Empty;
+    public string CustomStreamName
+    {
+        get => _customStreamName;
+        set
+        {
+            _customStreamName = value;
+            OnPropertyChanged(nameof(CustomStreamName));
+        }
+    }
 
-    private bool _isMuted;
+    private StreamType _customStreamType;
+    public StreamType CustomStreamType
+    {
+        get => _customStreamType;
+        set
+        {
+            _customStreamType = value;
+            OnPropertyChanged(nameof(CustomStreamType));
+        }
+    }
+
+    private string _currentCustomStreamName = string.Empty;
+    private StreamType _currentCustomStreamType = StreamType.twitch;
+    
+    public int Volume { get; set; } = 0;
+    public string TextVolume => $"{NewVolume}%";
+    public string URLVolume => (Volume / 100f).ToString(CultureInfo.InvariantCulture);
+
+    private int _newVolume;
+    public int NewVolume
+    {
+        get => _newVolume;
+        set
+        {
+            _newVolume = value;
+            OnPropertyChanged(nameof(NewVolume));
+            OnPropertyChanged(nameof(TextVolume));
+        }
+    }
+    
+    private bool _isMuted = true;
     public bool IsMuted
     {
         get => _isMuted;
@@ -99,18 +138,6 @@ public class PointOfView : BaseViewModel
         {
             _isMuted = value;
             OnPropertyChanged(nameof(IsMuted));
-        }
-    }
-
-    private float _newVolume;
-    public float NewVolume
-    {
-        get => _newVolume;
-        set
-        {
-            if (_newVolume != value) _newVolume = value;
-            OnPropertyChanged(nameof(NewVolume));
-            OnPropertyChanged(nameof(TextVolume));
         }
     }
 
@@ -156,7 +183,44 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
-    public void SetPOV(IPlayer? povInfo)
+    public void SetBrowserURL()
+    {
+        if (!_obs.SetBrowserURL(SceneItemName!, GetURL())) return;
+        
+        if (_tournament.SetPovHeadsInBrowser) UpdateHead();
+        if (_tournament.DisplayedNameType != DisplayedNameType.None) UpdateNameTextField();
+        if (_tournament.SetPovPBText) UpdatePersonalBestTextField();
+    }
+    
+    public void SetCustomPOV()
+    {
+        if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(_currentCustomStreamName))
+        {
+            _currentCustomStreamName = string.Empty;
+            Clear();
+            return;
+        }
+        if (CustomStreamName.Equals(_currentCustomStreamName) && CustomStreamType == _currentCustomStreamType) return;
+        
+        if (player != null) Clear();
+        _currentCustomStreamName = CustomStreamName;
+        _currentCustomStreamType = CustomStreamType;
+
+        PlayerViewModel customPlayer = new();
+        customPlayer.Name = CustomStreamName;
+        if (_currentCustomStreamType == StreamType.twitch)
+        {
+            customPlayer.StreamData.Main = CustomStreamName;
+        }
+        else
+        {
+            customPlayer.StreamData.Other = CustomStreamName;
+            customPlayer.StreamData.OtherType = CustomStreamType;
+        }
+        
+        SetPOV(customPlayer, true);
+    }
+    public void SetPOV(IPlayer? povInfo, bool isCustom = false)
     {
         var oldPlayer = player;
         player = povInfo;
@@ -166,7 +230,7 @@ public class PointOfView : BaseViewModel
             return;
         }
 
-        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.TwitchName))
+        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.StreamDisplayInfo.Name))
         {
             player = oldPlayer;
             return;
@@ -184,6 +248,11 @@ public class PointOfView : BaseViewModel
             }
         }
 
+        if (!isCustom)
+        {
+            _currentCustomStreamName = string.Empty;
+            CustomStreamName = string.Empty;
+        }
         IsResizing = true;
         IsPlayerUsed = true;
         SetPOV();
@@ -197,18 +266,23 @@ public class PointOfView : BaseViewModel
         }
 
         DisplayedPlayer = player.DisplayName;
-        TwitchName = player.TwitchName;
+        StreamDisplayInfo = player.StreamDisplayInfo;
         HeadViewParametr = player.HeadViewParameter;
         PersonalBest = player.GetPersonalBest ?? "Unk";
         IsFromWhiteList = player.IsFromWhitelist;
         IsPlayerUsed = true;
 
-        _obs.SetBrowserURL(this);
+        SetBrowserURL();
         Update();
     }
     public void Swap(PointOfView pov)
     {
         IPlayer? povPlayer = pov.player;
+
+        (pov.CustomStreamName, CustomStreamName) = (CustomStreamName, pov.CustomStreamName);
+        (pov.CustomStreamType, CustomStreamType) = (CustomStreamType, pov.CustomStreamType);
+        (pov._currentCustomStreamName, _currentCustomStreamName) = (_currentCustomStreamName, pov._currentCustomStreamName);
+        (pov._currentCustomStreamType, _currentCustomStreamType) = (_currentCustomStreamType, pov._currentCustomStreamType);
 
         pov.player = player;
         pov.SetPOV();
@@ -234,26 +308,26 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(BackgroundColor));
     }
 
-    public void ChangeVolume(float volume)
+    public void ChangeVolume(int volume)
     {
-        Volume = Math.Clamp(volume, 0, 1);
+        Volume = volume;
 
-        if (NewVolume == volume) return;
+        if (NewVolume == Volume) return;
         NewVolume = Volume;
-        IsMuted = Volume != 0f;
+        IsMuted = Volume == 0;
     }
     public void ApplyVolume()
     {
         Volume = NewVolume;
-        IsMuted = Volume != 0f;
+        IsMuted = Volume == 0;
         Update();
 
-        _obs.SetBrowserURL(this);
+        SetBrowserURL();
     }
 
     public void UpdateHead()
     {
-        if (string.IsNullOrEmpty(HeadItemName)) return;
+        if (string.IsNullOrEmpty(HeadItemName) || string.IsNullOrEmpty(HeadViewParametr)) return;
 
         string path = $"minotar.net/helm/{HeadViewParametr}/180.png";
         if (string.IsNullOrEmpty(HeadViewParametr))
@@ -271,19 +345,13 @@ public class PointOfView : BaseViewModel
     {
         if (string.IsNullOrEmpty(TextFieldItemName)) return;
 
-        string name = string.Empty;
-        switch (_tournament.DisplayedNameType)
+        string name = _tournament.DisplayedNameType switch
         {
-            case DisplayedNameType.Twitch:
-                name = TwitchName;
-                break;
-            case DisplayedNameType.IGN:
-                name = IsFromWhiteList ? HeadViewParametr : TwitchName;
-                break;
-            case DisplayedNameType.WhiteList:
-                name = DisplayedPlayer;
-                break;
-        }
+            DisplayedNameType.Twitch => StreamDisplayInfo.Name,
+            DisplayedNameType.IGN => IsFromWhiteList ? HeadViewParametr : StreamDisplayInfo.Name,
+            DisplayedNameType.WhiteList => DisplayedPlayer,
+            _ => string.Empty
+        };
 
         _obs.SetTextField(TextFieldItemName, name);
     }
@@ -306,19 +374,34 @@ public class PointOfView : BaseViewModel
 
     public string GetURL()
     {
-        if (string.IsNullOrEmpty(TwitchName)) return string.Empty;
+        if (string.IsNullOrEmpty(StreamDisplayInfo.Name)) return string.Empty;
 
-        return $"https://player.twitch.tv/?channel={TwitchName}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={Volume.ToString().Replace(',', '.')}";
+        int muted = IsMuted ? 1 : 0;
+        string url = StreamDisplayInfo.Type switch
+        {
+            StreamType.twitch => $"https://player.twitch.tv/?channel={StreamDisplayInfo.Name}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={URLVolume}",
+            StreamType.kick => $"https://player.kick.com/{StreamDisplayInfo.Name}?muted={IsMuted.ToString().ToLower()}&allowfullscreen=true",
+            StreamType.youtube => $"https://www.youtube.com/embed/{StreamDisplayInfo.Name}?autoplay=1&controls=0&mute={muted}",
+            _ => string.Empty
+        };
+
+        return url;
     }
-
-    public void Clear()
+    
+    public void Clear(bool fullClear = false)
     {
         DisplayedPlayer = string.Empty;
         Text = string.Empty;
-        TwitchName = string.Empty;
+        StreamDisplayInfo = new StreamDisplayInfo("", StreamType.twitch);
         Volume = 0;
         HeadViewParametr = string.Empty;
         PersonalBest = string.Empty;
+
+        if (fullClear)
+        {
+            _currentCustomStreamName = string.Empty;
+            CustomStreamName = string.Empty;
+        }
 
         if (player != null)
         {

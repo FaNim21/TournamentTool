@@ -1,22 +1,27 @@
-﻿using TournamentTool.Models;
-using TournamentTool.Modules.OBS;
+﻿using TournamentTool.Interfaces;
+using TournamentTool.Models;
+using TournamentTool.ViewModels;
+using TournamentTool.Windows;
 
 namespace TournamentTool.Commands.Controller;
 
 public class ShowPOVInfoWindowCommand : BaseCommand
 {
-    private Scene _scene;
+    private readonly IDialogWindow _dialogWindow;
 
-    public ShowPOVInfoWindowCommand(Scene scene) : base()
+    
+    public ShowPOVInfoWindowCommand(IDialogWindow dialogWindow)
     {
-        _scene = scene;
+        _dialogWindow = dialogWindow;
     }
 
     public override void Execute(object? parameter)
     {
-        if (parameter == null) return;
         if (parameter is not PointOfView pov) return;
 
-        _scene.OpenPOVInfoWindow(pov);
+        POVInformationViewModel viewModel = new(pov);
+        POVInformationWindow window = new() { DataContext = viewModel };
+
+        _dialogWindow.ShowDialog(window);
     }
 }

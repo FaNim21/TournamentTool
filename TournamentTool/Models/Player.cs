@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using TournamentTool.Enums;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.Models;
@@ -16,6 +17,8 @@ public class StreamData : BaseViewModel
 {
     public string Main { get; set; } = string.Empty;
     public string Alt { get; set; } = string.Empty;
+    public string Other { get; set; } = string.Empty;
+    public StreamType OtherType { get; set; } = StreamType.kick;
 }
 
 public class Player

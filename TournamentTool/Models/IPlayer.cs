@@ -1,4 +1,8 @@
-﻿namespace TournamentTool.Models;
+﻿using TournamentTool.Enums;
+
+namespace TournamentTool.Models;
+
+public record StreamDisplayInfo(string Name, StreamType Type);
 
 public interface IPlayer
 {
@@ -10,6 +14,6 @@ public interface IPlayer
     public string DisplayName { get; }
     public string GetPersonalBest { get; }
     public string HeadViewParameter { get; }
-    public string TwitchName { get; }
+    public StreamDisplayInfo StreamDisplayInfo { get; }
     public bool IsFromWhitelist { get; }
 }

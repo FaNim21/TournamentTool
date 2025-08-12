@@ -29,6 +29,8 @@ public class LuaAPIContext : LuaAPIBase
     public int PlayerPoints => _entry.Points;
     public int PlayerTime => _data.MainSplit.Time;
     public int PlayerMilestoneBestTime => _entry.GetBestMilestoneTime(_data.MainSplit.Milestone);
+    public int PlayerMilestoneAmount => _entry.GetBestMilestoneAmount(_data.MainSplit.Milestone);
+    public int PlayerMilestoneTotalTime => _entry.GetBestMilestoneTotalTime(_data.MainSplit.Milestone);
     public string PlayerName => _data.Player.InGameName!;
 
 
@@ -61,6 +63,9 @@ public class LuaPlayerData
     public int Points => entry.Points;
     public int Time => data.MainSplit.Time;
     public string Name => data.Player.InGameName!;
+    public int MilestoneBestTime => entry.GetBestMilestoneTime(data.MainSplit.Milestone);
+    public int MilestoneAmount => entry.GetBestMilestoneAmount(data.MainSplit.Milestone);
+    public int MilestoneTotalTime => entry.GetBestMilestoneTotalTime(data.MainSplit.Milestone);
     
     
     public LuaPlayerData(LeaderboardEntry entry, LeaderboardPlayerEvaluateData data)

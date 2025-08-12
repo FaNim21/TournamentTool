@@ -283,7 +283,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             PlayerSortingType.TeamName => player.TeamName?.Trim().Contains(SearchText, _comparison) ?? false,
             PlayerSortingType.Stream =>
                 (player.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
-                (player.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false),
+                (player.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false) ||
+                (player.StreamData.Other?.Trim().Contains(SearchText, _comparison) ?? false),
             _ => false
         };
     }
@@ -400,6 +401,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         playerViewModel.TeamName = windowsData.TeamName?.Trim();
         playerViewModel.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
         playerViewModel.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
+        playerViewModel.StreamData.Other = windowsData.StreamData.Other.ToLower().Trim();
+        playerViewModel.StreamData.OtherType = windowsData.StreamData.OtherType;
 
         await playerViewModel.CompleteData();
         return true;

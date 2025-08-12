@@ -7,8 +7,11 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
+using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
+using TournamentTool.Utils;
+using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Modules.OBS;
@@ -54,7 +57,7 @@ public class ObsController
 
     private bool _startedTransition;
     private bool _tryingToConnect;
-
+    
 
     public ObsController(TournamentViewModel tournament, ILoggingService logger)
     {
@@ -154,15 +157,6 @@ public class ObsController
         ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, ConnectionState.Disconnected));
     }
 
-    public void SetBrowserURL(PointOfView pov)
-    {
-        if (pov == null) return;
-        if (!SetBrowserURL(pov.SceneItemName!, pov.GetURL())) return;
-
-        if (Tournament.SetPovHeadsInBrowser) pov.UpdateHead();
-        if (Tournament.DisplayedNameType != DisplayedNameType.None) pov.UpdateNameTextField();
-        if (Tournament.SetPovPBText) pov.UpdatePersonalBestTextField();
-    }
     public bool SetBrowserURL(string sceneItemName, string path)
     {
         if (!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return false;
@@ -179,41 +173,29 @@ public class ObsController
         Client.SetInputSettings(sceneItemName, input);
     }
 
-    public async Task<(string, float)> GetBrowserURLTwitchName(string sceneItemName)
+    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName)
     {
-        if (!IsConnectedToWebSocket) return (string.Empty, 0);
+        if (!IsConnectedToWebSocket) return (string.Empty, 0, StreamType.twitch);
 
         var setting = await Client.GetInputSettings(sceneItemName);
         Dictionary<string, object> input = setting.InputSettings;
 
-        string patternPlayerName = @"channel=([^&]+)";
-        string patternVolume = @"volume=(\d+(\.\d+)?)";
-
         input.TryGetValue("url", out var address);
-        if (address == null) return (string.Empty, 0);
+        if (address == null)return (string.Empty, 0, StreamType.twitch); 
 
         string url = address!.ToString()!;
-        if (string.IsNullOrEmpty(url)) return (string.Empty, 0);
+        if (string.IsNullOrEmpty(url))return (string.Empty, 0, StreamType.twitch); 
 
-        string name = string.Empty;
-        float volume = 0;
-
-        Match matchName = Regex.Match(address!.ToString()!, patternPlayerName);
-        Match matchVolume = Regex.Match(address!.ToString()!, patternVolume);
-
-        if (matchName.Success)
+        try
         {
-            name = matchName.Groups[1].Value;
-        }
-        if (matchVolume.Success)
+            return StreamUrlParser.Parse(url);
+        } 
+        catch (Exception ex)
         {
-            if (float.TryParse(matchVolume.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out float volumeValue))
-            {
-                volume = volumeValue;
-            }
+            Logger.Error(ex);
         }
-
-        return (name, volume);
+        
+        return (string.Empty, 0, StreamType.twitch);
     }
 
     private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)

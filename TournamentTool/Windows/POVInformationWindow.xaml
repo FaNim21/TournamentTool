@@ -9,18 +9,20 @@
         xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
         xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
         xmlns:views="clr-namespace:TournamentTool.Views"
+        xmlns:converters="clr-namespace:TournamentTool.Converters"
         d:DataContext="{d:DesignInstance Type=vm:POVInformationViewModel}"
         mc:Ignorable="d"
         Title="POV Informations"
-        Height="160"
-        Width="250"
+        Height="220"
+        Width="350"
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Topmost="True"
         WindowStartupLocation="CenterOwner"
         Background="#1E1E1E">
-    <Border BorderThickness="1" BorderBrush="Black">
+    <Border BorderThickness="1"
+            BorderBrush="Black">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="29" />
@@ -45,46 +47,75 @@
 
             <Grid Grid.Row="1">
                 <StackPanel Margin="10 10 0 0">
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0 0 0 5">
+                        <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="DisplayName"
+                                  ItemsSource="{Binding PointOfView.CustomStreamType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
+                                  SelectedValue="{Binding PointOfView.CustomStreamType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Width="80"
+                                  Height="20" />
+                        <TextBox TextWrapping="Wrap"
+                                 Width="120"
+                                 Height="20"
+                                 Text="{Binding PointOfView.CustomStreamName}"
+                                 Background="#9E9E9E"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top" 
+                                 Margin="5 0 0 0"/>
+                        <TextBlock Text="Custom stream"
+                                   Foreground="White"
+                                   Height="20"
+                                   FontSize="16"
+                                   Padding="0"
+                                   Margin="5 0 0 3" />
+                    </StackPanel>
+                    
                     <TextBlock>
-                    <Run Text="Item: "
-                         FontSize="12"
-                         Foreground="White" />
-                    <Run Text="{Binding PointOfView.SceneItemName}"
-                         Foreground="White"
-                         FontWeight="SemiBold" />
+                        <Run Text="Item: "
+                             FontSize="12"
+                             Foreground="White" />
+                        <Run Text="{Binding PointOfView.SceneItemName}"
+                             Foreground="White"
+                             FontWeight="SemiBold" />
                     </TextBlock>
                     <TextBlock>
-                    <Run Text="Text Item: "
-                         FontSize="12"
-                         Foreground="White" />
-                    <Run Text="{Binding PointOfView.TextFieldItemName}"
-                         Foreground="White"
-                         FontWeight="SemiBold" />
+                        <Run Text="Text Item: "
+                             FontSize="12"
+                             Foreground="White" />
+                        <Run Text="{Binding PointOfView.TextFieldItemName}"
+                             Foreground="White"
+                             FontWeight="SemiBold" />
                     </TextBlock>
                     <TextBlock>
-                    <Run Text="PB Item: "
-                         FontSize="12"
-                         Foreground="White" />
-                    <Run Text="{Binding PointOfView.PersonalBestItemName}"
-                         Foreground="White"
-                         FontWeight="SemiBold" />
+                        <Run Text="PB Item: "
+                             FontSize="12"
+                             Foreground="White" />
+                        <Run Text="{Binding PointOfView.PersonalBestItemName}"
+                             Foreground="White"
+                             FontWeight="SemiBold" />
                     </TextBlock>
                     <TextBlock>
-                    <Run Text="Head Item: "
-                         FontSize="12"
-                         Foreground="White" />
-                    <Run Text="{Binding PointOfView.HeadItemName}"
-                         Foreground="White"
-                         FontWeight="SemiBold" />
+                        <Run Text="Head Item: "
+                             FontSize="12"
+                             Foreground="White" />
+                        <Run Text="{Binding PointOfView.HeadItemName}"
+                             Foreground="White"
+                             FontWeight="SemiBold" />
                     </TextBlock>
                     <TextBlock>
-                    <Run Text="Player: "
-                         FontSize="12"
-                         Foreground="White" />
-                    <Run Text="{Binding PointOfView.DisplayedPlayer}"
-                         Foreground="Cyan" />
+                        <Run Text="Player: "
+                             FontSize="12"
+                             Foreground="White" />
+                        <Run Text="{Binding PointOfView.DisplayedPlayer}"
+                             Foreground="Cyan" />
                     </TextBlock>
                     <StackPanel Orientation="Horizontal"
+                                Height="90"
+                                VerticalAlignment="Bottom"
                                 Margin="0 5 0 0">
                         <components:ButtonNormal Width="45"
                                                  Height="25"
@@ -96,18 +127,18 @@
                                     Margin="5 5 0 0"
                                     Opacity="0.5"
                                     Minimum="0"
-                                    Maximum="1"
-                                    TickFrequency="0.01"
+                                    Maximum="100"
+                                    TickFrequency="1"
                                     Value="{Binding PointOfView.Volume}" />
 
                             <Slider Width="150"
                                     Height="20"
                                     Minimum="0"
-                                    Maximum="1"
+                                    Maximum="100"
                                     IsSnapToTickEnabled="True"
                                     Value="{Binding PointOfView.NewVolume}"
-                                    TickFrequency="0.01"
-                                    SmallChange="0.01"
+                                    TickFrequency="1"
+                                    SmallChange="1"
                                     LargeChange="0"
                                     Margin="5 5 0 0">
                                 <i:Interaction.Behaviors>
@@ -115,11 +146,11 @@
                                 </i:Interaction.Behaviors>
                             </Slider>
                         </Grid>
-                        <Label Content="{Binding PointOfView.TextVolume}"
-                               FontWeight="Bold"
-                               Foreground="Wheat"
-                               Padding="0"
-                               Margin="1 5 0 0" />
+                        <TextBlock Text="{Binding PointOfView.TextVolume, Mode=OneWay}"
+                                   FontWeight="Bold"
+                                   Foreground="Wheat"
+                                   Padding="0"
+                                   Margin="1 37 0 0" />
                     </StackPanel>
                 </StackPanel>
             </Grid>

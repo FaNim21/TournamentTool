@@ -91,9 +91,11 @@ public class TwitchService
             _api.Settings.AccessToken = response.AccessToken;
             _refreshToken = response.RefreshToken;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Error($"Error refreshing twitch access token: {ex.Message} - {ex.StackTrace}");
             Disconnect();
+            return;
         }
         
         Logger.Log($"Refreshing AccessToken, old: {oldToken}, new: {_refreshToken}");

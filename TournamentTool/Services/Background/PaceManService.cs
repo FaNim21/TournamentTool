@@ -123,7 +123,7 @@ public class PaceManService : IBackgroundService
     private void AddPaceMan(Paceman paceman)
     {
         _paces.Add(paceman);
-        UpdatePlayerStreamData(paceman.Nickname, paceman.TwitchName);
+        UpdatePlayerStreamData(paceman.Nickname, paceman.StreamDisplayInfo.Name);
         _pacemanSidePanelReceiver?.AddPace(paceman);
     }
     private void RemovePaceMan(Paceman paceman)

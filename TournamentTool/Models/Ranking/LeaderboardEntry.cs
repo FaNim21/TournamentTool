@@ -74,6 +74,20 @@ public sealed class LeaderboardEntry
         if (data != null) time = data.BestTime;
         return time;
     }
+    public int GetBestMilestoneAmount(RunMilestone milestone)
+    {
+        var data = GetBestMilestone(milestone);
+        int amount = -1;
+        if (data != null) amount = data.Amount;
+        return amount;
+    }
+    public int GetBestMilestoneTotalTime(RunMilestone milestone)
+    {
+        var data = GetBestMilestone(milestone);
+        int amount = -1;
+        if (data != null) amount = data.Amount;
+        return amount;
+    }
     
     public int CompareTo(LeaderboardEntry other, RunMilestone milestone)
     {

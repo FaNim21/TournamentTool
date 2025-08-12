@@ -18,7 +18,7 @@ public class Paceman
     public string UUID { get; }
     public string Nickname { get; }
     public string WorldID { get; }
-    public string TwitchName { get; }
+    public StreamDisplayInfo StreamDisplayInfo { get; }
     public bool ShowOnlyLive { get; private set; }
 
     public PlayerViewModel? PlayerViewModel { get; set; }
@@ -53,7 +53,7 @@ public class Paceman
         Nickname = data.Nickname;
         WorldID = data.WorldID;
         UUID = data.User.UUID;
-        TwitchName = data.User.TwitchName;
+        StreamDisplayInfo = new StreamDisplayInfo(data.User.TwitchName, StreamType.twitch);
 
         Inventory = new PlayerInventory();
         if (!data.ShowOnlyLive) IsLive = data.IsLive();

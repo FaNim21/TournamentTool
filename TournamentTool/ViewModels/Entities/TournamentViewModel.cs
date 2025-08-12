@@ -540,15 +540,16 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         return false;
     }
         
-    public PlayerViewModel? GetPlayerByTwitchName(string twitchName)
+    public PlayerViewModel? GetPlayerByStreamName(string name, StreamType type)
     {
-        if (string.IsNullOrEmpty(twitchName)) return null;
+        if (string.IsNullOrEmpty(name)) return null;
         
         int n = Players.Count;
         for (int i = 0; i < n; i++)
         {
             var current = Players[i];
-            if (current.StreamData.ExistName(twitchName))
+            if ((current.StreamData.ExistName(name) && type == StreamType.twitch) ||
+                (current.StreamData.Other.Equals(name, StringComparison.OrdinalIgnoreCase) && current.StreamData.OtherType == type))
                 return current;
         }
         return null;

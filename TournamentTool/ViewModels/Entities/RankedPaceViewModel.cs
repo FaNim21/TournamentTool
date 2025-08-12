@@ -22,7 +22,7 @@ public class RankedPaceViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public string DisplayName => Data.Player == null ? InGameName : Data.Player.DisplayName;
     public string GetPersonalBest => Data.Player == null ? "Unk" : Data.Player.GetPersonalBest;
     public string HeadViewParameter => Data.Player == null ? InGameName : Data.Player.HeadViewParameter;
-    public string TwitchName => Data.Player == null ? string.Empty : Data.Player.TwitchName;
+    public StreamDisplayInfo StreamDisplayInfo => Data.Player == null ? new StreamDisplayInfo("", StreamType.twitch) : Data.Player.StreamDisplayInfo;
     public bool IsFromWhitelist => Data.Player != null;
     public bool IsLive => Data.IsLive;
     

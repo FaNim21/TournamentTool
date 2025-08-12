@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TournamentTool.Components.Controls;
+using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
@@ -84,8 +85,10 @@ public class TwitchStreamDataViewModel : BaseViewModel
 
     public void Clear(bool isUsingTwitchApi = true)
     {
+        ID = string.Empty;
         BroadcasterID = string.Empty;
         UserName = string.Empty;
+        UserLogin = string.Empty;
         GameName = string.Empty;
         Title = string.Empty;
         ViewerCount = 0;
@@ -93,6 +96,7 @@ public class TwitchStreamDataViewModel : BaseViewModel
         Language = string.Empty;
         ThumbnailUrl = string.Empty;
         Status = "offline";
+        
         Application.Current?.Dispatcher.Invoke(delegate
         {
             if (!isUsingTwitchApi)
@@ -104,6 +108,11 @@ public class TwitchStreamDataViewModel : BaseViewModel
     }
 }
 
+/// <summary>
+/// To moze kiedys jeszcze raz przerobic na 1.0 pod listy, a nie takie dodawanie
+/// - wtedy natomiast uwzglednic szukanie duplikatow po typie stream'a
+/// - czyli dodawanie streamow do listy z opcja wybrania kolejnosci (glownie ze wzgledu na twitch api)
+/// </summary>
 public class StreamDataViewModel : BaseViewModel
 {
     private StreamData _streamData;
@@ -129,6 +138,25 @@ public class StreamDataViewModel : BaseViewModel
         }
     }
 
+    public string Other
+    {
+        get => _streamData.Other;
+        set
+        {
+            _streamData.Other = value;
+            OnPropertyChanged(nameof(Other));
+        }
+    }
+    public StreamType OtherType
+    {
+        get => _streamData.OtherType;
+        set
+        {
+            _streamData.OtherType = value;
+            OnPropertyChanged(nameof(OtherType));
+        }
+    }
+    
     private bool _isLive;
     public bool IsLive
     {
@@ -169,11 +197,13 @@ public class StreamDataViewModel : BaseViewModel
         return Main.Equals(name, _ordinalIgnoreCaseComparison) || Alt.Equals(name, _ordinalIgnoreCaseComparison);
     }
 
-    public string GetCorrectName()
+    public StreamDisplayInfo GetCorrectStream()
     {
+        if (!string.IsNullOrEmpty(Other))
+            return new StreamDisplayInfo(Other, OtherType);
         if (string.IsNullOrEmpty(Main))
-            return Alt;
-        return Main;
+            return new StreamDisplayInfo(Alt, StreamType.twitch);
+        return new StreamDisplayInfo(Main, StreamType.twitch);
     }
 
     public bool EqualsNoDialog(StreamData data)
@@ -350,13 +380,13 @@ public class PlayerViewModel : BaseViewModel, IPlayer
     public string DisplayName => Name!;
     public string GetPersonalBest => PersonalBest ?? "Unk";
     public string HeadViewParameter => InGameName!;
-    public string TwitchName 
+    public StreamDisplayInfo StreamDisplayInfo 
     {
         get
         {
-            if (string.IsNullOrEmpty(StreamData.LiveData.ID)) return StreamData.GetCorrectName();
-    
-            return StreamData.LiveData.UserLogin;
+            if (string.IsNullOrEmpty(StreamData.LiveData.ID))
+                return StreamData.GetCorrectStream();
+            return new StreamDisplayInfo(StreamData.LiveData.UserLogin, StreamType.twitch);
         }
     }
     public bool IsFromWhitelist => true;

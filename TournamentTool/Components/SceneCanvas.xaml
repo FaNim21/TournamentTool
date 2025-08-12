@@ -97,7 +97,7 @@
                                                 </Setter>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsMuted}"
-                                                                 Value="True">
+                                                                 Value="False">
                                                         <Setter Property="Source">
                                                             <Setter.Value>
                                                                 <BitmapImage DecodePixelWidth="16"

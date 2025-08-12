@@ -86,7 +86,7 @@ public partial class SceneCanvas : UserControl
         if (Keyboard.Modifiers == ModifierKeys.Control)
         {
             if (border.DataContext is not PointOfView pov) return;
-            pov.Clear();
+            pov.Clear(true);
             e.Handled = true;
         }
     }

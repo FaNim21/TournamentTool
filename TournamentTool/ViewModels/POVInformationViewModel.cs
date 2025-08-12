@@ -4,16 +4,7 @@ namespace TournamentTool.ViewModels;
 
 public class POVInformationViewModel : BaseViewModel
 {
-    private PointOfView _pointOfView = null!;
-    public PointOfView PointOfView
-    {
-        get => _pointOfView;
-        set
-        {
-            _pointOfView = value;
-            OnPropertyChanged(nameof(PointOfView));
-        }
-    }
+    public PointOfView PointOfView { get; private set; }
 
     //TODO: 9 jakies rzeczy typu rozdzielczosc pova, skala, itp itd
 
@@ -21,5 +12,11 @@ public class POVInformationViewModel : BaseViewModel
     public POVInformationViewModel(PointOfView pov)
     {
         PointOfView = pov;
+    }
+
+    public override void Dispose()
+    {
+        PointOfView.SetCustomPOV();
+        // zatwierdzanie zmian odnosnie custom'owego pov'a
     }
 }

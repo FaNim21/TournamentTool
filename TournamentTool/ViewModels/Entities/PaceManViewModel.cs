@@ -26,7 +26,7 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public string DisplayName => _paceman.PlayerViewModel == null ? _paceman.Nickname : _paceman.PlayerViewModel.DisplayName;
     public string GetPersonalBest => _paceman.PlayerViewModel == null ? "Unk" : _paceman.PlayerViewModel.GetPersonalBest;
     public string HeadViewParameter => _paceman.PlayerViewModel == null ? _paceman.UUID! : _paceman.PlayerViewModel.HeadViewParameter;
-    public string TwitchName => _paceman.TwitchName ?? string.Empty;
+    public StreamDisplayInfo StreamDisplayInfo => _paceman.StreamDisplayInfo ?? new StreamDisplayInfo("", StreamType.twitch);
     public bool IsFromWhitelist => _paceman.PlayerViewModel != null;
     public bool IsLive => _paceman.IsLive;
 

@@ -1,9 +1,9 @@
 ﻿using OBSStudioClient.Classes;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands.Controller;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -11,7 +11,6 @@ using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Controller;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.Windows;
 
 namespace TournamentTool.Modules.OBS;
 
@@ -27,8 +26,7 @@ public class Scene : BaseViewModel
     public SceneType Type { get; protected init; }
 
     public SceneControllerViewmodel SceneController { get; }
-    public ILoggingService Logger { get; }
-    private readonly IDialogWindow _dialogWindow;
+    protected ILoggingService Logger { get; }
 
     private ObservableCollection<PointOfView> _povs = [];
     public ObservableCollection<PointOfView> POVs
@@ -103,12 +101,11 @@ public class Scene : BaseViewModel
     {
         SceneController = sceneController;
         Logger = logger;
-        _dialogWindow = dialogWindow;
         Type = SceneType.Main;
         
         ClearPOVCommand = new ClearPOVCommand();
         RefreshPOVCommand = new RefreshPOVCommand();
-        ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(this);
+        ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(dialogWindow);
 
         CanvasWidth = 426;
         CanvasHeight = 239.625f;
@@ -254,7 +251,7 @@ public class Scene : BaseViewModel
         };
         pov.UpdateTransform(ProportionsRatio);
 
-        (string? currentName, float volume) = await SceneController.OBS.GetBrowserURLTwitchName(pov.SceneItemName);
+        (string? currentName, int volume, StreamType type) = await SceneController.OBS.GetBrowserURLStreamInfo(pov.SceneItemName);
 
         foreach (var additional in additionals)
         {
@@ -272,13 +269,22 @@ public class Scene : BaseViewModel
             }
         }
 
-        pov.Clear();
+        // pov.Clear(true);
         pov.ChangeVolume(volume);
 
         if (!string.IsNullOrEmpty(currentName))
         {
-            PlayerViewModel? player = SceneController.Tournament.GetPlayerByTwitchName(currentName);
-            if (player != null) pov.SetPOV(player);
+            PlayerViewModel? player = SceneController.Tournament.GetPlayerByStreamName(currentName, type);
+            if (player != null)
+            {
+                pov.SetPOV(player);
+            }
+            else
+            {
+                pov.CustomStreamType = type;
+                pov.CustomStreamName = currentName;
+                pov.SetCustomPOV();
+            }
         }
 
         AddPov(pov);
@@ -335,7 +341,7 @@ public class Scene : BaseViewModel
         for (int i = 0; i < POVs.Count; i++)
         {
             var current = POVs[i];
-            if (current.TwitchName.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
+            if (current.StreamDisplayInfo.Name.Equals(twitchName, StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;
@@ -365,14 +371,6 @@ public class Scene : BaseViewModel
             CanvasWidth = calculatedWidth;
         else
             CanvasHeight = calculatedHeight;
-    }
-
-    public void OpenPOVInfoWindow(PointOfView pov)
-    {
-        POVInformationViewModel viewModel = new(pov);
-        POVInformationWindow window = new() { DataContext = viewModel };
-
-        _dialogWindow.ShowDialog(window);
     }
 
     public void Clear()

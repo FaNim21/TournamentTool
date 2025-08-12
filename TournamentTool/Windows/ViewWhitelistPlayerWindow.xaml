@@ -198,6 +198,28 @@
                         <Run Text="{Binding PlayerViewModel.StreamData.Alt}"
                              Foreground="Wheat" />
                     </TextBlock>
+                    
+                    <TextBlock FontSize="12"
+                               TextAlignment="Left"
+                               VerticalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
+                               Padding="0"
+                               Margin="5 0 0 0">
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding CopyDataCommand}"
+                                          CommandParameter="{Binding PlayerViewModel.StreamData.Alt}" />
+                        </TextBlock.InputBindings>
+
+                        <Run Text="Other (" />
+                        <Run Text="{Binding PlayerViewModel.StreamData.OtherType}" />
+                        <Run Text="): " />
+                        <Run Text="{Binding PlayerViewModel.StreamData.Other}"
+                             Foreground="Wheat" />
+                    </TextBlock>
 
                 </StackPanel>
 
