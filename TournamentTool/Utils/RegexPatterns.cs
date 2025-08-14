@@ -17,10 +17,4 @@ public static partial class RegexPatterns
     
     [GeneratedRegex(@"chunk_0:\((\d+),")]
     public static partial Regex LuaErrorLogPattern();
-    
-    [GeneratedRegex("channel=([^&]+)")]
-    public static partial Regex TwitchURLChannelNamePattern();
-    
-    [GeneratedRegex(@"volume=(\d+(\.\d+)?)")]
-    public static partial Regex TwitchURLVolumePattern();
 }

@@ -109,11 +109,6 @@ public class MainViewModel : BaseViewModel
 
         NotificationPanel.PanelOpened += (_, _) => { IsHamburgerMenuOpen = false; };
 
-        Directory.CreateDirectory(Consts.PresetsPath);
-        Directory.CreateDirectory(Consts.LogsPath);
-        Directory.CreateDirectory(Consts.ScriptsPath);
-        Directory.CreateDirectory(Consts.LeaderboardScriptsPath);
-
         SelectViewModelCommand = new RelayCommand<string>(SelectViewModel);
 
         VersionText = Consts.Version;
@@ -150,7 +145,7 @@ public class MainViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            Logger.Warning("Problem while checking for new update: " + ex);
         }
 
         NewUpdate = isNewUpdate;

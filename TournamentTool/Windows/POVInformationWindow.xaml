@@ -117,9 +117,9 @@
                                 Height="90"
                                 VerticalAlignment="Bottom"
                                 Margin="0 5 0 0">
-                        <components:ButtonNormal Width="45"
+                        <components:ButtonNormal Width="115"
                                                  Height="25"
-                                                 ContentText="Apply"
+                                                 ContentText="Apply new volume"
                                                  OnCommand="{Binding PointOfView.ApplyVolumeCommand}" />
                         <Grid>
                             <Slider Width="150"

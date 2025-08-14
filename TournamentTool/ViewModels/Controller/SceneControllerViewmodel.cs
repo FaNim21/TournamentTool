@@ -6,6 +6,7 @@ using OBSStudioClient.Events;
 using TournamentTool.Commands;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.Controller;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
@@ -21,7 +22,7 @@ public class SceneControllerViewmodel : BaseViewModel
     public TournamentViewModel Tournament { get; }
     public ILoggingService Logger { get; }
     public ObsController OBS { get; }
-    
+
     public Scene MainScene { get; }
     public PreviewScene PreviewScene { get; }
 
@@ -31,8 +32,8 @@ public class SceneControllerViewmodel : BaseViewModel
         get => _currentChosenPOV;
         set
         {
-            if (value == null)
-                _currentChosenPOV?.UnFocus();
+            if (value == null) _currentChosenPOV?.UnFocus();
+            
             _currentChosenPOV = value;
             OnPropertyChanged(nameof(CurrentChosenPOV));
         }
@@ -76,8 +77,9 @@ public class SceneControllerViewmodel : BaseViewModel
         Tournament = tournament;
         Logger = logger;
 
-        MainScene = new Scene(this, coordinator, logger);
-        PreviewScene = new PreviewScene(this, coordinator, logger);
+        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament);
+        MainScene = new Scene(this, povController, coordinator, logger);
+        PreviewScene = new PreviewScene(this, povController, coordinator, logger);
         
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
@@ -133,8 +135,7 @@ public class SceneControllerViewmodel : BaseViewModel
         
         string mainScene = await OBS.GetCurrentProgramScene();
         await MainScene.GetCurrentSceneItems(mainScene, true);
-        
-        MainScene.RefreshItems();
+        await StudioModeChanged();
     }
 
     private void UpdateView()

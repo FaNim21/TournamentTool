@@ -1,22 +1,24 @@
 ﻿using TournamentTool.Models;
+using TournamentTool.Modules.OBS;
 
 namespace TournamentTool.ViewModels;
 
 public class POVInformationViewModel : BaseViewModel
 {
+    private readonly Scene _scene;
+    
     public PointOfView PointOfView { get; private set; }
 
-    //TODO: 9 jakies rzeczy typu rozdzielczosc pova, skala, itp itd
 
-
-    public POVInformationViewModel(PointOfView pov)
+    public POVInformationViewModel(PointOfView pov, Scene scene)
     {
+        _scene = scene;
         PointOfView = pov;
     }
 
     public override void Dispose()
     {
+        if (_scene.IsPlayerInPov(PointOfView.CustomStreamName, PointOfView.CustomStreamType)) return;
         PointOfView.SetCustomPOV();
-        // zatwierdzanie zmian odnosnie custom'owego pov'a
     }
 }

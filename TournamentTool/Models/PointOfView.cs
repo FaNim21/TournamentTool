@@ -4,73 +4,137 @@ using System.Windows.Input;
 using System.Windows.Media;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
+using TournamentTool.Modules.Controller;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Models;
 
-public class PointOfView : BaseViewModel
+public class PointOfViewOBSData
 {
-    private readonly ObsController _obs;
-    private readonly TournamentViewModel _tournament;
-
-    public Scene Scene { get; set; }
-
-    public string? GroupName { get; set; }
-    public string? SceneName { get; set; }
-    public string? SceneItemName { get; set; }
-    public int ID { get; set; }
-
-    public int OriginWidth { get; set; }
-    public int Width { get; set; }
-    public int OriginHeight { get; set; }
-    public int Height { get; set; }
-
-    public int OriginX { get; set; }
-    public int X { get; set; }
-    public int OriginY { get; set; }
-    public int Y { get; set; }
-
+    public int ID { get; init; }
+    public string GroupName { get; init; }
+    public string SceneName { get; init; }
+    public string SceneItemName { get; init; }
+    
     public string TextFieldItemName { get; set; } = string.Empty;
     public string HeadItemName { get; set; } = string.Empty;
     public string PersonalBestItemName { get; set; } = string.Empty;
+    
+    public bool IsFromWhiteList { get; set; }
+    public string DisplayedPlayer { get; set; } = string.Empty;
+    public string PersonalBest { get; set; } = string.Empty;
+    public string HeadViewParametr { get; set; } = string.Empty;
+    public StreamDisplayInfo StreamDisplayInfo { get; set; } = new(string.Empty, StreamType.twitch);
 
-    private bool _isResizing;
-    public bool IsResizing
+    public int Volume { get; set; }
+    public bool IsMuted { get; set; } = true;
+    
+    
+    public PointOfViewOBSData(int id, string groupName, string sceneName, string sceneItemName)
     {
-        get => _isResizing;
+        ID = id;
+        GroupName = groupName;
+        SceneName = sceneName;
+        SceneItemName = sceneItemName;
+    }
+}
+
+public class PointOfView : BaseViewModel
+{
+    private readonly IPointOfViewOBSController _controller;
+
+    public SceneType Type { get; }
+    public PointOfViewOBSData Data { get; }
+    
+    public int OriginWidth { get; init; }
+    public int Width { get; private set; }
+    public int OriginHeight { get; init; }
+    public int Height { get; private set; }
+
+    public int OriginX { get; init; }
+    public int X { get; private set; }
+    public int OriginY { get; init; }
+    public int Y { get; private set; }
+
+    public string TextFieldItemName
+    {
+        get => Data.TextFieldItemName;
         set
         {
-            if (_isResizing == value) return;
-
-            _isResizing = value;
-            OnPropertyChanged(nameof(IsResizing));
+            Data.TextFieldItemName = value;
+            OnPropertyChanged(nameof(TextFieldItemName));
+        }
+    }
+    public string HeadItemName
+    {
+        get => Data.HeadItemName;
+        set
+        {
+            Data.HeadItemName = value;
+            OnPropertyChanged(nameof(HeadItemName));
+        }
+    }
+    public string PersonalBestItemName
+    {
+        get => Data.PersonalBestItemName;
+        set
+        {
+            Data.PersonalBestItemName = value;
+            OnPropertyChanged(nameof(PersonalBestItemName));
         }
     }
 
-    public Brush? BackgroundColor { get; set; }
+    public bool IsFromWhiteList
+    {
+        get => Data.IsFromWhiteList;
+        set => Data.IsFromWhiteList = value;
+    }
+    public string DisplayedPlayer
+    {
+        get => Data.DisplayedPlayer;
+        set
+        {
+            Data.DisplayedPlayer = value;
+            OnPropertyChanged(nameof(DisplayedPlayer));
+        }
+    }
+    public string PersonalBest
+    {
+        get => Data.PersonalBest;
+        set => Data.PersonalBest = value;
+    }
+    public string HeadViewParametr
+    {
+        get => Data.HeadViewParametr;
+        set => Data.HeadViewParametr = value;
+    }
+    public StreamDisplayInfo StreamDisplayInfo
+    {
+        get => Data.StreamDisplayInfo;
+        set => Data.StreamDisplayInfo = value;
+    }
 
-    public string Text { get; set; } = string.Empty;
+    public bool IsFocused { get; private set; }
+    public Brush? BackgroundColor { get; set; }
 
     public bool IsPlayerUsed
     {
         get
         {
             if (player == null) return false;
-            if (Scene.Type == SceneType.Main)
+            if (Type == SceneType.Main)
             {
                 return player.IsUsedInPov;
             }
-            else
-            {
-                return player.IsUsedInPreview;
-            }
+
+            return player.IsUsedInPreview;
         }
         set
         {
             if (player == null) return;
-            if (Scene.Type == SceneType.Main)
+            if (Type == SceneType.Main)
             {
                 player.IsUsedInPov = value;
             }
@@ -80,14 +144,10 @@ public class PointOfView : BaseViewModel
             }
         }
     }
-
-    public bool IsFromWhiteList { get; set; }
+    public bool IsEmpty => player == null;
+    
 
     public IPlayer? player;
-    public string DisplayedPlayer { get; set; } = string.Empty;
-    public string PersonalBest { get; set; } = string.Empty;
-    public string HeadViewParametr { get; set; } = string.Empty;
-    public StreamDisplayInfo StreamDisplayInfo { get; set; } = new("", StreamType.twitch);
 
     private string _customStreamName = string.Empty;
     public string CustomStreamName
@@ -111,13 +171,31 @@ public class PointOfView : BaseViewModel
         }
     }
 
-    private string _currentCustomStreamName = string.Empty;
-    private StreamType _currentCustomStreamType = StreamType.twitch;
-    
-    public int Volume { get; set; } = 0;
-    public string TextVolume => $"{NewVolume}%";
-    public string URLVolume => (Volume / 100f).ToString(CultureInfo.InvariantCulture);
+    public string CurrentCustomStreamName { get; private set; } = string.Empty;
+    public StreamType CurrentCustomStreamType { get; private set; } = StreamType.twitch;
 
+    public string TextVolume => $"{NewVolume}%";
+
+    public int Volume
+    {
+        get => Data.Volume;
+        set
+        {
+            Data.Volume = value;
+            OnPropertyChanged(nameof(Volume));
+        }
+    }
+
+    public bool IsMuted
+    {
+        get => Data.IsMuted;
+        set
+        {
+            Data.IsMuted = value;  
+            OnPropertyChanged(nameof(IsMuted));
+        } 
+    }
+    
     private int _newVolume;
     public int NewVolume
     {
@@ -129,45 +207,23 @@ public class PointOfView : BaseViewModel
             OnPropertyChanged(nameof(TextVolume));
         }
     }
-    
-    private bool _isMuted = true;
-    public bool IsMuted
-    {
-        get => _isMuted;
-        set
-        {
-            _isMuted = value;
-            OnPropertyChanged(nameof(IsMuted));
-        }
-    }
 
     public ICommand ApplyVolumeCommand { get; set; }
     public ICommand RefreshCommand { get; set; }
 
 
-    public PointOfView(ObsController obs, TournamentViewModel tournament, Scene scene, string? groupName = "")
+    public PointOfView(IPointOfViewOBSController controller, PointOfViewOBSData data, SceneType type = SceneType.Main)
     {
-        _obs = obs;
-        _tournament = tournament;
-        Scene = scene;
+        Data = data;
+        Type = type;
+        _controller = controller;
 
         UnFocus();
 
         ApplyVolumeCommand = new RelayCommand(ApplyVolume);
         RefreshCommand = new RelayCommand(async () => { await Refresh(); });
-
-        GroupName = groupName;
     }
 
-    public void Update()
-    {
-        OnPropertyChanged(nameof(DisplayedPlayer));
-        OnPropertyChanged(nameof(TextFieldItemName));
-        OnPropertyChanged(nameof(PersonalBestItemName));
-        OnPropertyChanged(nameof(HeadItemName));
-        OnPropertyChanged(nameof(Text));
-        OnPropertyChanged(nameof(Volume));
-    }
     public void UpdateTransform(float proportion)
     {
         X = (int)(OriginX / proportion);
@@ -183,32 +239,23 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
-    public void SetBrowserURL()
-    {
-        if (!_obs.SetBrowserURL(SceneItemName!, GetURL())) return;
-        
-        if (_tournament.SetPovHeadsInBrowser) UpdateHead();
-        if (_tournament.DisplayedNameType != DisplayedNameType.None) UpdateNameTextField();
-        if (_tournament.SetPovPBText) UpdatePersonalBestTextField();
-    }
-    
     public void SetCustomPOV()
     {
-        if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(_currentCustomStreamName))
+        if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(CurrentCustomStreamName))
         {
-            _currentCustomStreamName = string.Empty;
+            CurrentCustomStreamName = string.Empty;
             Clear();
             return;
         }
-        if (CustomStreamName.Equals(_currentCustomStreamName) && CustomStreamType == _currentCustomStreamType) return;
+        if (CustomStreamName.Equals(CurrentCustomStreamName) && CustomStreamType == CurrentCustomStreamType) return;
         
         if (player != null) Clear();
-        _currentCustomStreamName = CustomStreamName;
-        _currentCustomStreamType = CustomStreamType;
+        CurrentCustomStreamName = CustomStreamName;
+        CurrentCustomStreamType = CustomStreamType;
 
         PlayerViewModel customPlayer = new();
         customPlayer.Name = CustomStreamName;
-        if (_currentCustomStreamType == StreamType.twitch)
+        if (CurrentCustomStreamType == StreamType.twitch)
         {
             customPlayer.StreamData.Main = CustomStreamName;
         }
@@ -229,16 +276,15 @@ public class PointOfView : BaseViewModel
             Clear();
             return;
         }
-
-        if ((IsFromWhiteList && IsPlayerUsed) || Scene.IsPlayerInPov(player!.StreamDisplayInfo.Name))
+        
+        if (IsFromWhiteList && IsPlayerUsed)
         {
             player = oldPlayer;
             return;
         }
-
         if (oldPlayer != null)
         {
-            if (Scene.Type == SceneType.Main)
+            if (Type == SceneType.Main)
             {
                 oldPlayer.IsUsedInPov = false;
             }
@@ -247,14 +293,11 @@ public class PointOfView : BaseViewModel
                 oldPlayer.IsUsedInPreview = false;
             }
         }
-
         if (!isCustom)
         {
-            _currentCustomStreamName = string.Empty;
-            CustomStreamName = string.Empty;
+            ClearCustomData();
         }
-        IsResizing = true;
-        IsPlayerUsed = true;
+        
         SetPOV();
     }
     private void SetPOV()
@@ -272,39 +315,44 @@ public class PointOfView : BaseViewModel
         IsFromWhiteList = player.IsFromWhitelist;
         IsPlayerUsed = true;
 
-        SetBrowserURL();
-        Update();
+        _controller.SendOBSInformations(Data);
     }
-    public void Swap(PointOfView pov)
+    public bool Swap(PointOfView? pov)
     {
+        if (pov is null) return false;
+        if (Type != pov.Type) return false;
+        
         IPlayer? povPlayer = pov.player;
 
         (pov.CustomStreamName, CustomStreamName) = (CustomStreamName, pov.CustomStreamName);
         (pov.CustomStreamType, CustomStreamType) = (CustomStreamType, pov.CustomStreamType);
-        (pov._currentCustomStreamName, _currentCustomStreamName) = (_currentCustomStreamName, pov._currentCustomStreamName);
-        (pov._currentCustomStreamType, _currentCustomStreamType) = (_currentCustomStreamType, pov._currentCustomStreamType);
+        (pov.CurrentCustomStreamName, CurrentCustomStreamName) = (CurrentCustomStreamName, pov.CurrentCustomStreamName);
+        (pov.CurrentCustomStreamType, CurrentCustomStreamType) = (CurrentCustomStreamType, pov.CurrentCustomStreamType);
 
         pov.player = player;
         pov.SetPOV();
         player = povPlayer;
         SetPOV();
+        return true;
     }
 
     public async Task Refresh()
     {
-        _obs.SetBrowserURL(SceneItemName!, "");
+        _controller.SetBrowserURL(Data.SceneItemName, string.Empty);
         await Task.Delay(25);
         SetPOV();
     }
 
     public void Focus()
     {
-        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(153, 224, 255)); });
+        IsFocused = true;
+        Application.Current?.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(153, 224, 255)); });
         OnPropertyChanged(nameof(BackgroundColor));
     }
     public void UnFocus()
     {
-        Application.Current.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(102, 179, 204)); });
+        IsFocused = false;
+        Application.Current?.Dispatcher.Invoke(() => { BackgroundColor = new SolidColorBrush(Color.FromRgb(102, 179, 204)); });
         OnPropertyChanged(nameof(BackgroundColor));
     }
 
@@ -320,105 +368,36 @@ public class PointOfView : BaseViewModel
     {
         Volume = NewVolume;
         IsMuted = Volume == 0;
-        Update();
 
-        SetBrowserURL();
+        _controller.UpdatePOVBrowser(Data);
     }
 
-    public void UpdateHead()
-    {
-        if (string.IsNullOrEmpty(HeadItemName) || string.IsNullOrEmpty(HeadViewParametr)) return;
-
-        string path = $"minotar.net/helm/{HeadViewParametr}/180.png";
-        if (string.IsNullOrEmpty(HeadViewParametr))
-            path = string.Empty;
-
-        _obs.SetBrowserURL(HeadItemName, path);
-    }
-    private void ClearHead()
-    {
-        if (string.IsNullOrEmpty(HeadItemName)) return;
-        _obs.SetBrowserURL(HeadItemName, "");
-    }
-
-    public void UpdateNameTextField()
-    {
-        if (string.IsNullOrEmpty(TextFieldItemName)) return;
-
-        string name = _tournament.DisplayedNameType switch
-        {
-            DisplayedNameType.Twitch => StreamDisplayInfo.Name,
-            DisplayedNameType.IGN => IsFromWhiteList ? HeadViewParametr : StreamDisplayInfo.Name,
-            DisplayedNameType.WhiteList => DisplayedPlayer,
-            _ => string.Empty
-        };
-
-        _obs.SetTextField(TextFieldItemName, name);
-    }
-    private void ClearNameTextField()
-    {
-        if (string.IsNullOrEmpty(TextFieldItemName)) return;
-        _obs.SetTextField(TextFieldItemName, "");
-    }
-
-    public void UpdatePersonalBestTextField()
-    {
-        if (string.IsNullOrEmpty(PersonalBestItemName)) return;
-        _obs.SetTextField(PersonalBestItemName, PersonalBest);
-    }
-    private void ClearPersonalBestTextField()
-    {
-        if (string.IsNullOrEmpty(PersonalBestItemName)) return;
-        _obs.SetTextField(PersonalBestItemName, "");
-    }
-
-    public string GetURL()
-    {
-        if (string.IsNullOrEmpty(StreamDisplayInfo.Name)) return string.Empty;
-
-        int muted = IsMuted ? 1 : 0;
-        string url = StreamDisplayInfo.Type switch
-        {
-            StreamType.twitch => $"https://player.twitch.tv/?channel={StreamDisplayInfo.Name}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={URLVolume}",
-            StreamType.kick => $"https://player.kick.com/{StreamDisplayInfo.Name}?muted={IsMuted.ToString().ToLower()}&allowfullscreen=true",
-            StreamType.youtube => $"https://www.youtube.com/embed/{StreamDisplayInfo.Name}?autoplay=1&controls=0&mute={muted}",
-            _ => string.Empty
-        };
-
-        return url;
-    }
-    
     public void Clear(bool fullClear = false)
     {
         DisplayedPlayer = string.Empty;
-        Text = string.Empty;
-        StreamDisplayInfo = new StreamDisplayInfo("", StreamType.twitch);
+        StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
         Volume = 0;
         HeadViewParametr = string.Empty;
         PersonalBest = string.Empty;
 
         if (fullClear)
         {
-            _currentCustomStreamName = string.Empty;
-            CustomStreamName = string.Empty;
+            ClearCustomData();
         }
-
         if (player != null)
         {
             IsPlayerUsed = false;
             player = null;
         }
 
-        if (!_obs.SetBrowserURL(SceneItemName!, GetURL())) return;
-        ClearHead();
-        ClearNameTextField();
-        ClearPersonalBestTextField();
-
-        Update();
+        _controller.Clear(Data);
     }
 
-    public bool IsEmpty()
+    private void ClearCustomData()
     {
-        return player == null;
+        CurrentCustomStreamName = string.Empty;
+        CurrentCustomStreamType = StreamType.twitch;
+        CustomStreamName = string.Empty;
+        CustomStreamType = StreamType.twitch;
     }
 }

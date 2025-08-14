@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
@@ -69,6 +70,11 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        Directory.CreateDirectory(Consts.PresetsPath);
+        Directory.CreateDirectory(Consts.LogsPath);
+        Directory.CreateDirectory(Consts.ScriptsPath);
+        Directory.CreateDirectory(Consts.LeaderboardScriptsPath);
+        
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.DisableStylusAndTouchSupport", true);
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
 

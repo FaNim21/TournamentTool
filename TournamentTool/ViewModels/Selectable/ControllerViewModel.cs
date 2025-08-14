@@ -256,6 +256,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         CurrentChosenPlayer = chosenPlayer;
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
+        bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main ?
+            SceneController.MainScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo) :
+            SceneController.PreviewScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo);
+        if (isPlayerInPOV) return;
+
         CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
         UnSelectItems();
     }

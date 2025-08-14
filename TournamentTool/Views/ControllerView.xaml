@@ -257,7 +257,7 @@
                          SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
                          Margin="6 0 0 0">
                     <i:Interaction.Behaviors>
-                        <behaviors:ListBoxUpdateBehavior />
+                        <behaviors:ListBoxUpdateBehavior DragAndDropContext="{Binding .}"/>
                         <behaviors:ListBoxSelectionBehavior />
                         <behaviors:ListBoxClampScrollBehavior />
                     </i:Interaction.Behaviors>

@@ -67,7 +67,7 @@
                         </Border>
 
                         <ListBox ItemsSource="{Binding Items}"
-                                 SelectedItem="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                 SelectedItem="{Binding DataContext.SelectedPlayer, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
                                  SelectionMode="{Binding SelectionMode, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" 
                                  Background="Transparent"
                                  BorderThickness="0"
@@ -76,7 +76,7 @@
                                  VirtualizingPanel.VirtualizationMode="Recycling" >
 
                             <b:Interaction.Behaviors>
-                                <behaviors:ListBoxUpdateBehavior />
+                                <behaviors:ListBoxUpdateBehavior DragAndDropContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 <behaviors:ListBoxSelectionBehavior />
                                 <behaviors:ListBoxClampScrollBehavior />
                             </b:Interaction.Behaviors>

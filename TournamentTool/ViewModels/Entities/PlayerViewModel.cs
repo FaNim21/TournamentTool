@@ -210,6 +210,7 @@ public class StreamDataViewModel : BaseViewModel
     {
         if (ExistName(data.Main)) return true;
         if (ExistName(data.Alt)) return true;
+        if (!string.IsNullOrEmpty(data.Other) && Other.Equals(data.Other, _ordinalIgnoreCaseComparison)) return true;
         return false;
     }
     
@@ -223,6 +224,11 @@ public class StreamDataViewModel : BaseViewModel
         if (ExistName(data.Alt))
         {
             DialogBox.Show($"Twitch name \"{data.Alt}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return true;
+        }
+        if (!string.IsNullOrEmpty(data.Other) && Other.Equals(data.Other, _ordinalIgnoreCaseComparison))
+        {
+            DialogBox.Show($"Other name \"{data.Other}\" is already assigned to another player", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             return true;
         }
 

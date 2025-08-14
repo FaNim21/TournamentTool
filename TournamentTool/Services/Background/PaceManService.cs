@@ -41,6 +41,7 @@ public class PaceManService : IBackgroundService
         if (receiver is IPacemanDataReceiver pacemanDataReceiver)
         {
             _pacemanSidePanelReceiver = pacemanDataReceiver;
+            
             foreach (var batch in _paces.Batch(UiSendBatchSize))
             {
                 Application.Current.Dispatcher.InvokeAsync(() => 

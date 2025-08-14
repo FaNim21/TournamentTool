@@ -31,16 +31,15 @@ public partial class SceneCanvas : UserControl
         if (DataContext is not Scene scene) return;
         if (droppedBorder.DataContext is not PointOfView pov) return;
 
-        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
+        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info && !scene.IsPlayerInPov(info.StreamDisplayInfo))
         {
             pov.SetPOV(info);
         }
-        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov && dragPov.Scene.Type == pov.Scene.Type)
+        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {
             dragPov.Swap(pov);
         }
 
-        if (string.IsNullOrEmpty(pov.DisplayedPlayer)) return;
         scene.SceneController.Controller.UnSelectItems(true);
     }
 
