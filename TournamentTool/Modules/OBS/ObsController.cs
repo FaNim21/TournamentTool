@@ -3,14 +3,10 @@ using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using OBSStudioClient.Messages;
 using System.ComponentModel;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
 using TournamentTool.Enums;
-using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
-using TournamentTool.Utils;
 using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
 
@@ -103,7 +99,7 @@ public class ObsController
             }
 
             bool studioMode = await Client.GetStudioModeEnabled();
-            ChangeStudioMode(studioMode, false);
+            ChangeStudioMode(studioMode);
 
             Client.StudioModeStateChanged += OnStudioModeStateChanged;
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
@@ -151,7 +147,8 @@ public class ObsController
         Client.Dispose();
         Client = new ObsClient { RequestTimeout = 10000 };
         IsConnectedToWebSocket = false;
-        
+
+        StudioMode = false;
         State = ConnectionState.Disconnected;
         _tryingToConnect = false;
         ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, ConnectionState.Disconnected));
@@ -216,7 +213,6 @@ public class ObsController
         Input input = new(inputKind, newSceneItemName, inputKind);
         await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
     }
-
     public async Task CreateNestedSceneItem(string sceneName)
     {
         if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
@@ -335,7 +331,7 @@ public class ObsController
     {
         ChangeStudioMode(e.StudioModeEnabled);
     }
-    private void ChangeStudioMode(bool option, bool refresh = true)
+    private void ChangeStudioMode(bool option)
     {
         Logger.Log($"StudioMode: {option}");
         StudioMode = option;

@@ -4,12 +4,15 @@ namespace TournamentTool.Models;
 
 public record StreamDisplayInfo(string Name, StreamType Type);
 
-public interface IPlayer
+public interface IPovUsage
 {
-    public bool IsLive { get; }
-
     public bool IsUsedInPov { get; set; }
     public bool IsUsedInPreview { get; set; }
+}
+
+public interface IPlayer : IPovUsage
+{
+    public bool IsLive { get; }
 
     public string DisplayName { get; }
     public string GetPersonalBest { get; }

@@ -117,12 +117,16 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Column="0">
-                            <TextBlock Text="{Binding SceneController.PreviewScene.SceneName}"
-                                       Foreground="White"
+                            <TextBlock Foreground="LightGray"
                                        FontWeight="Bold"
-                                       FontSize="20"
-                                       HorizontalAlignment="Center" 
-                                       Margin="0 16 0 0"/>
+                                       FontSize="18"
+                                       TextAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       Margin="0 10 0 0">
+                                <Run Text="Preview:" />
+                                <LineBreak />
+                                <Run Text="{Binding SceneController.PreviewScene.SceneName}" />
+                            </TextBlock>
                             <local2:SceneCanvas DataContext="{Binding SceneController.PreviewScene}" />
 
                             <ComboBox Style="{StaticResource ComboBoxTest2}"
@@ -135,12 +139,16 @@
                                       Margin="0 0 0 22" />
                         </Grid>
                         <Grid Grid.Column="1">
-                            <TextBlock Text="{Binding SceneController.MainScene.SceneName}"
-                                       Foreground="White"
+                            <TextBlock Foreground="LightGray"
                                        FontWeight="Bold"
-                                       FontSize="20"
+                                       FontSize="18"
+                                       TextAlignment="Center"
                                        HorizontalAlignment="Center"
-                                       Margin="0 16 0 0" />
+                                       Margin="0 10 0 0">
+                                <Run Text="Program:" />
+                                <LineBreak />
+                                <Run Text="{Binding SceneController.MainScene.SceneName}" />
+                            </TextBlock>
                             <local2:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
 
                             <components:ButtonNormal Width="150"
@@ -149,10 +157,18 @@
                                                      VerticalAlignment="Bottom"
                                                      ContentText="Transition"
                                                      OnCommand="{Binding SceneController.StudioModeTransitionCommand}"
-                                                     FontSize="14" 
-                                                     Margin="0 0 0 15"/>
+                                                     FontSize="14"
+                                                     Margin="0 0 0 15" />
                         </Grid>
                     </Grid>
+
+                    <Thumb Width="10"
+                           Height="10"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Bottom"
+                           Cursor="SizeNWSE"
+                           Background="DarkGray"
+                           Opacity="0.7" /> 
                 </Grid>
 
                 <Grid Grid.Row="1">

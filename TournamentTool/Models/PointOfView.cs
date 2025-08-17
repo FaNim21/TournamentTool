@@ -239,7 +239,7 @@ public class PointOfView : BaseViewModel
         OnPropertyChanged(nameof(Height));
     }
 
-    public void SetCustomPOV()
+    public void SetCustomPOV(IPovUsage? other = null)
     {
         if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(CurrentCustomStreamName))
         {
@@ -253,35 +253,42 @@ public class PointOfView : BaseViewModel
         CurrentCustomStreamName = CustomStreamName;
         CurrentCustomStreamType = CustomStreamType;
 
-        PlayerViewModel customPlayer = new();
-        customPlayer.Name = CustomStreamName;
-        if (CurrentCustomStreamType == StreamType.twitch)
-        {
-            customPlayer.StreamData.Main = CustomStreamName;
-        }
-        else
-        {
-            customPlayer.StreamData.Other = CustomStreamName;
-            customPlayer.StreamData.OtherType = CustomStreamType;
-        }
+        CustomPlayer customPlayer = new(new StreamDisplayInfo(CustomStreamName, _customStreamType), "Unk", string.Empty);
+        CustomPlayerViewModel playerViewModel = new CustomPlayerViewModel(customPlayer, other);
         
-        SetPOV(customPlayer, true);
+        SetPlayerToPOV(playerViewModel);
     }
-    public void SetPOV(IPlayer? povInfo, bool isCustom = false)
+
+    public void SetPOV(IPlayer? povInfo)
     {
-        var oldPlayer = player;
-        player = povInfo;
-        if (player == null)
+        if (povInfo is null)
         {
             Clear();
             return;
         }
-        
-        if (IsFromWhiteList && IsPlayerUsed)
+
+        if (povInfo.IsFromWhitelist)
+        {
+            SetPlayerToPOV(povInfo);
+            ClearCustomData();
+        }
+        else
+        {
+            CustomStreamName = povInfo.StreamDisplayInfo.Name;
+            CustomStreamType = povInfo.StreamDisplayInfo.Type;
+            SetCustomPOV(povInfo);
+        }
+    }
+    private void SetPlayerToPOV(IPlayer? povInfo)
+    {
+        var oldPlayer = player;
+        player = povInfo;
+        if (IsPlayerUsed)
         {
             player = oldPlayer;
             return;
         }
+        
         if (oldPlayer != null)
         {
             if (Type == SceneType.Main)
@@ -293,14 +300,11 @@ public class PointOfView : BaseViewModel
                 oldPlayer.IsUsedInPreview = false;
             }
         }
-        if (!isCustom)
-        {
-            ClearCustomData();
-        }
         
-        SetPOV();
+        UpdatePOVInfo();
     }
-    private void SetPOV()
+    
+    private void UpdatePOVInfo()
     {
         if (player == null)
         {
@@ -317,6 +321,7 @@ public class PointOfView : BaseViewModel
 
         _controller.SendOBSInformations(Data);
     }
+    
     public bool Swap(PointOfView? pov)
     {
         if (pov is null) return false;
@@ -330,9 +335,9 @@ public class PointOfView : BaseViewModel
         (pov.CurrentCustomStreamType, CurrentCustomStreamType) = (CurrentCustomStreamType, pov.CurrentCustomStreamType);
 
         pov.player = player;
-        pov.SetPOV();
+        pov.UpdatePOVInfo();
         player = povPlayer;
-        SetPOV();
+        UpdatePOVInfo();
         return true;
     }
 
@@ -340,7 +345,7 @@ public class PointOfView : BaseViewModel
     {
         _controller.SetBrowserURL(Data.SceneItemName, string.Empty);
         await Task.Delay(25);
-        SetPOV();
+        UpdatePOVInfo();
     }
 
     public void Focus()

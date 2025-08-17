@@ -115,12 +115,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Canvas>
-            <TextBlock Text="{Binding MainText, Mode=OneWay}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Foreground="OrangeRed"
-                       FontWeight="SemiBold"
-                       FontSize="20" />
         </Grid>
     </Border>
 </UserControl>

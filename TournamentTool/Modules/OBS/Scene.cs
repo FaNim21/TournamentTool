@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using MethodTimer;
 using TournamentTool.Commands.Controller;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
@@ -25,7 +26,7 @@ public class Scene : BaseViewModel
 {
     private readonly IPointOfViewOBSController _povController;
     private readonly Lock _lock = new();
-    protected SceneType Type { get; init; }
+    protected SceneType Type { get; set; }
 
     public SceneControllerViewmodel SceneController { get; }
     protected ILoggingService Logger { get; }
@@ -83,35 +84,39 @@ public class Scene : BaseViewModel
     public float BaseWidth {  get; set; } 
     public float ProportionsRatio => BaseWidth / CanvasWidth;
 
-    private string _mainText { get; set; } = string.Empty;
-    public string MainText
-    {
-        get => _mainText;
-        set
-        {
-            _mainText = value;
-            OnPropertyChanged(nameof(MainText));
-        }
-    }
-
     public ICommand ClearPOVCommand { get; set; }
     public ICommand RefreshPOVCommand { get; set; }
     public ICommand ShowInfoWindowCommand { get; set; }
 
 
-    public Scene(SceneControllerViewmodel sceneController, IPointOfViewOBSController povController, IDialogWindow dialogWindow, ILoggingService logger)
+    public Scene(SceneType type, SceneControllerViewmodel sceneController, IPointOfViewOBSController povController, IDialogWindow dialogWindow, ILoggingService logger)
     {
         SceneController = sceneController;
         Logger = logger;
         _povController = povController;
         
-        Type = SceneType.Main;
+        SetSceneType(type);
         
         ClearPOVCommand = new ClearPOVCommand();
         RefreshPOVCommand = new RefreshPOVCommand();
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(dialogWindow, this);
     }
 
+    public void Swap(Scene other)
+    {
+        var povs = other.POVs;
+        float baseWidth = other.BaseWidth;
+        string sceneName = other.SceneName;
+
+        other.SetSceneName(SceneName);
+        other.POVs = POVs;
+        other.BaseWidth = BaseWidth;
+
+        SetSceneName(sceneName);
+        POVs = povs;
+        BaseWidth = baseWidth;
+    }
+    
     public void OnPOVClick(PointOfView clickedPov)
     {
         SceneController.CurrentChosenPOV?.UnFocus();
@@ -150,8 +155,6 @@ public class Scene : BaseViewModel
 
     public void SetStudioMode(bool option)
     {
-        string output = option?"<Smaller>" : "<Bigger>";
-        Logger.Log($"Resizing scene ([{Type}] - {SceneName}) to {output}");
         if (option)
         {
             CanvasWidth = 210;
@@ -165,7 +168,7 @@ public class Scene : BaseViewModel
         FontSizeSceneName = 10;
     } 
 
-    public virtual async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
+    public async Task GetCurrentSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
     {
         if (string.IsNullOrEmpty(scene)) return;
         if (scene.Equals(SceneName) && !force) return;
@@ -207,8 +210,7 @@ public class Scene : BaseViewModel
 
         if (updatePlayersInPov) SceneController.Tournament.ClearPlayersFromPOVS();
 
-        povItems.Reverse();
-        for (int i = 0; i < povItems.Count; i++)
+        for (int i = povItems.Count - 1; i >= 0; i--)
         {
             (SceneItem, SceneItem?) current = povItems[i];
             await SetupPovFromSceneItem(additionals, current.Item1, current.Item2);
@@ -366,6 +368,10 @@ public class Scene : BaseViewModel
         SceneName = scene;
         OnPropertyChanged(nameof(SceneName));
     }
+    private void SetSceneType(SceneType type)
+    {
+        Type = type;
+    }
 
     public void CalculateProportionsRatio(float baseWidth)
     {
@@ -385,6 +391,12 @@ public class Scene : BaseViewModel
             CanvasWidth = calculatedWidth;
         else
             CanvasHeight = calculatedHeight;
+
+        for (int i = 0; i < POVs.Count; i++)
+        {
+            var pov = POVs[i];
+            pov.UpdateTransform(ProportionsRatio);
+        }
     }
 
     public void Clear()

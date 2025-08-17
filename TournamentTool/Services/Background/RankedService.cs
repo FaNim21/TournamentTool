@@ -56,7 +56,6 @@ public class RankedService : IBackgroundService
     private const int UiSendBatchSize = 7;
     
     
-    //TODO: 0 w UI przy dodawaniu subrule pokazac czy sie jest na rankedzie czy pacemanie i wtedy moze ewentualnie inna zawartosc dawac
     public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard)
     {
         TournamentViewModel = tournamentViewModel;

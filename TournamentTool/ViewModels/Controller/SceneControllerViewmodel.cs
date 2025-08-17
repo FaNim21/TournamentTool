@@ -24,7 +24,7 @@ public class SceneControllerViewmodel : BaseViewModel
     public ObsController OBS { get; }
 
     public Scene MainScene { get; }
-    public PreviewScene PreviewScene { get; }
+    public Scene PreviewScene { get; }
 
     private PointOfView? _currentChosenPOV;
     public PointOfView? CurrentChosenPOV
@@ -65,6 +65,8 @@ public class SceneControllerViewmodel : BaseViewModel
     public bool StudioMode => OBS.StudioMode;
     public bool Connected => OBS.IsConnectedToWebSocket;
 
+    public bool BusyWithOBS { get; private set; }
+
     public ICommand RefreshPOVsCommand { get; set; }
     public ICommand RefreshOBSCommand { get; set; }
     public ICommand SwitchStudioModeCommand {  get; set; }
@@ -78,8 +80,8 @@ public class SceneControllerViewmodel : BaseViewModel
         Logger = logger;
 
         IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament);
-        MainScene = new Scene(this, povController, coordinator, logger);
-        PreviewScene = new PreviewScene(this, povController, coordinator, logger);
+        MainScene = new Scene(SceneType.Main, this, povController, coordinator, logger);
+        PreviewScene = new Scene(SceneType.Preview, this, povController, coordinator, logger);
         
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
@@ -199,16 +201,14 @@ public class SceneControllerViewmodel : BaseViewModel
             Logger.Error(ex);
         }
     }
-    private async void OnSceneTransitionStarted(object? sender, EventArgs e)
+    private void OnSceneTransitionStarted(object? sender, EventArgs e)
     {
-        try
-        {
-            await SceneTransitionStarted();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
+        if (MainScene.SceneName!.Equals(PreviewScene.SceneName)) return;
+        OBS.SetStartedTransition(true);
+        Logger.Log("Started Transition");
+        
+        MainScene.Swap(PreviewScene);
+        UpdateSelectedScene(PreviewScene.SceneName);
     }
     private async void OnStudioModeChanged(object? sender, EventArgs e)
     {
@@ -235,7 +235,7 @@ public class SceneControllerViewmodel : BaseViewModel
         if (option)
         {
             await LoadScenesForStudioMode();
-            await PreviewScene.GetCurrentSceneItems(MainScene.SceneName, true);
+            PreviewScene.Clear();
             await LoadPreviewScene(MainScene.SceneName);
         }
     }
@@ -251,26 +251,16 @@ public class SceneControllerViewmodel : BaseViewModel
     private async Task CurrentPreviewSceneChanged(string scene)
     {
         if (scene.Equals(PreviewScene.SceneName)) return;
+        if (scene.Equals(MainScene.SceneName))
+        {
+            PreviewScene.Clear();
+            return;
+        }
         Logger.Log("Loading Preview scene: " + scene);
         
         await LoadScenesForStudioMode(false);
         await PreviewScene.GetCurrentSceneItems(scene);
         await LoadPreviewScene(scene, true);
-    }
-
-    private async Task SceneTransitionStarted()
-    {
-        if (MainScene.SceneName!.Equals(PreviewScene.SceneName)) return;
-        OBS.SetStartedTransition(true);
-
-        Logger.Log("Started Transition");
-        string previewScene = PreviewScene.SceneName;
-        string mainScene = MainScene.SceneName;
-
-        await MainScene.GetCurrentSceneItems(previewScene);
-        await PreviewScene.GetCurrentSceneItems(mainScene);
-
-        UpdateSelectedScene(mainScene);
     }
     
     private async Task UpdateSceneItems(string scene)
@@ -311,18 +301,23 @@ public class SceneControllerViewmodel : BaseViewModel
     }
     
     private async Task RefreshScenesPOVS()
-    { 
+    {
+        if (BusyWithOBS) return;
+        BusyWithOBS = true;
         await MainScene.RefreshPovs();
         await PreviewScene.RefreshPovs();
+        BusyWithOBS = false;
     }
     private async Task RefreshScenes()
     {
-        if (!OBS.IsConnectedToWebSocket) return;
+        if (!OBS.IsConnectedToWebSocket || BusyWithOBS) return;
+        BusyWithOBS = true;
         
         Controller.TournamentViewModel.ClearPlayersFromPOVS();
         
         await MainScene.Refresh();
         await PreviewScene.Refresh();
+        BusyWithOBS = false;
     }
     
     private async Task LoadScenesForStudioMode(bool force = true)
@@ -348,6 +343,8 @@ public class SceneControllerViewmodel : BaseViewModel
     private void ClearScenes()
     {
         MainScene.ClearPovs();
+        MainScene.SetStudioMode(false);
         PreviewScene.ClearPovs();
+        PreviewScene.SetStudioMode(false);
     }
 }
