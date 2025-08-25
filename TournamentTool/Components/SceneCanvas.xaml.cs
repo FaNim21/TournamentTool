@@ -40,7 +40,7 @@ public partial class SceneCanvas : UserControl
             dragPov.Swap(pov);
         }
 
-        scene.SceneController.Controller.UnSelectItems(true);
+        scene.Interactable.UnSelectItems(true);
     }
 
     private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -55,7 +55,7 @@ public partial class SceneCanvas : UserControl
         if (sender is not Border clickedBorder) return;
         if (clickedBorder!.DataContext is not PointOfView pov) return;
 
-        scene.OnPOVClick(pov);
+        scene.Interactable.OnPOVClick(scene, pov);
     }
     private void PointOfView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {

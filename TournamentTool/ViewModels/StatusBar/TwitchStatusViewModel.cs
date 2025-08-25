@@ -9,7 +9,6 @@ namespace TournamentTool.ViewModels.StatusBar;
 public class TwitchStatusViewModel : StatusItemViewModel
 {
     private readonly TwitchService _twitchService;
-    private readonly TournamentViewModel _tournament;
 
     protected override string Name => "Twitch";
     
@@ -17,10 +16,9 @@ public class TwitchStatusViewModel : StatusItemViewModel
     private ConnectionState _currentState;
 
     
-    public TwitchStatusViewModel(TwitchService twitchService, TournamentViewModel tournament)
+    public TwitchStatusViewModel(TwitchService twitchService)
     {
         _twitchService = twitchService;
-        _tournament = tournament;
         
         _twitchService.ConnectionStateChanged += OnConnectionStateChanged;
     }

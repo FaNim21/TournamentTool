@@ -58,6 +58,13 @@ public partial class App : Application
         services.AddTransient<SceneManagementViewModel>();
         services.AddSingleton<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
+        
+        //Daje to zeby pamietac o zasadzie ISP i ze mozna to tak rozwiazac z DI
+        /*
+        services.AddSingleton<IInterfaceOne>(sp => sp.GetRequiredService<ClassOne>());
+        services.AddSingleton<IInterfaceTwo>(sp => sp.GetRequiredService<ClassTwo>());
+        services.AddSingleton<IInterfaceThree>(sp => sp.GetRequiredService<ClassThree>());
+        */
 
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));

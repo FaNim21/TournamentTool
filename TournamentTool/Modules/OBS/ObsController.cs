@@ -121,8 +121,6 @@ public class ObsController
     }
     public async Task Disconnect()
     {
-        if (!IsConnectedToWebSocket) return;
-
         Client.PropertyChanged -= OnPropertyChanged;
 
         Client.StudioModeStateChanged -= OnStudioModeStateChanged;
@@ -236,9 +234,9 @@ public class ObsController
             if (e.PropertyName == "ConnectionState")
             {
                 bool isConnected = Client!.ConnectionState == OBSStudioClient.Enums.ConnectionState.Connected;
-                if (Client.ConnectionState is OBSStudioClient.Enums.ConnectionState.Connecting or OBSStudioClient.Enums.ConnectionState.Disconnected)
+                if (Client.ConnectionState is OBSStudioClient.Enums.ConnectionState.Connecting)
                 {
-                    var state = Client.ConnectionState is OBSStudioClient.Enums.ConnectionState.Connecting ? ConnectionState.Connecting : ConnectionState.Disconnecting;
+                    const ConnectionState state = ConnectionState.Connecting;
                     ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, state));
                     State = state;
                 }

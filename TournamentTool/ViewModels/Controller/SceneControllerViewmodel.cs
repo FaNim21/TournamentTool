@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using OBSStudioClient.Classes;
 using OBSStudioClient.Events;
 using TournamentTool.Commands;
+using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Controller;
@@ -14,7 +15,25 @@ using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.ViewModels.Controller;
 
-public class SceneControllerViewmodel : BaseViewModel
+public interface IScenePovInteractable
+{
+    void OnPOVClick(Modules.OBS.Scene scene, PointOfView clickedPov);
+    void UnSelectItems(bool clearAll = false);
+}
+
+public interface ISceneController
+{
+    void ClearPlayersFromPovs();
+
+    PlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
+    Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName);
+    Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene);
+}
+
+/// <summary>
+/// TODO: 1 MAKE IT SOLID for 0.13 update
+/// </summary>
+public class SceneControllerViewmodel : BaseViewModel, ISceneController, IScenePovInteractable
 {
     private readonly Lock _lock = new();
     
@@ -23,8 +42,8 @@ public class SceneControllerViewmodel : BaseViewModel
     public ILoggingService Logger { get; }
     public ObsController OBS { get; }
 
-    public Scene MainScene { get; }
-    public Scene PreviewScene { get; }
+    public Modules.OBS.Scene MainScene { get; }
+    public Modules.OBS.Scene PreviewScene { get; }
 
     private PointOfView? _currentChosenPOV;
     public PointOfView? CurrentChosenPOV
@@ -72,7 +91,7 @@ public class SceneControllerViewmodel : BaseViewModel
     public ICommand SwitchStudioModeCommand {  get; set; }
     public ICommand StudioModeTransitionCommand { get; set; }
 
-    public SceneControllerViewmodel(ControllerViewModel controller, ICoordinator coordinator, ObsController obs, TournamentViewModel tournament, ILoggingService logger)
+    public SceneControllerViewmodel(ControllerViewModel controller, IDialogWindow dialogWindow, ObsController obs, TournamentViewModel tournament, ILoggingService logger)
     {
         Controller = controller;
         OBS = obs;
@@ -80,8 +99,8 @@ public class SceneControllerViewmodel : BaseViewModel
         Logger = logger;
 
         IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament);
-        MainScene = new Scene(SceneType.Main, this, povController, coordinator, logger);
-        PreviewScene = new Scene(SceneType.Preview, this, povController, coordinator, logger);
+        MainScene = new Modules.OBS.Scene(SceneType.Main, this, this, povController, dialogWindow, logger);
+        PreviewScene = new Modules.OBS.Scene(SceneType.Preview, this, this, povController, dialogWindow, logger);
         
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
@@ -136,7 +155,7 @@ public class SceneControllerViewmodel : BaseViewModel
         PreviewScene.CalculateProportionsRatio(settings.BaseWidth);
         
         string mainScene = await OBS.GetCurrentProgramScene();
-        await MainScene.GetCurrentSceneItems(mainScene, true);
+        await MainScene.SetSceneItems(mainScene, true);
         await StudioModeChanged();
     }
 
@@ -246,7 +265,7 @@ public class SceneControllerViewmodel : BaseViewModel
         Logger.Log($"Program scene: {scene}, duplicate: {isDuplicate}");
         if (isDuplicate) return;
 
-        await MainScene.GetCurrentSceneItems(scene);
+        await MainScene.SetSceneItems(scene);
     }
     private async Task CurrentPreviewSceneChanged(string scene)
     {
@@ -259,7 +278,7 @@ public class SceneControllerViewmodel : BaseViewModel
         Logger.Log("Loading Preview scene: " + scene);
         
         await LoadScenesForStudioMode(false);
-        await PreviewScene.GetCurrentSceneItems(scene);
+        await PreviewScene.SetSceneItems(scene);
         await LoadPreviewScene(scene, true);
     }
     
@@ -267,11 +286,11 @@ public class SceneControllerViewmodel : BaseViewModel
     {
         if (scene.Equals(MainScene.SceneName))
         {
-            await MainScene.GetCurrentSceneItems(scene, true);
+            await MainScene.SetSceneItems(scene, true);
             return;
         }
 
-        await PreviewScene.GetCurrentSceneItems(scene, true);
+        await PreviewScene.SetSceneItems(scene, true);
     }
 
     private void UpdateSelectedScene(string sceneName)
@@ -313,11 +332,16 @@ public class SceneControllerViewmodel : BaseViewModel
         if (!OBS.IsConnectedToWebSocket || BusyWithOBS) return;
         BusyWithOBS = true;
         
-        Controller.TournamentViewModel.ClearPlayersFromPOVS();
+        ClearPlayersFromPovs();
         
         await MainScene.Refresh();
         await PreviewScene.Refresh();
         BusyWithOBS = false;
+    }
+
+    public void ClearPlayersFromPovs()
+    {
+        Tournament.ClearPlayersFromPOVS();
     }
     
     private async Task LoadScenesForStudioMode(bool force = true)
@@ -338,6 +362,100 @@ public class SceneControllerViewmodel : BaseViewModel
                 Application.Current.Dispatcher.Invoke(() => { Scenes.Add(current.SceneName); });
             }
         }
+    }
+
+    public void OnPOVClick(Modules.OBS.Scene scene, PointOfView clickedPov)
+    {
+        CurrentChosenPOV?.UnFocus();
+        if (CurrentChosenPOV is { } && CurrentChosenPOV == clickedPov)
+        {
+            CurrentChosenPOV = null;
+            return;
+        }
+        
+        PointOfView? previousPOV = CurrentChosenPOV;
+        CurrentChosenPOV = clickedPov;
+        
+        if (Controller.CurrentChosenPlayer == null)
+        {
+            if (previousPOV is { IsEmpty: true } && CurrentChosenPOV!.IsEmpty)
+            {
+                previousPOV.UnFocus();
+            }
+            else if (CurrentChosenPOV!.Swap(previousPOV))
+            {
+                CurrentChosenPOV = null;
+            }
+            
+            CurrentChosenPOV?.Focus();
+            return;
+        }
+
+        if (!scene.IsPlayerInPov(Controller.CurrentChosenPlayer.StreamDisplayInfo))
+        {
+            clickedPov.SetPOV(Controller.CurrentChosenPlayer);
+        }
+
+        CurrentChosenPOV.UnFocus();
+        Controller.UnSelectItems(true);
+    }
+    public void UnSelectItems(bool clearAll = false)
+    {
+        Controller.UnSelectItems(clearAll);
+    }
+
+    public PlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => Tournament.GetPlayerByStreamName(name, type);
+    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName) => await OBS.GetBrowserURLStreamInfo(sceneItemName);
+    public async Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene)
+    {
+        //TODO: 1 TEMP z racji i tak reorganizacji kodu OBS do update 0.13
+        SceneItem[] sceneItems = await OBS.GetSceneItemList(scene);
+        List<SceneItem> additionals = [];
+        List<(SceneItem, SceneItem?)> povItems = [];
+        
+        foreach (var item in sceneItems)
+        {
+            if (item.IsGroup == true)
+            {
+                SceneItem[] groupItems = await OBS.GetGroupSceneItemList(item.SourceName);
+                foreach (var groupItem in groupItems)
+                {
+                    if (string.IsNullOrEmpty(groupItem.InputKind)) continue;
+                    if (CheckForAdditionals(additionals, groupItem)) continue;
+
+                    if (groupItem.InputKind!.Equals("browser_source") &&
+                        groupItem.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+                    {
+                        povItems.Add((groupItem, item));
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(item.InputKind)) continue;
+            if (CheckForAdditionals(additionals, item)) continue;
+
+            if (item.InputKind!.Equals("browser_source") &&
+                item.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+            {
+                povItems.Add((item, null));
+            }
+        }
+
+        return (povItems, additionals);
+    }
+    private bool CheckForAdditionals(List<SceneItem> additionals, SceneItem item)
+    {
+        if (item == null || string.IsNullOrEmpty(item.InputKind)) return false;
+
+        if ((item.InputKind.Equals("browser_source") &&
+             item.SourceName.StartsWith("head", StringComparison.OrdinalIgnoreCase)) ||
+            item.InputKind.StartsWith("text"))
+        {
+            additionals.Add(item);
+            return true;
+        }
+
+        return false;
     }
 
     private void ClearScenes()

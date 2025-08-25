@@ -10,7 +10,6 @@ using TournamentTool.Modules.Logging;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
 

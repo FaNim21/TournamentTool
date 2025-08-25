@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace TournamentTool.Interfaces;
+﻿namespace TournamentTool.Interfaces;
 
 public interface ILoadingDialog
 {

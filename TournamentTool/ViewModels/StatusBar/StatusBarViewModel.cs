@@ -19,7 +19,7 @@ public class StatusBarViewModel : BaseViewModel
         var notifications = new NotificationStatusViewModel(notificationPanelViewModel);
         var obsStatus = new OBSStatusViewModel(obs);
         var backgroundServiceStatus = new BackgroundServiceStatusViewModel(backgroundCoordinator, (IBackgroundServiceRegistry)backgroundCoordinator);
-        var twitchStatus = new TwitchStatusViewModel(twitch, tournament);
+        var twitchStatus = new TwitchStatusViewModel(twitch);
 
         StatusItems.Add(notifications);
         StatusItems.Add(obsStatus);

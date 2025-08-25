@@ -47,7 +47,15 @@ public class OBSStatusViewModel : StatusItemViewModel
                 Command = new RelayCommand(async () => await ConnectOBS())
             });
         }
-        else if (_currentState == ConnectionState.Connected)
+        else if (_currentState is ConnectionState.Connecting)
+        {
+            menu.Items.Add(new MenuItem 
+            { 
+                Header = "Stop connecting",
+                Command = new RelayCommand(async () => await DisconnectOBS())
+            });
+        }
+        else if (_currentState is ConnectionState.Connected)
         {
             menu.Items.Add(new MenuItem 
             { 
