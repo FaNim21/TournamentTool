@@ -7,6 +7,7 @@ using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Modules.Logging;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
@@ -40,9 +41,10 @@ public class PresetManagerTests
         _mockTournamentViewModel = new Mock<TournamentViewModel>();
         _mockCoordinator = new Mock<MainViewModelCoordinator>(null!);
         
-        Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
+        var mockObsConnection = new Mock<IObsConnectionControl>();
+        var mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
 
-        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, _mockBackgroundCoordinator.Object, new TestLogger());
+        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object);
     }
 
     [Fact]
@@ -121,10 +123,10 @@ public class PresetManagerTests
             _mockCoordinator = new Mock<ICoordinator>();
             _presetService = new PresetService(_mockTournamentViewModel.Object);
             
-            Mock<ILeaderboardManager> _mockLeaderboard = new Mock<ILeaderboardManager>();
             Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
+            var mockObsConnection = new Mock<IObsConnectionControl>();
 
-            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger());
+            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object);
         }
 
         [Fact]

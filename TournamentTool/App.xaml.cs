@@ -42,6 +42,8 @@ public partial class App : Application
         services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
         
         services.AddSingleton<ObsController>();
+        services.AddSingleton<IObsConnectionControl>(s => s.GetRequiredService<ObsController>());
+        
         services.AddSingleton<TwitchService>();
 
         services.AddSingleton<StatusBarViewModel>();
@@ -61,9 +63,9 @@ public partial class App : Application
         
         //Daje to zeby pamietac o zasadzie ISP i ze mozna to tak rozwiazac z DI
         /*
-        services.AddSingleton<IInterfaceOne>(sp => sp.GetRequiredService<ClassOne>());
-        services.AddSingleton<IInterfaceTwo>(sp => sp.GetRequiredService<ClassTwo>());
-        services.AddSingleton<IInterfaceThree>(sp => sp.GetRequiredService<ClassThree>());
+        services.AddSingleton<IInterfaceOne>(s => sp.GetRequiredService<ClassOne>());
+        services.AddSingleton<IInterfaceTwo>(s => s.GetRequiredService<ClassTwo>());
+        services.AddSingleton<IInterfaceThree>(s => s.GetRequiredService<ClassThree>());
         */
 
         services.AddSingleton<INavigationService, NavigationService>();

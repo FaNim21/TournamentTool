@@ -284,6 +284,21 @@ public class Scene : BaseViewModel
         return false;
     }
 
+    public PointOfView? GetPlayerPov(string streamName, StreamType streamType)
+    {
+        if (string.IsNullOrEmpty(streamName)) return null;
+        
+        for (int i = 0; i < POVs.Count; i++)
+        {
+            var current = POVs[i];
+            if (current.StreamDisplayInfo.Name.Equals(streamName, StringComparison.OrdinalIgnoreCase) &&
+                current.StreamDisplayInfo.Type == streamType)
+                return current;
+        }
+
+        return null;
+    }
+
     public void SetSceneName(string scene)
     {
         SceneName = scene;

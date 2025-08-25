@@ -259,7 +259,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main ?
             SceneController.MainScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo) :
             SceneController.PreviewScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo);
-        if (isPlayerInPOV) return;
+        if (isPlayerInPOV)
+        {
+            var pov = CurrentChosenPOV.Type == SceneType.Main
+                ? SceneController.MainScene.GetPlayerPov(CurrentChosenPlayer.StreamDisplayInfo.Name, CurrentChosenPlayer.StreamDisplayInfo.Type)
+                : SceneController.PreviewScene.GetPlayerPov(CurrentChosenPlayer.StreamDisplayInfo.Name, CurrentChosenPlayer.StreamDisplayInfo.Type);
+            if (pov == null) return;
+            
+            CurrentChosenPOV!.Swap(pov);
+            UnSelectItems();
+            return;
+        }
 
         CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
         UnSelectItems();

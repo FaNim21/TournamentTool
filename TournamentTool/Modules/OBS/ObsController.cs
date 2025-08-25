@@ -31,12 +31,16 @@ public class ConnectionStateChangedEventArgs : EventArgs
     }
 }
 
-public class ObsController
+public interface IObsConnectionControl
+{
+    Task Connect();
+    Task Disconnect();
+}
+
+public class ObsController : IObsConnectionControl
 {
     public TournamentViewModel Tournament { get; }
     public ILoggingService Logger { get; }
-
-    private CancellationTokenSource _cancellationTokenSource;
 
     public ObsClient Client { get; private set; }
  
@@ -61,11 +65,6 @@ public class ObsController
         Logger = logger;
 
         Client = new ObsClient { RequestTimeout = 10000 };
-
-        _cancellationTokenSource = new CancellationTokenSource();
-        Task.Factory.StartNew(async () => { await Connect(); }, _cancellationTokenSource.Token);
-        
-        // AddPovItemToOBSCommand = new RelayCommand(async () => { await OBS.CreateNestedSceneItem("PovSceneLOL"); });
     }
  
     public void SwitchStudioMode()
@@ -130,10 +129,6 @@ public class ObsController
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
         Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
         Client.SceneTransitionStarted -= OnSceneTransitionStarted;
-
-        await _cancellationTokenSource.CancelAsync();
-        _cancellationTokenSource.Dispose();
-        _cancellationTokenSource = new CancellationTokenSource();
 
         Client.Disconnect();
 

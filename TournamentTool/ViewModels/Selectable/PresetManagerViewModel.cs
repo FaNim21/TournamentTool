@@ -12,6 +12,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
@@ -23,6 +24,7 @@ public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
+    private readonly IObsConnectionControl _obsConnectionControl;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
     public TournamentViewModel TournamentViewModel { get; }
@@ -62,12 +64,13 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
+        _obsConnectionControl = obsConnectionControl;
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -106,11 +109,14 @@ public class PresetManagerViewModel : SelectableViewModel
         string lastOpened = Properties.Settings.Default.LastOpenedPresetName;
         for (int i = 0; i < Presets.Count; i++)
         {
-            if (Presets[i].Name.Equals(lastOpened))
-            {
-                CurrentChosen = Presets[i];
-            }
+            if (!Presets[i].Name.Equals(lastOpened)) continue;
+            
+            CurrentChosen = Presets[i];
+            break;
         }
+
+        //TODO: 1 Usunac to dla 0.13, poniewaz obecnie problem jest z czytaniem polaczenia
+        _obsConnectionControl.Connect();
     }
     private void LoadCurrentPreset(string opened)
     {

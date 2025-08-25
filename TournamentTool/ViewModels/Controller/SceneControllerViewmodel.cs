@@ -395,9 +395,20 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         {
             clickedPov.SetPOV(Controller.CurrentChosenPlayer);
         }
+        else
+        {
+            var pov = scene.GetPlayerPov(Controller.CurrentChosenPlayer.StreamDisplayInfo.Name,
+                Controller.CurrentChosenPlayer.StreamDisplayInfo.Type);
+            if (pov != null)
+            {
+                CurrentChosenPOV!.Swap(pov);
+                UnSelectItems();
+                return;
+            }
+        }
 
         CurrentChosenPOV.UnFocus();
-        Controller.UnSelectItems(true);
+        UnSelectItems(true);
     }
     public void UnSelectItems(bool clearAll = false)
     {
