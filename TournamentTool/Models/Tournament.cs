@@ -123,7 +123,7 @@ public class Tournament : IPreset
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;
-    public string FilterNameAtStartForSceneItems { get; set; } = "pov";
+    public string FilterNameAtStartForSceneItems { get; set; } = "pov"; //
 
     public bool SetPovHeadsInBrowser { get; set; }
     public bool SetPovPBText { get; set; }

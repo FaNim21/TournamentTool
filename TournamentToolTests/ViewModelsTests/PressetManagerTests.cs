@@ -43,8 +43,9 @@ public class PresetManagerTests
         
         var mockObsConnection = new Mock<IObsConnectionControl>();
         var mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
+        var mockSettingsService = new Mock<SettingsService>();
 
-        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object);
+        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object, mockSettingsService.Object);
     }
 
     [Fact]
@@ -125,8 +126,9 @@ public class PresetManagerTests
             
             Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
             var mockObsConnection = new Mock<IObsConnectionControl>();
+            var mockSettingsService = new Mock<SettingsService>();
 
-            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object);
+            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object, mockSettingsService.Object);
         }
 
         [Fact]

@@ -43,14 +43,12 @@ public partial class App : Application
         
         services.AddSingleton<ObsController>();
         services.AddSingleton<IObsConnectionControl>(s => s.GetRequiredService<ObsController>());
-        
         services.AddSingleton<TwitchService>();
 
         services.AddSingleton<StatusBarViewModel>();
         
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ICoordinator, MainViewModelCoordinator>();
-        
         services.AddSingleton<IBackgroundCoordinator, BackgroundCoordinator>();
         
         services.AddSingleton<ControllerViewModel>();
@@ -60,6 +58,8 @@ public partial class App : Application
         services.AddTransient<SceneManagementViewModel>();
         services.AddSingleton<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
+        
+        services.AddSingleton<SettingsService>();
         
         //Daje to zeby pamietac o zasadzie ISP i ze mozna to tak rozwiazac z DI
         /*
@@ -89,7 +89,8 @@ public partial class App : Application
 
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-        var navigationService = _serviceProvider.GetService<INavigationService>();
+        var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
+        settingsService.Load();
 
         mainViewModel.NavigationService.Startup(mainViewModel);
         mainWindow.Show();
@@ -102,6 +103,9 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        var settings = _serviceProvider.GetRequiredService<SettingsService>();
+        settings.Save();
+        
         _serviceProvider.Dispose();
         base.OnExit(e);
     }

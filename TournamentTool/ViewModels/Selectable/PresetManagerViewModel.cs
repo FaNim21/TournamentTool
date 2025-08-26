@@ -25,6 +25,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
     private readonly IObsConnectionControl _obsConnectionControl;
+    private readonly SettingsService _settingsService;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
     public TournamentViewModel TournamentViewModel { get; }
@@ -64,13 +65,14 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, SettingsService settingsService) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
         _obsConnectionControl = obsConnectionControl;
+        _settingsService = settingsService;
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -106,7 +108,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private void LoadStartupPreset()
     {
-        string lastOpened = Properties.Settings.Default.LastOpenedPresetName;
+        string lastOpened = _settingsService.Settings.LastOpenedPresetName;
         for (int i = 0; i < Presets.Count; i++)
         {
             if (!Presets[i].Name.Equals(lastOpened)) continue;
@@ -115,7 +117,7 @@ public class PresetManagerViewModel : SelectableViewModel
             break;
         }
 
-        //TODO: 1 Usunac to dla 0.13, poniewaz obecnie problem jest z czytaniem polaczenia
+        //TODO: 1 Usunac to dla 0.13, poniewaz obecnie problem jest z czytaniem polaczenia, a tak to bedzie oparte o dane z settings
         _obsConnectionControl.Connect();
     }
     private void LoadCurrentPreset(string opened)
@@ -197,8 +199,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     public void SaveLastOpened(string presetName)
     {
-        Properties.Settings.Default.LastOpenedPresetName = presetName;
-        Properties.Settings.Default.Save();
+        _settingsService.Settings.LastOpenedPresetName = presetName;
     }
 
     private void UpdateBackgroundService(ControllerMode mode, bool isValidated)

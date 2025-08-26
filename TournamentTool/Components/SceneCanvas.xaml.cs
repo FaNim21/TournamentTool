@@ -10,6 +10,7 @@ public partial class SceneCanvas : UserControl
 {
     private readonly List<Border> _subscribedBorders = [];
 
+    //TODO: 1 TO CALE GOWNO DAC DO BEHAVIORS
 
     public SceneCanvas()
     {
@@ -31,9 +32,17 @@ public partial class SceneCanvas : UserControl
         if (DataContext is not Scene scene) return;
         if (droppedBorder.DataContext is not PointOfView pov) return;
 
-        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info && !scene.IsPlayerInPov(info.StreamDisplayInfo))
+        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
         {
-            pov.SetPOV(info);
+            if (!scene.IsPlayerInPov(info.StreamDisplayInfo))
+            {
+                pov.SetPOV(info);
+            }
+            else
+            {
+                var foundPov = scene.GetPlayerPov(info.StreamDisplayInfo.Name, info.StreamDisplayInfo.Type);
+                foundPov?.Swap(pov);
+            }
         }
         else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
         {

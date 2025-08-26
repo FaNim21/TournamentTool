@@ -498,7 +498,8 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         using HttpClient client = new();
         if (string.IsNullOrEmpty(InGameName)) return null;
     
-        string path = $"https://minotar.net/helm/{InGameName}/8.png";
+        string path = $"https://mc-heads.net/avatar/{InGameName}/32";
+        // string path = $"https://minotar.net/helm/{InGameName}/32.png";
         HttpResponseMessage response = await client.GetAsync(path);
         if (!response.IsSuccessStatusCode) return null;
     
