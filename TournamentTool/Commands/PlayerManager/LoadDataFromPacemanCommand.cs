@@ -72,7 +72,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         }
         catch (Exception ex)
         {
-            Logger.Error(ex.Message);
+            Logger.Error($"Error while loading data from paceman: {ex}");
         }
 
         if (_twitchNames == null) return;

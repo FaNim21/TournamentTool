@@ -65,6 +65,7 @@ public class Paceman
     public void Update(PaceManData paceman)
     {
         ShowOnlyLive = paceman.ShowOnlyLive;
+        IsLive = ShowOnlyLive || paceman.IsLive();
         _lastUpdate = paceman.LastUpdate;
         if (paceman.Splits.Count == 0) return;
         

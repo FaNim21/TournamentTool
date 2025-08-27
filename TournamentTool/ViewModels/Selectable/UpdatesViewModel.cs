@@ -188,7 +188,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} {ex.StackTrace}");
+            Logger.Error($"Error: {ex}");
             canDownloadUpdate = false;
         }
         finally
@@ -235,7 +235,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} {ex.StackTrace}");
+            Logger.Error($"Error: {ex}");
         }
         finally
         {
@@ -284,7 +284,7 @@ public class UpdatesViewModel : SelectableViewModel
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error replacing executable: {ex.Message}\n{ex.StackTrace}");
+            Logger.Error($"Error replacing executable: {ex}");
         }
         Downloading = false;
     }

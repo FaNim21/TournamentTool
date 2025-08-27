@@ -1,7 +1,9 @@
 ﻿using OBSStudioClient.Classes;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Navigation;
 using MethodTimer;
 using TournamentTool.Commands.Controller;
 using TournamentTool.Enums;
@@ -44,7 +46,16 @@ public class Scene : BaseViewModel
         }
     }
 
-    public string SceneName { get; set; } = string.Empty;
+    private string _sceneName = string.Empty;
+    public string SceneName
+    {
+        get => _sceneName;
+        set
+        {
+            _sceneName = value;
+            OnPropertyChanged(nameof(SceneName));
+        }
+    }
 
     private float _canvasWidth;
     public float CanvasWidth
@@ -82,9 +93,13 @@ public class Scene : BaseViewModel
     public float BaseWidth {  get; set; } 
     public float ProportionsRatio => BaseWidth / CanvasWidth;
 
+    public bool StudioModeEnabled { get; private set; }
+
     public ICommand ClearPOVCommand { get; private set; }
     public ICommand RefreshPOVCommand { get; private set; }
     public ICommand ShowInfoWindowCommand { get; private set; }
+
+    private const float _studioFactor = 2.05f;
 
 
     public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IPointOfViewOBSController povController, IDialogWindow dialogWindow, ILoggingService logger)
@@ -107,28 +122,33 @@ public class Scene : BaseViewModel
         float baseWidth = other.BaseWidth;
         string sceneName = other.SceneName;
 
-        other.SetSceneName(SceneName);
+        other.SceneName = SceneName;
         other.POVs = POVs;
         other.BaseWidth = BaseWidth;
 
-        SetSceneName(sceneName);
+        SceneName = sceneName;
         POVs = povs;
         BaseWidth = baseWidth;
     }
 
     public void SetStudioMode(bool option)
     {
-        if (option)
+        if (option && !StudioModeEnabled)
         {
-            CanvasWidth = 210;
-            CanvasHeight = 118.12f;
-            FontSizeSceneName = 4;
-            return;
+            CanvasWidth /= _studioFactor;
+            CanvasHeight /= _studioFactor;
         }
-
-        CanvasWidth = 426;
-        CanvasHeight = 239.625f;
-        FontSizeSceneName = 10;
+        else if (!option && StudioModeEnabled)
+        {
+            CanvasWidth *= _studioFactor;
+            CanvasHeight *= _studioFactor;
+        }
+        
+        StudioModeEnabled = option;
+        
+        OnPropertyChanged(nameof(CanvasWidth));
+        OnPropertyChanged(nameof(CanvasHeight));
+        UpdatePovsProportions();
     } 
 
     public async Task SetSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
@@ -136,7 +156,7 @@ public class Scene : BaseViewModel
         if (string.IsNullOrEmpty(scene)) return;
         if (scene.Equals(SceneName) && !force) return;
 
-        SetSceneName(scene);
+        SceneName = scene;
         ClearPovs();
 
         (List<(SceneItem, SceneItem?)> povItems, List<SceneItem> additionals) = await SceneController.GetSceneItems(scene);
@@ -299,31 +319,29 @@ public class Scene : BaseViewModel
         return null;
     }
 
-    public void SetSceneName(string scene)
-    {
-        SceneName = scene;
-        OnPropertyChanged(nameof(SceneName));
-    }
-
     public void CalculateProportionsRatio(float baseWidth)
     {
         BaseWidth = baseWidth;
     }
 
-    public void ResizeCanvas()
+    public void ChangeSceneSize(float newWidth, float newHeight)
     {
-        if (CanvasWidth == 0 || CanvasHeight == 0) return;
-
-        float calculatedHeight = CanvasWidth / Consts.AspectRatio;
-        float calculatedWidth = CanvasHeight * Consts.AspectRatio;
-
-        if (float.IsNaN(calculatedHeight) || float.IsInfinity(calculatedHeight) || float.IsNaN(calculatedWidth) || float.IsInfinity(calculatedWidth)) return;
-
-        if (calculatedHeight > CanvasHeight)
-            CanvasWidth = calculatedWidth;
+        if (StudioModeEnabled)
+        {
+            CanvasWidth = newWidth / _studioFactor;
+            CanvasHeight = newHeight / _studioFactor;
+        }
         else
-            CanvasHeight = calculatedHeight;
+        {
+            CanvasWidth = newWidth;
+            CanvasHeight = newHeight;
+        }
+        
+        UpdatePovsProportions();
+    }
 
+    private void UpdatePovsProportions()
+    {
         for (int i = 0; i < POVs.Count; i++)
         {
             var pov = POVs[i];
@@ -333,7 +351,7 @@ public class Scene : BaseViewModel
 
     public void Clear()
     {
-        SetSceneName(string.Empty);
+        SceneName = string.Empty;
         ClearPovs();
     }
 }

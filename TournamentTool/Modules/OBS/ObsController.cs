@@ -114,7 +114,7 @@ public class ObsController : IObsConnectionControl
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
+            Logger.Error($"Error: {ex}");
             await Disconnect();
         }
     }

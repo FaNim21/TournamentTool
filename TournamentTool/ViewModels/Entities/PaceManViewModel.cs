@@ -28,6 +28,7 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public string HeadViewParameter => _paceman.PlayerViewModel == null ? _paceman.UUID! : _paceman.PlayerViewModel.HeadViewParameter;
     public StreamDisplayInfo StreamDisplayInfo => _paceman.StreamDisplayInfo ?? new StreamDisplayInfo("", StreamType.twitch);
     public bool IsFromWhitelist => _paceman.PlayerViewModel != null;
+
     public bool IsLive => _paceman.IsLive;
 
     public PlayerInventoryViewModel Inventory { get; set; }
@@ -92,8 +93,8 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
         } 
     }
     
-    private Brush? _statusLabelColor = new SolidColorBrush(Consts.DefaultColor);
-    public Brush? StatusLabelColor
+    private SolidColorBrush _statusLabelColor = new(Consts.DefaultColor);
+    public SolidColorBrush StatusLabelColor
     {
         get => _statusLabelColor;
         set
@@ -145,6 +146,7 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
         get => _paceman.PlayerViewModel?.IsUsedInPov ?? false;
         set
         {
+            //TODO: 9 to jest pod znakiem zapytanie z racji nei oznaczania graczy, ktorzy nie sa z whitelisty
             if (_paceman.PlayerViewModel == null) return;
 
             _paceman.PlayerViewModel.IsUsedInPov = value;
@@ -172,21 +174,13 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
         InGameName = _paceman.Nickname;
         Update();
         
-        Application.Current?.Dispatcher.Invoke(delegate
-        {
-            if (_paceman.ShowOnlyLive)
-            {
-                StatusLabelColor = new SolidColorBrush(Consts.DefaultColor);
-                return;
-            }
-            
-            StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
-        });
+        UpdateLiveInfo();
     }
 
     public void Update()
     {
         CheckForPacePriority();
+        UpdateLiveInfo();
 
         HeadImage = _paceman.HeadImage;
         HeadImageOpacity = _paceman.HeadImageOpacity;
@@ -223,5 +217,12 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
 
         OnPropertyChanged(nameof(PaceSplitTimeColor));
         OnPropertyChanged(nameof(PaceFontWeight));
+    }
+    private void UpdateLiveInfo()
+    {
+        Application.Current?.Dispatcher.Invoke(delegate
+        {
+            StatusLabelColor = IsLive ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
+        });
     }
 }

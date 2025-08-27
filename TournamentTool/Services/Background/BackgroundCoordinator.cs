@@ -93,7 +93,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         catch (TaskCanceledException) { Clear(); }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} while updating background service {ex.StackTrace}");
+            Logger.Error($"Error while updating background service: {ex}");
             Clear();
         }
     }

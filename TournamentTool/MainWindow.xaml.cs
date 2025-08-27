@@ -50,8 +50,7 @@ public partial class MainWindow : Window
         if (_handledCrash) return;
         _handledCrash = true;
 
-        string output = $"UnhandledException: {e.Exception.Message}\n" +
-                        $"StackTrace: {e.Exception.StackTrace}";
+        string output = $"UnhandledException: {e.Exception}";
 
         DialogBox.Show($"Unhandled exception: {e.Exception.Message}", "Application crash", MessageBoxButton.OK, MessageBoxImage.Error);
 

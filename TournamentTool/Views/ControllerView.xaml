@@ -93,14 +93,14 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="428" />
-                <ColumnDefinition Width="*" MinWidth="350" />
+                <ColumnDefinition MinWidth="428" />
+                <ColumnDefinition Width="*" MinWidth="361" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="242" />
+                    <RowDefinition MinHeight="242"/>
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
@@ -168,65 +168,73 @@
                            VerticalAlignment="Bottom"
                            Cursor="SizeNWSE"
                            Background="DarkGray"
-                           Opacity="0.7" /> 
+                           Opacity="0.7">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ResizeThumb InitialWidth="{Binding SceneController.ScenePreviewWidth}"
+                                                   InitialHeight="{Binding SceneController.ScenePreviewHeight}"
+                                                   ResizeCommand="{Binding SceneController.OnSceneResizeCommand}" />
+                        </i:Interaction.Behaviors>
+                    </Thumb> 
                 </Grid>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions> 
+                        <ColumnDefinition Width="176"/>
                         <ColumnDefinition />
-                        <ColumnDefinition Width="252" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <StackPanel>
-                            <components:ButtonNormal ContentText="Refresh OBS"
-                                                     FontSize="15"
-                                                     Width="150"
-                                                     Height="30"
-                                                     OnCommand="{Binding SceneController.RefreshOBSCommand}"
-                                                     Margin="0 5 0 0" />
+                    <Grid Grid.Column="0" >
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto">
+                            <StackPanel MaxWidth="150">
+                                <components:ButtonNormal ContentText="Refresh OBS"
+                                                         FontSize="15"
+                                                         Height="30"
+                                                         OnCommand="{Binding SceneController.RefreshOBSCommand}"
+                                                         Margin="0 5 0 0" />
 
-                            <components:ButtonNormal ContentText="Refresh All POVS"
-                                                     FontSize="15"
-                                                     Width="150"
-                                                     Height="30"
-                                                     OnCommand="{Binding SceneController.RefreshPOVsCommand}"
-                                                     Margin="0 5 0 0" />
+                                <components:ButtonNormal ContentText="Refresh All POVS"
+                                                         FontSize="15"
+                                                         Height="30"
+                                                         OnCommand="{Binding SceneController.RefreshPOVsCommand}"
+                                                         Margin="0 5 0 0" />
 
-                            <!-- TO MOZE BARDZIEJ JAKO POV MANAGER JAKO VIEW ZASTEPUJACE KONTROLER DO TEGO ZEBY PRZERZEC SCENY W OBSIE i zarzadzac nimi
-                            <components:ButtonNormal ContentText="Create new POV"
-                                                     FontSize="15"
-                                                     Width="150"
-                                                     Height="30"
-                                                     OnCommand="{Binding SceneController.AddPovItemToOBSCommand}"
-                                                     Margin="0 5 0 0" />
-                            -->
+                                <!-- TO MOZE BARDZIEJ JAKO POV MANAGER JAKO VIEW ZASTEPUJACE KONTROLER DO TEGO ZEBY PRZERZEC SCENY W OBSIE i zarzadzac nimi
+                                <components:ButtonNormal ContentText="Create new POV"
+                                                         FontSize="15"
+                                                         Width="150"
+                                                         Height="30"
+                                                         OnCommand="{Binding SceneController.AddPovItemToOBSCommand}"
+                                                         Margin="0 5 0 0" />
+                                -->
 
-                            <!-- TUTAJ BEDZIE ODPALANE OKNO Z KLIPAMI - czyli czas zrobienia klipa, czyj jest klip itp
-                            <components:ButtonNormal ContentText="Open Clip Manager"
-                                                     FontSize="15"
-                                                     Width="150"
-                                                     Height="30"
-                                                     OnCommand="{Binding .}"
-                                                     Margin="0 5 0 0" />
-                            -->
+                                    <!-- TUTAJ BEDZIE ODPALANE OKNO Z KLIPAMI - czyli czas zrobienia klipa, czyj jest klip itp
+                                <components:ButtonNormal ContentText="Open Clip Manager"
+                                                         FontSize="15"
+                                                         Width="150"
+                                                         Height="30"
+                                                         OnCommand="{Binding .}"
+                                                         Margin="0 5 0 0" />
+                                -->
 
-                            <!--
-                            <components:ButtonNormal ContentText="clip first stream xd"
-                                                     FontSize="15"
-                                                     Width="150"
-                                                     Height="30"
-                                                     OnCommand="{Binding ClipCommand}" />
-                            -->
-                            <!--
-                            <TextBlock Text="MORE CONTROLS IN FUTURE"
-                                       FontSize="48"
-                                       TextWrapping="Wrap"
-                                       TextAlignment="Center"
-                                       VerticalAlignment="Center" />
-                            -->
-                        </StackPanel>
+                                    <!--
+                                <components:ButtonNormal ContentText="clip first stream xd"
+                                                         FontSize="15"
+                                                         Width="150"
+                                                         Height="30"
+                                                         OnCommand="{Binding ClipCommand}" />
+                                -->
+                                    <!--
+                                <TextBlock Text="MORE CONTROLS IN FUTURE"
+                                           FontSize="48"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center" />
+                                -->
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
+                    
                     <Grid Grid.Column="1" >
                         <Line X1="0"
                               Y1="0"

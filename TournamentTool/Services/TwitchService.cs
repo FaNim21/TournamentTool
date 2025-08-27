@@ -103,7 +103,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
+            Logger.Error($"Error: {ex}");
             Disconnect();
         }
     }
@@ -142,7 +142,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error refreshing twitch access token: {ex.Message} - {ex.StackTrace}");
+            Logger.Error($"Error refreshing twitch access token: {ex}");
             Disconnect();
             return;
         }
@@ -185,7 +185,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error while fetching streaming datas - {ex.Message}\n{ex.StackTrace}");
+            Logger.Error($"Error while fetching streaming datas - {ex}");
         }
 
         return allStreams.DistinctBy(stream => stream.UserId).ToList();
@@ -200,7 +200,7 @@ public class TwitchService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error: {ex.Message} - {ex.StackTrace}");
+            Logger.Error($"Error: {ex}");
         }
         return response;
     }

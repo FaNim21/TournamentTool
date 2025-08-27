@@ -90,6 +90,30 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     public ICommand RefreshOBSCommand { get; set; }
     public ICommand SwitchStudioModeCommand {  get; set; }
     public ICommand StudioModeTransitionCommand { get; set; }
+    public ICommand OnSceneResizeCommand { get; set; }
+
+    private float _scenePreviewHeight = 240f;
+    public float ScenePreviewHeight
+    {
+        get => _scenePreviewHeight;
+        set
+        {
+            _scenePreviewHeight = value;
+            OnPropertyChanged(nameof(ScenePreviewHeight));
+        }
+    }
+
+    private float _scenePreviewWidth = 426f;
+    public float ScenePreviewWidth
+    {
+        get => _scenePreviewWidth;
+        set
+        {
+            _scenePreviewWidth = value;
+            OnPropertyChanged(nameof(ScenePreviewWidth));
+        }
+    }
+
 
     public SceneControllerViewmodel(ControllerViewModel controller, IDialogWindow dialogWindow, ObsController obs, TournamentViewModel tournament, ILoggingService logger)
     {
@@ -107,9 +131,11 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         SwitchStudioModeCommand = new RelayCommand(OBS.SwitchStudioMode);
         StudioModeTransitionCommand = new RelayCommand(() =>
         {
-            if (MainScene.SceneName!.Equals(PreviewScene.SceneName)) return;
+            if (MainScene.SceneName!.Equals(PreviewScene.SceneName) ||
+                string.IsNullOrEmpty(PreviewScene.SceneName)) return;
             OBS.TransitionStudioMode();
         });
+        OnSceneResizeCommand = new RelayCommand<Dimension>(OnSceneResize);
     }
 
     public override void OnEnable(object? parameter)
@@ -159,8 +185,22 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         await StudioModeChanged();
     }
 
+    private void OnSceneResize(Dimension dimension)
+    {
+        if (Math.Abs(ScenePreviewWidth - dimension.Width) < 1f &&
+            Math.Abs(ScenePreviewHeight - dimension.Height) < 1f) return;
+
+        ScenePreviewWidth = dimension.Width;
+        ScenePreviewHeight = dimension.Height;
+        
+        MainScene.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
+        PreviewScene.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
+    }
+    
     private void UpdateView()
     {
+        MainScene.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
+        PreviewScene.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
         OnPropertyChanged(nameof(Connected));
         OnPropertyChanged(nameof(StudioMode));
     }
