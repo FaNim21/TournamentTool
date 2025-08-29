@@ -220,6 +220,9 @@
                                      MaxLength="8"
                                      Background="#9E9E9E" />
                             <TextBlock Text="Time (ms to mm:ss.fff)"
+                                       ToolTipService.InitialShowDelay="0"
+                                       ToolTipService.ShowDuration="60000"
+                                       ToolTip="Time threshold for which a given sube rule can be achieved by players"
                                        Foreground="White"
                                        FontSize="16"
                                        Margin="5 0 0 3" />

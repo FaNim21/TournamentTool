@@ -43,6 +43,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand RemoveEntryCommand { get; set; }
     public ICommand RemoveAllEntriesCommand { get; set; }
 
+    public ICommand OpenScriptingDocsCommand { get; private set; }
     public ICommand RefreshScriptsCommand { get; set; }
     public ICommand OpenScriptsFolderCommand { get; set; }
 
@@ -67,6 +68,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveEntryCommand = new RemoveEntryCommand(this);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
+        OpenScriptingDocsCommand = new RelayCommand(() => { Helper.StartProcess("https://github.com/FaNim21/TournamentTool");});
         RefreshScriptsCommand = new RelayCommand(RefreshScripts);
         OpenScriptsFolderCommand = new RelayCommand(() => { Helper.StartProcess(Consts.ScriptsPath);});
 

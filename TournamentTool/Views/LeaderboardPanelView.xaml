@@ -67,6 +67,12 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Bottom">
+                    <components:ButtonNormal ContentText="Scripting Docs"
+                                             FontSize="15"
+                                             Width="150"
+                                             Height="30"
+                                             OnCommand="{Binding OpenScriptingDocsCommand}"
+                                             Margin="0 0 0 10" />
                     <components:ButtonNormal ContentText="Refresh Scripts"
                                              FontSize="15"
                                              Width="150"

@@ -69,9 +69,15 @@
                                       Margin="0 0 0 5" />
                         <ToggleButton IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
                                       IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
+                                      ToolTipService.InitialShowDelay="0"
+                                      ToolTipService.ShowDuration="60000"
+                                      ToolTip="With Twitch API enabled and connected in status bar it you a category form online stream in controller"
                                       Content="Show stream category"
                                       Margin="0 0 0 5" />
                         <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
+                                      ToolTipService.InitialShowDelay="0"
+                                      ToolTipService.ShowDuration="60000"
+                                      ToolTip="Enabled gives you on top of every player in controller his team name text set in whitelist"
                                       Content="Use team names"
                                       Margin="0 0 0 5" />
 
@@ -79,7 +85,11 @@
                             <TextBlock Text="Controller Mode"
                                        HorizontalAlignment="Left"
                                        Foreground="White"
-                                       Padding="0" />
+                                       ToolTipService.InitialShowDelay="0"
+                                       ToolTipService.ShowDuration="60000"
+                                       ToolTip="Controller mode defines you what type of service you will use to read player paces in controller and leaderboard"
+                                       Padding="0"
+                                       Margin="0 0 0 2" />
                             <RadioButton GroupName="ControllerMode"
                                          Foreground="White"
                                          Content="None"
@@ -124,6 +134,9 @@
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top" />
                                 <TextBlock Text="PaceMan refresh (ms)"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="How often it will try to obtain paceman data"
                                            Foreground="White"
                                            Height="20"
                                            FontSize="16"
@@ -132,22 +145,60 @@
                             </StackPanel>
                             
                             <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="Enabled shows you only whitelisted players in controller right side panel"
                                           Content="Use Whitelist on Paceman"
                                           Margin="0 0 0 5" />
                             <ToggleButton IsChecked="{Binding TournamentViewModel.AddUnknownPacemanPlayersToWhitelist}"
                                           IsEnabled="{Binding TournamentViewModel.IsUsingWhitelistOnPaceMan, Converter={StaticResource BooleanInverterConverter}}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="It adds players from paceman to whitelist with in game name and twitch name if possible"
                                           Content="Add unknown paceman players to whitelist"
-                                          ToolTip="It adds players from paceman to whitelist with all information it could get from there"
                                           Margin="0 0 0 5" />
                             <ToggleButton IsChecked="{Binding TournamentViewModel.ShowOnlyLive}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="Shows only life players in controller right side panel"
                                           Content="Show only live players"
                                           Margin="0 0 0 5" />
 
-                            <TextBlock Text="Good Pace Splits (ms)"
-                                       Foreground="White"
-                                       FontSize="24"
-                                       Padding="0"
-                                       Margin="0 0 0 5" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Good Pace Splits (ms)"
+                                           Foreground="White"
+                                           FontSize="24"
+                                           Padding="0"
+                                           Margin="0 0 0 5" />
+                                
+                                <Border BorderBrush="Gray"
+                                        BorderThickness="0.75"
+                                        CornerRadius="5"
+                                        Background="#1b1d1f"
+                                        Width="25"
+                                        Height="30"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        ToolTipService.InitialShowDelay="0"
+                                        ToolTipService.ShowDuration="60000"
+                                        Margin="5 0 0 0">
+                                    <Border.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock FontSize="14"
+                                                       FontWeight="SemiBold">
+                                                <Run Text="Defines specific times to highlight player pace in controller right side panel" />
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </Border.ToolTip>
+
+                                    <TextBlock Text="?"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal"
                                        Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
@@ -247,8 +298,10 @@
                                        Margin="0 10 0 5" />
 
                             <ToggleButton IsChecked="{Binding TournamentViewModel.AddUnknownRankedPlayersToWhitelist}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="It adds players from ranked priv room match to whitelist with  in game name"
                                           Content="Add unknown ranked players to whitelist"
-                                          ToolTip="It adds players from ranked to whitelist with all information it could get from there"
                                           Margin="0 0 0 5" />
                                           
                             <StackPanel Orientation="Horizontal"
@@ -265,6 +318,9 @@
                                 </TextBox>
                                 <TextBlock Text="Ranked API key"
                                            Foreground="White"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="You can get the key from MCSR Ranked in profile -> settings an then button 'Generate &amp; Copy API Private Key'"
                                            Height="20"
                                            FontSize="16"
                                            Padding="0"
@@ -285,6 +341,9 @@
                                 </TextBox>
                                 <TextBlock Text="Player name for API"
                                            Foreground="White"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="API Private key owner in game name (needs to be a host/co-host in priv room)"
                                            Height="20"
                                            FontSize="16"
                                            Padding="0"
@@ -321,12 +380,45 @@
                                     Margin="40 0 0 0">
 
                             <!-- OBS CONNECTION -->
-                            <TextBlock Text="OBS Connection"
-                                       Foreground="Wheat"
-                                       FontSize="24"
-                                       FontWeight="SemiBold"
-                                       Padding="0"
-                                       Margin="0 0 0 5" />
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBlock Text="OBS Connection"
+                                           Foreground="Wheat"
+                                           FontSize="24"
+                                           FontWeight="SemiBold"
+                                           Padding="0"
+                                           Margin="0 0 0 5" />
+                                <Border BorderBrush="Gray"
+                                        BorderThickness="0.75"
+                                        CornerRadius="5"
+                                        Background="#1b1d1f"
+                                        Width="25"
+                                        Height="30"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        ToolTipService.InitialShowDelay="0"
+                                        ToolTipService.ShowDuration="60000"
+                                        Margin="5 0 0 0">
+                                    <Border.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock FontSize="14"
+                                                       FontWeight="SemiBold">
+                                                <Run Text="To configure OBS WebSocket go to Tools -> WebSocket Server Settings" />
+                                                <LineBreak />
+                                                <Run Text="Required OBS Studio 28+" />
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </Border.ToolTip>
+
+                                    <TextBlock Text="?"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </StackPanel>
+                            
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
@@ -374,6 +466,9 @@
                                            Height="20"
                                            FontSize="16"
                                            Padding="0"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="Opens given scene collection after connecting to OBS"
                                            Margin="5 0 0 3" />
                             </StackPanel>
 
@@ -384,6 +479,7 @@
                                        FontWeight="SemiBold"
                                        Padding="0"
                                        Margin="0 10 0 5" />
+                            
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="Wrap"
@@ -398,21 +494,34 @@
                                            Height="20"
                                            FontSize="16"
                                            Padding="0"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="Given filter is used to find pov elements in scene"
                                            Margin="5 0 0 3" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical"
                                         Margin="0 0 0 5">
                                 <ToggleButton IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
-                                          Content="Use skin heads"
-                                          Margin="0 0 0 5" />
+                                              ToolTipService.InitialShowDelay="0"
+                                              ToolTipService.ShowDuration="60000"
+                                              ToolTip="Enabled sets player heads into element in pov based on player ign in whitelist"
+                                              Content="Use skin heads"
+                                              Margin="0 0 0 5" />
                                 <ToggleButton IsChecked="{Binding TournamentViewModel.SetPovPBText}"
-                                          Content="Use personal best text"
-                                          Margin="0 0 0 5" />
+                                              ToolTipService.InitialShowDelay="0"
+                                              ToolTipService.ShowDuration="60000"
+                                              ToolTip="Enabled sets player personal best value from whitelist into text element in pov"
+                                              Content="Use personal best text"
+                                              Margin="0 0 0 5" />
 
                                 <TextBlock Text="Use names for povs"
                                            HorizontalAlignment="Left"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="Chosen type will define what will be displayed for name element in pov"
                                            Foreground="White"
-                                           Padding="0" />
+                                           Padding="0"
+                                           Margin="0 0 0 2"/>
                                 <RadioButton GroupName="DisplayedNames"
                                              Foreground="White"
                                              Content="None"
