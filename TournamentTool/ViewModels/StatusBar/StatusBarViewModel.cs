@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using TournamentTool.Interfaces;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
@@ -8,13 +9,13 @@ namespace TournamentTool.ViewModels.StatusBar;
 
 public class StatusBarViewModel : BaseViewModel
 {
-    public TournamentViewModel Tournament { get; }
+    public IPresetInfo PresetInfo { get; }
     public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
 
     
-    public StatusBarViewModel(TournamentViewModel tournament, ObsController obs, TwitchService twitch, IBackgroundCoordinator backgroundCoordinator, NotificationPanelViewModel notificationPanelViewModel)
+    public StatusBarViewModel(IPresetInfo presetInfo, ObsController obs, TwitchService twitch, IBackgroundCoordinator backgroundCoordinator, NotificationPanelViewModel notificationPanelViewModel)
     {
-        Tournament = tournament;
+        PresetInfo = presetInfo;
 
         var notifications = new NotificationStatusViewModel(notificationPanelViewModel);
         var obsStatus = new OBSStatusViewModel(obs);

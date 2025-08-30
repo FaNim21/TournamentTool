@@ -9,7 +9,7 @@ using TournamentTool.Models.Ranking;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager
+public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager, IPresetInfo
 {
     private readonly Dictionary<string, List<string>> _errors = [];
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
@@ -679,7 +679,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     
     public void PresetIsModified()
     {
-        //TODO: 9 kiedys zrobic bardziej zaawansowane przechwytywanie zmian z weryfikacja powrotu do danych przed zmiana itd
         //to sie tez tyczy problemow jak zmiana atrybutow w player, ponieawz nie jest bezposrednio powiazany z modelem wiec na razie
         // nie chce wprowadzac zmian z zapisywaniem itp itd tutaj
         IsPresetModified = true;

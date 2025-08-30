@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Components;
+using TournamentTool.Interfaces;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.Updates;
 using TournamentTool.Services;
@@ -19,7 +20,8 @@ namespace TournamentTool.ViewModels;
 public class MainViewModel : BaseViewModel
 {
     public DebugWindow? DebugWindow { get; set; }
-    public TournamentViewModel TournamentViewModel { get; private set; }
+    
+    private readonly IPresetSaver _presetSaver;
 
     private INavigationService? _navigationService;
     public INavigationService NavigationService
@@ -99,13 +101,13 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; private set; }
 
 
-    public MainViewModel(INavigationService navigationService, TournamentViewModel tournamentViewModel, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel)
+    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel, IPresetSaver presetSaver)
     {
         NavigationService = navigationService;
-        TournamentViewModel = tournamentViewModel;
         StatusBar = statusBar;
         Logger = logger;
         NotificationPanel = notificationPanel;
+        _presetSaver = presetSaver;
 
         NotificationPanel.PanelOpened += (_, _) => { IsHamburgerMenuOpen = false; };
 
@@ -153,6 +155,7 @@ public class MainViewModel : BaseViewModel
 
     public void HotkeySetup()
     {
+        //Rozkminic czy przy opcji edytowania hotkey'i nie trzeba bedzie czyscic Action przed zresetowaniem Hotkey
         var renameTextBox = new Hotkey
         {
             Key = Key.F2,
@@ -196,11 +199,23 @@ public class MainViewModel : BaseViewModel
             Description = "Toggle mode for debug window for specific selected view model",
             Action = SwitchDebugWindow
         };
+        
+        var savePreset = new Hotkey
+        {
+            Key = Key.S,
+            ModifierKeys = ModifierKeys.Control,
+            Description = "Saves current preset changes",
+            Action = () =>
+            {
+                _presetSaver.SavePreset();
+            }
+        };
 
         InputController.Instance.AddHotkey(renameTextBox);
         InputController.Instance.AddHotkey(toggleHamburgerMenu);
         InputController.Instance.AddHotkey(toggleStudioMode);
         InputController.Instance.AddHotkey(toggleDebugWindow);
+        InputController.Instance.AddHotkey(savePreset);
     }
 
     public void BlockWindow()

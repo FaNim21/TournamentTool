@@ -68,7 +68,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveEntryCommand = new RemoveEntryCommand(this);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
-        OpenScriptingDocsCommand = new RelayCommand(() => { Helper.StartProcess("https://github.com/FaNim21/TournamentTool");});
+        OpenScriptingDocsCommand = new RelayCommand(() => { Helper.StartProcess("https://github.com/FaNim21/TournamentTool/blob/master/Docs/LeaderboardScripting.md");});
         RefreshScriptsCommand = new RelayCommand(RefreshScripts);
         OpenScriptsFolderCommand = new RelayCommand(() => { Helper.StartProcess(Consts.ScriptsPath);});
 

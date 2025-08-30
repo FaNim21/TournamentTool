@@ -36,14 +36,18 @@ public partial class App : Application
         services.AddSingleton<NotificationPanelViewModel>();
         
         services.AddSingleton<TournamentViewModel>();
-        services.AddSingleton<IPresetSaver, PresetService>();
-        
-        services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
-        services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
+        services.AddSingleton<IPresetInfo>(s => s.GetRequiredService<TournamentViewModel>());
         
         services.AddSingleton<ObsController>();
         services.AddSingleton<IObsConnectionControl>(s => s.GetRequiredService<ObsController>());
+        
+        services.AddSingleton<SettingsService>();
+        
+        services.AddSingleton<IPresetSaver, PresetService>();
         services.AddSingleton<TwitchService>();
+        
+        services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
+        services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();
 
         services.AddSingleton<StatusBarViewModel>();
         
@@ -59,13 +63,11 @@ public partial class App : Application
         services.AddSingleton<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
         
-        services.AddSingleton<SettingsService>();
-        
         //Daje to zeby pamietac o zasadzie ISP i ze mozna to tak rozwiazac z DI
         /*
-        services.AddSingleton<IInterfaceOne>(s => sp.GetRequiredService<ClassOne>());
-        services.AddSingleton<IInterfaceTwo>(s => s.GetRequiredService<ClassTwo>());
-        services.AddSingleton<IInterfaceThree>(s => s.GetRequiredService<ClassThree>());
+        services.AddSingleton<IInterfaceOne>(s => sp.GetRequiredService<SomeClas>());
+        services.AddSingleton<IInterfaceTwo>(s => s.GetRequiredService<SomeClass>());
+        services.AddSingleton<IInterfaceThree>(s => s.GetRequiredService<SomeClass>());
         */
 
         services.AddSingleton<INavigationService, NavigationService>();

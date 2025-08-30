@@ -183,22 +183,11 @@
                                                       Foreground="LimeGreen"
                                                       IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:ControllerViewModel}}"
                                                       GroupName="MenuItem" />
-                        <Grid>
-                            <components:HamburgerMenuItem Text="Presets"
-                                                          Command="{Binding SelectViewModelCommand}"
-                                                          CommandParameter="Presets"
-                                                          IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:PresetManagerViewModel}}"
-                                                          GroupName="MenuItem"/>
-                            
-                            <TextBlock Visibility="{Binding TournamentViewModel.IsPresetModified, Converter={StaticResource BoolToVisibilityConverter}}"
-                                       Foreground="Gray"
-                                       FontWeight="Bold"
-                                       Padding="0"
-                                       VerticalAlignment="Center"
-                                       Text="*Unsaved"
-                                       FontSize="10"
-                                       Margin="95 5 0 0" />
-                        </Grid>
+                        <components:HamburgerMenuItem Text="Presets"
+                                                      Command="{Binding SelectViewModelCommand}"
+                                                      CommandParameter="Presets"
+                                                      IsChecked="{Binding NavigationService.SelectedView, Mode=OneWay, Converter={StaticResource TypeToBoolConverter}, ConverterParameter={x:Type selectable:PresetManagerViewModel}}"
+                                                      GroupName="MenuItem" />
                         <components:HamburgerMenuItem Text="Whitelist"
                                                       Command="{Binding SelectViewModelCommand}"
                                                       CommandParameter="Whitelist"

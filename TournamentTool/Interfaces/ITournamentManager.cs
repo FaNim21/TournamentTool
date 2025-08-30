@@ -4,6 +4,12 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Interfaces;
 
+public interface IPresetInfo
+{
+    public string Name { get; }
+    public bool IsPresetModified { get; }
+}
+
 public interface ITournamentManager
 {
     string Name { get; set; }
@@ -12,7 +18,4 @@ public interface ITournamentManager
     
     bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null);
     bool ContainsDuplicatesNoDialog(Player findPlayer, Guid? excludeID = null);
-
-    void AddPlayer(PlayerViewModel playerViewModel);
-    void RemovePlayer(PlayerViewModel playerViewModel);
 }
