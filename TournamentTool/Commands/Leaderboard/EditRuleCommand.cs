@@ -25,7 +25,7 @@ public class EditRuleCommand : BaseCommand
         if (parameter is not LeaderboardRuleViewModel rule) return;
 
         rule.FilterSplitsAndAdvancements(_tournament.ControllerMode);
-        LeaderboardRuleEditViewModel viewModel = new(rule, _luaScriptsManager);
+        LeaderboardRuleEditViewModel viewModel = new(rule, _luaScriptsManager, _tournament);
         LeaderboardRuleEditWindow window = new() { DataContext = viewModel };
         
         _dialogWindow.ShowDialog(window);

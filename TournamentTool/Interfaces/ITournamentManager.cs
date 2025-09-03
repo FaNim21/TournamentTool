@@ -4,6 +4,11 @@ using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.Interfaces;
 
+public interface INotifyPresetModification
+{
+    void PresetIsModified();
+}
+
 public interface IPresetInfo
 {
     public string Name { get; }

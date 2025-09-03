@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using TournamentTool.Commands;
 using TournamentTool.Commands.Leaderboard;
+using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
 
@@ -31,13 +32,14 @@ public class LuaLeaderboardScriptViewModel : BaseViewModel
 
 public class LeaderboardRuleEditViewModel : BaseViewModel
 {
+    private readonly INotifyPresetModification _notifyPresetModification;
     private readonly LeaderboardRule _ruleModel;
     
-    private LeaderboardRuleViewModel _rule;
+    private LeaderboardRuleViewModel? _rule;
     public LeaderboardRuleViewModel Rule
     {
-        get => _rule;
-        set
+        get => _rule!;
+        init
         {
             _rule = value;
             OnPropertyChanged(nameof(Rule));
@@ -87,11 +89,12 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
     public ICommand MoveSubRuleCommand { get; set; }
 
 
-    public LeaderboardRuleEditViewModel(LeaderboardRuleViewModel rule, ILuaScriptsManager luaScriptsManager)
+    public LeaderboardRuleEditViewModel(LeaderboardRuleViewModel rule, ILuaScriptsManager luaScriptsManager, INotifyPresetModification notifyPresetModification)
     {
-        _rule = rule;
-        OnPropertyChanged(nameof(Rule));
+        Rule = rule;
         _ruleModel = rule.GetLeaderboardRule();
+        
+        _notifyPresetModification = notifyPresetModification;
 
         Application.Current.Dispatcher.Invoke(() =>
         {
@@ -104,7 +107,7 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
 
             foreach (var subRule in Rule.SubRules)
             {
-                subRule.SelectedScript = LuaScripts.FirstOrDefault(s => s.Name.Equals(subRule.LuaPath));
+                subRule.SetupScriptOnOpen(LuaScripts.FirstOrDefault(s => s.Name.Equals(subRule.LuaPath)));
             }
         });
 
@@ -128,16 +131,21 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         Application.Current.Dispatcher.Invoke(() =>
         {
             _ruleModel.SubRules.Add(subRule);
-            var subRuleViewModel = new LeaderboardSubRuleViewModel(subRule, Rule);
+            var subRuleViewModel = new LeaderboardSubRuleViewModel(subRule, Rule, _notifyPresetModification);
             subRuleViewModel.SelectedScript = LuaScripts[0];
             Rule.SubRules.Add(subRuleViewModel);
+            _notifyPresetModification.PresetIsModified();
         });
     }
 
     public void RemoveSubRule(LeaderboardSubRuleViewModel subRule)
     {
-        _ruleModel.SubRules.Remove(subRule.Model);
-        Rule.SubRules.Remove(subRule);
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            _ruleModel.SubRules.Remove(subRule.Model);
+            Rule.SubRules.Remove(subRule);
+            _notifyPresetModification.PresetIsModified();
+        });
     }
 
     private void MoveSubRuleItem((int oldIndex, int newIndex) indexTuple)

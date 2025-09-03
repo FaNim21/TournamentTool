@@ -221,6 +221,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     }
     public override bool OnDisable()
     {
+        PresetService.SavePreset();
+        
         BackgroundCoordinator.Unregister(this);
         ChosenEvent = null;
         ShowPlayers = false;
@@ -366,7 +368,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             if (!await AddPlayerToWhitelist(playerViewModel)) return false;
         }
 
-        SavePreset();
         return true;
     }
     private async Task<bool> EditPlayer(PlayerViewModel playerViewModel)
@@ -404,6 +405,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         playerViewModel.StreamData.Other = windowsData.StreamData.Other.ToLower().Trim();
         playerViewModel.StreamData.OtherType = windowsData.StreamData.OtherType;
 
+        Tournament.PresetIsModified();
         await playerViewModel.CompleteData();
         return true;
     }
@@ -424,7 +426,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         });
         
         ClearFilters();
-        SavePreset();
     }
     private void RemoveSelectedPlayer()
     {
@@ -453,7 +454,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         }
 
         Logger.Information("Done fixing players head skins");
-        SavePreset();
+        Tournament.PresetIsModified();
     }
 
     private void ClearFilters()
@@ -461,10 +462,5 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         SearchText = string.Empty;
         SortingType = PlayerSortingType.Name;
         FilterWhitelist(true);
-    }
-    
-    public void SavePreset()
-    {
-        PresetService.SavePreset();
     }
 }

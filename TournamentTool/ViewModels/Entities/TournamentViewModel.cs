@@ -9,7 +9,7 @@ using TournamentTool.Models.Ranking;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager, IPresetInfo
+public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager, IPresetInfo, INotifyPresetModification
 {
     private readonly Dictionary<string, List<string>> _errors = [];
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
@@ -54,6 +54,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         {
             _tournament.Name = value;
             OnPropertyChanged(nameof(Name));
+            PresetIsModified();
         }
     }
     
@@ -100,6 +101,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         {
             _tournament.ShowOnlyLive = value;
             OnPropertyChanged(nameof(ShowOnlyLive));
+            PresetIsModified();
         }
     }
     public bool AddUnknownPacemanPlayersToWhitelist
@@ -376,7 +378,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public bool IsPresetModified
     {
         get => _isPresetModified;
-        set
+        private set
         {
             _isPresetModified = value;
             OnPropertyChanged(nameof(IsPresetModified));
@@ -626,6 +628,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         RankedApiPlayerName = string.Empty;
         RankedApiKey = string.Empty;
         AddUnknownRankedPlayersToWhitelist = false;
+        
+        PresetIsModified();
     }
 
     public void Delete()
@@ -679,8 +683,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     
     public void PresetIsModified()
     {
-        //to sie tez tyczy problemow jak zmiana atrybutow w player, ponieawz nie jest bezposrednio powiazany z modelem wiec na razie
-        // nie chce wprowadzac zmian z zapisywaniem itp itd tutaj
         IsPresetModified = true;
     }
     public void PresetIsSaved()

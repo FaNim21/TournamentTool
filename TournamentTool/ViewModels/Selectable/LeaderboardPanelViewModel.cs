@@ -105,7 +105,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         
             foreach (var rule in Leaderboard.Rules)
             {
-                Rules.Add(new LeaderboardRuleViewModel(rule));
+                Rules.Add(new LeaderboardRuleViewModel(rule, Tournament));
             }
         });
         
@@ -190,7 +190,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     public void AddRule(LeaderboardRule rule)
     {
-        var ruleViewModel = new LeaderboardRuleViewModel(rule);
+        var ruleViewModel = new LeaderboardRuleViewModel(rule, Tournament);
         Leaderboard.AddRule(rule);
         Application.Current.Dispatcher.Invoke(() =>
         {

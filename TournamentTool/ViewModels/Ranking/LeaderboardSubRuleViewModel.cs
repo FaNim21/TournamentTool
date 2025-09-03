@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
+using OBSStudioClient.Classes;
 using TournamentTool.Commands;
+using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
@@ -9,6 +11,7 @@ namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardSubRuleViewModel : BaseViewModel
 {
+    private readonly INotifyPresetModification _notifyPresetModification;
     public LeaderboardSubRule Model { get; private set; }
 
     public LeaderboardRuleViewModel Rule { get; private set; }
@@ -29,6 +32,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.Description = value;
             OnPropertyChanged(nameof(Description));
+            _notifyPresetModification.PresetIsModified();
         } 
     }
     public int Time
@@ -37,8 +41,9 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         set
         {
             Model.Time = value;
-            TimeText = TimeSpan.FromMilliseconds(value).ToFormattedTime();
             OnPropertyChanged(nameof(Time));
+            SetTime();
+            _notifyPresetModification.PresetIsModified();
         } 
     }
     public int BasePoints
@@ -48,6 +53,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.BasePoints = value;
             OnPropertyChanged(nameof(BasePoints));
+            _notifyPresetModification.PresetIsModified();
         } 
     }
     public int MaxWinners
@@ -57,6 +63,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.MaxWinners = value;
             OnPropertyChanged(nameof(MaxWinners));
+            _notifyPresetModification.PresetIsModified();
         } 
     }
     public bool Repeatable
@@ -66,6 +73,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.Repeatable = value;
             OnPropertyChanged(nameof(Repeatable));
+            _notifyPresetModification.PresetIsModified();
         } 
     }
 
@@ -92,15 +100,31 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedScript));
 
             LuaPath = _selectedScript.Name;
+            _notifyPresetModification.PresetIsModified();
         }
     }
 
 
-    public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule)
+    public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule, INotifyPresetModification notifyPresetModification)
     {
+        _notifyPresetModification = notifyPresetModification;
         Model = model;
         Rule = rule;
         
-        Time = Model.Time;
+        SetTime();
+    }
+
+    private void SetTime()
+    {
+        TimeText = TimeSpan.FromMilliseconds(Time).ToFormattedTime();
+    }
+    public void SetupScriptOnOpen(LuaLeaderboardScriptViewModel? script)
+    {
+        if (script == null) return;
+        
+        _selectedScript = script;
+        OnPropertyChanged(nameof(SelectedScript));
+
+        LuaPath = script.Name;
     }
 }

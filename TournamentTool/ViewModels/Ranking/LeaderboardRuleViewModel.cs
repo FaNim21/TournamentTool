@@ -8,6 +8,7 @@ using Microsoft.Xaml.Behaviors.Media;
 using TournamentTool.Attributes;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 
@@ -16,6 +17,7 @@ namespace TournamentTool.ViewModels.Ranking;
 public class LeaderboardRuleViewModel : BaseViewModel
 {
     private readonly LeaderboardRule _rule;
+    private readonly INotifyPresetModification _notifyPresetModification;
 
     public string Name
     {
@@ -24,6 +26,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
         {
             _rule.Name = value;
             OnPropertyChanged(nameof(Name));
+            _notifyPresetModification.PresetIsModified();
         }
     }
     public bool IsEnabled
@@ -34,13 +37,8 @@ public class LeaderboardRuleViewModel : BaseViewModel
             _rule.IsEnabled = value;
             OnPropertyChanged(nameof(IsEnabled));
             
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                BrushIsEnabledColor = value ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
-            });
-            OnPropertyChanged(nameof(BrushIsEnabledColor));
-            
-            IsEnabledText = value ? "1": "0";
+            SetIsEnabledButton();
+            _notifyPresetModification.PresetIsModified();
         }
     }
     public LeaderboardRuleType RuleType
@@ -51,6 +49,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
             _rule.RuleType = value;
             RuleTypeText = value.ToString();
             OnPropertyChanged(nameof(RuleType));
+            _notifyPresetModification.PresetIsModified();
         }
     }
 
@@ -67,6 +66,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
             
             _rule.ChosenAdvancement = value; 
             OnPropertyChanged(nameof(ChosenMilestone));
+            _notifyPresetModification.PresetIsModified();
         }
     }
 
@@ -135,25 +135,36 @@ public class LeaderboardRuleViewModel : BaseViewModel
     public ICommand ShowCollapseCommand { get; set; }
 
 
-    public LeaderboardRuleViewModel(LeaderboardRule rule)
+    public LeaderboardRuleViewModel(LeaderboardRule rule, INotifyPresetModification notifyPresetModification)
     {
         _rule = rule;
-
-        IsEnabled = _rule.IsEnabled;
+        _notifyPresetModification = notifyPresetModification;
 
         SwitchRuleTypeCommand = new RelayCommand(SwitchRuleType);
         ShowCollapseCommand = new RelayCommand(SwitchSubRulesVisibility);
         
+        SetIsEnabledButton();
         _chosenCopy = ChosenMilestone;
 
         foreach (var subRule in rule.SubRules)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                SubRules.Add(new LeaderboardSubRuleViewModel(subRule, this));
+                SubRules.Add(new LeaderboardSubRuleViewModel(subRule, this, notifyPresetModification));
             });
         }
         RuleTypeText = RuleType.ToString();
+    }
+
+    private void SetIsEnabledButton()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            BrushIsEnabledColor = IsEnabled ? new SolidColorBrush(Consts.LiveColor) : new SolidColorBrush(Consts.OfflineColor);
+        });
+        OnPropertyChanged(nameof(BrushIsEnabledColor));
+            
+        IsEnabledText = IsEnabled ? "1": "0";
     }
 
     public void FilterSplitsAndAdvancements(ControllerMode controllerMode)
@@ -174,7 +185,14 @@ public class LeaderboardRuleViewModel : BaseViewModel
 
         var memberInfo = typeof(RunMilestone).GetMember(ChosenMilestone.ToString()).FirstOrDefault();
         var attr = memberInfo?.GetCustomAttribute<EnumRuleContextAttribute>();
-        ChosenMilestone = attr!.RuleType.Equals(RuleType) || attr.RuleType.Equals(LeaderboardRuleType.All) ? _chosenCopy : RunMilestone.None;
+        var milestone = attr!.RuleType.Equals(RuleType) || attr.RuleType.Equals(LeaderboardRuleType.All) ? _chosenCopy : RunMilestone.None;
+        
+        if (ChosenMilestone != RunMilestone.None)
+        {
+            _chosenCopy = _rule.ChosenAdvancement;
+        }
+        _rule.ChosenAdvancement = milestone; 
+        OnPropertyChanged(nameof(ChosenMilestone));
         
         FilteredMilestones = new List<RunMilestone>(filtered);
         OnPropertyChanged(nameof(FilteredMilestones));
@@ -184,6 +202,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
     {
         RuleType = RuleType == LeaderboardRuleType.Split ? LeaderboardRuleType.Advancement : LeaderboardRuleType.Split;
         FilterSplitsAndAdvancements(ControllerMode);
+        _notifyPresetModification.PresetIsModified();
     }
     private void SwitchSubRulesVisibility()
     {
