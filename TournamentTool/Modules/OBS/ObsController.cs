@@ -259,50 +259,69 @@ public class ObsController : IObsConnectionControl
 
         SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
     }
-    private void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
+    private async void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
     {
         //TODO: 7 Zrobic wylapywanie dodawania wszystkich elementow tez typu head i text od povow
         // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
-        
-        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
-        
-        /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
 
-        SceneItemTransform transform = Client!.GetSceneItemTransform(args.SceneName, args.SceneItemId).Result;
-        PointOfView pov = new(this)
+        return;
+        try
         {
-            SceneName = args.SceneName,
-            SceneItemName = args.SourceName,
-            ID = args.SceneItemId,
-            X = (int)(transform.PositionX / XAxisRatio),
-            Y = (int)(transform.PositionY / YAxisRatio),
-            Width = (int)(transform.Width / XAxisRatio),
-            Height = (int)(transform.Height / YAxisRatio),
-            Text = args.SourceName
-        };
-        Controller.AddPov(pov);*/
+            var listResponse = await Client.GetSceneList();
+            var scenes = listResponse.Scenes;
+            for (var i = 0; i < scenes.Length; i++)
+            {
+                var scene = scenes[i];
+                if (scene.SceneName.Equals(e.SceneName)) return;
+            }
+
+            SceneItem[] items = await Client.GetSceneItemList(e.SceneName);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var item = items[i];
+                if (item.SourceName.Equals(e.SourceName)) return;
+            }
+            
+            Logger.Log(e.SceneName + " - " + e.SourceName);
+            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+        }
+        catch
+        {
+            // ignored
+        }
     }
-    private void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
+    private async void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
     {
         //TODO: 7 Zrobic wylapywanie usuwania wszystkich elementow tez typu head i text od povow
         // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
-        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
-        
-        /*if (!args.SourceName.StartsWith(Controller.Configuration.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase)) return;
-
-        PointOfView? pov = null;
-        for (int i = 0; i < Controller.POVs.Count; i++)
+        return;
+        try
         {
-            if (Controller.POVs[i].SceneItemName == args.SourceName)
+            var listResponse = await Client.GetSceneList();
+            var scenes = listResponse.Scenes;
+            for (var i = 0; i < scenes.Length; i++)
             {
-                pov = Controller.POVs[i];
-                break;
+                var scene = scenes[i];
+                if (scene.SceneName.Equals(e.SceneName)) return;
             }
-        }
 
-        if (pov == null) return;
-        Controller.RemovePov(pov);*/
+            /*
+            SceneItem[] items = await Client.GetSceneItemList(e.SceneName);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var item = items[i];
+                if (item.SourceName.Equals(e.SourceName)) return;
+            }
+            */
+            
+            Logger.Log(e.SceneName + " - " + e.SourceName);
+            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private void OnCurrentProgramSceneChanged(object? sender, SceneNameEventArgs e)

@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using OBSStudioClient.Classes;
+using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
@@ -12,6 +13,7 @@ using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
+using ConnectionState = TournamentTool.Modules.OBS.ConnectionState;
 
 namespace TournamentTool.ViewModels.Controller;
 
@@ -459,37 +461,52 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName) => await OBS.GetBrowserURLStreamInfo(sceneItemName);
     public async Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene)
     {
-        //TODO: 1 TEMP z racji i tak reorganizacji kodu OBS do update 0.13
-        SceneItem[] sceneItems = await OBS.GetSceneItemList(scene);
         List<SceneItem> additionals = [];
         List<(SceneItem, SceneItem?)> povItems = [];
         
-        foreach (var item in sceneItems)
+        try
         {
-            if (item.IsGroup == true)
-            {
-                SceneItem[] groupItems = await OBS.GetGroupSceneItemList(item.SourceName);
-                foreach (var groupItem in groupItems)
-                {
-                    if (string.IsNullOrEmpty(groupItem.InputKind)) continue;
-                    if (CheckForAdditionals(additionals, groupItem)) continue;
+            //TODO: 1 TEMP z racji i tak reorganizacji kodu OBS do update 0.13
+            SceneItem[] sceneItems = await OBS.GetSceneItemList(scene);
 
-                    if (groupItem.InputKind!.Equals("browser_source") &&
-                        groupItem.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
+            foreach (var item in sceneItems)
+            {
+                if (item.SourceType == SourceType.OBS_SOURCE_TYPE_SCENE)
+                {
+                    SceneItem[] groupItems;
+                    if (item.IsGroup == true)
+                        groupItems = await OBS.GetGroupSceneItemList(item.SourceName);
+                    else
+                        groupItems = await OBS.GetSceneItemList(item.SourceName);
+                    
+                    foreach (var groupItem in groupItems)
                     {
-                        povItems.Add((groupItem, item));
+                        if (string.IsNullOrEmpty(groupItem.InputKind)) continue;
+                        if (CheckForAdditionals(additionals, groupItem)) continue;
+
+                        if (groupItem.InputKind!.Equals("browser_source") &&
+                            groupItem.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems,
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            povItems.Add((groupItem, item));
+                        }
                     }
                 }
-            }
 
-            if (string.IsNullOrEmpty(item.InputKind)) continue;
-            if (CheckForAdditionals(additionals, item)) continue;
+                if (string.IsNullOrEmpty(item.InputKind)) continue;
+                if (CheckForAdditionals(additionals, item)) continue;
 
-            if (item.InputKind!.Equals("browser_source") &&
-                item.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems, StringComparison.OrdinalIgnoreCase))
-            {
-                povItems.Add((item, null));
+                if (item.InputKind!.Equals("browser_source") &&
+                    item.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    povItems.Add((item, null));
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
         }
 
         return (povItems, additionals);

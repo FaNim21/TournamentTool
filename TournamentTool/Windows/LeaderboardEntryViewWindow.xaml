@@ -132,6 +132,9 @@
 
                                 <Run Text="Points: " />
                                 <Run Text="{Binding Points, Mode=OneTime}" />
+                                
+                                <Run Text=" in Round: " />
+                                <Run Text="{Binding Round, Mode=OneTime}" />
                             </TextBlock>
                         </Border>
                     </DataTemplate>

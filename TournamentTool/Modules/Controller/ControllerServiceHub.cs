@@ -1,7 +1,9 @@
 ﻿using System.Windows;
 using TournamentTool.Components.Controls;
 using TournamentTool.Modules.Logging;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
+using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.Modules.Controller;
@@ -19,8 +21,6 @@ public interface IServiceUpdater
 
 public class ControllerServiceHub
 {
-    private ILoggingService Logger { get; }
-
     private class ServiceRunner
     {
         public string Name { get; }
@@ -39,23 +39,24 @@ public class ControllerServiceHub
             Interval = interval;
         }
     }
+    
+    private ILoggingService Logger { get; }
 
     private readonly Dictionary<string, ServiceRunner> _services = new();
     private readonly CancellationTokenSource _cancellationSource = new();
     
-    private Timer? _uiUpdateTimer;
-
     
-    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger)
+    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger, TournamentViewModel preset, ObsController obs)
     {
         Logger = logger;
-        _uiUpdateTimer = new Timer(UpdateTimers, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+        var _uiUpdateTimer = new Timer(UpdateTimers, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
         
         TwitchUpdaterService twitchUpdater = new(controller, twitch);
         AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60));
 
-        APIUpdaterService apiUpdater = new(controller, logger);
-        AddService("API-data", apiUpdater, TimeSpan.FromSeconds(1));
+        APIUpdaterService apiUpdater = new(controller, logger, preset, obs);
+        AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5));
+        //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
     }
     public void OnEnable()
     {

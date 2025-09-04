@@ -22,6 +22,7 @@ public class EntryMilestoneRankedDataViewModel : EntryMilestoneDataViewModel
     public RunMilestone PreviousMilestoneType => _data.Previous!.Milestone;
     public string PreviousMilestoneTime => TimeSpan.FromMilliseconds(_data.Previous!.Time).ToFormattedTime();
 
+    public int Round => _data.Round;
     public int Points => _data.Points;
 
     
@@ -33,6 +34,7 @@ public class EntryMilestoneRankedDataViewModel : EntryMilestoneDataViewModel
         OnPropertyChanged(nameof(MainMilestoneTime));
         OnPropertyChanged(nameof(PreviousMilestoneType));
         OnPropertyChanged(nameof(PreviousMilestoneTime));
+        OnPropertyChanged(nameof(Round));
         OnPropertyChanged(nameof(Points));
     }
 }

@@ -8,7 +8,7 @@ namespace TournamentTool.Models.Ranking;
 [JsonDerivedType(typeof(EntryRankedMilestoneData), "ranked")]
 public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points);
 public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
-public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points) : EntryMilestoneData(Main, Previous, Points);
+public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, int Round) : EntryMilestoneData(Main, Previous, Points);
 
 public class BestMilestoneData
 {

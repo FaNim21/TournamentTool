@@ -10,7 +10,7 @@ public abstract class LeaderboardEntryMilestoneFactory
         return evaluateData switch
         {
             LeaderboardPacemanEvaluateData data => new EntryPacemanMilestoneData(data.MainSplit, data.PreviousSplit, Points, data.WorldID),
-            LeaderboardRankedEvaluateData data => new EntryRankedMilestoneData(data.MainSplit, data.PreviousSplit, Points), 
+            LeaderboardRankedEvaluateData data => new EntryRankedMilestoneData(data.MainSplit, data.PreviousSplit, Points, data.Round), 
             _ => throw new UnreachableException()
         };
     }

@@ -11,6 +11,7 @@ public abstract record LeaderboardPlayerEvaluateData(
 
 public record LeaderboardRankedEvaluateData(
     Player Player,
+    int Round,
     LeaderboardTimeline MainSplit,
     LeaderboardTimeline? PreviousSplit) : LeaderboardPlayerEvaluateData(Player, MainSplit, PreviousSplit);
 public record LeaderboardPacemanEvaluateData(

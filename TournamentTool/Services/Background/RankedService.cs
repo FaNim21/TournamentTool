@@ -264,7 +264,7 @@ public class RankedService : IBackgroundService
             previousTimeline = new LeaderboardTimeline(previous.Milestone, (int)previous.Time);
         }
         
-        var data = new LeaderboardRankedEvaluateData(player, mainTimeline, previousTimeline);
+        var data = new LeaderboardRankedEvaluateData(player, _rankedManagementData.Rounds, mainTimeline, previousTimeline);
         evaluateTimelineData.Add(data);
     }
 
@@ -272,8 +272,8 @@ public class RankedService : IBackgroundService
     {
         if (_splitDatas.Count == 0) return;
 
-        _rankedManagementData.Rounds++;
         Leaderboard.EvaluateData(_splitDatas);
+        _rankedManagementData.Rounds++;
     }
     private void SeedStarted()
     {

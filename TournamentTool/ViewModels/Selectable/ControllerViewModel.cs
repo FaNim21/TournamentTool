@@ -123,7 +123,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _twitch = twitch;
         
         SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel, logger);
-        _serviceHub = new ControllerServiceHub(this, twitch, logger);
+        _serviceHub = new ControllerServiceHub(this, twitch, logger, tournamentViewModel, obs);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
