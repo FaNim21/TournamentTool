@@ -12,6 +12,7 @@ using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
+using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
@@ -34,7 +35,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     public ObservableCollection<LeaderboardRuleViewModel> Rules { get; } = [];
 
-    public ICommand AddRuleCommand { get; set; }
+    public ICommand AddRuleCommand { get; private set; }
+    public ICommand AddFromWhitelistCommand { get; private set; }
 
     public ICommand EditRuleCommand { get; set; }
     public ICommand RemoveRuleCommand { get; set; }
@@ -60,6 +62,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         Leaderboard = Tournament.Leaderboard; 
         
         AddRuleCommand = new RelayCommand(() => AddRule(new LeaderboardRule()));
+        AddFromWhitelistCommand = new RelayCommand(() => { Coordinator.ShowLoading(AddFromWhitelist); });
 
         EditRuleCommand = new EditRuleCommand(coordinator, Tournament, luaScriptsManager);
         RemoveRuleCommand = new RemoveRuleCommand(this);
@@ -74,7 +77,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
         MoveRuleItemCommand = new RelayCommand<(int oldIndex, int newIndex)>(MoveRuleItem);
     }
-
+    
     public override bool CanEnable()
     {
         return !Tournament.IsNullOrEmpty();
@@ -107,6 +110,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             {
                 Rules.Add(new LeaderboardRuleViewModel(rule, Tournament));
             }
+
+            Rules[0].IsFocused = true;
         });
         
         var collectionViewSource = CollectionViewSource.GetDefaultView(Entries);
@@ -197,6 +202,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             Rules.Add(ruleViewModel);
             Tournament.PresetIsModified();
         });
+        UpdateFocusedRule();
     }
     public void RemoveRule(LeaderboardRuleViewModel rule)
     {
@@ -206,6 +212,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             Rules.Remove(rule);
             Tournament.PresetIsModified();
         });
+        UpdateFocusedRule();
     }
 
     private void MoveRuleItem((int oldIndex, int newIndex) indexTuple)
@@ -223,6 +230,42 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         Leaderboard.MoveRule(oldIndex, newIndex);
         
         RecalculateAllEntries();
+        UpdateFocusedRule();
+    }
+
+    private void UpdateFocusedRule()
+    {
+        for (int i = 0; i < Rules.Count; i++)
+        {
+            var current = Rules[i];
+            current.IsFocused = false;
+        }
+        Rules[0].IsFocused = true;
+    }
+
+    private async Task AddFromWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
+    {
+        int count = Tournament.Players.Count;
+        for (var i = 0; i < count; i++)
+        {
+            if (cancellationToken.IsCancellationRequested) break;
+            progress.Report((float)i / count);
+            
+            var player = Tournament.Players[i];
+            if (string.IsNullOrEmpty(player.UUID)) continue;
+            if (Leaderboard.GetEntry(player.UUID) != null) continue;
+            
+            logProgress.Report($"({i+1})/{count}) Adding player {player.DisplayName} to leaderboard");
+            
+            var entry = new LeaderboardEntry { PlayerUUID = player.UUID };
+            AddLeaderboardEntry(entry, player);
+
+            await Task.Delay(10);
+        }
+        
+        logProgress.Report($"Recalculating all positions");
+        RecalculateAllEntries();
+        await Task.Delay(25);
     }
     
     private void RemoveAllEntries()

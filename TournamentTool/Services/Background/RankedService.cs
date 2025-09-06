@@ -154,7 +154,7 @@ public class RankedService : IBackgroundService
         if(privRoomData.Status == MatchStatus.done)
         {
             _lastStatus = privRoomData.Status;
-            EvaluateResults();
+            EvaluateResults(privRoomData);
             return;
         }
         if(privRoomData.Status == MatchStatus.generate)
@@ -189,20 +189,6 @@ public class RankedService : IBackgroundService
             //TODO: 0 TUTAJ INVENTORY JAK DODADZA DO API
             pace.Value.Update(null);
         }
-        
-        //TODO: 0 Z tym tez cos zrobic jezeli nie naprawia timeline'ow dla defaultowego completionw priv roomie,
-        //bo wtedy na bazie tego trzeba bedzie samemu dorobic ten timeline
-        /*
-        for (int i = 0; i < privRoomData.Completions.Length; i++)
-        {
-            var completion = privRoomData.Completions[i];
-
-            if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
-            if (paceData.Completion != null) continue;
-
-            paceData.Completion = completion;
-        }
-        */
     }
 
     private void AddPace(PrivRoomPlayer player)
@@ -268,9 +254,23 @@ public class RankedService : IBackgroundService
         evaluateTimelineData.Add(data);
     }
 
-    private void EvaluateResults()
+    private void EvaluateResults(PrivRoomData data)
     {
-        if (_splitDatas.Count == 0) return;
+        int completions = data.Completions.Length;
+        var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
+        
+        for (int i = 0; i < data.Completions.Length; i++)
+        {
+            var completion = data.Completions[i];
+
+            if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
+            if (paceData.GetLastSplit().Split == RankedSplitType.complete) continue;
+
+            var paceTimeline = new RankedPaceTimeline(display.ShortName!, RunMilestone.ProjectEloComplete, completion.Time);
+            paceData.AddTimeline(paceTimeline);
+        }
+        
+        if (_splitDatas.Count == 0 || completions == 0) return;
 
         Leaderboard.EvaluateData(_splitDatas);
         _rankedManagementData.Rounds++;

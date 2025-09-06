@@ -70,6 +70,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
         }
     }
 
+    public Brush? BrushBorderFocused { get; set; } = Brushes.Gray;
     public Brush? BrushIsEnabledColor { get; set; }
     
     private string _isEnabledText = string.Empty;
@@ -124,6 +125,21 @@ public class LeaderboardRuleViewModel : BaseViewModel
         {
             _collapseButtonName = value;
             OnPropertyChanged(nameof(CollapseButtonName));
+        }
+    }
+
+    private bool _isFocused;
+    public bool IsFocused
+    {
+        get => _isFocused;
+        set
+        {
+            _isFocused = value;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                BrushBorderFocused = value ? Brushes.LightBlue : Brushes.Gray;
+                OnPropertyChanged(nameof(BrushBorderFocused));
+            });
         }
     }
 

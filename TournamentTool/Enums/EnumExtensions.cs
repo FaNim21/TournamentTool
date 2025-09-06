@@ -25,16 +25,16 @@ public static class EnumExtensions
         throw new ArgumentException($"No enum found for description: {description}", nameof(description));
     }
     
-    public static T FromShortName<T>(string description) where T : Enum
+    public static T FromShortName<T>(string shortName) where T : Enum
     {
         foreach (var field in typeof(T).GetFields())
         {
             var attribute = field.GetCustomAttribute<DisplayAttribute>();
-            if (attribute != null && attribute.ShortName == description)
+            if (attribute != null && attribute.ShortName == shortName)
             {
                 return (T)field.GetValue(null)!;
             }
         }
-        throw new ArgumentException($"No enum found for shortName: {description}", nameof(description));
+        throw new ArgumentException($"No enum found for shortName: {shortName}", nameof(shortName));
     }
 }

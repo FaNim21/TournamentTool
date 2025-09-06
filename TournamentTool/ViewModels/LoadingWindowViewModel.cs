@@ -56,7 +56,7 @@ public class LoadingWindowViewModel : BaseViewModel
         
         CancelCommand = new RelayCommand(Cancel);
 
-        Task.Run(async () => await StartLoading(loading));
+        _ = StartLoading(loading);
     }
 
     private async Task StartLoading(Func<IProgress<float>, IProgress<string>, CancellationToken, Task> loading)
@@ -73,6 +73,6 @@ public class LoadingWindowViewModel : BaseViewModel
 
     private void Cancel()
     {
-        _cts?.Cancel();
+        _cts.Cancel();
     }
 }

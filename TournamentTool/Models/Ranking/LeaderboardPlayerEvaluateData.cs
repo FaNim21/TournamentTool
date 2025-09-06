@@ -18,5 +18,4 @@ public record LeaderboardPacemanEvaluateData(
     Player Player,
     string WorldID,
     LeaderboardTimeline MainSplit,
-    LeaderboardTimeline? PreviousSplit)
-    : LeaderboardPlayerEvaluateData(Player, MainSplit, PreviousSplit);
+    LeaderboardTimeline? PreviousSplit) : LeaderboardPlayerEvaluateData(Player, MainSplit, PreviousSplit);

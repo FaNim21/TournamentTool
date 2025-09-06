@@ -44,11 +44,11 @@ public class APIUpdaterService : IServiceUpdater
         
     }
 
-    public Task UpdateAsync(CancellationToken token)
+    public async Task UpdateAsync(CancellationToken token)
     {
         _controller.ManagementPanel?.UpdateAPI(_api);
-        Task.Run(UpdateLeaderboardTopAPI, token);
-        return Task.CompletedTask;
+        await UpdateLeaderboardTopAPI();
+        // return Task.CompletedTask;
     }
 
     private void LeaderboardAPICheck()
