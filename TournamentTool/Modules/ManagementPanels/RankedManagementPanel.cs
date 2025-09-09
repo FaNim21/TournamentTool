@@ -112,16 +112,6 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         api.CheckFile(_rankedCustomTextFileName);
 
         Update();
-        
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            BestSplits.Clear();
-            foreach (var bestSplit in _data.BestSplits)
-            {
-                var viewModel = new RankedBestSplitViewModel(bestSplit);
-                BestSplits.Add(viewModel);
-            }
-        });
     }
 
     public override void UpdateAPI(APIDataSaver api)
@@ -142,15 +132,34 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
             TimeStartedText = date.ToString("dd MMM yyyy hh:mm:ss tt", CultureInfo.CurrentCulture);
         }
 
-        Application.Current.Dispatcher.Invoke(() =>
+        //ewentualnie to aktualizowanie zastapic guzikiem refresh
+        for (var i = 0; i < _data.BestSplits.Count; i++)
         {
-            BestSplits.Clear();
-            foreach (var bestSplit in _data.BestSplits)
+            PrivRoomBestSplit bestSplit = _data.BestSplits[i];
+            if (i < BestSplits.Count) continue;
+            
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 var viewModel = new RankedBestSplitViewModel(bestSplit);
                 BestSplits.Add(viewModel);
+            });
+        }
+
+        for (int i = 0; i < _data.BestSplits.Count; i++)
+        {
+            PrivRoomBestSplit bestSplit = _data.BestSplits[i];
+            for (int j = 0; j < bestSplit.Datas.Count; j++)
+            {
+                PrivRoomBestSplitData data = bestSplit.Datas[j];
+                if (j < BestSplits[i].Splits.Count) continue;
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    RankedBestSplitDataViewModel dataViewModel = new RankedBestSplitDataViewModel(data);
+                    BestSplits[i].Splits.Add(dataViewModel);
+                });
             }
-        });
+        }
         
         OnPropertyChanged(nameof(CustomText));
         OnPropertyChanged(nameof(Rounds));

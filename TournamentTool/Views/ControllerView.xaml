@@ -183,7 +183,9 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" >
+                    <Border BorderBrush="#000D14"
+                            BorderThickness="0 0 3 0 "
+                        Grid.Column="0" >
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                                       VerticalScrollBarVisibility="Auto">
                             <StackPanel MaxWidth="150">
@@ -233,16 +235,9 @@
                                 -->
                             </StackPanel>
                         </ScrollViewer>
-                    </Grid>
+                    </Border>
                     
                     <Grid Grid.Column="1" >
-                        <Line X1="0"
-                              Y1="0"
-                              X2="0"
-                              Y2="2000"
-                              StrokeThickness="5"
-                              Stroke="#000d14" />
-
                         <ScrollViewer>
                             <ContentControl Content="{Binding ManagementPanel}">
                                 <ContentControl.Resources>
@@ -256,21 +251,16 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Column="1"
-                  Background="Transparent">
-                <Line X1="3"
-                      X2="3"
-                      Y1="0"
-                      Y2="2000"
-                      Stroke="#000D14"
-                      StrokeThickness="4" />
-
-                <ListBox ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         Background="Transparent"
+            <Border Grid.Column="1"
+                    BorderBrush="#000D14"
+                    BorderThickness="3 0 0 0"
+                    Background="Transparent">
+                <ListBox Background="Transparent"
                          BorderThickness="0"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          VirtualizingPanel.IsVirtualizingWhenGrouping="True"
@@ -279,7 +269,7 @@
                          AllowDrop="True"
                          ItemsSource="{Binding FilteredPlayersCollectionView}"
                          SelectedItem="{Binding SelectedWhitelistPlayer, Mode=TwoWay}"
-                         Margin="6 0 0 0">
+                         Margin="2 2 0 0">
                     <i:Interaction.Behaviors>
                         <behaviors:ListBoxUpdateBehavior DragAndDropContext="{Binding .}"/>
                         <behaviors:ListBoxSelectionBehavior />
@@ -377,17 +367,12 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
-            </Grid>
+            </Border>
 
-            <Grid Grid.Column="2"
-                  Visibility="{Binding UseSidePanel, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Line X1="2"
-                      X2="2"
-                      Y1="0"
-                      Y2="2000"
-                      Stroke="#000D14"
-                      StrokeThickness="4" />
-
+            <Border Grid.Column="2"
+                    BorderBrush="#000D14"
+                    BorderThickness="3 0 0 0"
+                    Visibility="{Binding UseSidePanel, Converter={StaticResource BoolToVisibilityConverter}}">
                 <ScrollViewer>
                     <ContentControl Content="{Binding SidePanel}">
                         <ContentControl.Resources>
@@ -400,7 +385,7 @@
                         </ContentControl.Resources>
                     </ContentControl>
                 </ScrollViewer>
-            </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

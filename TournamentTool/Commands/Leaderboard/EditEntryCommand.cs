@@ -4,12 +4,12 @@ using TournamentTool.Windows;
 
 namespace TournamentTool.Commands.Leaderboard;
 
-public class ViewEntryCommand : BaseCommand
+public class EditEntryCommand : BaseCommand
 {
     private readonly IDialogWindow _dialogWindow;
 
     
-    public ViewEntryCommand(IDialogWindow dialogWindow)
+    public EditEntryCommand(IDialogWindow dialogWindow)
     {
         _dialogWindow = dialogWindow;
     }
@@ -18,8 +18,8 @@ public class ViewEntryCommand : BaseCommand
     {
         if (parameter is not LeaderboardEntryViewModel entry) return;
 
-        entry.SetupOpeningWindow();
-        LeaderboardEntryViewWindow window = new() { DataContext = entry };
+        LeaderboardEntryEditViewModel editViewModel = new LeaderboardEntryEditViewModel(entry.GetLeaderboardEntry(), entry.Player);
+        LeaderboardEntryEditWindow window = new() { DataContext = editViewModel };
         _dialogWindow.ShowDialog(window);
     }
 }

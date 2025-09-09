@@ -226,14 +226,12 @@
                 <StackPanel Background="#3b3b3b"
                             Height="50"
                             VerticalAlignment="Bottom" Orientation="Horizontal">
-
                     <Grid>
                         <components:ButtonNormal ContentText="Correct UUID"
                                                  Width="100"
                                                  Height="30"
                                                  Margin="5 0 0 0"
                                                  OnCommand="{Binding CorrectPlayerUUIDCommand}" />
-
                         <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
                                 IsHitTestVisible="False"
@@ -251,15 +249,22 @@
                                        FontSize="8"
                                        Margin="3 -1 0 0" />
                         </Border>
-
                     </Grid>
-
-
                     <components:ButtonNormal ContentText="NameMC"
                                              Width="80"
                                              Height="30"
                                              Margin="5 0 0 0"
                                              OnCommand="{Binding OpenNameMCCommand}" />
+                    <components:ButtonNormal ContentText="Ranked"
+                                             Width="80"
+                                             Height="30"
+                                             Margin="5 0 0 0"
+                                             OnCommand="{Binding OpenRankedStatsCommand}" />
+                    <components:ButtonNormal ContentText="Paceman"
+                                             Width="80"
+                                             Height="30"
+                                             Margin="5 0 0 0"
+                                             OnCommand="{Binding OpenPacemanStatsCommand}" />
                 </StackPanel>
             </Grid >
         </Grid>

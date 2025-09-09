@@ -103,19 +103,29 @@
                  ItemsSource="{Binding BestSplits}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="viewModelModels:RankedBestSplitViewModel">
-                    <StackPanel Orientation="Horizontal"
+                    <StackPanel Orientation="Vertical"
                                 Width="220"
                                 Margin="-1 0 0 2">
-                        <TextBlock Foreground="White">
-                                <Run Text="{Binding TypeName}"
-                                     Foreground="Wheat"
-                                     FontWeight="Bold" />
-                                <LineBreak />
-                                <Run Text="{Binding TimeText}"
-                                     FontWeight="SemiBold" />
-                                <Run Text="-" />
-                                <Run Text="{Binding PlayerName}" />
-                        </TextBlock>
+                        <TextBlock Text="{Binding TypeName, Mode=OneTime}"
+                                   Foreground="Wheat"
+                                   FontWeight="Bold" />
+                        
+                        <ItemsControl ItemsSource="{Binding Splits}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type viewModelModels:RankedBestSplitDataViewModel}">
+                                    <TextBlock Foreground="White">
+                                        <Run Text="{Binding TimeText, Mode=OneTime}"
+                                             Foreground="LightGray"
+                                             FontWeight="SemiBold" />
+                                        <Run Text="{Binding TimeDifferenceText, Mode=OneTime}"
+                                             Foreground="#d43f3f"
+                                             FontWeight="SemiBold" />
+                                        <Run Text="-" />
+                                        <Run Text="{Binding PlayerName, Mode=OneTime}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

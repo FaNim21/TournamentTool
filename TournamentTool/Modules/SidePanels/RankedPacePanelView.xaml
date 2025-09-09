@@ -57,7 +57,7 @@
                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
                                    SnapsToDevicePixels="True"
                                    UseLayoutRounding="True"
-                                   Margin="0 5 0 0" />
+                                   Margin="4 5 4 0" />
                             <TextBlock FontSize="15"
                                        Width="140"
                                        FontWeight="SemiBold">

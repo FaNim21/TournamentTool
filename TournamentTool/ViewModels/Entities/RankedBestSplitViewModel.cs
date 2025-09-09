@@ -1,54 +1,17 @@
-﻿using TournamentTool.Enums;
+﻿using System.Collections.ObjectModel;
 using TournamentTool.Models;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
 
 namespace TournamentTool.ViewModels.Entities;
 
-public class RankedBestSplitViewModel : BaseViewModel
+public class RankedBestSplitDataViewModel : BaseViewModel
 {
-    private readonly PrivRoomBestSplit _bestSplit;
+    private readonly PrivRoomBestSplitData _splitData;
     
-    public string? PlayerName
-    {
-        get => _bestSplit.PlayerName;
-        set
-        {
-            _bestSplit.PlayerName = value;
-            OnPropertyChanged(nameof(PlayerName));
-        }
-    }
-    public RankedSplitType Type 
-    {
-        get => _bestSplit.Type;
-        set
-        {
-            _bestSplit.Type = value;
-            TypeName = _bestSplit.Type.ToString();
-            OnPropertyChanged(nameof(Type));
-        }
-    }
-    public long Time 
-    {
-        get => _bestSplit.Time;
-        set
-        {
-            _bestSplit.Time = value;
-            TimeText = TimeSpan.FromMilliseconds(value).ToFormattedTime();
-            OnPropertyChanged(nameof(Time));
-        }
-    }
-    
-    private string _typeName = string.Empty;
-    public string TypeName
-    {
-        get => _typeName;
-        set
-        {
-            _typeName = value.Replace('_', ' ').CaptalizeAll();
-            OnPropertyChanged(nameof(TypeName));
-        } 
-    }
+    public string? PlayerName => _splitData.PlayerName;
+    public long Time => _splitData.Time;
+    public long TimeDifference => _splitData.TimeDifference;
 
     private string _timeText = string.Empty;
     public string TimeText
@@ -60,19 +23,49 @@ public class RankedBestSplitViewModel : BaseViewModel
             OnPropertyChanged(nameof(TimeText));
         } 
     }
+    
+    private string _timeDifferenceText = string.Empty;
+    public string TimeDifferenceText
+    {
+        get => _timeDifferenceText;
+        set
+        {
+            _timeDifferenceText = value;
+            OnPropertyChanged(nameof(TimeDifferenceText));
+        } 
+    }
+
+    
+    public RankedBestSplitDataViewModel(PrivRoomBestSplitData splitData)
+    {
+        _splitData = splitData;
+        
+        TimeText = TimeSpan.FromMilliseconds(_splitData.Time).ToFormattedTime();
+        TimeDifferenceText = _splitData.TimeDifference == 0 ? string.Empty : " +" + TimeSpan.FromMilliseconds(_splitData.TimeDifference).ToFormattedTime();
+        OnPropertyChanged(nameof(PlayerName));
+        OnPropertyChanged(nameof(Time));
+        OnPropertyChanged(nameof(TimeDifference));
+    }
+}
+
+public class RankedBestSplitViewModel : BaseViewModel
+{
+    private string _typeName = string.Empty;
+    public string TypeName
+    {
+        get => _typeName;
+        set
+        {
+            _typeName = value.Replace('_', ' ').CaptalizeAll();
+            OnPropertyChanged(nameof(TypeName));
+        } 
+    }
+
+    public ObservableCollection<RankedBestSplitDataViewModel> Splits { get; } = [];
 
 
     public RankedBestSplitViewModel(PrivRoomBestSplit bestSplit)
     {
-        _bestSplit = bestSplit;
-
-        ReloadProperties();
-    }
-
-    private void ReloadProperties()
-    {
-        PlayerName = _bestSplit.PlayerName;
-        Type = _bestSplit.Type;
-        Time = _bestSplit.Time;
+        TypeName = bestSplit.Type.ToString();
     }
 }

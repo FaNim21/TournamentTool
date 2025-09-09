@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.IO;
 using System.Windows;
 using System.Windows.Data;
@@ -42,6 +43,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand RemoveRuleCommand { get; set; }
 
     public ICommand ViewEntryCommand { get; set; }
+    public ICommand EditEntryCommand { get; set; }
     public ICommand RemoveEntryCommand { get; set; }
     public ICommand RemoveAllEntriesCommand { get; set; }
 
@@ -68,6 +70,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveRuleCommand = new RemoveRuleCommand(this);
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
+        EditEntryCommand = new EditEntryCommand(coordinator);
         RemoveEntryCommand = new RemoveEntryCommand(this);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
@@ -91,6 +94,13 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public override bool OnDisable()
     {
         LeaderboardManager.OnEntryUpdate -= OnEntryUpdate;
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            EntriesCollection = null;
+            Rules.Clear();
+            Entries.Clear();
+        });
         
         PresetSaver.SavePreset();
         return true;
@@ -111,7 +121,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
                 Rules.Add(new LeaderboardRuleViewModel(rule, Tournament));
             }
 
-            Rules[0].IsFocused = true;
+            if (Rules.Count > 1)
+                Rules[0].IsFocused = true;
         });
         
         var collectionViewSource = CollectionViewSource.GetDefaultView(Entries);
@@ -168,6 +179,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     }
     public void RefreshAllEntries()
     {
+        if (Rules.Count == 0) return;
+        
         foreach (var entry in Entries)
         {
             entry.Refresh(Rules[0].ChosenMilestone);

@@ -14,4 +14,19 @@ public abstract class LeaderboardEntryMilestoneFactory
             _ => throw new UnreachableException()
         };
     }
+    
+    public static EntryMilestoneData DeepCopy(EntryMilestoneData milestoneData)
+    {
+        LeaderboardTimeline mainTimeline = new LeaderboardTimeline(milestoneData.Main.Milestone, milestoneData.Main.Time);
+        LeaderboardTimeline? previousTimeline = null;
+        if (milestoneData.Previous != null)
+            previousTimeline = new LeaderboardTimeline(milestoneData.Previous.Milestone, milestoneData.Previous.Time);
+        
+        return milestoneData switch
+        {
+            EntryPacemanMilestoneData data => new EntryPacemanMilestoneData(mainTimeline, previousTimeline, data.Points, data.WorldID),
+            EntryRankedMilestoneData data => new EntryRankedMilestoneData(mainTimeline, previousTimeline, data.Points, data.Round), 
+            _ => throw new UnreachableException()
+        };
+    }
 }

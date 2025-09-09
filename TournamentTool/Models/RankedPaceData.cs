@@ -116,9 +116,9 @@ public class PrivRoomInventory
     public int Potion { get; set; }
 }
 
+public record PrivRoomBestSplitData(string PlayerName, long Time, long TimeDifference);
 public class PrivRoomBestSplit
 {
-    public string? PlayerName { get; set; }
-    public RankedSplitType Type { get; set; }
-    public long Time { get; set; }
+    public RankedSplitType Type { get; init; }
+    public List<PrivRoomBestSplitData> Datas { get; init; } = [];
 }

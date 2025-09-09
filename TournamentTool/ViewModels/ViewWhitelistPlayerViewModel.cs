@@ -20,6 +20,8 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
     public ICommand CorrectPlayerUUIDCommand { get; init; }
     public ICommand OpenNameMCCommand { get; init; }
+    public ICommand OpenRankedStatsCommand { get; init; }
+    public ICommand OpenPacemanStatsCommand { get; init; }
     public ICommand CopyDataCommand { get; init; }
 
 
@@ -32,6 +34,8 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
 
         CorrectPlayerUUIDCommand = new RelayCommand(() => { LoadingDialog.ShowLoading(CompleteUUID, true); });
         OpenNameMCCommand = new RelayCommand(OpenNameMC);
+        OpenRankedStatsCommand = new RelayCommand(OpenRankedStats);
+        OpenPacemanStatsCommand = new RelayCommand(OpenPacemanStats);
         CopyDataCommand = new RelayCommand<string>(CopyToClipboard);
     }
 
@@ -80,7 +84,24 @@ public class ViewWhitelistPlayerViewModel : BaseViewModel
         };
         Process.Start(processStart);
     }
-
+    private void OpenRankedStats()
+    {
+        var processStart = new ProcessStartInfo($"https://mcsrranked.com/stats/{PlayerViewModel.InGameName}")
+        {
+            UseShellExecute = true,
+            Verb = "open"
+        };
+        Process.Start(processStart);
+    }
+    private void OpenPacemanStats()
+    {
+        var processStart = new ProcessStartInfo($"https://paceman.gg/stats/player/{PlayerViewModel.InGameName}")
+        {
+            UseShellExecute = true,
+            Verb = "open"
+        };
+        Process.Start(processStart);
+    }
     private void CopyToClipboard(string text)
     {
         if (string.IsNullOrEmpty(text)) return;

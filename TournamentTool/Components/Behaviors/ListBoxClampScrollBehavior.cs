@@ -12,7 +12,6 @@ public class ListBoxClampScrollBehavior : BehaviorBase<ListBox>
         base.OnAttached();
         AssociatedObject.PreviewMouseWheel += OnPreviewMouseWheel;
     }
-
     protected override void OnCleanup()
     {
         base.OnCleanup();

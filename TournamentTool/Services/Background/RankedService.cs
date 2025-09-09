@@ -186,7 +186,7 @@ public class RankedService : IBackgroundService
 
         foreach (var pace in _paces)
         {
-            //TODO: 0 TUTAJ INVENTORY JAK DODADZA DO API
+            //TODO: 5 TUTAJ INVENTORY JAK DODADZA DO API
             pace.Value.Update(null);
         }
     }
@@ -259,6 +259,8 @@ public class RankedService : IBackgroundService
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
         
+        //TODO: 0 TU MUSZE SPRAWDZIC W JAKIEJ KOLEJNOSCI JAKIEJ SA COMPLETIONS, poniewaz timelines jest w odwrotnej w sensie sa dodawana na poczatku
+        // a to wazne zeby uwzglednic wlasciwal kolejnosc dodawania completions do czasu
         for (int i = 0; i < data.Completions.Length; i++)
         {
             var completion = data.Completions[i];

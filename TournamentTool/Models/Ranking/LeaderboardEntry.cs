@@ -35,6 +35,7 @@ public sealed class LeaderboardEntry
 
     public int Points { get; set; }
     public int Position { get; set; } = -1;
+    public bool IsEdited { get; set; }
 
     public Dictionary<RunMilestone, BestMilestoneData> BestMilestones { get; init; } = [];
     public List<EntryMilestoneData> Milestones { get; init; } = [];

@@ -38,7 +38,8 @@ public class RankedPace
     }
     public void Initialize()
     {
-        Inventory.DisplayItems = true;
+        //TODO: 5 TU JAK DODADZA INVENTORY DO API TO ZEBY DAC NA TRUE
+        Inventory.DisplayItems = false;
         Splits.Add(new RankedPaceSplit("Start", RankedSplitType.Start, 0));
         
         UpdateHeadImage();
@@ -166,17 +167,30 @@ public class RankedPace
         _service.AddEvaluationData(Player.Data, mainTimeline, previousTimeline);
     }
     
-    private void ValidateBestSplit(RankedPaceSplit newSplit)
+    private void ValidateBestSplit(RankedPaceSplit pace)
     {
-        PrivRoomBestSplit bestSplit = _service.GetBestSplit(newSplit.Split);
-        
-        if(string.IsNullOrEmpty(bestSplit.PlayerName))
+        PrivRoomBestSplit bestSplit = _service.GetBestSplit(pace.Split);
+
+        for (int i = 0; i < bestSplit.Datas.Count; i++)
         {
-            bestSplit.PlayerName = InGameName;
-            bestSplit.Time = newSplit.Time;
+            var current = bestSplit.Datas[i];
+            if (current.PlayerName.Equals(InGameName)) return;
         }
-        DifferenceSplitTimeMiliseconds = newSplit.Time - bestSplit.Time;
-        if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
+
+        if (bestSplit.Datas.Count != 0)
+        {
+            PrivRoomBestSplitData? bestData = bestSplit.Datas[0];
+            
+            DifferenceSplitTimeMiliseconds = pace.Time - bestData.Time;
+            if (DifferenceSplitTimeMiliseconds < 0) DifferenceSplitTimeMiliseconds = 0;
+        }
+        else
+        {
+            DifferenceSplitTimeMiliseconds = 0;
+        }
+        
+        var data = new PrivRoomBestSplitData(InGameName, pace.Time, DifferenceSplitTimeMiliseconds);
+        bestSplit.Datas.Add(data);
     }
     
     public RankedPaceSplit GetLastSplit()

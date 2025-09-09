@@ -33,6 +33,9 @@
             <MenuItem Header="View"
                       Command="{Binding DataContext.ViewEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       CommandParameter="{Binding .}"/>
+            <MenuItem Header="Edit"
+                      Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      CommandParameter="{Binding .}"/>
             <MenuItem Header="Remove"
                       Command="{Binding DataContext.RemoveEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       CommandParameter="{Binding .}"/>
@@ -104,14 +107,14 @@
                       Stroke="#000D14"
                       StrokeThickness="3" />
 
-                <ListBox ScrollViewer.VerticalScrollBarVisibility="Visible"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                <ListBox ItemsSource="{Binding Rules}"
                          Background="Transparent"
                          BorderThickness="0"
                          Width="380"
                          VerticalAlignment="Top"
                          HorizontalAlignment="Left"
-                         ItemsSource="{Binding Rules}"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          Margin="1 0 1 0">
@@ -237,24 +240,17 @@
                   Stroke="#000D14"
                   StrokeThickness="3" />
 
-            <ListBox ItemsSource="{Binding EntriesCollection}"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     VerticalAlignment="Top"
-                     HorizontalAlignment="Left"
-                     ScrollViewer.CanContentScroll="True"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     VirtualizingStackPanel.IsVirtualizing="True"
-                     VirtualizingStackPanel.VirtualizationMode="Recycling"
-                     VirtualizingPanel.ScrollUnit="Pixel"
-                     Margin="5 0 0 0">
-                <i:Interaction.Behaviors>
-                    <behaviors:ListBoxUpdateBehavior />
-                    <behaviors:ListBoxSelectionBehavior />
-                    <behaviors:ListBoxClampScrollBehavior />
-                </i:Interaction.Behaviors>
-                <ListBox.ItemTemplate>
+            <vwp:VirtualizingItemsControl ItemsSource="{Binding EntriesCollection}"
+                                          Background="Transparent"
+                                          VerticalAlignment="Top"
+                                          HorizontalAlignment="Left"
+                                          ScrollViewer.CanContentScroll="True"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          VirtualizingStackPanel.IsVirtualizing="True"
+                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                          VirtualizingStackPanel.ScrollUnit="Pixel">
+                <vwp:VirtualizingItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type rankingViewModels:LeaderboardEntryViewModel}">
                         <Border BorderBrush="Gray"
                                 BorderThickness="1"
@@ -313,29 +309,11 @@
                             </StackPanel>
                         </Border>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <vwp:VirtualizingWrapPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Focusable"
-                                Value="False" />
-                        <Setter Property="Margin"
-                                Value="0" />
-                        <Setter Property="Padding"
-                                Value="0" />
+                </vwp:VirtualizingItemsControl.ItemTemplate>
+                <vwp:VirtualizingItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
                         <Setter Property="ContextMenu"
                                 Value="{StaticResource EntriesContextMenu}" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <ContentPresenter />
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver"
                                      Value="True">
@@ -344,8 +322,8 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
+                </vwp:VirtualizingItemsControl.ItemContainerStyle>
+            </vwp:VirtualizingItemsControl>
         </Grid>
     </Grid>
 </UserControl>
