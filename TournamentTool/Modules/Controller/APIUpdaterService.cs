@@ -1,4 +1,5 @@
-﻿using OBSStudioClient.Classes;
+﻿using System.Data;
+using OBSStudioClient.Classes;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Logging;
@@ -28,8 +29,8 @@ public class APIUpdaterService : IServiceUpdater
     private string[] _rankedSplits = ["enter_the_nether", "structure_1", "structure_2", 
         "blind_travel", "follow_ender_eye", "enter_the_end", "kill_dragon", "complete"];
 
-    private string[] _rankedNames = ["1_split_player_name", "2_split_player_name"];
-    private string[] _savedNames = new string[2];
+    private string[] _rankedNames = ["1_split_player_name", "2_split_player_name", "3_split_player_name"];
+    private string[] _savedNames = new string[3];
     
     
     public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, TournamentViewModel preset, ObsController obs)
@@ -82,12 +83,14 @@ public class APIUpdaterService : IServiceUpdater
     {
         _api.CheckFile(_rankedNames[0]);
         _api.CheckFile(_rankedNames[1]);
+        _api.CheckFile(_rankedNames[2]);
 
-        _splitsAPINames = new List<SplitsTwoPlayersAPINames>[2];
+        _splitsAPINames = new List<SplitsTwoPlayersAPINames>[3];
         _splitsAPINames[0] = [];
         _splitsAPINames[1] = [];
+        _splitsAPINames[2] = [];
         
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
             int number = i + 1;
             for (int j = 0; j < _rankedSplits.Length; j++)
@@ -105,14 +108,25 @@ public class APIUpdaterService : IServiceUpdater
     {
         if (_preset.ManagementData is not RankedManagementData rankedManagementData) return;
         
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < _rankedSplits.Length; j++)
+            {
+                _api.UpdateFileContent(_splitsAPINames[i][j].Time, string.Empty);
+                _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
+            }
+            _api.UpdateFileContent(_rankedNames[i], string.Empty);
+        }
+        
         SceneItem[] itemsInHeadsGroup = [];
+        List<string> sourceNames = [];
+        
         try
         {
             itemsInHeadsGroup = await _obs.GetGroupSceneItemList("splits_heads");
         }
         catch { /**/ }
 
-        int count = 14;
         for (int i = 0; i < itemsInHeadsGroup.Length; i++)
         {
             var item = itemsInHeadsGroup[i];
@@ -124,20 +138,41 @@ public class APIUpdaterService : IServiceUpdater
             if (!int.TryParse(digits, out int number)) continue;
             
             number -= 1;
-            if (number is < 0 or > 1) continue;
-            if (rankedManagementData.BestSplits.Count == 0) return;
-            if (i >= rankedManagementData.BestSplits[0].Datas.Count) return;
-            if (number >= rankedManagementData.BestSplits[0].Datas.Count)
+            if (number is < 0 or > 2) continue;
+            sourceNames.Add(item.SourceName);
+        }
+
+        for (var i = 0; i < sourceNames.Count; i++)
+        {
+            var sourceName = sourceNames[i];
+            _obs.SetBrowserURL(sourceName, string.Empty);
+            _savedNames[i] = string.Empty;
+        }
+
+        for (var i = 0; i < sourceNames.Count; i++)
+        {
+            var sourceName = sourceNames[i];
+            
+            if (rankedManagementData.BestSplitsDatas.Count == 0) return;
+            if (i >= rankedManagementData.BestSplitsDatas[0].Datas.Count)
             {
-                _obs.SetBrowserURL(item.SourceName, string.Empty);
+                _obs.SetBrowserURL(sourceName, string.Empty);
+                _savedNames[i] = string.Empty;
                 continue;
             }
 
-            count++;
-            var data = rankedManagementData.BestSplits[0].Datas[count];
+            if (i >= rankedManagementData.BestSplitsDatas[0].Datas.Count)
+            {
+                _obs.SetBrowserURL(sourceName, string.Empty);
+                _savedNames[i] = string.Empty;
+                _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
+                continue;
+            }
+
+            var data = rankedManagementData.BestSplitsDatas[0].Datas[i];
 
             string path = $"https://mc-heads.net/avatar/{data.PlayerName}/180";
-            _obs.SetBrowserURL(item.SourceName, path);
+            _obs.SetBrowserURL(sourceName, path);
             _savedNames[i] = data.PlayerName;
             _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
         }
@@ -146,20 +181,20 @@ public class APIUpdaterService : IServiceUpdater
     }
     private void UpdateTwoPlayersSplitsData(RankedManagementData rankedManagementData)
     {
-        List<long> player1Times = []; 
-        List<long> player2Times = []; 
+        List<List<long>> playersTimes = [];
         
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
+            playersTimes.Add([]);
             for (int j = 0; j < _rankedSplits.Length; j++)
             {
                 PrivRoomBestSplit? currentSplit = null;
-                for (int k = 0; k < rankedManagementData.BestSplits.Count; k++)
+                for (int k = 0; k < rankedManagementData.BestSplitsDatas.Count; k++)
                 {
-                    var best = rankedManagementData.BestSplits[k];
+                    var best = rankedManagementData.BestSplitsDatas[k];
                     if (!best.Type.ToString().Equals(_rankedSplits[j])) continue;
                     
-                    currentSplit = rankedManagementData.BestSplits[k];
+                    currentSplit = rankedManagementData.BestSplitsDatas[k];
                     break;
                 }
                 bool foundData = false;
@@ -172,32 +207,49 @@ public class APIUpdaterService : IServiceUpdater
                     
                     var formattedTime = TimeSpan.FromMilliseconds(data.Time).ToFormattedTime();
                     _api.UpdateFileContent(_splitsAPINames[i][j].Time, formattedTime);
-                    if (i == 0)
-                        player1Times.Add(data.Time);
-                    else
-                        player2Times.Add(data.Time);
                     
+                    playersTimes[i].Add(data.Time);
                     foundData = true;
                     break;
                 }
 
                 if (foundData) continue;
+                playersTimes[i].Add(0);
                 _api.UpdateFileContent(_splitsAPINames[i][j].Time, string.Empty);
                 _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
             }
         }
         
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < _rankedSplits.Length; j++)
             {
-                if (j >= player1Times.Count || j >= player2Times.Count)
+                if (j >= playersTimes[i].Count || playersTimes[i][j] == 0)
                 {
                     _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
                     continue;
                 }
 
-                long difference = i == 0 ? player2Times[j] - player1Times[j] : player1Times[j] - player2Times[j];
+                int fastestPlayerIndex = -1;
+                long fastestTime = long.MaxValue;
+                for (int k = 0; k < playersTimes.Count; k++)
+                {
+                    if (j >= playersTimes[k].Count || playersTimes[k][j] == 0) continue;
+                    
+                    long currentTime = playersTimes[k][j];
+                    if (fastestTime < currentTime) continue;
+                    
+                    fastestPlayerIndex = k;
+                    fastestTime = currentTime;
+                }
+
+                if (fastestPlayerIndex == -1 || fastestPlayerIndex == i)
+                {
+                    _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
+                    continue;
+                }
+
+                long difference = fastestTime - playersTimes[i][j];
                 string formattedTime = TimeSpan.FromMilliseconds(Math.Abs(difference)).ToFormattedTime();
                 
                 if (difference < 0)
@@ -256,7 +308,7 @@ public class APIUpdaterService : IServiceUpdater
             {
                 var previousRoundPoints = entry.Milestones.
                     OfType<EntryRankedMilestoneData>().
-                    FirstOrDefault(e => e.Main.Milestone == _preset.Leaderboard.Rules[0].ChosenAdvancement && e.Round == data.Rounds);
+                    FirstOrDefault(e => e.Main.Milestone == _preset.Leaderboard.Rules[0].ChosenAdvancement && e.Round == (data.Rounds - 1));
                 
                 _api.UpdateFileContent(_leaderboardAPINames[i].PreviousRoundPoints, previousRoundPoints?.Points ?? 0);
             }

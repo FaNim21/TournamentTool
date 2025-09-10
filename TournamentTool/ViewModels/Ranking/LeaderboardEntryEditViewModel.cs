@@ -31,6 +31,10 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
 
     private void Save()
     {
+        string ign = EditedEntry?.Player?.InGameName ?? string.Empty;
+        if (DialogBox.Show($"Are you sure you want to save?\nYou will apply all changes for {ign} entry\nThis will mark this entry as edited", "Rolling back changes", 
+                MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        
         //TODO: 0 Tu trzeba uwzglednic statystki i chyba nie ma co ich kopiowac
         // tylko przy zapisywaniu stworzyc na nowo na bazie obecnych milestones
         

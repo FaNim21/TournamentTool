@@ -62,7 +62,7 @@ public class RankedService : IBackgroundService
         Leaderboard = leaderboard;
         
         _rankedManagementData = (TournamentViewModel.ManagementData as RankedManagementData)!;
-        _bestSplits = _rankedManagementData.BestSplits.ToDictionary(b => b.Type, b => b) ?? [];
+        _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
         _options = new JsonSerializerOptions
         {
@@ -285,7 +285,7 @@ public class RankedService : IBackgroundService
     }
     private void ReadySeed(PrivRoomData privRoomData)
     {
-        if (_rankedManagementData!.BestSplits.Count != 0)
+        if (_rankedManagementData!.BestSplitsDatas.Count != 0)
         {
             _rankedManagementData.StartTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - privRoomData.Time;
         }
@@ -305,7 +305,7 @@ public class RankedService : IBackgroundService
 
         bestSplit = new PrivRoomBestSplit { Type = splitType };
         _bestSplits[bestSplit.Type] = bestSplit;
-        _rankedManagementData?.BestSplits.Add(bestSplit);
+        _rankedManagementData?.BestSplitsDatas.Add(bestSplit);
         return bestSplit;
     }
     
@@ -313,8 +313,13 @@ public class RankedService : IBackgroundService
     {
         _bestSplits.Clear();
         _paces.Clear();
-        
-        _rankedManagementData!.BestSplits.Clear();
+
+        for (int i = 0; i < _rankedManagementData.BestSplitsDatas.Count; i++)
+        {
+            var currentSplit = _rankedManagementData.BestSplitsDatas[i];
+            currentSplit.Datas.Clear();
+        }
+        _rankedManagementData!.BestSplitsDatas.Clear();
         _rankedManagementData.Completions = 0;
         _rankedManagementData.Players = 0;
         _rankedManagementData.StartTime = 0;

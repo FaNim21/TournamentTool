@@ -113,7 +113,6 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 
         Update();
     }
-
     public override void UpdateAPI(APIDataSaver api)
     {
         api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
@@ -133,9 +132,13 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         }
 
         //ewentualnie to aktualizowanie zastapic guzikiem refresh
-        for (var i = 0; i < _data.BestSplits.Count; i++)
+        if (_data.BestSplitsDatas.Count == 0)
         {
-            PrivRoomBestSplit bestSplit = _data.BestSplits[i];
+            Application.Current.Dispatcher.Invoke(() => { BestSplits.Clear(); });
+        }
+        for (var i = 0; i < _data.BestSplitsDatas.Count; i++)
+        {
+            PrivRoomBestSplit bestSplit = _data.BestSplitsDatas[i];
             if (i < BestSplits.Count) continue;
             
             Application.Current.Dispatcher.Invoke(() =>
@@ -145,9 +148,9 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
             });
         }
 
-        for (int i = 0; i < _data.BestSplits.Count; i++)
+        for (int i = 0; i < _data.BestSplitsDatas.Count; i++)
         {
-            PrivRoomBestSplit bestSplit = _data.BestSplits[i];
+            PrivRoomBestSplit bestSplit = _data.BestSplitsDatas[i];
             for (int j = 0; j < bestSplit.Datas.Count; j++)
             {
                 PrivRoomBestSplitData data = bestSplit.Datas[j];
