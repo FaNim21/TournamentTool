@@ -86,115 +86,118 @@
                 </StackPanel>
             </StackPanel>
 
-            <controls:VirtualizingItemsControl Grid.Row="1"
-                                               ItemsSource="{Binding Milestones}"
-                                               Background="Transparent"
-                                               VerticalAlignment="Top"
-                                               HorizontalAlignment="Left"
-                                               ScrollViewer.CanContentScroll="True"
-                                               ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                               VirtualizingStackPanel.IsVirtualizing="True"
-                                               VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                               VirtualizingStackPanel.ScrollUnit="Pixel">
-                <controls:VirtualizingItemsControl.Resources>
-                    <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestoneRankedDataViewModel}">
-                        <Border BorderBrush="Gray"
-                                BorderThickness="1"
-                                Width="375"
-                                Margin="2 2 2 4">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Foreground="White">
-                                    <Run Foreground="#d3d3d3">Time: </Run>
-                                    <Run Text="{Binding MainMilestoneTime, Mode=OneTime}"
-                                         Foreground="LightBlue" />
+            <Border Grid.Row="1"
+                    BorderBrush="Gray"
+                    BorderThickness="0 1 0 0">
+                <controls:VirtualizingItemsControl ItemsSource="{Binding Milestones}"
+                                                   Background="Transparent"
+                                                   VerticalAlignment="Top"
+                                                   HorizontalAlignment="Left"
+                                                   ScrollViewer.CanContentScroll="True"
+                                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                   VirtualizingStackPanel.IsVirtualizing="True"
+                                                   VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                                   VirtualizingStackPanel.ScrollUnit="Pixel">
+                    <controls:VirtualizingItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestoneRankedDataViewModel}">
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="1"
+                                    Width="425"
+                                    Margin="2 2 2 4">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Foreground="White">
+                                        <Run Foreground="#d3d3d3">Time: </Run>
+                                        <Run Text="{Binding MainMilestoneTime, Mode=OneTime}"
+                                             Foreground="LightBlue" />
 
-                                    <Run> | </Run>
+                                        <Run> | </Run>
 
-                                    <Run Foreground="#d3d3d3">Main: </Run>
-                                    <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
-                                </TextBlock>
+                                        <Run Foreground="#d3d3d3">Main: </Run>
+                                        <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
+                                    </TextBlock>
 
-                                <TextBlock Visibility="{Binding IsPreviousEmpty, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
-                                           Foreground="White">
-                                    <Run Foreground="#d3d3d3">Time: </Run>
-                                    <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}"
-                                         Foreground="LightBlue" />
+                                    <TextBlock Visibility="{Binding IsPreviousEmpty, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                                               Foreground="White">
+                                        <Run Foreground="#d3d3d3">Time: </Run>
+                                        <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}"
+                                             Foreground="LightBlue" />
 
-                                    <Run> | </Run>
+                                        <Run> | </Run>
 
-                                    <Run Foreground="#d3d3d3">Previous: </Run>
-                                    <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
-                                </TextBlock>
+                                        <Run Foreground="#d3d3d3">Previous: </Run>
+                                        <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
+                                    </TextBlock>
 
-                                <TextBlock Foreground="White"
-                                           Margin="0 0 0 2">
-                                    <Run Foreground="#d3d3d3">Points: </Run>
-                                    <Run Text="{Binding Points, Mode=OneTime}"
-                                         FontWeight="SemiBold" />
-                                    <Run Foreground="#d3d3d3"> in Round: </Run>
-                                    <Run Text="{Binding Round, Mode=OneTime}"
-                                         FontWeight="SemiBold" />
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestonePacemanDataViewModel}">
-                        <Border BorderBrush="Gray"
-                                BorderThickness="1"
-                                Width="375"
-                                Margin="2 1 2 2">
-                            <StackPanel Orientation="Vertical"
-                                        Margin="2 0 0 0">
-                                <TextBlock Foreground="White">
-                                    <Run Foreground="#d3d3d3">Time: </Run>
-                                    <Run Text="{Binding MainMilestoneTime, Mode=OneTime}"
-                                         Foreground="LightBlue" />
+                                    <TextBlock Foreground="White"
+                                               Margin="0 0 0 2">
+                                        <Run Foreground="#d3d3d3">Points: </Run>
+                                        <Run Text="{Binding Points, Mode=OneTime}"
+                                             FontWeight="SemiBold" />
+                                        <Run Foreground="#d3d3d3"> in Round: </Run>
+                                        <Run Text="{Binding Round, Mode=OneTime}"
+                                             FontWeight="SemiBold" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestonePacemanDataViewModel}">
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="1"
+                                    Width="425"
+                                    Margin="2 1 2 2">
+                                <StackPanel Orientation="Vertical"
+                                            Margin="2 0 0 0">
+                                    <TextBlock Foreground="White">
+                                        <Run Foreground="#d3d3d3">Time: </Run>
+                                        <Run Text="{Binding MainMilestoneTime, Mode=OneTime}"
+                                             Foreground="LightBlue" />
 
-                                    <Run> | </Run>
+                                        <Run> | </Run>
 
-                                    <Run Foreground="#d3d3d3">Main: </Run>
-                                    <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
-                                </TextBlock>
+                                        <Run Foreground="#d3d3d3">Main: </Run>
+                                        <Run Text="{Binding MainMilestoneType, Mode=OneTime}" />
+                                    </TextBlock>
 
-                                <TextBlock Visibility="{Binding IsPreviousEmpty, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
-                                           Foreground="White">
-                                    <Run Foreground="#d3d3d3">Time: </Run>
-                                    <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}"
-                                         Foreground="LightBlue" />
+                                    <TextBlock Visibility="{Binding IsPreviousEmpty, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                                               Foreground="White">
+                                        <Run Foreground="#d3d3d3">Time: </Run>
+                                        <Run Text="{Binding PreviousMilestoneTime, Mode=OneTime}"
+                                             Foreground="LightBlue" />
 
-                                    <Run> | </Run>
+                                        <Run> | </Run>
 
-                                    <Run Foreground="#d3d3d3">Previous: </Run>
-                                    <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
-                                </TextBlock>
+                                        <Run Foreground="#d3d3d3">Previous: </Run>
+                                        <Run Text="{Binding PreviousMilestoneType, Mode=OneTime}" />
+                                    </TextBlock>
 
-                                <TextBlock Foreground="White"
-                                           Margin="0 0 0 2">
-                                    <Run Foreground="#d3d3d3">Points: </Run>
-                                    <Run Text="{Binding Points, Mode=OneTime}"
-                                         FontWeight="SemiBold" />
-                                    <Hyperlink Command="{Binding DataContext.EditedEntry.OpenPacemanWorldIDCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                               CommandParameter="{Binding WorldID}">
-                                        Check this run on paceman
-                                    </Hyperlink>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </controls:VirtualizingItemsControl.Resources>
-                <controls:VirtualizingItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-                                     Value="True">
-                                <Setter Property="Cursor"
-                                        Value="Hand" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </controls:VirtualizingItemsControl.ItemContainerStyle>
-            </controls:VirtualizingItemsControl>
+                                    <TextBlock Foreground="White"
+                                               Margin="0 0 0 2">
+                                        <Run Foreground="#d3d3d3">Points: </Run>
+                                        <Run Text="{Binding Points, Mode=OneTime}"
+                                             FontWeight="SemiBold" />
+                                        <Hyperlink Command="{Binding DataContext.OpenPacemanWorldIDCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   CommandParameter="{Binding WorldID}">
+                                            Check this run on paceman
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </controls:VirtualizingItemsControl.Resources>
+                    <controls:VirtualizingItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                    <Setter Property="Cursor"
+                                            Value="Hand" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </controls:VirtualizingItemsControl.ItemContainerStyle>
+                </controls:VirtualizingItemsControl>
+            </Border>
         </Grid>
     </Grid>
 </Window>

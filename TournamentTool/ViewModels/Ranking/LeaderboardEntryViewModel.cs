@@ -16,35 +16,35 @@ namespace TournamentTool.ViewModels.Ranking;
 public interface IEntryMilestoneDataViewModel;
 public class EntryMilestoneDataViewModel<T> : BaseViewModel, IEntryMilestoneDataViewModel where T : EntryMilestoneData
 {
-    protected readonly T _data;
-    
-    public RunMilestone MainMilestoneType => _data.Main.Milestone;
-    public string MainMilestoneTime => TimeSpan.FromMilliseconds(_data.Main.Time).ToFormattedTime();
+    public T Data { get; }
 
-    public bool IsPreviousEmpty => _data.Previous == null;
+    public RunMilestone MainMilestoneType => Data.Main.Milestone;
+    public string MainMilestoneTime => TimeSpan.FromMilliseconds(Data.Main.Time).ToFormattedTime();
+
+    public bool IsPreviousEmpty => Data.Previous == null;
     public string PreviousMilestoneType
     {
         get
         {
-            if (_data.Previous == null) return string.Empty;
-            return _data.Previous.Milestone.ToString() ?? string.Empty;
+            if (Data.Previous == null) return string.Empty;
+            return Data.Previous.Milestone.ToString() ?? string.Empty;
         }
     }
     public string PreviousMilestoneTime
     {
         get
         {
-            if (_data.Previous == null) return string.Empty;
-            return TimeSpan.FromMilliseconds(_data.Previous.Time).ToFormattedTime();
+            if (Data.Previous == null) return string.Empty;
+            return TimeSpan.FromMilliseconds(Data.Previous.Time).ToFormattedTime();
         }
     }
 
-    public int Points => _data.Points;
+    public int Points => Data.Points;
 
 
     protected EntryMilestoneDataViewModel(T data)
     {
-        _data = data;
+        Data = data;
         
         OnPropertyChanged(nameof(MainMilestoneType));
         OnPropertyChanged(nameof(MainMilestoneTime));
@@ -57,7 +57,7 @@ public class EntryMilestoneDataViewModel<T> : BaseViewModel, IEntryMilestoneData
 
 public class EntryMilestoneRankedDataViewModel : EntryMilestoneDataViewModel<EntryRankedMilestoneData>
 {
-    public int Round => _data.Round;
+    public int Round => Data.Round;
     
     public EntryMilestoneRankedDataViewModel(EntryRankedMilestoneData data) : base(data)
     {
@@ -66,7 +66,7 @@ public class EntryMilestoneRankedDataViewModel : EntryMilestoneDataViewModel<Ent
 }
 public class EntryMilestonePacemanDataViewModel : EntryMilestoneDataViewModel<EntryPacemanMilestoneData>
 {
-    public string WorldID => _data.WorldID;
+    public string WorldID => Data.WorldID;
 
     public EntryMilestonePacemanDataViewModel(EntryPacemanMilestoneData data) : base(data)
     {
@@ -76,7 +76,7 @@ public class EntryMilestonePacemanDataViewModel : EntryMilestoneDataViewModel<En
 
 public class LeaderboardEntryViewModel : BaseViewModel
 {
-    private readonly LeaderboardEntry _entry;
+    public LeaderboardEntry Data { get; }
 
     public PlayerViewModel? Player { get; }
 
@@ -91,31 +91,31 @@ public class LeaderboardEntryViewModel : BaseViewModel
         } 
     }
     
-    public string PlayerUUID => _entry.PlayerUUID;
+    public string PlayerUUID => Data.PlayerUUID;
     public int Points
     {
-        get => _entry.Points;
+        get => Data.Points;
         set
         {
-            _entry.Points = value;
+            Data.Points = value;
             OnPropertyChanged(nameof(Points));
         }
     }
     public int Position
     {
-        get => _entry.Position;
+        get => Data.Position;
         set
         {
-            _entry.Position = value;
+            Data.Position = value;
             OnPropertyChanged(nameof(Position));
         }
     }
     public bool IsEdited
     {
-        get => _entry.IsEdited;
+        get => Data.IsEdited;
         set
         {
-            _entry.IsEdited = value;
+            Data.IsEdited = value;
             OnPropertyChanged(nameof(IsEdited));
         }
     }
@@ -145,9 +145,9 @@ public class LeaderboardEntryViewModel : BaseViewModel
     public ICommand OpenPacemanWorldIDCommand { get; private set; }
 
 
-    public LeaderboardEntryViewModel(LeaderboardEntry entry, PlayerViewModel? player)
+    public LeaderboardEntryViewModel(LeaderboardEntry data, PlayerViewModel? player)
     {
-        _entry = entry;
+        Data = data;
         Player = player;
         Player?.UpdateHeadBitmap();
 
@@ -167,7 +167,7 @@ public class LeaderboardEntryViewModel : BaseViewModel
     }
     public void RefreshBestMilestone(RunMilestone milestone)
     {
-        var data = _entry.GetBestMilestone(milestone);
+        var data = Data.GetBestMilestone(milestone);
         if (data == null)
         {
             BestTimeOnPrioritizeMilestone = "Unknown";
@@ -181,12 +181,18 @@ public class LeaderboardEntryViewModel : BaseViewModel
 
     private void OpenPacemanWorldID(string worldID)
     {
+        if (string.IsNullOrEmpty(worldID)) return;
         Helper.StartProcess($"https://paceman.gg/stats/run/{worldID}");
     }
     
     public void SetupOpeningWindow()
     {
-        foreach (var milestones in _entry.Milestones.Batch(5))
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Milestones.Clear();
+        });
+        
+        foreach (var milestones in Data.Milestones.Batch(5))
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -210,5 +216,5 @@ public class LeaderboardEntryViewModel : BaseViewModel
         Milestones.Clear();
     }
 
-    public LeaderboardEntry GetLeaderboardEntry() => _entry;
+    public LeaderboardEntry GetLeaderboardEntry() => Data;
 }

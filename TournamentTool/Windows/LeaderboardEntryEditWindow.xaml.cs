@@ -2,7 +2,9 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using TournamentTool.Components.Controls;
 using TournamentTool.Utils;
+using TournamentTool.ViewModels;
 
 namespace TournamentTool.Windows;
 
@@ -14,7 +16,17 @@ public partial class LeaderboardEntryEditWindow : Window
         InputController.Instance.InitializeNewWindow(this);
     }
     
-    private void ExitButtonClick(object sender, RoutedEventArgs e) => Close();
+    private void ExitButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (!((BaseViewModel)DataContext).OnDisable())
+        {
+            MessageBoxResult result = DialogBox.Show($"You have unsaved changes in entry.\nAre you sure you want to leave?", "Leaving entry",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
+        }
+        
+        Close();
+    }
 
     protected override void OnClosing(CancelEventArgs e)
     {

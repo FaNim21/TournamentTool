@@ -187,7 +187,7 @@ public class RankedService : IBackgroundService
         foreach (var pace in _paces)
         {
             //TODO: 5 TUTAJ INVENTORY JAK DODADZA DO API
-            pace.Value.Update(null);
+            pace.Value.Update(null!);
         }
     }
 

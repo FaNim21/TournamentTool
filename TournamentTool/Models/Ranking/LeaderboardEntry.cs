@@ -3,13 +3,6 @@ using TournamentTool.Enums;
 
 namespace TournamentTool.Models.Ranking;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(EntryPacemanMilestoneData), "paceman")]
-[JsonDerivedType(typeof(EntryRankedMilestoneData), "ranked")]
-public abstract record EntryMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points);
-public record EntryPacemanMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, string WorldID) : EntryMilestoneData(Main, Previous, Points);
-public record EntryRankedMilestoneData(LeaderboardTimeline Main, LeaderboardTimeline? Previous, int Points, int Round) : EntryMilestoneData(Main, Previous, Points);
-
 public class BestMilestoneData
 {
     public int BestTime { get; set; } = int.MaxValue;
@@ -45,9 +38,9 @@ public sealed class LeaderboardEntry
     {
         Points += points;
     }
-    public bool AddMilestone(EntryMilestoneData data)
+    public bool AddMilestone<T>(T data) where T : EntryMilestoneData
     {
-        if (Milestones.Contains(data)) return false;
+        if (AlreadyExists(data)) return false;
         if (Milestones.Count > 0 && data == Milestones[^1]) return false;
         
         BestMilestones.TryGetValue(data.Main.Milestone, out var bestMilestone);
@@ -63,6 +56,18 @@ public sealed class LeaderboardEntry
         return true;
     }
 
+    private bool AlreadyExists<T>(T data) where T : EntryMilestoneData
+    {
+        for (var i = 0; i < Milestones.Count; i++)
+        {
+            var milestone = Milestones[i];
+            
+            if (milestone.GetType() != data.GetType()) continue;
+            if (milestone.Equals(data)) return true;
+        }
+        return false;
+    }
+    
     public BestMilestoneData? GetBestMilestone(RunMilestone milestone)
     {
         BestMilestones.TryGetValue(milestone, out var data);

@@ -28,6 +28,7 @@
         <converters:IndentConverter x:Key="IndentConverter" />
         <converters:ExpandCollapseConverter x:Key="ExpandCollapseConverter" />
         <converters:BooleanInverterConverter x:Key="BooleanInverterConverter" />
+        <converters:EnumDisplayNameConverter x:Key="EnumDisplayNameConverter"/>
          
         <DataTemplate DataType="{x:Type selectable:PresetManagerViewModel}">
             <views:PresetManagerView />

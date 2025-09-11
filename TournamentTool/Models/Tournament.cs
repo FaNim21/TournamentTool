@@ -85,10 +85,10 @@ public abstract class ManagementData;
 
 public class RankedManagementData : ManagementData
 {
-    [JsonIgnore] public List<PrivRoomBestSplit> BestSplitsDatas { get; set; } = [];
     public string CustomText { get; set; } = string.Empty;
     public int Rounds { get; set; } = 0;
     public long StartTime { get; set; } = 0;
+    [JsonIgnore] public List<PrivRoomBestSplit> BestSplitsDatas { get; set; } = [];
     [JsonIgnore] public int Players { get; set; }
     [JsonIgnore] public int Completions { get; set; }
 }

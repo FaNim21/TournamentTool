@@ -28,8 +28,6 @@
         Width="600"
         Height="450">
     <Window.Resources>
-        <converters:EnumDisplayNameConverter x:Key="EnumDisplayNameConverter"/>
-        
         <ContextMenu x:Key="SubRuleContextMenu">
             <MenuItem Header="Remove"
                       Command="{Binding DataContext.RemoveSubRuleCommand, RelativeSource={RelativeSource AncestorType=Window}}" 

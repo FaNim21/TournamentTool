@@ -24,6 +24,16 @@
         WindowStartupLocation="CenterOwner"
         Height="450"
         Width="840">
+    <Window.Resources>
+        <ContextMenu x:Key="MilestonesContextMenu">
+            <MenuItem Header="Edit"
+                      Command="{Binding DataContext.EditMilestoneCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                      CommandParameter="{Binding .}" />
+            <MenuItem Header="Remove"
+                      Command="{Binding DataContext.RemoveMilestoneCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                      CommandParameter="{Binding .}" />
+        </ContextMenu>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="29" />
@@ -96,49 +106,204 @@
                 </Border>
 
                 <StackPanel>
-
                     <StackPanel Orientation="Horizontal">
                         <buttons:ButtonNormal ContentText="New"
                                               Width="80"
                                               Height="30"
                                               FontSize="16"
                                               HorizontalAlignment="Left"
-                                              OnCommand="{Binding }"
+                                              OnCommand="{Binding NewMilestoneCommand}"
                                               Margin="5 5 10 5" />
 
-                        <buttons:ButtonNormal ContentText="cos2"
+                        <buttons:ButtonNormal ContentText="Set"
                                               Width="80"
                                               Height="30"
                                               FontSize="16"
                                               HorizontalAlignment="Left"
-                                              OnCommand="{Binding }"
-                                              Margin="5 5 10 5" />
-
-                        <buttons:ButtonNormal ContentText="cos2"
-                                              Width="80"
-                                              Height="30"
-                                              FontSize="16"
-                                              HorizontalAlignment="Left"
-                                              OnCommand="{Binding }"
+                                              OnCommand="{Binding SetMilestoneCommand}"
                                               Margin="5 5 10 5" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal"
-                                Margin="0 0 0 5">
-                        <TextBox TextWrapping="Wrap"
-                                 Width="50"
-                                 Height="20"
-                                 Text=""
-                                 PreviewTextInput="NumberValidationTextBox"
-                                 Padding="0 2 0 0"
-                                 Background="#9E9E9E"
-                                 MaxLength="5" />
-                        <TextBlock Text="Jakis text field"
-                                   Foreground="White"
-                                   Height="18"
-                                   FontSize="16"
-                                   Padding="0"
-                                   Margin="5 0 0 3" />
+                    <StackPanel Orientation="Vertical"
+                                Margin="5">
+                        <TextBlock Text="{Binding TitleInfo}"
+                                   Foreground="Wheat"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center" />
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Paceman"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Margin="0 0 5 0" />
+                            <ToggleButton IsChecked="{Binding MilestoneType}" />
+                            <TextBlock Text="Ranked"
+                                       VerticalAlignment="Center"
+                                       Foreground="White" />
+
+                            <TextBlock Text="|"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Margin="10 0 10 5" />
+
+                            <buttons:ButtonNormal ContentText="Switch Rule Type"
+                                                  Width="100"
+                                                  Height="25"
+                                                  HorizontalAlignment="Left"
+                                                  Margin="0 3 0 5"
+                                                  OnCommand="{Binding SwitchRuleTypeCommand}" />
+                            <TextBlock Foreground="White"
+                                       FontSize="14"
+                                       Margin="5 5 0 0">
+                                <Run Text="Type:" />
+                                <Run Text="{Binding RuleType}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 2 0 4">
+                            <ComboBox Width="150"
+                                      ItemsSource="{Binding FilteredMilestones}"
+                                      SelectedItem="{Binding MainChosenMilestone, Mode=TwoWay}"
+                                      HorizontalAlignment="Left"
+                                      Style="{StaticResource ComboBoxTest2}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumDisplayNameConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <TextBlock Text="Main Milestone"
+                                       Foreground="White"
+                                       Height="18"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="60"
+                                     Height="20"
+                                     Text="{Binding MainTime, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 2 0 0"
+                                     Background="#9E9E9E"
+                                     MaxLength="7" />
+                            <TextBlock Text="Main Time"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 2">
+                                <Run Text=" (" />
+                                <Run Text="{Binding MainTimeText, Mode=OneWay}" />
+                                <Run Text=")" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 2 0 4">
+                            <ComboBox Width="150"
+                                      ItemsSource="{Binding FilteredMilestones}"
+                                      SelectedItem="{Binding PreviousChosenMilestone, Mode=TwoWay}"
+                                      HorizontalAlignment="Left"
+                                      Style="{StaticResource ComboBoxTest2}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumDisplayNameConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <TextBlock Text="Previous Milestone"
+                                       Foreground="White"
+                                       Height="18"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="60"
+                                     Height="20"
+                                     Text="{Binding PreviousTime, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 2 0 0"
+                                     Background="#9E9E9E"
+                                     MaxLength="7" />
+                            <TextBlock Text="Previous Time"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 2">
+                                <Run Text=" (" />
+                                <Run Text="{Binding PreviousTimeText, Mode=OneWay}" />
+                                <Run Text=")" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 5">
+                            <TextBox TextWrapping="Wrap"
+                                     Width="50"
+                                     Height="20"
+                                     Text="{Binding Points}"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Padding="0 2 0 0"
+                                     Background="#9E9E9E"
+                                     MaxLength="6" />
+                            <TextBlock Text="Points"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 2" />
+                        </StackPanel>
+
+                        <!-- Milestone data type differences -->
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding MilestoneType, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="50"
+                                         Height="20"
+                                         Text="{Binding Round}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Padding="0 2 0 0"
+                                         Background="#9E9E9E"
+                                         MaxLength="6" />
+                                <TextBlock Text="Round"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 2" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding MilestoneType, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="NoWrap"
+                                         Width="90"
+                                         Height="20"
+                                         Text="{Binding WorldID}"
+                                         Padding="0 2 0 0"
+                                         Background="#9E9E9E" />
+                                <TextBlock Text="WorldID"
+                                           Foreground="White"
+                                           Height="20"
+                                           FontSize="16"
+                                           Padding="0"
+                                           Margin="5 0 0 2" />
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
@@ -201,8 +366,8 @@
                         <DataTemplate DataType="{x:Type rankingViewModels:EntryMilestonePacemanDataViewModel}">
                             <Border BorderBrush="Gray"
                                     BorderThickness="1"
-                                    Width="375" 
-                                    Margin="2 1 2 2" >
+                                    Width="375"
+                                    Margin="2 1 2 2">
                                 <StackPanel Orientation="Vertical"
                                             Margin="2 0 0 0">
                                     <TextBlock Foreground="White">
@@ -244,6 +409,9 @@
                     </controls:VirtualizingItemsControl.Resources>
                     <controls:VirtualizingItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource MilestonesContextMenu}">
+                            </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver"
                                          Value="True">

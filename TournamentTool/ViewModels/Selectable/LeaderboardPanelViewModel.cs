@@ -70,7 +70,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveRuleCommand = new RemoveRuleCommand(this);
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
-        EditEntryCommand = new EditEntryCommand(coordinator);
+        EditEntryCommand = new EditEntryCommand(coordinator, tournament, this);
         RemoveEntryCommand = new RemoveEntryCommand(this);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
@@ -164,7 +164,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RefreshAllEntries();
     }
 
-    private void RecalculateAllEntries()
+    public void RecalculateAllEntries()
     {
         foreach (var entry in Entries)
         {

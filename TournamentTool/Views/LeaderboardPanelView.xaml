@@ -280,11 +280,22 @@
                                 <StackPanel Orientation="Vertical"
                                             Margin="5 4 0 0">
 
-                                    <TextBlock Text="{Binding Player.InGameName}"
-                                               FontWeight="Bold"
-                                               FontSize="17"
-                                               Foreground="Wheat"
-                                               Background="Transparent" />
+                                    <Grid Background="Blue">
+                                        <TextBlock Text="{Binding Player.InGameName}"
+                                                   FontWeight="Bold"
+                                                   FontSize="17"
+                                                   HorizontalAlignment="Left"
+                                                   Foreground="Wheat"
+                                                   Background="Transparent" />
+
+                                        <TextBlock Visibility="{Binding IsEdited, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                   Text="Edited*"
+                                                   FontWeight="Bold"
+                                                   FontSize="9"
+                                                   HorizontalAlignment="Right"
+                                                   Foreground="Gray"
+                                                   Background="Red" />
+                                    </Grid>
 
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Foreground="White"

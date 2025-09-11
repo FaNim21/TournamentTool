@@ -136,9 +136,9 @@ public class PresetManagerViewModel : SelectableViewModel
 
             TournamentViewModel.ChangeData(data);
         }
-        catch
+        catch (Exception ex)
         {
-            Logger.Error($"Error loading current preset: {opened}");
+            Logger.Error(ex);
         }
     }
     private void LoadPresetsList()
