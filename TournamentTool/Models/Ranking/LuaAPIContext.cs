@@ -18,6 +18,9 @@ public abstract class LuaAPIBase
         _tournament = tournament;
         _onEntryRunRegistered = onEntryRunRegistered;
     }
+
+    public object? GetVariable(string name) => _subRule.GetVariable(name);
+    public void SetVariable(string name, object value) => _subRule.SetVariable(name, value);
 }
 
 public class LuaAPIContext : LuaAPIBase
@@ -74,7 +77,6 @@ public class LuaPlayerData
         this.entry = entry;
     }
 }
-
 public class LuaAPIRankedContext : LuaAPIBase
 {
     public List<LuaPlayerData> Players { get; }

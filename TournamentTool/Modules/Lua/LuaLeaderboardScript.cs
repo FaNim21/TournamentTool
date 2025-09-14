@@ -14,8 +14,38 @@ public enum LuaLeaderboardType
     ranked
 }
 
+public class LuaCustomVariable
+{
+    public string Name { get; init; }
+    public string Type { get; private set; }
+    public string DefaultValue { get; private set; }
+    
+    public string Value { get; set; }
+
+
+    public LuaCustomVariable(string name, string type, string defaultValue, string value)
+    {
+        Name = name;
+        Type = type;
+        DefaultValue = defaultValue;
+        Value = value;
+    }
+    
+    public void Update(LuaCustomVariable otherVariable)
+    {
+        if (Type != otherVariable.Type)
+        {
+            Value = otherVariable.DefaultValue;
+        }
+        Type = otherVariable.Type;
+        DefaultValue = otherVariable.DefaultValue;
+    }
+}
+
 public class LuaLeaderboardScript
 {
+    public List<LuaCustomVariable> CustomVariables { get; } = [];
+
     public string FullPath { get; }
     public LuaLeaderboardType Type { get; private set; }
     public string Description { get; private set; } = string.Empty;
@@ -183,6 +213,29 @@ public class LuaLeaderboardScript
                 output.Append(args[i].ToPrintString());
             }
             LogService.Log(output);
+            return DynValue.Nil;
+        });
+        
+        _script.Globals["register_variable"] = DynValue.NewCallback((context, args) =>
+        {
+            if (args.Count < 3)
+                return DynValue.NewString("register_variable(name, type, default)");
+
+            var name = args[0].CastToString();
+            var type = args[1].CastToString();
+            string defaultValue;
+            if (type.Equals("bool"))
+            {
+                defaultValue = args[2].CastToBool().ToString();
+            }
+            else
+            {
+                defaultValue = args[2].CastToString();
+            }
+            
+            var variable = new LuaCustomVariable(name, type, defaultValue, defaultValue);
+            CustomVariables.Add(variable);
+
             return DynValue.Nil;
         });
     }

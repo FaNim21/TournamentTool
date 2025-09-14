@@ -36,7 +36,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public TournamentViewModel TournamentViewModel { get; }
     public LeaderboardPanelViewModel Leaderboard { get; }
     public ILoggingService Logger { get; }
-    public IPresetSaver PresetService { get; }
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -113,10 +112,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private CancellationTokenSource? _playersRefreshTokenSource;
     
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs, TwitchService twitch, ILoggingService logger) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs, TwitchService twitch, ILoggingService logger) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
-        PresetService = presetService;
         Leaderboard = leaderboard;
         Logger = logger;
         _backgroundCoordinator = backgroundCoordinator;
@@ -140,7 +138,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
             collectionViewSource.Filter = null;
             collectionViewSource.Filter = FilterPlayers;
             collectionViewSource.SortDescriptions.Clear();
-            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.isStreamLive), ListSortDirection.Descending));
+            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(PlayerViewModel.IsStreamLive), ListSortDirection.Descending));
             FilteredPlayersCollectionView = collectionViewSource;
             FilteredPlayersCollectionView.Refresh();
         });
@@ -208,8 +206,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         SelectedWhitelistPlayer = null;
         CurrentChosenPlayer = null;
 
-        SavePreset();
-
         return true;
     }
 
@@ -225,7 +221,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         if (obj is not PlayerViewModel player) return false;
 
         bool matchesText = string.IsNullOrWhiteSpace(SearchText) || player.Name?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true;
-        var hasStreamData = !player.StreamData.AreBothNullOrEmpty();
+        var hasStreamData = !player.StreamData.IsNullOrEmpty();
         
         return matchesText && hasStreamData;
     }
@@ -288,10 +284,5 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     {
         _selectedWhitelistPlayer = null;
         OnPropertyChanged(nameof(SelectedWhitelistPlayer));
-    }
-
-    public void SavePreset()
-    {
-        PresetService.SavePreset();
     }
 }

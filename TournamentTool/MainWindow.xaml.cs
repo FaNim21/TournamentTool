@@ -47,6 +47,11 @@ public partial class MainWindow : Window
 
     private void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
+        if (DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.PresetSaver.SavePreset();
+        }
+        
         if (_handledCrash) return;
         _handledCrash = true;
 
@@ -61,15 +66,24 @@ public partial class MainWindow : Window
     private void ExitButtonClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not MainViewModel mainViewModel) return;
-
-        if (mainViewModel.NavigationService.SelectedView != null && mainViewModel.NavigationService.SelectedView is not PresetManagerViewModel)
+        if (!mainViewModel.PresetInfo.IsPresetModified)
         {
-            var option = DialogBox.Show($"Are you sure you want to exit from here?\n" +
-                                        $"Make sure you save your preset!", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (option != MessageBoxResult.Yes) return;
+            Close();
+            return;
         }
 
-        if (mainViewModel.NavigationService.SelectedView != null && !mainViewModel.NavigationService.SelectedView.OnDisable()) return;
+        MessageBoxResult option = DialogBox.Show($"You have unsaved changes in preset.\n" +
+                                                 $"Do you want to save those changes?", "WARNING",
+            MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+        if (option == MessageBoxResult.Yes)
+        {
+            mainViewModel.PresetSaver.SavePreset();
+        } 
+        else if (option == MessageBoxResult.No) { }
+        else return;
+
+        mainViewModel.NavigationService.SelectedView.OnDisable();
         Close();
     }
 

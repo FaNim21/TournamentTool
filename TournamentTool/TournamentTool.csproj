@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Deterministic>true</Deterministic>
     <ApplicationIcon>TT.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

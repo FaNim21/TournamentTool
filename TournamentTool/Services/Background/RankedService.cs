@@ -110,7 +110,7 @@ public class RankedService : IBackgroundService
             string.IsNullOrWhiteSpace(TournamentViewModel.RankedApiPlayerName)) return;
         
         await LoadJsonFileAsync();
-        await Task.Delay(TimeSpan.FromSeconds(2), token);
+        await Task.Delay(TimeSpan.FromMilliseconds(1500), token);
     }
     
     private async Task LoadJsonFileAsync()
@@ -259,8 +259,7 @@ public class RankedService : IBackgroundService
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
         
-        //TODO: 0 TU MUSZE SPRAWDZIC W JAKIEJ KOLEJNOSCI JAKIEJ SA COMPLETIONS, poniewaz timelines jest w odwrotnej w sensie sa dodawana na poczatku
-        // a to wazne zeby uwzglednic wlasciwal kolejnosc dodawania completions do czasu
+        //TODO: 1 zrobic generator json tutaj jako koniec priv room'a do zbierania wynikow pod testy i weryfikacje
         for (int i = 0; i < data.Completions.Length; i++)
         {
             var completion = data.Completions[i];

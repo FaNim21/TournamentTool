@@ -9,6 +9,7 @@ using TournamentTool.Attributes;
 using TournamentTool.Commands;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
+using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils;
 

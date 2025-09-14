@@ -280,7 +280,7 @@
                                 <StackPanel Orientation="Vertical"
                                             Margin="5 4 0 0">
 
-                                    <Grid Background="Blue">
+                                    <Grid>
                                         <TextBlock Text="{Binding Player.InGameName}"
                                                    FontWeight="Bold"
                                                    FontSize="17"
@@ -294,7 +294,7 @@
                                                    FontSize="9"
                                                    HorizontalAlignment="Right"
                                                    Foreground="Gray"
-                                                   Background="Red" />
+                                                   Background="Transparent" />
                                     </Grid>
 
                                     <StackPanel Orientation="Horizontal">

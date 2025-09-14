@@ -28,7 +28,7 @@ public static class LuaScriptValidator
             script.ExtractMetadata();
 
             // Runtime
-            var testContext = CreateTestContext(script.Type);
+            var testContext = CreateTestContext(script);
             if (testContext != null)
             {
                 var runtimeResult = script.ValidateRuntime(testContext);
@@ -54,9 +54,15 @@ public static class LuaScriptValidator
             };
         }
     }
-    private static object CreateTestContext(LuaLeaderboardType type)
+    private static object CreateTestContext(LuaLeaderboardScript script)
     {
-        if (type == LuaLeaderboardType.ranked)
+        LeaderboardSubRule subRule = new() { BasePoints = 100 };
+        foreach (var variable in script.CustomVariables)
+        {
+            subRule.CustomVariables[variable.Name] = variable;
+        }
+        
+        if (script.Type == LuaLeaderboardType.ranked)
         {
             var players = new List<LuaPlayerData>
             {
@@ -64,7 +70,6 @@ public static class LuaScriptValidator
                 CreateMockPlayer("TestPlayer2", 2, 80, 70000)
             };
 
-            LeaderboardSubRule subRule = new() {BasePoints = 100};
             TournamentViewModel tournament = new TournamentViewModel();
             tournament.ManagementData = new RankedManagementData { Rounds = 1, Completions = 1, Players = 2 };
             
@@ -73,7 +78,6 @@ public static class LuaScriptValidator
         }
         else
         {
-            LeaderboardSubRule subRule = new() {BasePoints = 100};
             LeaderboardEntry entry = new LeaderboardEntry { Points = 5, Position = 2 };
             
             LeaderboardTimeline mainSplit = new LeaderboardTimeline(RunMilestone.PacemanEnterNether, 12345);

@@ -243,9 +243,13 @@ public class StreamDataViewModel : BaseViewModel
     {
         return string.IsNullOrEmpty(Alt);
     }
+    public bool IsOtherEmpty()
+    {
+        return string.IsNullOrEmpty(Other);
+    }
     public bool IsNullOrEmpty()
     {
-        return IsMainEmpty() || IsAltEmpty();
+        return IsMainEmpty() && IsAltEmpty() && IsOtherEmpty();
     }
     public bool AreBothNullOrEmpty()
     {
@@ -381,7 +385,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         }
     }
 
-    public bool isStreamLive => StreamData.IsLive;
+    public bool IsStreamLive => StreamData.IsLive;
     
     public string DisplayName => Name!;
     public string GetPersonalBest => PersonalBest ?? "Unk";

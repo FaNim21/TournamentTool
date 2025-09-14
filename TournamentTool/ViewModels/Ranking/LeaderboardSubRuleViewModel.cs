@@ -1,20 +1,18 @@
-﻿using System.Diagnostics;
-using System.Windows.Input;
-using OBSStudioClient.Classes;
-using TournamentTool.Commands;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
-using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
+using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardSubRuleViewModel : BaseViewModel
 {
     private readonly INotifyPresetModification _notifyPresetModification;
-    public LeaderboardSubRule Model { get; private set; }
-
     public LeaderboardRuleViewModel Rule { get; private set; }
+    
+    public LeaderboardSubRule Model { get; private set; }
 
     public string LuaPath
     {
@@ -101,24 +99,34 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
 
             LuaPath = _selectedScript.Name;
             _notifyPresetModification.PresetIsModified();
+            
+            Model.CustomVariables.Clear();
+            foreach (var variable in _selectedScript.CustomVariables)
+            {
+                Model.CustomVariables[variable.Name] = variable;
+            }
+            SetupCustomVariables();
         }
     }
+
+    public ObservableCollection<LuaCustomVariableViewModel> CustomVariables { get; private set; } = [];
 
 
     public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule, INotifyPresetModification notifyPresetModification)
     {
         _notifyPresetModification = notifyPresetModification;
+        
         Model = model;
         Rule = rule;
-        
+
         SetTime();
     }
-
     private void SetTime()
     {
         TimeText = TimeSpan.FromMilliseconds(Time).ToFormattedTime();
     }
-    public void SetupScriptOnOpen(LuaLeaderboardScriptViewModel? script)
+    
+    public void SetupScript(LuaLeaderboardScriptViewModel? script)
     {
         if (script == null) return;
         
@@ -126,5 +134,19 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         OnPropertyChanged(nameof(SelectedScript));
 
         LuaPath = script.Name;
+        Model.UpdateCustomVariables(script.CustomVariables);
+    }
+    public void SetupCustomVariables()
+    {
+        CustomVariables = new ObservableCollection<LuaCustomVariableViewModel>(Model.CustomVariables.Values.Select(v => new LuaCustomVariableViewModel(v, _notifyPresetModification)));
+        OnPropertyChanged(nameof(CustomVariables));
+    }
+
+    public void UpdateCustomVariablesValues()
+    {
+        foreach (var customVariable in CustomVariables)
+        {
+            customVariable.Update();
+        }
     }
 }

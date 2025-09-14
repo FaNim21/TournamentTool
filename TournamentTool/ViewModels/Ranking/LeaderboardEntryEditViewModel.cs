@@ -335,6 +335,9 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
     }
     private void RemoveMilestone(IEntryMilestoneDataViewModel milestone)
     {
+        bool isEdited = TitleInfo.StartsWith("editing", StringComparison.CurrentCultureIgnoreCase);
+        if (isEdited) return;
+        
         int index = EditedEntry!.Milestones.IndexOf(milestone);
         EditedEntry.Milestones.RemoveAt(index);
         _isSaved = false;

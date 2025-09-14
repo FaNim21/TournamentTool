@@ -20,8 +20,9 @@ namespace TournamentTool.ViewModels;
 public class MainViewModel : BaseViewModel
 {
     public DebugWindow? DebugWindow { get; set; }
-    
-    private readonly IPresetSaver _presetSaver;
+
+    public IPresetSaver PresetSaver { get; }
+    public IPresetInfo PresetInfo { get; }
 
     private INavigationService? _navigationService;
     public INavigationService NavigationService
@@ -101,13 +102,14 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; private set; }
 
 
-    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel, IPresetSaver presetSaver)
+    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel, IPresetSaver presetSaver, IPresetInfo presetInfo)
     {
         NavigationService = navigationService;
         StatusBar = statusBar;
         Logger = logger;
         NotificationPanel = notificationPanel;
-        _presetSaver = presetSaver;
+        PresetSaver = presetSaver;
+        PresetInfo = presetInfo;
 
         NotificationPanel.PanelOpened += (_, _) => { IsHamburgerMenuOpen = false; };
 
@@ -207,7 +209,7 @@ public class MainViewModel : BaseViewModel
             Description = "Saves current preset changes",
             Action = () =>
             {
-                _presetSaver.SavePreset();
+                PresetSaver.SavePreset();
             }
         };
 

@@ -145,7 +145,6 @@ public class PaceManService : IBackgroundService
         {
             player.StreamData.LiveData.Clear(false);
         }
-        PresetSaver.SavePreset();
     }
 
     private PlayerViewModel AddPaceManPlayerToWhiteList(PaceManData paceManData)

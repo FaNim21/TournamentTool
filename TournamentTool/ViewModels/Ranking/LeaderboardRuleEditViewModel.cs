@@ -6,6 +6,7 @@ using TournamentTool.Commands.Leaderboard;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.Lua;
 
 namespace TournamentTool.ViewModels.Ranking;
 
@@ -17,6 +18,7 @@ public class LuaLeaderboardScriptViewModel : BaseViewModel
     public string FullPath => _data.FullPath;
     public string Description => _data.Description;
     public string Version => _data.Version;
+    public IReadOnlyList<LuaCustomVariable> CustomVariables => _data.CustomVariables;
 
     
     public LuaLeaderboardScriptViewModel(LuaLeaderboardScriptEntry data)
@@ -32,6 +34,7 @@ public class LuaLeaderboardScriptViewModel : BaseViewModel
 
 public class LeaderboardRuleEditViewModel : BaseViewModel
 {
+    private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly INotifyPresetModification _notifyPresetModification;
     private readonly LeaderboardRule _ruleModel;
     
@@ -53,8 +56,9 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         set
         {
             _selectedSubRule = value;
+            _selectedSubRule?.SetupCustomVariables();
             OnPropertyChanged(nameof(SelectedSubRule));
-            
+
             IsGeneralVisible = value == null;
         }
     }
@@ -93,7 +97,8 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
     {
         Rule = rule;
         _ruleModel = rule.GetLeaderboardRule();
-        
+
+        _luaScriptsManager = luaScriptsManager;
         _notifyPresetModification = notifyPresetModification;
 
         Application.Current.Dispatcher.Invoke(() =>
@@ -107,7 +112,7 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
 
             foreach (var subRule in Rule.SubRules)
             {
-                subRule.SetupScriptOnOpen(LuaScripts.FirstOrDefault(s => s.Name.Equals(subRule.LuaPath)));
+                subRule.SetupScript(LuaScripts.FirstOrDefault(s => s.Name.Equals(subRule.LuaPath)));
             }
         });
 

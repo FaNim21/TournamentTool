@@ -26,6 +26,7 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private readonly IObsConnectionControl _obsConnectionControl;
     private readonly SettingsService _settingsService;
+    private readonly ILuaScriptsManager _luaScriptsManager;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
     public TournamentViewModel TournamentViewModel { get; }
@@ -65,7 +66,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, SettingsService settingsService) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, SettingsService settingsService, ILuaScriptsManager luaScriptsManager) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
@@ -73,6 +74,7 @@ public class PresetManagerViewModel : SelectableViewModel
         Logger = logger;
         _obsConnectionControl = obsConnectionControl;
         _settingsService = settingsService;
+        _luaScriptsManager = luaScriptsManager;
 
         TournamentViewModel.OnControllerModeChanged += UpdateBackgroundService;
         
@@ -102,7 +104,6 @@ public class PresetManagerViewModel : SelectableViewModel
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable()
     {
-        PresetService.SavePreset();
         return true;
     }
 
@@ -135,6 +136,7 @@ public class PresetManagerViewModel : SelectableViewModel
             if (data == null) return;
 
             TournamentViewModel.ChangeData(data);
+            _luaScriptsManager.LoadLuaScripts();
         }
         catch (Exception ex)
         {

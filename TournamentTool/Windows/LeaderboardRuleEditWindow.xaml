@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
+        xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:local="clr-namespace:TournamentTool.Windows"
         xmlns:models="clr-namespace:TournamentTool.Models"
         xmlns:RankingModels="clr-namespace:TournamentTool.Models.Ranking"
@@ -13,6 +14,7 @@
         xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
         xmlns:converters="clr-namespace:TournamentTool.Converters"
         xmlns:rankingViewModels="clr-namespace:TournamentTool.ViewModels.Ranking"
+        xmlns:entityViewModels="clr-namespace:TournamentTool.ViewModels.Entities"
         xmlns:enums="clr-namespace:TournamentTool.Enums"
         d:DataContext="{d:DesignInstance Type=rankingViewModels:LeaderboardRuleEditViewModel}"
         mc:Ignorable="d"
@@ -182,133 +184,177 @@
                 </StackPanel>
 
                 <Grid Visibility="{Binding IsGeneralVisible, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Vertical"
-                                Margin="10 2 0 0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                        <TextBlock Text="Config"
-                                   Foreground="Wheat"
-                                   FontSize="32"
-                                   FontWeight="SemiBold"
-                                   Margin="0 0 0 10" />
+                    <Grid Grid.Row="0"
+                          Margin="10 2 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
 
-                        <!-- DESCRIPTION -->
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="160"
-                                     Height="20"
-                                     Text="{Binding SelectedSubRule.Description}"
-                                     Padding="0 1 0 0"
-                                     Background="#9E9E9E" />
-                            <TextBlock Text="Description"
-                                       Foreground="White"
-                                       FontSize="16"
-                                       Margin="5 0 0 3" />
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Vertical">
+                            <TextBlock Text="Config"
+                                       Foreground="Wheat"
+                                       FontSize="32"
+                                       FontWeight="SemiBold"
+                                       Margin="0 0 0 10" />
+
+                            <!-- DESCRIPTION -->
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="NoWrap"
+                                         Width="130"
+                                         Height="20"
+                                         Text="{Binding SelectedSubRule.Description}"
+                                         Padding="0 1 0 0"
+                                         Background="#9E9E9E" />
+                                <TextBlock Text="Description"
+                                           Foreground="White"
+                                           FontSize="16"
+                                           Margin="5 0 0 3" />
+                            </StackPanel>
+
+                            <!-- TIME -->
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="64"
+                                         Height="20"
+                                         Text="{Binding SelectedSubRule.Time, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Padding="0 1 0 0"
+                                         MaxLength="8"
+                                         Background="#9E9E9E" />
+                                <TextBlock Text="Time (ms)"
+                                           ToolTipService.InitialShowDelay="0"
+                                           ToolTipService.ShowDuration="60000"
+                                           ToolTip="Time threshold for which a given sube rule can be achieved by players"
+                                           Foreground="White"
+                                           FontSize="16"
+                                           Margin="5 0 0 3" />
+                            </StackPanel>
+
+                            <!-- BASE POINTS -->
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="50"
+                                         Height="20"
+                                         Text="{Binding SelectedSubRule.BasePoints}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Padding="0 1 0 0"
+                                         MaxLength="6"
+                                         Background="#9E9E9E" />
+                                <TextBlock Text="Base Points"
+                                           Foreground="White"
+                                           FontSize="16"
+                                           Margin="5 0 0 3" />
+                            </StackPanel>
+
+                            <!-- MAX WINNERS (RANKED) -->
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding Rule.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}"
+                                        Margin="0 0 0 5">
+                                <TextBox TextWrapping="Wrap"
+                                         Width="50"
+                                         Height="20"
+                                         Text="{Binding SelectedSubRule.MaxWinners}"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Padding="0 1 0 0"
+                                         MaxLength="6"
+                                         Background="#9E9E9E" />
+                                <TextBlock Text="Max Winners"
+                                           Foreground="White"
+                                           FontSize="16"
+                                           Margin="5 0 0 3" />
+                            </StackPanel>
                         </StackPanel>
 
-                        <!-- TIME -->
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="64"
-                                     Height="20"
-                                     Text="{Binding SelectedSubRule.Time, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberValidationTextBox"
-                                     Padding="0 1 0 0"
-                                     MaxLength="8"
-                                     Background="#9E9E9E" />
-                            <TextBlock Text="Time (ms to mm:ss.fff)"
-                                       ToolTipService.InitialShowDelay="0"
-                                       ToolTipService.ShowDuration="60000"
-                                       ToolTip="Time threshold for which a given sube rule can be achieved by players"
-                                       Foreground="White"
-                                       FontSize="16"
-                                       Margin="5 0 0 3" />
-                        </StackPanel>
+                        <Border Grid.Column="1"
+                                BorderBrush="#404447"
+                                BorderThickness="2 0 0 0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Scripts variables"
+                                           Foreground="Wheat"
+                                           FontSize="32"
+                                           FontWeight="SemiBold"
+                                           Margin="0 0 0 10" />
 
-                        <!-- BASE POINTS -->
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="50"
-                                     Height="20"
-                                     Text="{Binding SelectedSubRule.BasePoints}"
-                                     PreviewTextInput="NumberValidationTextBox"
-                                     Padding="0 1 0 0"
-                                     MaxLength="6"
-                                     Background="#9E9E9E" />
-                            <TextBlock Text="Base Points"
-                                       Foreground="White"
-                                       FontSize="16"
-                                       Margin="5 0 0 3" />
-                        </StackPanel>
-
-                        <!-- MAX WINNERS (RANKED) -->
-                        <StackPanel Orientation="Horizontal"
-                                    Visibility="{Binding Rule.ControllerMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static enums:ControllerMode.Ranked}}"
-                                    Margin="0 0 0 5">
-                            <TextBox TextWrapping="Wrap"
-                                     Width="50"
-                                     Height="20"
-                                     Text="{Binding SelectedSubRule.MaxWinners}"
-                                     PreviewTextInput="NumberValidationTextBox"
-                                     Padding="0 1 0 0"
-                                     MaxLength="6"
-                                     Background="#9E9E9E" />
-                            <TextBlock Text="Max Winners"
-                                       Foreground="White"
-                                       FontSize="16"
-                                       Margin="5 0 0 3" />
-                        </StackPanel>
-                        
-                    </StackPanel>
-
-                    <Line X1="0"
-                          Y1="220"
-                          X2="600"
-                          Y2="220"
-                          Stroke="#404447"
-                          StrokeThickness="2" />
-
-                    <StackPanel VerticalAlignment="Bottom"
-                                Background="Transparent"
-                                Height="200"
-                                Margin="10 0 0 0">
-                        <TextBlock Text="Lua"
-                                   Foreground="Wheat"
-                                   FontSize="32"
-                                   FontWeight="SemiBold"
-                                   Margin="0 0 0 10" />
-
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0 -4 10 0">
-                            <TextBlock Text="Scripts: "
-                                       Foreground="White"
-                                       FontSize="16" />
-                            <ComboBox ItemsSource="{Binding LuaScripts}"
-                                      SelectedItem="{Binding SelectedSubRule.SelectedScript, Mode=TwoWay}"
-                                      DisplayMemberPath="Name"
-                                      Width="150"
-                                      Height="25"
-                                      Style="{StaticResource ComboBoxTest2}" />
-                        </StackPanel>
-
-                        <Border BorderBrush="Black"
-                                Width="480"
-                                Height="109"
-                                HorizontalAlignment="Left"
-                                BorderThickness="1"
-                                Margin="0 9 0 0">
-                            <TextBlock Text="{Binding SelectedSubRule.SelectedScript.Description}"
-                                       Foreground="White"
-                                       TextWrapping="Wrap"
-                                       FontSize="12"
-                                       Background="Transparent"
-                                       Margin="5"/>
+                                <vwp:VirtualizingItemsControl ItemsSource="{Binding SelectedSubRule.CustomVariables}">
+                                    <vwp:VirtualizingItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type entityViewModels:LuaCustomVariableViewModel}">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0 0 0 5">
+                                                <TextBox TextWrapping="NoWrap"
+                                                         Width="50"
+                                                         Height="20"
+                                                         Text="{Binding Value}"
+                                                         Padding="0 1 0 0"
+                                                         MaxLength="6"
+                                                         Background="#9E9E9E" />
+                                                <TextBlock Foreground="White"
+                                                           FontSize="16"
+                                                           Margin="5 0 0 3">
+                                                    <Run Text="{Binding Type, Mode=OneWay}" />
+                                                    <Run Text=" - " />
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </vwp:VirtualizingItemsControl.ItemTemplate>
+                                </vwp:VirtualizingItemsControl>
+                            </StackPanel>
                         </Border>
+                    </Grid>
 
-                    </StackPanel>
+                    <Border Grid.Row="1"
+                            BorderBrush="#404447"
+                            BorderThickness="0 2 0 0">
+                        <StackPanel VerticalAlignment="Bottom"
+                                    Background="Transparent"
+                                    Height="200"
+                                    Margin="10 0 0 0">
+                            <TextBlock Text="Lua"
+                                       Foreground="Wheat"
+                                       FontSize="32"
+                                       FontWeight="SemiBold"
+                                       Margin="0 0 0 10" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Margin="0 -4 10 0">
+                                <TextBlock Text="Scripts: "
+                                           Foreground="White"
+                                           FontSize="16" />
+                                <ComboBox ItemsSource="{Binding LuaScripts}"
+                                          SelectedItem="{Binding SelectedSubRule.SelectedScript, Mode=TwoWay}"
+                                          DisplayMemberPath="Name"
+                                          Width="150"
+                                          Height="25"
+                                          Style="{StaticResource ComboBoxTest2}" />
+                            </StackPanel>
+
+                            <Border BorderBrush="Black"
+                                    Width="480"
+                                    Height="109"
+                                    HorizontalAlignment="Left"
+                                    BorderThickness="1"
+                                    Margin="0 9 0 0">
+                                <TextBlock Text="{Binding SelectedSubRule.SelectedScript.Description}"
+                                           Foreground="White"
+                                           TextWrapping="Wrap"
+                                           FontSize="12"
+                                           Background="Transparent"
+                                           Margin="5" />
+                            </Border>
+
+                        </StackPanel>
+                    </Border>
 
                 </Grid >
             </Grid>

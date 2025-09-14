@@ -1,25 +1,28 @@
 ﻿using System.IO;
-using NuGet.Versioning;
 using TournamentTool.Enums;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
-using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 using ZLinq;
 
 namespace TournamentTool.Managers;
 
-public record LuaLeaderboardScriptEntry(string Name, string FullPath, string Description, string Version, LuaLeaderboardType Type);
+public record LuaLeaderboardScriptEntry(string Name, string FullPath, string Description, string Version, LuaLeaderboardType Type, IReadOnlyList<LuaCustomVariable> CustomVariables);
 
-public interface ILuaScriptsManager
+public interface ILuaScriptsProvider
 {
-    LuaLeaderboardScript AddOrReload(string name);
     LuaLeaderboardScript? Get(string name);
+}
+
+public interface ILuaScriptsManager : ILuaScriptsProvider
+{
+    void LoadLuaScripts();
+    LuaLeaderboardScript AddOrReload(string name);
     IReadOnlyList<LuaLeaderboardScriptEntry> GetScriptsList();
 }
 
-public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
+public class LuaScriptsManager : ILuaScriptsManager
 {
     private ILoggingService Logger { get; }
     private readonly TournamentViewModel _tournament;
@@ -32,11 +35,10 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
         Logger = logger;
         _tournament = tournament;
         
-        LoadLuaScripts();
         CheckDefaultScriptsForUpdate();
     }
 
-    private void LoadLuaScripts()
+    public void LoadLuaScripts()
     {
         var scripts = Directory.GetFiles(Consts.LeaderboardScriptsPath, "*.lua", SearchOption.TopDirectoryOnly).AsSpan();
 
@@ -85,6 +87,20 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
     {
         var loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath);
         _leaderboardScripts[name] = loaded;
+
+        if (loaded.CustomVariables.Count == 0) return loaded;
+        for (int i = 0; i < _tournament.Leaderboard.Rules.Count; i++)
+        {
+            var rule = _tournament.Leaderboard.Rules[i];
+            for (int j = 0; j < rule.SubRules.Count; j++)
+            {
+                var subRule = rule.SubRules[j];
+                if (!subRule.LuaPath.Equals(name)) continue;
+                
+                subRule.UpdateCustomVariables(loaded.CustomVariables);
+            }
+        }
+        
         return loaded;
     }
     public LuaLeaderboardScript? Get(string name)
@@ -92,7 +108,6 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
         _leaderboardScripts.TryGetValue(name, out var cached);
         return cached;
     }
-
     public IReadOnlyList<LuaLeaderboardScriptEntry> GetScriptsList()
     {
         LuaLeaderboardType type = _tournament.ControllerMode == ControllerMode.Ranked ? LuaLeaderboardType.ranked : LuaLeaderboardType.normal;
@@ -105,39 +120,8 @@ public class LuaScriptsManager : BaseViewModel, ILuaScriptsManager
                 kvp.Value.FullPath, 
                 kvp.Value.Description, 
                 kvp.Value.Version?.ToNormalizedString() ?? "Unknown", 
-                kvp.Value.Type))
+                kvp.Value.Type, 
+                kvp.Value.CustomVariables))
             .ToList();
     }
-}
-
-public static class LuaDefaultScripts
-{
-    public record DefaultScript(NuGetVersion Version, string Code);
-
-    public static readonly Dictionary<string, DefaultScript> DefaultScripts = new()
-    {
-        ["normal_add_base_points"] = new DefaultScript(NuGetVersion.Parse("0.2.0"),
-            """
-            version = "0.2.0"
-            type = "normal"
-            description = "Basic script adding base point to successfully evaluated player"
-
-            function evaluate_data(api)
-                api:register_milestone(api.base_points)
-            end
-            """),
-        ["ranked_add_base_points"] = new DefaultScript(NuGetVersion.Parse("0.2.0"),
-            """
-            version = "0.2.0"
-            type = "ranked"
-            description = "Basic Ranked type script adding base point to all evaluated players"
-
-            function evaluate_data(api)
-                for _, player in ipairs(api.players) do
-                    api:register_milestone(player, api.base_points)
-                end
-            end
-            """),
-    };
-
 }

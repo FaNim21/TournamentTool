@@ -26,7 +26,7 @@ public class LeaderboardRule
         
         foreach (var subRule in SubRules)
         {
-            if (!subRule.Evaluate(data)) continue; 
+            if (!subRule.EvaluateTime(data.MainSplit.Time)) continue; 
             return subRule;
         }
 

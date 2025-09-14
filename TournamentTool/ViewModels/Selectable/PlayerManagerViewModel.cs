@@ -221,8 +221,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     }
     public override bool OnDisable()
     {
-        PresetService.SavePreset();
-        
         BackgroundCoordinator.Unregister(this);
         ChosenEvent = null;
         ShowPlayers = false;

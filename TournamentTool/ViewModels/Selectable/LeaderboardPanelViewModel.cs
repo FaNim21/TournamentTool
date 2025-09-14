@@ -101,8 +101,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             Rules.Clear();
             Entries.Clear();
         });
-        
-        PresetSaver.SavePreset();
         return true;
     }
     
@@ -160,12 +158,24 @@ public class LeaderboardPanelViewModel : SelectableViewModel
                 EntriesCollection?.Refresh();
             });
         }
+
+        for (int i = 0; i < Rules.Count; i++)
+        {
+            LeaderboardRuleViewModel rule = Rules[i];
+            for (int j = 0; j < rule.SubRules.Count; j++)
+            {
+                LeaderboardSubRuleViewModel subRule = rule.SubRules[j];
+                subRule.UpdateCustomVariablesValues();
+            }
+        }
         
         RefreshAllEntries();
     }
 
     public void RecalculateAllEntries()
     {
+        if (Rules.Count == 0) return;
+            
         foreach (var entry in Entries)
         {
             Leaderboard.RecalculateEntryPosition(entry.GetLeaderboardEntry());
@@ -248,6 +258,8 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     private void UpdateFocusedRule()
     {
+        if (Rules.Count == 0) return;
+        
         for (int i = 0; i < Rules.Count; i++)
         {
             var current = Rules[i];
