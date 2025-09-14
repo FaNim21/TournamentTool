@@ -226,10 +226,13 @@
                                          Width="64"
                                          Height="20"
                                          Text="{Binding SelectedSubRule.Time, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 1 0 0"
                                          MaxLength="8"
-                                         Background="#9E9E9E" />
+                                         Background="#9E9E9E">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="Time (ms)"
                                            ToolTipService.InitialShowDelay="0"
                                            ToolTipService.ShowDuration="60000"
@@ -246,10 +249,13 @@
                                          Width="50"
                                          Height="20"
                                          Text="{Binding SelectedSubRule.BasePoints}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 1 0 0"
                                          MaxLength="6"
-                                         Background="#9E9E9E" />
+                                         Background="#9E9E9E">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="Base Points"
                                            Foreground="White"
                                            FontSize="16"
@@ -264,10 +270,13 @@
                                          Width="50"
                                          Height="20"
                                          Text="{Binding SelectedSubRule.MaxWinners}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 1 0 0"
                                          MaxLength="6"
-                                         Background="#9E9E9E" />
+                                         Background="#9E9E9E">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False"/>
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="Max Winners"
                                            Foreground="White"
                                            FontSize="16"

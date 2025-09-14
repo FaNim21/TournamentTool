@@ -17,6 +17,7 @@ using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Exceptions;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Ranking;
 
@@ -309,39 +310,20 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     private void RefreshScripts()
     {
         var scripts = Directory.GetFiles(Consts.LeaderboardScriptsPath, "*.lua", SearchOption.TopDirectoryOnly).AsSpan();
+
         for (int i = 0; i < scripts.Length; i++)
         {
             var script = scripts[i];
             var name = Path.GetFileNameWithoutExtension(script);
 
-            string output = ValidateScript(name);
-            if (!string.IsNullOrWhiteSpace(output))
-            {
-                string finalOutput = $"Error in: {name}.lua\n" + output;
-                DialogBox.Show(finalOutput, $"Script Validation ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                break;
-            }
-
             try
             {
                 _luaScriptsManager.AddOrReload(name);
             }
-            catch{ /**/ }
+            catch (LuaScriptValidationException ex)
+            {
+                DialogBox.Show(ex.ToString(), $"Script Validation ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-    }
-    public string ValidateScript(string scriptName)
-    {
-        var scriptPath = Path.Combine(Consts.LeaderboardScriptsPath, $"{scriptName}.lua");
-        var expectedType = Tournament.ControllerMode == ControllerMode.Ranked ? LuaLeaderboardType.ranked : LuaLeaderboardType.normal;
-        var result = LuaScriptValidator.ValidateScriptWithRuntime(scriptPath, expectedType);
-
-        if (result.IsValid) return string.Empty;
-        
-        var errors = new List<string>();
-        if (result.SyntaxError != null)
-            errors.Add($"Syntax: {result.SyntaxError.Message}");
-                    
-        errors.AddRange(result.RuntimeErrors.Select(e => $"Runtime: {e.Message}"));
-        return string.Join("\n", errors);
     }
 }

@@ -132,7 +132,11 @@
                                          Text="{Binding TournamentViewModel.PaceManRefreshRateMiliseconds}"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="PaceMan refresh (ms)"
                                            ToolTipService.InitialShowDelay="0"
                                            ToolTipService.ShowDuration="60000"
@@ -205,10 +209,13 @@
                                          Width="120"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.Structure2GoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="{Binding TournamentViewModel.Structure2ToText}"
                                            Foreground="White"
                                            Height="23"
@@ -222,10 +229,13 @@
                                          Width="120"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.FirstPortalGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="{Binding TournamentViewModel.FirstPortalToText}"
                                            Foreground="White"
                                            Height="23"
@@ -239,10 +249,13 @@
                                          Width="120"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.EnterStrongholdGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="{Binding TournamentViewModel.EnterStrongholdToText}"
                                            Foreground="White"
                                            Height="23"
@@ -257,10 +270,13 @@
                                          Width="120"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.EnterEndGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="{Binding TournamentViewModel.EnterEndToText}"
                                            Foreground="White"
                                            Height="23"
@@ -274,10 +290,13 @@
                                          Width="120"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.CreditsGoodPaceMiliseconds, UpdateSourceTrigger=PropertyChanged}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Background="#9E9E9E"
                                          HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
+                                         VerticalAlignment="Top">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="{Binding TournamentViewModel.CreditsToText}"
                                            Foreground="White"
                                            Height="23"
@@ -425,10 +444,13 @@
                                          Width="50"
                                          Height="20"
                                          Text="{Binding TournamentViewModel.Port}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 2 0 0"
                                          Background="#9E9E9E"
-                                         MaxLength="5" />
+                                         MaxLength="5">
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="Port"
                                            Foreground="White"
                                            Height="18"

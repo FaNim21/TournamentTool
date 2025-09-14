@@ -27,10 +27,5 @@ public partial class LeaderboardRuleEditWindow : Window
         InputController.Instance.CleanupWindow(this);
         base.OnClosed(e);
     }
-    
-    private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
-    {
-        Regex regex = RegexPatterns.NumbersPattern();
-        e.Handled = regex.IsMatch(e.Text);
-    }
+
 }

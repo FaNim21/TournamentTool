@@ -44,10 +44,13 @@
                      Width="50"
                      Height="20"
                      Text="{Binding Rounds, Mode=TwoWay}"
-                     PreviewTextInput="NumberValidationTextBox"
                      Background="#9E9E9E"
                      MaxLength="5"
-                     Margin="5 0 0 0" />
+                     Margin="5 0 0 0">
+                <i:Interaction.Behaviors>
+                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                </i:Interaction.Behaviors>
+            </TextBox>
 
             <components:ButtonNormal ContentText="-"
                                      FontSize="15"

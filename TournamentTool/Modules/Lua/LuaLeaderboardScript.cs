@@ -5,6 +5,7 @@ using NuGet.Versioning;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
+using TournamentTool.Utils.Exceptions;
 
 namespace TournamentTool.Modules.Lua;
 
@@ -62,7 +63,7 @@ public class LuaLeaderboardScript
         _code = code;
         FullPath = fullPath;
     }
-    public static LuaLeaderboardScript Load(string name, string path = "")
+    public static LuaLeaderboardScript Load(string name, string path = "", object? validationContext = null, bool validateRuntime = true)
     {
         string scriptPath = Path.Combine(path, name);
         if (!scriptPath.EndsWith(".lua"))
@@ -73,10 +74,10 @@ public class LuaLeaderboardScript
         var code = File.ReadAllText(scriptPath);
         var script = new LuaLeaderboardScript(code, scriptPath);
         
-        var validation = script.Validate();
+        var validation = script.Validate(validationContext, validateRuntime);
         if (!validation.IsValid)
         {
-            throw new InvalidOperationException($"Script validation failed: {validation.SyntaxError?.Message ?? "Unknown error"}");
+            throw new LuaScriptValidationException(validation);
         }
         
         return script;
@@ -93,7 +94,7 @@ public class LuaLeaderboardScript
         _script.Call(_evaluatePlayer, _script.Globals["api"]);
     }
 
-    public LuaScriptValidationResult Validate(object? testContext = null)
+    public LuaScriptValidationResult Validate(object? testContext = null, bool validateRuntime = true)
     {
         var result = new LuaScriptValidationResult();
 
@@ -109,11 +110,15 @@ public class LuaLeaderboardScript
         ExtractMetadata();
 
         // Runtime
-        if (testContext != null)
+        if (validateRuntime)
         {
-            var runtimeResult = ValidateRuntime(testContext);
-            result.RuntimeErrors.AddRange(runtimeResult.RuntimeErrors);
-            result.Warnings.AddRange(runtimeResult.Warnings);
+            testContext ??= LuaScriptValidator.CreateTestContext(this);
+            if (testContext is { })
+            {
+                var runtimeResult = ValidateRuntime(testContext);
+                result.RuntimeErrors.AddRange(runtimeResult.RuntimeErrors);
+                result.Warnings.AddRange(runtimeResult.Warnings);
+            }
         }
         
         result.IsValid = !result.HasErrors;

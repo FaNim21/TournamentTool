@@ -189,10 +189,13 @@
                                      Width="60"
                                      Height="20"
                                      Text="{Binding MainTime, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberValidationTextBox"
                                      Padding="0 2 0 0"
                                      Background="#9E9E9E"
-                                     MaxLength="7" />
+                                     MaxLength="7">
+                                <b:Interaction.Behaviors>
+                                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                </b:Interaction.Behaviors>
+                            </TextBox>
                             <TextBlock Text="Main Time"
                                        Foreground="White"
                                        Height="20"
@@ -232,10 +235,13 @@
                                      Width="60"
                                      Height="20"
                                      Text="{Binding PreviousTime, UpdateSourceTrigger=PropertyChanged}"
-                                     PreviewTextInput="NumberValidationTextBox"
                                      Padding="0 2 0 0"
                                      Background="#9E9E9E"
-                                     MaxLength="7" />
+                                     MaxLength="7">
+                                <b:Interaction.Behaviors>
+                                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                </b:Interaction.Behaviors>
+                            </TextBox>
                             <TextBlock Text="Previous Time"
                                        Foreground="White"
                                        Height="20"
@@ -254,10 +260,13 @@
                                      Width="50"
                                      Height="20"
                                      Text="{Binding Points}"
-                                     PreviewTextInput="NumberValidationTextBox"
                                      Padding="0 2 0 0"
                                      Background="#9E9E9E"
-                                     MaxLength="6" />
+                                     MaxLength="6">
+                                <b:Interaction.Behaviors>
+                                    <behaviors:NumericTextBoxBehavior AllowNegative="True" />
+                                </b:Interaction.Behaviors>
+                            </TextBox>
                             <TextBlock Text="Points"
                                        Foreground="White"
                                        Height="20"
@@ -275,10 +284,13 @@
                                          Width="50"
                                          Height="20"
                                          Text="{Binding Round}"
-                                         PreviewTextInput="NumberValidationTextBox"
                                          Padding="0 2 0 0"
                                          Background="#9E9E9E"
-                                         MaxLength="6" />
+                                         MaxLength="6">
+                                    <b:Interaction.Behaviors>
+                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                                    </b:Interaction.Behaviors>
+                                </TextBox>
                                 <TextBlock Text="Round"
                                            Foreground="White"
                                            Height="20"

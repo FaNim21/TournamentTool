@@ -1,5 +1,4 @@
-﻿using System.IO;
-using TournamentTool.Enums;
+﻿using TournamentTool.Enums;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.ViewModels.Entities;
@@ -8,53 +7,7 @@ namespace TournamentTool.Modules.Lua;
 
 public static class LuaScriptValidator
 {
-    public static LuaScriptValidationResult ValidateScriptWithRuntime(string scriptPath, LuaLeaderboardType type)
-    {
-        try
-        {
-            var code = File.ReadAllText(scriptPath);
-            var script = new LuaLeaderboardScript(code, scriptPath);
-            var result = new LuaScriptValidationResult();
-
-            // Syntax
-            var syntaxResult = script.ValidateSyntax();
-            if (!syntaxResult.IsValid)
-            {
-                result.SyntaxError = syntaxResult.SyntaxError;
-                result.IsValid = false;
-                return result;
-            }
-
-            script.ExtractMetadata();
-
-            // Runtime
-            var testContext = CreateTestContext(script);
-            if (testContext != null)
-            {
-                var runtimeResult = script.ValidateRuntime(testContext);
-                result.RuntimeErrors.AddRange(runtimeResult.RuntimeErrors);
-                result.Warnings.AddRange(runtimeResult.Warnings);
-            }
-        
-            result.IsValid = !result.HasErrors;
-            script.SetValidation(result.IsValid);
-        
-            return result;
-        }
-        catch (Exception ex)
-        {
-            return new LuaScriptValidationResult
-            {
-                IsValid = false,
-                SyntaxError = new LuaScriptError
-                {
-                    Type = "Error",
-                    Message = ex.Message
-                }
-            };
-        }
-    }
-    private static object CreateTestContext(LuaLeaderboardScript script)
+    public static object CreateTestContext(LuaLeaderboardScript script)
     {
         LeaderboardSubRule subRule = new() { BasePoints = 100 };
         foreach (var variable in script.CustomVariables)

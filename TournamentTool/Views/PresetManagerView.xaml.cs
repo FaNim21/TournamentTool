@@ -14,12 +14,6 @@ public partial class PresetManagerView : UserControl
         InitializeComponent();
     }
 
-    private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
-    {
-        Regex regex = RegexPatterns.NumbersPattern();
-        e.Handled = regex.IsMatch(e.Text);
-    }
-
     private void OpenDonateSite(object sender, RequestNavigateEventArgs e)
     {
         Helper.StartProcess(e.Uri.ToString());

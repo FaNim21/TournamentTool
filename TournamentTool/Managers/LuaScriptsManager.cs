@@ -52,6 +52,10 @@ public class LuaScriptsManager : ILuaScriptsManager
                 AddOrReload(name);
             }
             catch { /**/ }
+            /*catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }*/
         }
     }
     private void CheckDefaultScriptsForUpdate()
@@ -85,7 +89,7 @@ public class LuaScriptsManager : ILuaScriptsManager
 
     public LuaLeaderboardScript AddOrReload(string name)
     {
-        var loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath);
+        LuaLeaderboardScript loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath);
         _leaderboardScripts[name] = loaded;
 
         if (loaded.CustomVariables.Count == 0) return loaded;

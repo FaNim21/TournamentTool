@@ -1,6 +1,7 @@
 ﻿using MoonSharp.Interpreter;
 using NuGet.Versioning;
 using TournamentTool.Modules.Lua;
+using TournamentTool.Utils.Exceptions;
 
 namespace TournamentToolTests.LuaTests;
 
@@ -126,7 +127,7 @@ public class LuaLeaderboardScriptTests
         ";
         var path = WriteTempScript(lua);
         UserData.RegisterType<TestContext>();
-        var script = LuaLeaderboardScript.Load(path);
+        var script = LuaLeaderboardScript.Load(path, string.Empty, null, false);
 
         var context = new TestContext();
         script.Run(context);
@@ -156,7 +157,7 @@ public class LuaLeaderboardScriptTests
         string lua = "this is not valid Lua!";
         var path = WriteTempScript(lua);
 
-        Assert.Throws<InvalidOperationException>(() => LuaLeaderboardScript.Load(path));
+        Assert.Throws<LuaScriptValidationException>(() => LuaLeaderboardScript.Load(path));
     }
 
     [Fact]
@@ -175,16 +176,24 @@ public class LuaLeaderboardScriptTests
     [Fact]
     public void Validate_ShouldCaptureRuntimeError()
     {
+        //TODO: 0 Zrobic error handling tak samo jak print
         string lua = @"
             function evaluate_data(api)
                 error('Forced runtime error')
             end
         ";
         var path = WriteTempScript(lua);
-        var script = LuaLeaderboardScript.Load(path);
 
-        var result = script.Validate(new TestContext());
-        Assert.False(result.IsValid);
-        Assert.True(result.HasErrors);
+        try
+        {
+            LuaLeaderboardScript.Load(path);
+        }
+        catch (LuaScriptValidationException ex)
+        {
+            Assert.False(ex.IsValid);
+            Assert.True(ex.HasErrors);
+        }
+
+        Assert.True(false);
     }
 }

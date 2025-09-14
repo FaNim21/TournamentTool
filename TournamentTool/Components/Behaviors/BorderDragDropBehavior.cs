@@ -31,7 +31,6 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         AssociatedObject.MouseLeftButtonDown += OnMouseLeftButtonDown;
         AssociatedObject.MouseLeftButtonUp += OnMouseLeftButtonUp;
     }
-
     protected override void OnCleanup()
     {
         base.OnCleanup();
@@ -39,6 +38,7 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         AssociatedObject.MouseLeftButtonDown -= OnMouseLeftButtonDown;
         AssociatedObject.MouseLeftButtonUp -= OnMouseLeftButtonUp;
     }
+    
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         _startPoint = e.GetPosition(null);

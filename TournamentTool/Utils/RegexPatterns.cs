@@ -8,12 +8,16 @@ public static partial class RegexPatterns
     {
         //Regex regex = new("");
     }
+    
 
     [GeneratedRegex("[<>:\"/\\|?*]")]
     public static partial Regex SpecialCharacterPattern();
 
-    [GeneratedRegex("[^0-9]+")]
+    [GeneratedRegex(@"^-?\d*$")] 
     public static partial Regex NumbersPattern();
+    
+    [GeneratedRegex(@"^\d*$")]
+    public static partial Regex NumbersPatternDigitOnly();
     
     [GeneratedRegex(@"chunk_0:\((\d+),")]
     public static partial Regex LuaErrorLogPattern();
