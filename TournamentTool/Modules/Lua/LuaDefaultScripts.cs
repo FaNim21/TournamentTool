@@ -10,11 +10,17 @@ public static class LuaDefaultScripts
     {
         ["normal_add_base_points"] = new DefaultScript(NuGetVersion.Parse("0.2.0"),
             """
-            version = "0.2.0"
+            version = "0.3.0"
             type = "normal"
             description = "Basic script adding base point to successfully evaluated player"
-
+            
+            register_variable("count", "number", 0)
+            register_variable("last_player", "string", "none")
+            
             function evaluate_data(api)
+                api:set_variable("count", api:get_variable("count") + 1)
+                api:set_variable("last_player", api.player_name)
+            
                 api:register_milestone(api.base_points)
             end
             """),

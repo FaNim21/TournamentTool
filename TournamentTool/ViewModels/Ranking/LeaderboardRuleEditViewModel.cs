@@ -55,8 +55,9 @@ public class LeaderboardRuleEditViewModel : BaseViewModel
         get => _selectedSubRule;
         set
         {
+            _selectedSubRule?.OnDisable();
             _selectedSubRule = value;
-            _selectedSubRule?.SetupCustomVariables();
+            _selectedSubRule?.OnEnable(null);
             OnPropertyChanged(nameof(SelectedSubRule));
 
             IsGeneralVisible = value == null;

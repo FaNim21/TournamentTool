@@ -1,5 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Input;
+using TournamentTool.Commands;
+using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils.Extensions;
@@ -12,7 +15,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
     private readonly INotifyPresetModification _notifyPresetModification;
     public LeaderboardRuleViewModel Rule { get; private set; }
     
-    public LeaderboardSubRule Model { get; private set; }
+    public LeaderboardSubRule Model { get; }
 
     public string LuaPath
     {
@@ -111,6 +114,8 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
 
     public ObservableCollection<LuaCustomVariableViewModel> CustomVariables { get; private set; } = [];
 
+    public ICommand ResetCustomVariablesToDefaultCommand { get; private set; }
+
 
     public LeaderboardSubRuleViewModel(LeaderboardSubRule model, LeaderboardRuleViewModel rule, INotifyPresetModification notifyPresetModification)
     {
@@ -120,10 +125,34 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         Rule = rule;
 
         SetTime();
+
+        ResetCustomVariablesToDefaultCommand = new RelayCommand(ResetCustomVariablesToDefault);
     }
+    public override void OnEnable(object? parameter)
+    {
+        SetupCustomVariables();
+    }
+    public override bool OnDisable()
+    {
+        CustomVariables.Clear();
+        return true;
+    }
+
     private void SetTime()
     {
         TimeText = TimeSpan.FromMilliseconds(Time).ToFormattedTime();
+    }
+    
+
+    private void ResetCustomVariablesToDefault()
+    {
+        var result = DialogBox.Show("Are you sure you want to reset all custom variables in that sub rule to default?", "Resetting custom variables to default", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+        
+        foreach (var customVariable in CustomVariables)
+        {
+            customVariable.Value = customVariable.DefaultValue;
+        }
     }
     
     public void SetupScript(LuaLeaderboardScriptViewModel? script)

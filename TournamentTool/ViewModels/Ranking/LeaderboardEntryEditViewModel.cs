@@ -340,6 +340,7 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
         
         int index = EditedEntry!.Milestones.IndexOf(milestone);
         EditedEntry.Milestones.RemoveAt(index);
+        EditedEntry.Data.Milestones.RemoveAt(index);
         _isSaved = false;
     }
     

@@ -8,6 +8,7 @@ using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.Utils.Parsers;
@@ -36,6 +37,7 @@ public class RankedEvaluateTimelineData
 
 public class RankedService : IBackgroundService
 {
+    private ILoggingService Logger { get; }
     private readonly RankedManagementData _rankedManagementData;
     
     private TournamentViewModel TournamentViewModel { get; }
@@ -49,15 +51,19 @@ public class RankedService : IBackgroundService
     private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
     private readonly JsonSerializerOptions _options;
+    private readonly JsonSerializerOptions _saveOptions;
     private MatchStatus _lastStatus;
     
     private readonly Dictionary<string, RankedPace> _paces = [];
 
     private const int UiSendBatchSize = 7;
     
+    PrivRoomData? _privRoomData;
     
-    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard)
+    
+    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, ILoggingService logger)
     {
+        Logger = logger;
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         
@@ -69,6 +75,7 @@ public class RankedService : IBackgroundService
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
             PropertyNameCaseInsensitive = true
         };
+        _saveOptions = new JsonSerializerOptions() { WriteIndented = true };
     }
     
     public void RegisterData(IBackgroundDataReceiver? receiver)
@@ -115,7 +122,6 @@ public class RankedService : IBackgroundService
     
     private async Task LoadJsonFileAsync()
     {
-        PrivRoomData? privRoomData = null;
 
         //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
         /*
@@ -133,17 +139,17 @@ public class RankedService : IBackgroundService
             await using Stream responseStream = await Helper.MakeRequestAsStream($"https://mcsrranked.com/api/users/{TournamentViewModel.RankedApiPlayerName}/live", TournamentViewModel.RankedApiKey);
             PrivRoomAPIResult? rankedAPIResult = await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(responseStream, _options);
             if (rankedAPIResult == null) return;
-            privRoomData = rankedAPIResult.Data;
+            _privRoomData = rankedAPIResult.Data;
         }
         catch { /**/ }
 
-        if (privRoomData == null) return;
+        if (_privRoomData == null) return;
 
-        FilterJSON(privRoomData);
+        FilterJSON(_privRoomData);
         _rankedDataReceiver?.Update();
         
-        _rankedManagementData!.Completions = privRoomData.Completions.Length;
-        _rankedManagementData!.Players = privRoomData.Players.Length;
+        _rankedManagementData!.Completions = _privRoomData.Completions.Length;
+        _rankedManagementData!.Players = _privRoomData.Players.Length;
         _rankedManagementDataReceiver?.Update();
     }
     
@@ -254,12 +260,40 @@ public class RankedService : IBackgroundService
         evaluateTimelineData.Add(data);
     }
 
+    private void SavePrivRoomFinishedData()
+    {
+        //TODO: 1 zrobic generator json tutaj jako koniec priv room'a do zbierania wynikow pod testy i weryfikacje
+        if (_privRoomData == null) return;
+
+        try
+        {
+            var rankedSaveData = JsonSerializer.Serialize(_privRoomData, _saveOptions);
+
+            string logName = $"PrivRoomData({_privRoomData.Completions.Length})";
+            string date = DateTimeOffset.Now.ToString("yyyy-MM-dd_HH.mm");
+            string fileName = $"{logName} {date}.txt";
+
+            int count = 1;
+            while (File.Exists(Consts.LogsPath + "\\" + fileName))
+            {
+                fileName = $"{logName} {date} [{count}].txt";
+                count++;
+            }
+
+            File.WriteAllText(Consts.AppdataPath + "\\" + fileName, rankedSaveData);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+    }
     private void EvaluateResults(PrivRoomData data)
     {
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
         
-        //TODO: 1 zrobic generator json tutaj jako koniec priv room'a do zbierania wynikow pod testy i weryfikacje
+        SavePrivRoomFinishedData();
+        
         for (int i = 0; i < data.Completions.Length; i++)
         {
             var completion = data.Completions[i];

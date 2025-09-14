@@ -279,13 +279,41 @@
                                 BorderBrush="#404447"
                                 BorderThickness="2 0 0 0">
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Text="Scripts variables"
-                                           Foreground="Wheat"
-                                           FontSize="32"
-                                           FontWeight="SemiBold"
-                                           Margin="0 0 0 10" />
 
-                                <vwp:VirtualizingItemsControl ItemsSource="{Binding SelectedSubRule.CustomVariables}">
+                                <Grid VerticalAlignment="Center">
+                                    <TextBlock Text="Scripts vars"
+                                               Foreground="Wheat"
+                                               FontSize="32"
+                                               HorizontalAlignment="Left"
+                                               FontWeight="SemiBold"
+                                               TextAlignment="Center"
+                                               Margin="10 0 0 10" />
+
+                                    <components:ButtonNormal ContentText="↻"
+                                                             FontSize="28"
+                                                             Width="30"
+                                                             Height="30"
+                                                             Padding="0 0 0 0"
+                                                             HorizontalAlignment="Right"
+                                                             OnCommand="{Binding SelectedSubRule.ResetCustomVariablesToDefaultCommand}"
+                                                             ContentMargin="0 -7 0 0"
+                                                             Margin="0 0 17 5" />
+                                </Grid>
+
+                                <!-- Trzeba ogarnac zwykle kontrolki czyli togglebutton, string field i number field -->
+                                <vwp:VirtualizingItemsControl ItemsSource="{Binding SelectedSubRule.CustomVariables}"
+                                                              ScrollViewer.CanContentScroll="True"
+                                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                              VirtualizingStackPanel.IsVirtualizing="True"
+                                                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                                              VirtualizingStackPanel.ScrollUnit="Pixel"
+                                                              Width="235"
+                                                              Height="155"
+                                                              Background="Transparent"
+                                                              HorizontalAlignment="Left"
+                                                              VerticalAlignment="Top"
+                                                              Margin="5 0 0 0">
                                     <vwp:VirtualizingItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type entityViewModels:LuaCustomVariableViewModel}">
                                             <StackPanel Orientation="Horizontal"
@@ -299,9 +327,10 @@
                                                          Background="#9E9E9E" />
                                                 <TextBlock Foreground="White"
                                                            FontSize="16"
-                                                           Margin="5 0 0 3">
-                                                    <Run Text="{Binding Type, Mode=OneWay}" />
-                                                    <Run Text=" - " />
+                                                           Margin="2 0 0 2">
+                                                    <Run Text="{Binding Type, Mode=OneWay}"
+                                                         FontSize="11"
+                                                         BaselineAlignment="Center" />
                                                     <Run Text="{Binding Name, Mode=OneWay}" />
                                                 </TextBlock>
                                             </StackPanel>
@@ -319,32 +348,35 @@
                                     Background="Transparent"
                                     Height="200"
                                     Margin="10 0 0 0">
-                            <TextBlock Text="Lua"
-                                       Foreground="Wheat"
-                                       FontSize="32"
-                                       FontWeight="SemiBold"
-                                       Margin="0 0 0 10" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Lua"
+                                           Foreground="Wheat"
+                                           FontSize="32"
+                                           FontWeight="SemiBold"
+                                           Margin="0 0 0 10" />
 
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center"
-                                        Margin="0 -4 10 0">
-                                <TextBlock Text="Scripts: "
-                                           Foreground="White"
-                                           FontSize="16" />
-                                <ComboBox ItemsSource="{Binding LuaScripts}"
-                                          SelectedItem="{Binding SelectedSubRule.SelectedScript, Mode=TwoWay}"
-                                          DisplayMemberPath="Name"
-                                          Width="150"
-                                          Height="25"
-                                          Style="{StaticResource ComboBoxTest2}" />
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            Margin="30 -4 10 0">
+                                    <TextBlock Text="Script: "
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
+                                               FontSize="16" />
+                                    <ComboBox ItemsSource="{Binding LuaScripts}"
+                                              SelectedItem="{Binding SelectedSubRule.SelectedScript, Mode=TwoWay}"
+                                              DisplayMemberPath="Name"
+                                              Width="280"
+                                              Height="25"
+                                              Style="{StaticResource ComboBoxTest2}" />
+                                </StackPanel>
                             </StackPanel>
 
                             <Border BorderBrush="Black"
                                     Width="480"
-                                    Height="109"
+                                    Height="135"
                                     HorizontalAlignment="Left"
                                     BorderThickness="1"
-                                    Margin="0 9 0 0">
+                                    Margin="0 0 0 0">
                                 <TextBlock Text="{Binding SelectedSubRule.SelectedScript.Description}"
                                            Foreground="White"
                                            TextWrapping="Wrap"

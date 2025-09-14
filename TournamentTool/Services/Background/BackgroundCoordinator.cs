@@ -31,7 +31,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         Logger = logger;
         _tournament = tournament;
         
-        _backgroundServiceFactory = new BackgroundServiceFactory(tournament, leaderboard, saver);
+        _backgroundServiceFactory = new BackgroundServiceFactory(tournament, leaderboard, saver, logger);
     }
     
     public void Register(IBackgroundDataReceiver? receiver)
