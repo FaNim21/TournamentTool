@@ -8,11 +8,11 @@ public static class LuaDefaultScripts
 
     public static readonly Dictionary<string, DefaultScript> DefaultScripts = new()
     {
-        ["normal_add_base_points"] = new DefaultScript(NuGetVersion.Parse("0.2.0"),
+        ["normal_add_base_points"] = new DefaultScript(NuGetVersion.Parse("1.0.0"),
             """
-            version = "0.3.0"
+            version = "1.0.0"
             type = "normal"
-            description = "Basic script adding base point to successfully evaluated player"
+            description = "Basic script adding base point to successfully evaluated player.\ncount - displays amount of evaluated milestones\nlast_player - displays last evaluated player ign"
             
             register_variable("count", "number", 0)
             register_variable("last_player", "string", "none")

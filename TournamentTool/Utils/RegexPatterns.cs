@@ -19,6 +19,12 @@ public static partial class RegexPatterns
     [GeneratedRegex(@"^\d*$")]
     public static partial Regex NumbersPatternDigitOnly();
     
+    [GeneratedRegex(@"^-?\d*(\.\d*)?$")]
+    public static partial Regex DecimalWithNegativePattern();
+
+    [GeneratedRegex(@"^\d*(\.\d*)?$")]
+    public static partial Regex DecimalPattern();
+    
     [GeneratedRegex(@"chunk_0:\((\d+),")]
     public static partial Regex LuaErrorLogPattern();
 }

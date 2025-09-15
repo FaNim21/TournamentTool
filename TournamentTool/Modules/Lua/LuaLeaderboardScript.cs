@@ -220,23 +220,25 @@ public class LuaLeaderboardScript
             LogService.Log(output);
             return DynValue.Nil;
         });
+
+        _script.Globals["error"] = DynValue.NewCallback((context, args) =>
+        {
+            StringBuilder output = new();
+            for (int i = 0; i < args.Count; i++)
+            {
+                output.Append(args[i].ToPrintString());
+            }
+            LogService.Error(output);
+            return DynValue.Nil;
+        });
         
         _script.Globals["register_variable"] = DynValue.NewCallback((context, args) =>
         {
-            if (args.Count < 3)
-                return DynValue.NewString("register_variable(name, type, default)");
+            if (args.Count < 3) return DynValue.NewString("register_variable(name, type, default)");
 
             var name = args[0].CastToString();
             var type = args[1].CastToString();
-            string defaultValue;
-            if (type.Equals("bool"))
-            {
-                defaultValue = args[2].CastToBool().ToString();
-            }
-            else
-            {
-                defaultValue = args[2].CastToString();
-            }
+            string defaultValue = type.Equals("bool") ? args[2].CastToBool().ToString() : args[2].CastToString();
             
             var variable = new LuaCustomVariable(name, type, defaultValue, defaultValue);
             CustomVariables.Add(variable);

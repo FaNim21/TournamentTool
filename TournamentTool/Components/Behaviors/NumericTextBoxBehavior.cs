@@ -8,13 +8,21 @@ namespace TournamentTool.Components.Behaviors;
 
 public class NumericTextBoxBehavior : BehaviorBase<TextBox>
 {
-    public static readonly DependencyProperty AllowNegativeProperty = DependencyProperty.Register( nameof(AllowNegative), typeof(bool), typeof(NumericTextBoxBehavior), new PropertyMetadata(true));
+    public static readonly DependencyProperty AllowNegativeProperty = 
+        DependencyProperty.Register( nameof(AllowNegative), typeof(bool), typeof(NumericTextBoxBehavior), new PropertyMetadata(true));
+    public static readonly DependencyProperty AllowDecimalProperty =
+        DependencyProperty.Register(nameof(AllowDecimal), typeof(bool), typeof(NumericTextBoxBehavior), new PropertyMetadata(false)); 
+    
     public bool AllowNegative
     {
         get => (bool)GetValue(AllowNegativeProperty);
         set => SetValue(AllowNegativeProperty, value);
     } 
-    
+    public bool AllowDecimal
+    {
+        get => (bool)GetValue(AllowDecimalProperty);
+        set => SetValue(AllowDecimalProperty, value);
+    } 
     
     protected override void OnAttached()
     {
@@ -40,7 +48,6 @@ public class NumericTextBoxBehavior : BehaviorBase<TextBox>
     private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
     {
         if (sender is not TextBox textBox) return;
-
         if (e.DataObject.GetDataPresent(typeof(string)))
         {
             string pastedText = (string)e.DataObject.GetData(typeof(string))!;
@@ -48,7 +55,9 @@ public class NumericTextBoxBehavior : BehaviorBase<TextBox>
 
             Regex regex = GetRegex();
             if (!regex.IsMatch(newText))
+            {
                 e.CancelCommand();
+            }
         }
         else
         {
@@ -56,5 +65,11 @@ public class NumericTextBoxBehavior : BehaviorBase<TextBox>
         }
     }
     
-    private Regex GetRegex() => AllowNegative ? RegexPatterns.NumbersPattern() : RegexPatterns.NumbersPatternDigitOnly();
+    private Regex GetRegex()
+    {
+        if (AllowDecimal && AllowNegative) return RegexPatterns.DecimalWithNegativePattern();
+        if (AllowDecimal && !AllowNegative) return RegexPatterns.DecimalPattern();
+        if (!AllowDecimal && AllowNegative) return RegexPatterns.NumbersPattern();
+        return RegexPatterns.NumbersPatternDigitOnly();
+    }
 }

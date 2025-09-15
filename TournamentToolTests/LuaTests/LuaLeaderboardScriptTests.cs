@@ -1,10 +1,14 @@
-﻿using MoonSharp.Interpreter;
+﻿using Meziantou.Xunit;
+using MoonSharp.Interpreter;
 using NuGet.Versioning;
+using TournamentTool.Models;
+using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.Lua;
 using TournamentTool.Utils.Exceptions;
 
 namespace TournamentToolTests.LuaTests;
 
+[DisableParallelization]
 public class LuaLeaderboardScriptTests
 {
     private string WriteTempScript(string code)
@@ -22,6 +26,15 @@ public class LuaLeaderboardScriptTests
         {
             Called = true;
         }
+    }
+
+    private LogStore _store;
+
+    public LuaLeaderboardScriptTests()
+    {
+        _store = new LogStore();
+        ILoggingService logger = new LoggingService(_store);
+        LogService.Initialize(logger);
     }
 
     [Fact]
@@ -174,26 +187,34 @@ public class LuaLeaderboardScriptTests
     }
 
     [Fact]
-    public void Validate_ShouldCaptureRuntimeError()
+    public void Error_ShouldCaptureErrorLog()
     {
-        //TODO: 0 Zrobic error handling tak samo jak print
         string lua = @"
             function evaluate_data(api)
-                error('Forced runtime error')
+                error('printing error log')
             end
         ";
         var path = WriteTempScript(lua);
-
-        try
-        {
-            LuaLeaderboardScript.Load(path);
-        }
-        catch (LuaScriptValidationException ex)
-        {
-            Assert.False(ex.IsValid);
-            Assert.True(ex.HasErrors);
-        }
-
-        Assert.True(false);
+        LuaLeaderboardScript.Load(path);
+        
+        Assert.NotEmpty(_store.Logs);
+        Assert.NotNull(_store.Logs.FirstOrDefault(l => l.Message.Equals("printing error log")));
+        Assert.NotNull(_store.Logs.FirstOrDefault(l => l.Level == LogLevel.Error));
+    }
+    
+    [Fact]
+    public void Print_ShouldCapturePrintLog()
+    {
+        string lua = @"
+            function evaluate_data(api)
+                print('printing normal log')
+            end
+        ";
+        var path = WriteTempScript(lua);
+        LuaLeaderboardScript.Load(path);
+        
+        Assert.NotEmpty(_store.Logs);
+        Assert.NotNull(_store.Logs.FirstOrDefault(l => l.Message.Equals("printing normal log")));
+        Assert.NotNull(_store.Logs.FirstOrDefault(l => l.Level == LogLevel.Normal));
     }
 }

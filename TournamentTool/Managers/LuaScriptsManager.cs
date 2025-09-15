@@ -51,11 +51,10 @@ public class LuaScriptsManager : ILuaScriptsManager
             {
                 AddOrReload(name);
             }
-            catch { /**/ }
-            /*catch (Exception ex)
+            catch (Exception ex)
             {
                 Logger.Error(ex);
-            }*/
+            }
         }
     }
     private void CheckDefaultScriptsForUpdate()

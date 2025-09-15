@@ -5,6 +5,7 @@ using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Modules.Lua;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
 
@@ -95,18 +96,40 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         get => _selectedScript;
         set
         {
-            if (value == null) return;
+            if (value == null || value == _selectedScript) return;
+            
+            bool areVariablesModified = false;
+            foreach (var variable in CustomVariables)
+            {
+                if (variable.IsDefaultValue()) continue;
+                areVariablesModified = true;
+                break;
+            }
+
+            if (areVariablesModified)
+            {
+                var result = DialogBox.Show("Changing the script will reset all the custom variable values to default.\n" +
+                                            "Are you sure you want to change script?",
+                    "Changing script with modified values in custom variables",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    OnPropertyChanged(nameof(SelectedScript));
+                    return;
+                }
+            }
             
             _selectedScript = value;
             OnPropertyChanged(nameof(SelectedScript));
 
             LuaPath = _selectedScript.Name;
             _notifyPresetModification.PresetIsModified();
-            
+
             Model.CustomVariables.Clear();
             foreach (var variable in _selectedScript.CustomVariables)
             {
-                Model.CustomVariables[variable.Name] = variable;
+                Model.CustomVariables[variable.Name] = new LuaCustomVariable(variable.Name, variable.Type, variable.DefaultValue, variable.DefaultValue);
             }
             SetupCustomVariables();
         }
@@ -143,7 +166,6 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         TimeText = TimeSpan.FromMilliseconds(Time).ToFormattedTime();
     }
     
-
     private void ResetCustomVariablesToDefault()
     {
         var result = DialogBox.Show("Are you sure you want to reset all custom variables in that sub rule to default?", "Resetting custom variables to default", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -152,6 +174,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         foreach (var customVariable in CustomVariables)
         {
             customVariable.Value = customVariable.DefaultValue;
+            customVariable.Update();
         }
     }
     

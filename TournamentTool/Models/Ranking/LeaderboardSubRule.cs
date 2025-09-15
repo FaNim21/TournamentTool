@@ -1,4 +1,5 @@
-﻿using TournamentTool.Modules.Lua;
+﻿using System.Globalization;
+using TournamentTool.Modules.Lua;
 
 namespace TournamentTool.Models.Ranking;
 
@@ -25,9 +26,9 @@ public class LeaderboardSubRule
 
         return variable?.Type.ToLowerInvariant() switch
         {
-            "number" => Convert.ToDouble(variable.Value),
+            "number" => Convert.ToDouble(variable.Value, CultureInfo.InvariantCulture),
             "string" => variable.Value ?? string.Empty,
-            "bool" or "boolean" => Convert.ToBoolean(variable.Value),
+            "bool" or "boolean" => Convert.ToBoolean(variable.Value, CultureInfo.InvariantCulture),
             _ => variable?.Value
         };
     }
@@ -44,7 +45,7 @@ public class LeaderboardSubRule
 
         variable.Value = variable.Type.ToLowerInvariant() switch
         {
-            "number" => value.ToString(),
+            "number" => Convert.ToDouble(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
             "string" => value.ToString() ?? string.Empty,
             "bool" or "boolean" => value.ToString(),
             _ => value.ToString()
@@ -63,7 +64,7 @@ public class LeaderboardSubRule
             }
             else
             {
-                CustomVariables[variable.Name] = new LuaCustomVariable(variable.Name, variable.Type, variable.DefaultValue, variable.Value);
+                CustomVariables[variable.Name] = new LuaCustomVariable(variable.Name, variable.Type, variable.DefaultValue, variable.DefaultValue);
             }
 
             updatedVariables.Add(variable.Name);
