@@ -9,7 +9,9 @@ public static class LuaScriptValidator
 {
     public static object CreateTestContext(LuaLeaderboardScript script)
     {
-        LeaderboardSubRule subRule = new() { BasePoints = 100 };
+        LeaderboardRule rule = new() { Name = "xd", ChosenAdvancement = RunMilestone.ProjectEloComplete, RuleType = LeaderboardRuleType.Split };
+        LeaderboardSubRule subRule = new() { BasePoints = 7 };
+        
         foreach (var variable in script.CustomVariables)
         {
             subRule.CustomVariables[variable.Name] = variable;
@@ -20,13 +22,15 @@ public static class LuaScriptValidator
             var players = new List<LuaPlayerData>
             {
                 CreateMockPlayer("TestPlayer1", 1, 100, 60000),
-                CreateMockPlayer("TestPlayer2", 2, 80, 70000)
+                CreateMockPlayer("TestPlayer2", 2, 80, 70000),
+                CreateMockPlayer("TestPlayer3", 3, 73, 90000),
+                CreateMockPlayer("TestPlayer4", 4, 47, 120500),
             };
 
             TournamentViewModel tournament = new TournamentViewModel();
             tournament.ManagementData = new RankedManagementData { Rounds = 1, Completions = 1, Players = 2 };
             
-            LuaAPIRankedContext context = new LuaAPIRankedContext(subRule, tournament, players, null);
+            LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, tournament, players, null);
             return context;
         }
         else
@@ -39,7 +43,7 @@ public static class LuaScriptValidator
             TournamentViewModel tournament = new TournamentViewModel();
             tournament.ManagementData = new RankedManagementData { Rounds = 1, Completions = 1, Players = 2 };
             
-            LuaAPIContext context = new LuaAPIContext(entry, data, subRule, tournament, null);
+            LuaAPIContext context = new LuaAPIContext(entry, data, rule, subRule, tournament, null);
             return context;
         }
     }

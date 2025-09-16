@@ -1,4 +1,6 @@
-﻿using MoonSharp.Interpreter;
+﻿using System.ComponentModel.DataAnnotations;
+using MoonSharp.Interpreter;
+using TournamentTool.Enums;
 using TournamentTool.Factories;
 using TournamentTool.ViewModels.Entities;
 
@@ -6,14 +8,38 @@ namespace TournamentTool.Models.Ranking;
 
 public abstract class LuaAPIBase
 {
-    protected readonly Action<LeaderboardEntry>? _onEntryRunRegistered;
-    protected readonly TournamentViewModel _tournament;
-    protected readonly LeaderboardSubRule _subRule;
+    [MoonSharpHidden] protected readonly Action<LeaderboardEntry>? _onEntryRunRegistered;
+    [MoonSharpHidden] protected readonly TournamentViewModel _tournament;
+    [MoonSharpHidden] protected readonly LeaderboardRule _rule;
+    [MoonSharpHidden] protected readonly LeaderboardSubRule _subRule;
+    
+    public string RuleName => _rule.Name;
+    public string RuleType => _rule.RuleType.ToString().ToLower();
+    public string MilestoneName
+    {
+        get
+        {
+            DisplayAttribute? display = _rule.ChosenAdvancement.GetDisplay();
+            string output = _rule.ChosenAdvancement.ToString();
+            if (display != null && !string.IsNullOrEmpty(display.ShortName))
+            {
+                output = display.ShortName;
+            }
+            return output;
+        }
+    }
+
+    public string Description => _subRule.Description;
+    public int TimeThreshold => _subRule.Time;
     public int BasePoints => _subRule.BasePoints;
 
 
-    protected LuaAPIBase(TournamentViewModel tournament, LeaderboardSubRule subRule, Action<LeaderboardEntry>? onEntryRunRegistered)
+    protected LuaAPIBase(TournamentViewModel tournament, 
+        LeaderboardRule rule, 
+        LeaderboardSubRule subRule,
+        Action<LeaderboardEntry>? onEntryRunRegistered)
     {
+        _rule = rule;
         _subRule = subRule;
         _tournament = tournament;
         _onEntryRunRegistered = onEntryRunRegistered;
@@ -39,9 +65,10 @@ public class LuaAPIContext : LuaAPIBase
 
     public LuaAPIContext(LeaderboardEntry entry, 
         LeaderboardPlayerEvaluateData data, 
+        LeaderboardRule rule, 
         LeaderboardSubRule subRule, 
         TournamentViewModel tournament, 
-        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
+        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, rule, subRule, onEntryRunRegistered)
     {
         _entry = entry;
         _data = data;
@@ -80,15 +107,28 @@ public class LuaPlayerData
 public class LuaAPIRankedContext : LuaAPIBase
 {
     public List<LuaPlayerData> Players { get; }
-    public int Round => _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
+    public int Round
+    {
+        get
+        {
+            var player = Players[0];
+            if (player is { data: LeaderboardRankedEvaluateData rankedData })
+            {
+                return rankedData.Round;
+            }
+            return _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
+        }
+    }
+    public int MaxWinners => _subRule.MaxWinners;
     public int PlayersInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
     public int CompletionsInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Completions : 1;
     
     
-    public LuaAPIRankedContext( LeaderboardSubRule subRule, 
+    public LuaAPIRankedContext(LeaderboardRule rule,
+        LeaderboardSubRule subRule, 
         TournamentViewModel tournament, 
         List<LuaPlayerData> players,
-        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, subRule, onEntryRunRegistered)
+        Action<LeaderboardEntry>? onEntryRunRegistered) : base(tournament, rule, subRule, onEntryRunRegistered)
     {
         Players = players;
     }
