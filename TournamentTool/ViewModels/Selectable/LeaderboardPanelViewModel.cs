@@ -71,7 +71,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveRuleCommand = new RemoveRuleCommand(this);
 
         ViewEntryCommand = new ViewEntryCommand(coordinator);
-        EditEntryCommand = new EditEntryCommand(coordinator, tournament, this);
+        EditEntryCommand = new EditEntryCommand(coordinator, tournament, this, tournament);
         RemoveEntryCommand = new RemoveEntryCommand(this);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 

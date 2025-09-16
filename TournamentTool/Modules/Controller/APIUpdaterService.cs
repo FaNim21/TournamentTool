@@ -286,16 +286,17 @@ public class APIUpdaterService : IServiceUpdater
     private async Task UpdateLeaderboardTopAPI()
     {
         await UpdatePlayerHeads();
+
+        for (int i = 0; i < 20; i++)
+        {
+            _api.UpdateFileContent(_leaderboardAPINames[i].IGN, string.Empty);
+            _api.UpdateFileContent(_leaderboardAPINames[i].PreviousRoundPoints, string.Empty);
+            _api.UpdateFileContent(_leaderboardAPINames[i].OverallPoints, string.Empty);
+        }
         
         for (int i = 0; i < 20; i++)
         {
-            if (i >= _preset.Leaderboard.OrderedEntries.Count)
-            {
-                _api.UpdateFileContent(_leaderboardAPINames[i].IGN, string.Empty);
-                _api.UpdateFileContent(_leaderboardAPINames[i].PreviousRoundPoints, string.Empty);
-                _api.UpdateFileContent(_leaderboardAPINames[i].OverallPoints, string.Empty);
-                continue;
-            }
+            if (i >= _preset.Leaderboard.OrderedEntries.Count) break;
             
             var entry = _preset.Leaderboard.OrderedEntries[i];
             var player = _preset.GetPlayerByUUID(entry.PlayerUUID);

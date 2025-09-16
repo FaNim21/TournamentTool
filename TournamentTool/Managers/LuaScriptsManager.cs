@@ -18,7 +18,7 @@ public interface ILuaScriptsProvider
 public interface ILuaScriptsManager : ILuaScriptsProvider
 {
     void LoadLuaScripts();
-    LuaLeaderboardScript AddOrReload(string name);
+    LuaLeaderboardScript AddOrReload(string name, bool validateRuntime = true);
     IReadOnlyList<LuaLeaderboardScriptEntry> GetScriptsList();
 }
 
@@ -77,7 +77,7 @@ public class LuaScriptsManager : ILuaScriptsManager
 
                 if (!shouldUpdate) continue;
                 File.WriteAllText(path, script.Code);
-                AddOrReload(name);
+                AddOrReload(name, false);
             }
             catch (Exception ex)
             {
@@ -86,9 +86,9 @@ public class LuaScriptsManager : ILuaScriptsManager
         }
     }
 
-    public LuaLeaderboardScript AddOrReload(string name)
+    public LuaLeaderboardScript AddOrReload(string name, bool validateRuntime = true)
     {
-        LuaLeaderboardScript loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath);
+        LuaLeaderboardScript loaded = LuaLeaderboardScript.Load(name, Consts.LeaderboardScriptsPath, null, validateRuntime);
         _leaderboardScripts[name] = loaded;
 
         if (loaded.CustomVariables.Count == 0) return loaded;

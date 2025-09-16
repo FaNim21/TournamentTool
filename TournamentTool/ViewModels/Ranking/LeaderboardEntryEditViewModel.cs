@@ -8,6 +8,7 @@ using TournamentTool.Commands;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Factories;
+using TournamentTool.Interfaces;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
@@ -21,6 +22,7 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
     private readonly LeaderboardPanelViewModel _leaderboardPanelViewModel;
     private readonly LeaderboardEntry _originalEntry;
     private readonly PlayerViewModel? _player;
+    private readonly INotifyPresetModification _notifyPresetModification;
 
     public LeaderboardEntryViewModel? EditedEntry { get; private set; }
     
@@ -43,6 +45,10 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
         get => _titleInfo;
         set
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                value = "Click new to create or right click edit";
+            }
             _titleInfo = value;
             OnPropertyChanged(nameof(TitleInfo));
         }
@@ -168,14 +174,18 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
 
     private int _currentEditedMilestone = -1;
     private bool _isSaved = true;
+    private bool _madeChanges = false;
     
 
-    public LeaderboardEntryEditViewModel(TournamentViewModel tournament, LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, PlayerViewModel? player)
+    public LeaderboardEntryEditViewModel(TournamentViewModel tournament,
+        LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, PlayerViewModel? player,
+        INotifyPresetModification notifyPresetModification)
     {
         _tournament = tournament;
         _leaderboardPanelViewModel = leaderboardPanelViewModel;
         _originalEntry = originalEntry;
         _player = player;
+        _notifyPresetModification = notifyPresetModification;
         DeepCopyToEdited();
 
         SaveCommand = new RelayCommand(Save);
@@ -192,7 +202,10 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
     public override bool OnDisable()
     {
         if (!_isSaved) return false;
-        
+        if (_madeChanges)
+        {
+            _notifyPresetModification.PresetIsModified();
+        }
         _leaderboardPanelViewModel.RecalculateAllEntries();
         return true;
     }
@@ -310,6 +323,7 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
             Points = paceman.Data.Points;
             Round = 0;
             WorldID = paceman.Data.WorldID;
+            MilestoneType = false;
         }
         else if (milestone is EntryMilestoneRankedDataViewModel ranked)
         {
@@ -328,6 +342,7 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
             Points = ranked.Data.Points;
             WorldID = string.Empty;
             Round = ranked.Data.Round;
+            MilestoneType = true;
         }
         
         _currentEditedMilestone = EditedEntry!.Milestones.IndexOf(milestone);
@@ -352,6 +367,7 @@ public class LeaderboardEntryEditViewModel : BaseViewModel
         if (EditedEntry == null) return;
         
         _isSaved = true;
+        _madeChanges = true;
         _originalEntry.Milestones.Clear();
         _originalEntry.BestMilestones.Clear();
         _originalEntry.Points = 0;

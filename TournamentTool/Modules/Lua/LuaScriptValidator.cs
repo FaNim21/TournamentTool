@@ -10,7 +10,7 @@ public static class LuaScriptValidator
     public static object CreateTestContext(LuaLeaderboardScript script)
     {
         LeaderboardRule rule = new() { Name = "xd", ChosenAdvancement = RunMilestone.ProjectEloComplete, RuleType = LeaderboardRuleType.Split };
-        LeaderboardSubRule subRule = new() { BasePoints = 7 };
+        LeaderboardSubRule subRule = new() { BasePoints = 63 };
         
         foreach (var variable in script.CustomVariables)
         {
@@ -28,7 +28,7 @@ public static class LuaScriptValidator
             };
 
             TournamentViewModel tournament = new TournamentViewModel();
-            tournament.ManagementData = new RankedManagementData { Rounds = 1, Completions = 1, Players = 2 };
+            tournament.ManagementData = new RankedManagementData { Rounds = 7, Completions = 3, Players = 4 };
             
             LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, tournament, players, null);
             return context;
