@@ -46,28 +46,55 @@ function evaluate_data(api)
 end
 ```
 
-## Rules Edit Window Overview
-[//]: # (![Whitelist panel view]&#40;Images/Whitelist.png&#41;)
+## Rules Edit Window
 
-Tu dac jakis wstep do tego i opisac w punktach jak z tego korzystac
-- po lewej stronie lista pod zasad, ktore mozna zmieniac kolejnoscia i ogolnie kolejnosc jest wazne, poniewaz pod zasady sa sprawdzany w kolejnosci od gory w dol
-- pod zasada jest spelniona jezeli czas gracza jest ponizej okreslonej w tej pod zasadzie, natomiast jezeli jest wiekszy to rozpatrywana jest nastepna pod zasada
-- kazda zasada w leaderboardzie obowiazuje jednemu milestone, czyli split lub achievement
-- mozna przelaczac aktywnosc tych zasad toggle buttonem Is Enabled
-- Bazowe punkty sa wlasciwoscia, ktora jest stala i wskazuje bazowa liczbe punktow wykorzystywanych w skrypcie
-- okno pod zasady sklada sie z trzech zakladek: config, script vars i lua
-- Config ma 2 tryby zaleznie od controller mode paceman lub ranked, gdzie tylko w trybie rankedowym dochodzi zmienna max winners, ktora jest uwzgledniania przez tournament tool przed wyslaniem graczy do ocenienia przez skrypt, czyli jezeli jest max winners 10 to wtedy 11 osoba i w gore zostaje odeslana do nastepnej pod zasady
-- Lua jest zakladka z opcja wybory skryptu i informacjami o nim takimi jak opis i wersja
-- Scripts vars sluzy custom variables, ktore sa rejestrowane w skrypcie i wyswietla w tym miejscu w celu wgladu lub ich edycji, poniewaz z obu stron, czyli ze skryptu i ze strony tournament tool'a mozna edytowac ich wartosci i one sa przypisane tylko do danej pod zasady
+The following illustrations show the **Rules Editing Window**, which is a central element of the Lua scripting integration in *Tournament Tool*.  
+It allows you to define, modify, and control the logic of scoring and player evaluation.
 
+### Structure and Functionality
+
+1. **Sub-rule list (on the left side)**
+    - Sub-rules are ordered from top to bottom.
+    - The order is important, since each sub-rule is evaluated sequentially – if the condition of the current one is not met, the application proceeds to the next.
+    - A sub-rule is fulfilled if the player's time is below the defined threshold. Otherwise, the next sub-rule is evaluated.
+
+2. **Milestone assignment**  
+   Each rule is bound to a specific milestone, such as a *split* or an *achievement*, and applies only within that stage.
+
+3. **Managing activity**  
+   The main rule editor includes a toggle switch (*Is Enabled*) that allows you to quickly activate or deactivate the entire rule.
 
 <p align="center">
-  <img src="../Images/Rule-edit-window.png" alt="rule edit window view">
-</p>
-<br>
+  <img src="../Images/Rule-edit-window.png" alt="Main rule editing panel"/>
+</p>  
+<p align="center"><em>Main rule editing panel with sub-rules list and activity toggle</em></p>
+
+---
+
+### Sub-rule Configuration
+
+Each **sub-rule** is edited in a dedicated panel divided into three main sections, separated by lines:
+
+1. **Config**
+    - Defines the evaluation mode depending on the selected *controller mode*: *Paceman* or *Ranked*.
+    - In *Ranked* mode, an additional parameter **Max Winners** is available. It defines the maximum number of players evaluated by the script.
+        - Example: if *Max Winners* = 10, players ranked 11th and higher are automatically passed to the next sub-rule.
+    - Contains the **Base Points** property – a constant point value used by the script for this sub-rule.
+    - Contains **Time** threshold that defines time limit for specific sub-rule
+
+2. **Script Vars**
+    - Displays and allows editing of **custom variables**.
+    - These variables are registered and handled both by the Lua script and the *Tournament Tool* itself.
+    - Their values can be modified dynamically and are tied only to the given sub-rule.
+
+3. **Lua**
+    - Used to select the script attached to the sub-rule.
+    - Also provides script metadata, such as description and version.
+
 <p align="center">
-  <img src="../Images/SubRule-edit-window.png" alt="sub rule edit window view">
-</p>
+  <img src="../Images/SubRule-edit-window.png" alt="Sub-rule editing panel"/>
+</p>  
+<p align="center"><em>Sub-rule editing panel with three configuration sections (Paceman mode)</em></p>
 
 ## API Overview
 The Tournament Tool Lua API provides access to leaderboard data through an `api` object passed to the `evaluate_data` function.
@@ -176,6 +203,8 @@ for i, player in ipairs(api.players) do
     -- Process each player
 end
 ```
+
+---
 
 ### Player Data Object
 When iterating through the `api.players` array in Ranked mode, each player object contains:
