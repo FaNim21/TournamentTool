@@ -44,8 +44,14 @@ public class TwitchStatusViewModel : StatusItemViewModel
                 SetState("wait");
                 break;
         }
+
+        if (_twitchService.TokenExpiresAt == null)
+        {
+            SetToolTip(e.NewState.ToString());
+            return;
+        }
         
-        SetToolTip(e.NewState.ToString());
+        SetToolTip($"{e.NewState}\nExpires: {_twitchService.TokenExpiresAt}");
     }
 
     protected override void InitializeImages()

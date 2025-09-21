@@ -113,8 +113,8 @@ public class Paceman
 
         if (PlayerViewModel == null)
         {
-            string url = $"https://mc-heads.net/avatar/{UUID}/8";
-            // string url = $"https://minotar.net/helm/{UUID}/8.png";
+            // string url = $"https://mc-heads.net/avatar/{UUID}/8";
+            string url = $"https://minotar.net/helm/{UUID}/8.png";
             HeadImageOpacity = 0.35f;
             Task.Run(async () =>
             {

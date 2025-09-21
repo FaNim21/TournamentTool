@@ -442,6 +442,13 @@
                                               Width="280"
                                               Height="25"
                                               Style="{StaticResource ComboBoxTest2}" />
+                                    <TextBlock Text="{Binding SelectedSubRule.SelectedScript.Version}"
+                                               Foreground="White"
+                                               TextWrapping="Wrap"
+                                               VerticalAlignment="Center"
+                                               FontSize="12"
+                                               Background="Transparent"
+                                               Margin="5" />
                                 </StackPanel>
                             </StackPanel>
 

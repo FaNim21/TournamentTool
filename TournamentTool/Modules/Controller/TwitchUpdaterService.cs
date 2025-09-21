@@ -1,4 +1,5 @@
-﻿using TournamentTool.Services;
+﻿using TournamentTool.Modules.Logging;
+using TournamentTool.Services;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
 

@@ -132,8 +132,8 @@ public class RankedPace
 
         if (Player == null)
         {
-            string url = $"https://mc-heads.net/avatar/{InGameName}/8";
-            // string url = $"https://minotar.net/helm/{InGameName}/8.png";
+            // string url = $"https://mc-heads.net/avatar/{InGameName}/8";
+            string url = $"https://minotar.net/helm/{InGameName}/8.png";
             Task.Run(async () =>
             {
                 HeadImage = await Helper.LoadImageFromUrlAsync(url);

@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="TournamentTool.Views.Settings.GeneralTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:TournamentTool.Views.Settings"
+             xmlns:settings="clr-namespace:TournamentTool.ViewModels.Settings"
+             d:DataContext="{d:DesignInstance Type=settings:GeneralTabViewModel}"
+             mc:Ignorable="d"
+             d:DesignWidth="1024"
+             d:DesignHeight="605">
+    <Grid>
+        <TextBlock Text="General"
+                   Foreground="White" />
+        
+        <!--
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 0 0 5">
+            <TextBox TextWrapping="Wrap"
+                     Width="120"
+                     Height="20"
+                     Text="{Binding TournamentViewModel.PaceManRefreshRateMiliseconds}"
+                     Background="#9E9E9E"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Top">
+                <i:Interaction.Behaviors>
+                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                </i:Interaction.Behaviors>
+            </TextBox>
+            <TextBlock Text="PaceMan refresh (ms)"
+                       ToolTipService.InitialShowDelay="0"
+                       ToolTipService.ShowDuration="60000"
+                       ToolTip="How often it will try to obtain paceman data"
+                       Foreground="White"
+                       Height="20"
+                       FontSize="16"
+                       Padding="0"
+                       Margin="5 0 0 3" />
+        </StackPanel>
+        -->
+        
+        <!-- Dac do wyboru jakiego back-end'u pod glowki uzywac, czyli mc-heads i minotar -->
+        
+    </Grid>
+</UserControl>

@@ -166,6 +166,7 @@
         <ContentControl Grid.Row="1"
                         Content="{Binding NavigationService.SelectedView}" />
 
+        <!-- NOTIFICATION PANEL -->
         <ContentControl Grid.Row="1"
                         Visibility="{Binding NotificationPanel.IsNotificationPanelOpen, Converter={StaticResource BoolToVisibilityConverter}}">
             <views:NotificationPanelView DataContext="{Binding NotificationPanel}"
@@ -242,6 +243,7 @@
                 Background="Black"
                 Opacity="0.5" />
 
+        <!-- STATUS BAR -->
         <ContentPresenter Grid.Row="2"
                           Content="{Binding StatusBar}" />
     </Grid>

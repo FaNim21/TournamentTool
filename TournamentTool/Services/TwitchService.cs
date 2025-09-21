@@ -2,8 +2,8 @@
 using TwitchLib.Api.Helix.Models.Streams.GetStreams;
 using TournamentTool.Utils;
 using System.Diagnostics;
-using System.Net;
-using System.Timers;
+using TournamentTool.Interfaces;
+using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using TournamentTool.Modules.OBS;
@@ -14,63 +14,77 @@ namespace TournamentTool.Services;
 public class TwitchService
 {
     public ILoggingService Logger { get; }
+    private ISettings SettingsService { get; }
+    
     private readonly TwitchAPI _api;
+    private const string ClientID = "1s5wfzaplbnwqtwnhhc29wav44c88y";
 
     public bool IsConnected { get; private set; }
 
-    private string _refreshToken = string.Empty;
-    private int _expiresIn;
+    public DateTime? TokenExpiresAt { get; private set; }
 
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
-
-    private System.Timers.Timer? _refreshTimer;
     
     
-    public TwitchService(ILoggingService logger)
+    public TwitchService(ILoggingService logger, ISettings settingsService)
     {
         Logger = logger;
-        _api = new TwitchAPI
-        {
-            Settings =
-            {
-                ClientId = Consts.ClientID
-            }
-        };
+        SettingsService = settingsService;
+        _api = new TwitchAPI { Settings = { ClientId = ClientID } };
     }
 
-    private void ScheduleTokenRefresh(int expiresInSeconds)
+    public async Task ConnectAsync(bool silent = false)
     {
-        StopRefreshingToken();
-
-        int interval = Math.Max(1000, (expiresInSeconds - 600) * 1000); //Refreshing 10 min before expiring
-        _refreshTimer = new System.Timers.Timer(interval);
-        _refreshTimer.Elapsed += OnRefreshAccessTokenAsync;
-        _refreshTimer.AutoReset = false;
-        _refreshTimer.Start();
-    }
-    private void StopRefreshingToken()
-    {
-        if (_refreshTimer is null) return;
+        _api.Settings.ClientId = !string.IsNullOrEmpty(SettingsService.APIKeys.CustomTwitchClientID) ? SettingsService.APIKeys.CustomTwitchClientID : ClientID;
         
-        _refreshTimer.Elapsed -= OnRefreshAccessTokenAsync;
-        _refreshTimer.Stop();
-        _refreshTimer.Dispose();
-    }
-
-    public async Task ConnectAsync()
-    {
-        if (!string.IsNullOrEmpty(_refreshToken))
+        if (!string.IsNullOrEmpty(SettingsService.APIKeys.TwitchAccessToken))
         {
-            await RefreshAccessTokenAsync();
-            return;
+            _api.Settings.AccessToken = SettingsService.APIKeys.TwitchAccessToken;
         }
         
-        if (!string.IsNullOrEmpty(_api.Settings.AccessToken)) return;
-
+        if (!string.IsNullOrEmpty(_api.Settings.AccessToken) && IsConnected) return;
+        if (!string.IsNullOrEmpty(_api.Settings.AccessToken) && !IsConnected)
+        {
+            try
+            {
+                var validateResponse = await _api.Auth.ValidateAccessTokenAsync(_api.Settings.AccessToken);
+                if (validateResponse == null) throw new TokenExpiredException("Couldn't validate last token");
+                TokenExpiresAt = DateTime.UtcNow.AddSeconds(validateResponse.ExpiresIn);
+                
+                IsConnected = true;
+                ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connecting, ConnectionState.Connected));
+            
+                Logger.Log("Successfully connected to Twitch API");
+                return;
+            }
+            catch (TokenExpiredException ex)
+            {
+                Logger.Error(ex);
+                SettingsService.APIKeys.TwitchAccessToken = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                SettingsService.APIKeys.TwitchAccessToken = string.Empty;
+            }
+        }
+        
         var state = Guid.NewGuid().ToString();
-        var authScopes = new[] { TwitchLib.Api.Core.Enums.AuthScopes.Helix_Clips_Edit };
-        string auth = _api.Auth.GetAuthorizationCodeUrl(Consts.RedirectURL, authScopes, true, state, _api.Settings.AccessToken);
-        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Disconnected, ConnectionState.Connecting));
+        var authScopes = new[] { "clips:edit" };
+        // string scopeParam = string.Join("+", authScopes);
+        string scopeParam = string.Empty;
+        
+        string auth = $"https://id.twitch.tv/oauth2/authorize" +
+                      $"?client_id={_api.Settings.ClientId}" +
+                      $"&redirect_uri={Consts.RedirectURL}" +
+                      $"&response_type=token" +
+                      // $"&scope={scopeParam}" +
+                      $"&state={state}";
+        
+        if (!silent)
+        {
+            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Disconnected, ConnectionState.Connecting));
+        }
 
         try
         {
@@ -82,24 +96,25 @@ public class TwitchService
                 UseShellExecute = true
             });
 
-            var auth2 = await server.Listen();
-            if (auth2 == null)
+            var authResponse = await server.Listen();
+            if (authResponse == null)
             {
                 Logger.Error("Error while listening for twitch authentication");
                 return;
             }
 
-            var response = await _api.Auth.GetAccessTokenFromCodeAsync(auth2.Code, Consts.SecretID, Consts.RedirectURL, Consts.ClientID);
-            _api.Settings.AccessToken = response.AccessToken;
-            _expiresIn = response.ExpiresIn;
-            _refreshToken = response.RefreshToken;
+            var validateResponse = await _api.Auth.ValidateAccessTokenAsync(authResponse.Code);
+            _api.Settings.AccessToken = authResponse.Code;
+            if (SettingsService.Settings.SaveTwitchToken)
+            {
+                SettingsService.APIKeys.TwitchAccessToken = authResponse.Code;
+            }
+            TokenExpiresAt = DateTime.UtcNow.AddSeconds(validateResponse.ExpiresIn);
+            
             IsConnected = true;
-            ScheduleTokenRefresh(_expiresIn);
             ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connecting, ConnectionState.Connected));
-        }
-        catch (HttpListenerException ex) when (ex.ErrorCode == 995) 
-        {
-            Logger.Log("Web server listener stopped");
+            
+            Logger.Log("Successfully connected to Twitch API");
         }
         catch (Exception ex)
         {
@@ -110,44 +125,10 @@ public class TwitchService
     public void Disconnect()
     {
         _api.Settings.AccessToken = null;
-        // _refreshToken = string.Empty;
-        _expiresIn = 0;
+        TokenExpiresAt = null;
         IsConnected = false;
-        StopRefreshingToken();
         
         ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connected, ConnectionState.Disconnected));
-    }
-    
-    private async void OnRefreshAccessTokenAsync(object? sender, ElapsedEventArgs e)
-    {
-        try
-        {
-            await RefreshAccessTokenAsync();
-        }
-        catch { /**/ }
-    }
-    private async Task RefreshAccessTokenAsync()
-    {
-        if (string.IsNullOrEmpty(_refreshToken)) return;
-        
-        try
-        {
-            var response = await _api.Auth.RefreshAuthTokenAsync(_refreshToken, Consts.SecretID, Consts.ClientID);
-            _api.Settings.AccessToken = response.AccessToken;
-            _expiresIn = response.ExpiresIn;
-            _refreshToken = response.RefreshToken;
-            IsConnected = true;
-            ScheduleTokenRefresh(_expiresIn);
-            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Connecting, ConnectionState.Connected));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error refreshing twitch access token: {ex}");
-            Disconnect();
-            return;
-        }
-        
-        Logger.Log($"Successfully refreshed Access token");
     }
     
     public async Task<List<Stream>> GetAllStreamsAsync(List<string> logins)
@@ -160,7 +141,7 @@ public class TwitchService
             .GroupBy(x => x.index / batchSize)
             .Select(g => g.Select(x => x.login).ToList())
             .ToList();
-        
+
         try
         {
             foreach (var batch in loginBatches)
@@ -175,9 +156,15 @@ public class TwitchService
                 } while (!string.IsNullOrEmpty(cursor));
             }
         }
-        catch (TokenExpiredException)
+        catch (InvalidCredentialException)
         {
             Logger.Error("Twitch API access token expired");
+            Disconnect();
+        }
+        catch (BadScopeException ex)
+        {
+            Logger.Error(ex);
+            Disconnect();
         }
         catch (BadRequestException ex)
         {
@@ -197,6 +184,11 @@ public class TwitchService
         {
             response = await _api.Helix.Clips.CreateClipAsync(broadcasterID);
             // string url = response.CreatedClips[0].EditUrl;
+        }
+        catch (InvalidCredentialException)
+        {
+            Logger.Error("Twitch API access token expired");
+            Disconnect();
         }
         catch (Exception ex)
         {

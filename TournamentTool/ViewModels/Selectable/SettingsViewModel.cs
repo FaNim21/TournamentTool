@@ -1,39 +1,55 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Windows.Input;
+using TournamentTool.Commands;
 using TournamentTool.Interfaces;
-using TournamentTool.Models;
-using TournamentTool.Modules;
-using TournamentTool.Utils;
+using TournamentTool.ViewModels.Settings;
 
 namespace TournamentTool.ViewModels.Selectable;
 
 public class SettingsViewModel : SelectableViewModel
 {
-    public ObservableCollection<Hotkey>? Hotkeys { get; set; }
+    public List<ISettingsTab> Tabs { get; } = [];
 
-    private Hotkey? _selectedHotkey;
-    public Hotkey? SelectedHotkey
+    private ISettingsTab? _currentTab;
+    public ISettingsTab? CurrentTab
     {
-        get => _selectedHotkey;
+        get => _currentTab;
         set
         {
-            _selectedHotkey = value;
-            OnPropertyChanged(nameof(SelectedHotkey));
+            _currentTab = value;
+            OnPropertyChanged(nameof(CurrentTab));
         }
     }
 
+    public ICommand ChangeTabCommand { get; private set; }
 
-    public SettingsViewModel(ICoordinator coordinator) : base(coordinator) { }
 
-    public override bool CanEnable() => true;
-
-    public override void OnEnable(object? parameter)
+    public SettingsViewModel(ICoordinator coordinator, ISettings settingsService) : base(coordinator)
     {
-        Hotkeys = new ObservableCollection<Hotkey>(InputController.Instance.GetHotkeys());
+        ChangeTabCommand = new RelayCommand<string>(ChangeTab);
+        
+        var general = new GeneralTabViewModel(settingsService.Settings);
+        var hotkeys = new HotkeysTabViewModel(settingsService.Settings);
+        var keys = new APIKeysTabViewModel(settingsService.APIKeys);
+        
+        Tabs.Add(general);
+        Tabs.Add(hotkeys);
+        Tabs.Add(keys);
+
+        ChangeTab("general");
     }
 
-    public override bool OnDisable()
+    public void ChangeTab(string name)
     {
-        Hotkeys?.Clear();
-        return true;
+        if (CurrentTab != null && CurrentTab.Name.Equals(name)) return;
+        
+        foreach (var tab in Tabs)
+        {
+            if (!tab.Name.Equals(name)) continue;
+            
+            CurrentTab?.OnClose();
+            CurrentTab = tab;
+            CurrentTab.OnOpen();
+            OnPropertyChanged(nameof(CurrentTab));
+        }
     }
 }

@@ -49,6 +49,18 @@ end
 ## Rules Edit Window Overview
 [//]: # (![Whitelist panel view]&#40;Images/Whitelist.png&#41;)
 
+Tu dac jakis wstep do tego i opisac w punktach jak z tego korzystac
+- po lewej stronie lista pod zasad, ktore mozna zmieniac kolejnoscia i ogolnie kolejnosc jest wazne, poniewaz pod zasady sa sprawdzany w kolejnosci od gory w dol
+- pod zasada jest spelniona jezeli czas gracza jest ponizej okreslonej w tej pod zasadzie, natomiast jezeli jest wiekszy to rozpatrywana jest nastepna pod zasada
+- kazda zasada w leaderboardzie obowiazuje jednemu milestone, czyli split lub achievement
+- mozna przelaczac aktywnosc tych zasad toggle buttonem Is Enabled
+- Bazowe punkty sa wlasciwoscia, ktora jest stala i wskazuje bazowa liczbe punktow wykorzystywanych w skrypcie
+- okno pod zasady sklada sie z trzech zakladek: config, script vars i lua
+- Config ma 2 tryby zaleznie od controller mode paceman lub ranked, gdzie tylko w trybie rankedowym dochodzi zmienna max winners, ktora jest uwzgledniania przez tournament tool przed wyslaniem graczy do ocenienia przez skrypt, czyli jezeli jest max winners 10 to wtedy 11 osoba i w gore zostaje odeslana do nastepnej pod zasady
+- Lua jest zakladka z opcja wybory skryptu i informacjami o nim takimi jak opis i wersja
+- Scripts vars sluzy custom variables, ktore sa rejestrowane w skrypcie i wyswietla w tym miejscu w celu wgladu lub ich edycji, poniewaz z obu stron, czyli ze skryptu i ze strony tournament tool'a mozna edytowac ich wartosci i one sa przypisane tylko do danej pod zasady
+
+
 <p align="center">
   <img src="../Images/Rule-edit-window.png" alt="rule edit window view">
 </p>
@@ -58,7 +70,7 @@ end
 </p>
 
 ## API Overview
-The Tournament Tool Lua API provides access to tournament data through an `api` object passed to the `evaluate_data` function.
+The Tournament Tool Lua API provides access to leaderboard data through an `api` object passed to the `evaluate_data` function.
 The API behaves differently depending on the controller mode set in preset:
 - **Normal/Paceman Mode**: Individual player scoring splits in Random Seed Glitchless category based on [paceman](https://paceman.gg/) live data
 - **Ranked Mode**: Multiple player competing in [ranked](https://mcsrranked.com/) private room based on MCSR Ranked live match data api
@@ -275,8 +287,8 @@ print(i - 1, " - player: ", player.name, ", points: ", points)
 - **Description**: Logs error message into tournament tool logging system visible in notification panel available through bell button in bottom status bar
 - **Example**:
 ```lua
-error("")
-error("Base points = ", api.base_points)
+error("Error here!")
+error(i - 1, " - player: ", player.name, ", points: ", points)
 ```
 
 

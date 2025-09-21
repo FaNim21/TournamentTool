@@ -8,5 +8,14 @@ public class Settings
     public string Password { get; set; } = string.Empty;
     public string FilterNameAtStartForSceneItems { get; set; } = "pov";
 
-    public bool SaveTwitchRefreshToken { get; set; } = false;
+    public bool SaveTwitchToken { get; set; } = false;
+}
+
+public class APIKeys
+{
+    public string CustomTwitchClientID { get; set; } = string.Empty;
+    public string TwitchAccessToken { get; set; } = string.Empty;
+
+    public string MCSRRankedAPI { get; set; } = string.Empty;
+    public string PacemanAPI { get; set; } = string.Empty;
 }

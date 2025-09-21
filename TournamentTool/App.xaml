@@ -3,9 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:TournamentTool.ViewModels"
              xmlns:views="clr-namespace:TournamentTool.Views"
+             xmlns:settingsViews="clr-namespace:TournamentTool.Views.Settings"
              xmlns:converters="clr-namespace:TournamentTool.Converters"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable"
-             xmlns:statusBar="clr-namespace:TournamentTool.ViewModels.StatusBar">
+             xmlns:statusBar="clr-namespace:TournamentTool.ViewModels.StatusBar"
+             xmlns:settings="clr-namespace:TournamentTool.ViewModels.Settings">
     <Application.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                               TrueValue="Visible"
@@ -53,6 +55,15 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type statusBar:StatusBarViewModel}">
             <views:StatusBarView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type settings:GeneralTabViewModel}">
+            <settingsViews:GeneralTabView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type settings:HotkeysTabViewModel}">
+            <settingsViews:HotkeysTabView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type settings:APIKeysTabViewModel}">
+            <settingsViews:APIKeysTabView />
         </DataTemplate>
 
         <Style x:Key="ComboBoxTest2"

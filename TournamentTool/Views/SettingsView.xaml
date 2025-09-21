@@ -3,97 +3,136 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:TournamentTool.Views"
-             xmlns:models="clr-namespace:TournamentTool.Models"
-             xmlns:components="clr-namespace:TournamentTool.Components.Buttons"
-             xmlns:local2="clr-namespace:TournamentTool.Components"
-             xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable"
              d:DataContext="{d:DesignInstance Type=selectable:SettingsViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="1024"
              d:DesignHeight="605"
              Background="#1E1E1E">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="600" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Column="0">
-            <ListBox Background="Transparent"
-                     HorizontalAlignment="Left"
-                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                     ItemsSource="{Binding Hotkeys}"
-                     SelectedItem="{Binding SelectedHotkey}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="Gray"
-                                BorderThickness="1"
-                                Width="594"
-                                Height="40">
-                            <TextBlock Foreground="White"
-                                       Margin="3 2 0 0">
-                                <Run Text="Key: " />
-                                <Run Text="{Binding ., Converter={StaticResource HotkeyConverter}, Mode=OneWay}" />
-                                <LineBreak />
-                                <Run Text="Description: " />
-                                <Run Text="{Binding Description}" />
-                            </TextBlock>
+    <UserControl.Resources>
+        <Style x:Key="TopTabButtonStyle"
+               TargetType="Button">
+            <Setter Property="Width"
+                    Value="100" />
+            <Setter Property="Height"
+                    Value="30"/>
+            <Setter Property="VerticalAlignment"
+                    Value="Bottom"/>
+            <Setter Property="FontSize"
+                    Value="18"/>
+            <Setter Property="Background"
+                    Value="#4a4a4a" />
+            <Setter Property="Foreground"
+                    Value="White" />
+            <Setter Property="BorderBrush"
+                    Value="Transparent" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="5,2" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
                         </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Margin"
-                                Value="0" />
-                        <Setter Property="Padding"
-                                Value="0" />
-                        <Setter Property="Width"
-                                Value="596" />
-                        <Setter Property="Height"
-                                Value="42" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsPressed"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="#2D2D30" />
+                </Trigger>
+
+                <Trigger Property="IsEnabled"
+                         Value="False">
+                    <Setter Property="Background"
+                            Value="#2D2D30" />
+                    <Setter Property="Foreground"
+                            Value="Gray" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              Background="#2a2a2a">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="General"
+                        Command="{Binding ChangeTabCommand}"
+                        CommandParameter="general"
+                        Margin="5 0 0 0">
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource TopTabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentTab.Name}"
+                                             Value="general">
+                                    <Setter Property="Background"
+                                            Value="#1E1E1E" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Hotkeys"
+                        Command="{Binding ChangeTabCommand}"
+                        CommandParameter="hotkeys"
+                        Margin="5 0 0 0">
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource TopTabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentTab.Name}"
+                                             Value="hotkeys">
+                                    <Setter Property="Background"
+                                            Value="#1E1E1E" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+
+            <Button Content="API keys"
+                    HorizontalAlignment="Right"
+                    Command="{Binding ChangeTabCommand}"
+                    CommandParameter="apikeys"
+                    Margin="0 0 5 0">
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource TopTabButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentTab.Name}"
+                                         Value="apikeys">
+                                <Setter Property="Background"
+                                        Value="#1E1E1E" />
+                            </DataTrigger>
+                        </Style.Triggers>
                     </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
+                </Button.Style>
+            </Button>
         </Grid>
 
-        <Grid Grid.Column="1">
-            <TextBlock Text="Hotkey Configurator"
-                       Foreground="White"
-                       FontSize="50"
-                       Margin="0" />
-
-            <Grid Margin="0 75 0 0">
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Top"
-                            HorizontalAlignment="Center"
-                            Background="LightCoral">
-                    <TextBlock Text="{Binding SelectedHotkey, Converter={StaticResource HotkeyConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                               Width="50"
-                               Height="40"
-                               FontSize="25"
-                               Foreground="White" />
-
-                    <Button Width="100"
-                            Height="40"
-                            Content="REBIND" />
-                </StackPanel>
-
-            </Grid>
-        </Grid>
-
-        <Grid Grid.ColumnSpan="2">
-            <TextBlock Text="WORK IN PROGRESS..."
-                       Foreground="White"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontSize="100" />
-        </Grid>
+        <ScrollViewer Grid.Row="1"
+                      CanContentScroll="True"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <ContentPresenter Content="{Binding CurrentTab}" />
+        </ScrollViewer>
     </Grid>
 </UserControl>

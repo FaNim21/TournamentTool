@@ -5,9 +5,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using TournamentTool.Components.Controls;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Windows.Controls;
 using TournamentTool.Modules.Logging;
 
@@ -247,5 +246,21 @@ public static class Helper
             throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
 
         return await response.Content.ReadAsStreamAsync();
+    }
+    
+    public static string ToPlainText(SecureString secureString)
+    {
+        if (secureString == null) return string.Empty;
+
+        IntPtr unmanagedString = IntPtr.Zero;
+        try
+        {
+            unmanagedString = Marshal.SecureStringToBSTR(secureString);
+            return Marshal.PtrToStringBSTR(unmanagedString);
+        }
+        finally
+        {
+            Marshal.ZeroFreeBSTR(unmanagedString);
+        }
     }
 }

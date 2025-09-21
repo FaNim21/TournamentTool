@@ -14,7 +14,7 @@ public class WebServer
         expectedState = state;
         
         listener = new HttpListener();
-        listener.Prefixes.Add(uri);
+        listener.Prefixes.Add(uri.EndsWith("/") ? uri : uri + "/");
     }
 
     public async Task<Models.Twitch.Authorization?> Listen()
@@ -30,7 +30,6 @@ public class WebServer
         }
         return await OnRequest();
     }
-
     private async Task<Models.Twitch.Authorization?> OnRequest()
     {
         Models.Twitch.Authorization? authorization = null;
@@ -56,16 +55,56 @@ public class WebServer
             
             try
             {
-                if (req.QueryString["code"] is { } code &&
-                    req.QueryString["state"] == expectedState)
+                if (req.Url?.AbsolutePath == "/")
                 {
-                    authorization = new Models.Twitch.Authorization(code);
+                    resp.StatusCode = 200;
+                    resp.ContentType = "text/html; charset=UTF-8";
+                    
+                    string html = $$"""
+                                    <!DOCTYPE html>
+                                    <html>
+                                    <head>
+                                        <meta charset='utf-8' />
+                                        <title>Twitch Authentication</title>
+                                    </head>
+                                    <body style='font-family:sans-serif; text-align:center; margin-top:50px;'>
+                                        <h2>Authenticating...</h2>
+                                        <script>
+                                            // Extract token from URL fragment
+                                            var hash = window.location.hash.substring(1);
+                                            var params = new URLSearchParams(hash);
+                                            
+                                            var accessToken = params.get('access_token');
+                                            var state = params.get('state');
+                                            
+                                            if (accessToken && state === '{{expectedState}}') {
+                                                // Redirect to success page with token in query string
+                                                window.location.href = '/auth-callback?access_token=' + encodeURIComponent(accessToken) + '&state=' + encodeURIComponent(state);
+                                            } else {
+                                                document.body.innerHTML = '<h2 style="color:red;">Authentication failed!</h2><p>Invalid or missing token.</p>';
+                                            }
+                                        </script>
+                                    </body>
+                                    </html>
+                                    """;
 
-                    resp.StatusCode = 302;
-                    resp.RedirectLocation = "http://localhost:8080/redirect/success";
-                    resp.Close();
+                    await using var writer = new StreamWriter(resp.OutputStream);
+                    await writer.WriteAsync(html);
                 }
-                else if (req.Url?.AbsolutePath.EndsWith("/redirect/success") == true)
+                else if (req.Url?.AbsolutePath == "/auth-callback")
+                {
+                    var accessToken = req.QueryString["access_token"];
+                    var state = req.QueryString["state"];
+                    
+                    if (!string.IsNullOrEmpty(accessToken) && state == expectedState)
+                    {
+                        authorization = new Models.Twitch.Authorization(accessToken);
+                        resp.StatusCode = 302;
+                        resp.RedirectLocation = "http://localhost:8080/success";
+                        resp.Close();
+                    }
+                }
+                else if (req.Url?.AbsolutePath.EndsWith("success") == true)
                 {
                     resp.StatusCode = 200;
                     resp.ContentType = "text/html; charset=UTF-8";
@@ -85,14 +124,14 @@ public class WebServer
                         Thread.Sleep(500);
                         try
                         {
-                            if (listener.IsListening)
-                            {
-                                listener.Stop();
-                                listener.Close();
-                            }
+                            if (!listener.IsListening) return;
+                            
+                            listener.Stop();
+                            listener.Close();
                         } catch { /**/ }
                     });
-                }}
+                }
+            }
             catch (Exception ex)
             {
                 LogService.Error($"Error in WebServer: {ex.Message}");

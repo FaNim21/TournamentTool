@@ -25,7 +25,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
     private readonly IObsConnectionControl _obsConnectionControl;
-    private readonly SettingsService _settingsService;
+    private readonly ISettings _settingsService;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
@@ -66,7 +66,7 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, SettingsService settingsService, ILuaScriptsManager luaScriptsManager) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, ISettings settingsService, ILuaScriptsManager luaScriptsManager) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;

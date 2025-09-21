@@ -37,8 +37,8 @@ public class PointOfViewOBSController : IPointOfViewOBSController
 
         if (_tournament.SetPovHeadsInBrowser)
         {
-            string path = $"https://mc-heads.net/avatar/{data.HeadViewParametr}/180";
-            // string path = $"minotar.net/helm/{data.HeadViewParametr}/180.png";
+            // string path = $"https://mc-heads.net/avatar/{data.HeadViewParametr}/180";
+            string path = $"minotar.net/helm/{data.HeadViewParametr}/180.png";
             if (string.IsNullOrEmpty(data.HeadViewParametr))
                 path = string.Empty;
 

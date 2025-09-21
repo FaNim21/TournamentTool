@@ -6,8 +6,7 @@
              mc:Ignorable="d"
              d:DesignHeight="25"
              d:DesignWidth="100">
-    <Button Name="button"
-            Click="ButtonClick"
+    <Button Click="ButtonClick"
             FontWeight="Medium"
             Foreground="White"
             Content="{Binding ContentText, RelativeSource={RelativeSource AncestorType=UserControl}}"

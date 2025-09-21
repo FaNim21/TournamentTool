@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="TournamentTool.Views.Settings.HotkeysTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:TournamentTool.Views.Settings"
+             xmlns:settings="clr-namespace:TournamentTool.ViewModels.Settings"
+             d:DataContext="{d:DesignInstance Type=settings:HotkeysTabViewModel}"
+             mc:Ignorable="d"
+             d:DesignWidth="1024"
+             d:DesignHeight="605"
+             Background="#1E1E1E">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="600" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <ListBox Background="Transparent"
+                     HorizontalAlignment="Left"
+                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                     ItemsSource="{Binding Hotkeys}"
+                     SelectedItem="{Binding SelectedHotkey}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                Width="594"
+                                Height="40">
+                            <TextBlock Foreground="White"
+                                       Margin="3 2 0 0">
+                                <Run Text="Key: " />
+                                <Run Text="{Binding ., Converter={StaticResource HotkeyConverter}, Mode=OneWay}" />
+                                <LineBreak />
+                                <Run Text="Description: " />
+                                <Run Text="{Binding Description}" />
+                            </TextBlock>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
+                        <Setter Property="Width"
+                                Value="596" />
+                        <Setter Property="Height"
+                                Value="42" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <TextBlock Text="Hotkey Configurator"
+                       Foreground="White"
+                       FontSize="50"
+                       Margin="0" />
+
+            <Grid Margin="0 75 0 0">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Center"
+                            Background="LightCoral">
+                    <TextBlock Text="{Binding SelectedHotkey, Converter={StaticResource HotkeyConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                               Width="50"
+                               Height="40"
+                               FontSize="25"
+                               Foreground="White" />
+
+                    <Button Width="100"
+                            Height="40"
+                            Content="REBIND" />
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+
+        <Grid Grid.ColumnSpan="2">
+            <TextBlock Text="WORK IN PROGRESS..."
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="100" />
+        </Grid>
+    </Grid>
+</UserControl>

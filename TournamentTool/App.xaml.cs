@@ -42,6 +42,8 @@ public partial class App : Application
         services.AddSingleton<IObsConnectionControl>(s => s.GetRequiredService<ObsController>());
         
         services.AddSingleton<SettingsService>();
+        services.AddSingleton<ISettings>(s => s.GetRequiredService<SettingsService>());
+        services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsService>());
         
         services.AddSingleton<IPresetSaver, PresetService>();
         services.AddSingleton<TwitchService>();
@@ -91,7 +93,7 @@ public partial class App : Application
 
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-        var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
+        var settingsService = _serviceProvider.GetRequiredService<ISettingsSaver>();
         settingsService.Load();
 
         mainViewModel.NavigationService.Startup(mainViewModel);
@@ -105,7 +107,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        var settings = _serviceProvider.GetRequiredService<SettingsService>();
+        var settings = _serviceProvider.GetRequiredService<ISettingsSaver>();
         settings.Save();
         
         _serviceProvider.Dispose();

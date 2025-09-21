@@ -171,7 +171,8 @@ public class APIUpdaterService : IServiceUpdater
 
             var data = rankedManagementData.BestSplitsDatas[0].Datas[i];
 
-            string path = $"https://mc-heads.net/avatar/{data.PlayerName}/180";
+            // string path = $"https://mc-heads.net/avatar/{data.PlayerName}/180";
+            string path = $"https://minotar.net/helm/{data.PlayerName}/8.png";
             _obs.SetBrowserURL(sourceName, path);
             _savedNames[i] = data.PlayerName;
             _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
@@ -347,7 +348,8 @@ public class APIUpdaterService : IServiceUpdater
             }
             var entry = _preset.Leaderboard.OrderedEntries[number];
 
-            string path = $"https://mc-heads.net/avatar/{entry.PlayerUUID}/180";
+            string path = $"https://minotar.net/helm/{entry.PlayerUUID}/8.png";
+            // string path = $"https://mc-heads.net/avatar/{entry.PlayerUUID}/180";
             _obs.SetBrowserURL(item.SourceName, path);
         }
     }

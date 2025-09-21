@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using TournamentTool.Components.Controls;
+﻿using System.Timers;
+using System.Windows;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
@@ -44,12 +44,18 @@ public class ControllerServiceHub
 
     private readonly Dictionary<string, ServiceRunner> _services = new();
     private readonly CancellationTokenSource _cancellationSource = new();
+
+    private System.Timers.Timer _uiUpdateTimer;
     
     
     public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger, TournamentViewModel preset, ObsController obs)
     {
         Logger = logger;
-        var _uiUpdateTimer = new Timer(UpdateTimers, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+        
+        _uiUpdateTimer = new System.Timers.Timer(TimeSpan.FromMilliseconds(250));
+        _uiUpdateTimer.Elapsed += UpdateTimers;
+        _uiUpdateTimer.AutoReset = true;
+        _uiUpdateTimer.Start();
         
         TwitchUpdaterService twitchUpdater = new(controller, twitch);
         AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60));
@@ -58,6 +64,7 @@ public class ControllerServiceHub
         AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5));
         //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
     }
+
     public void OnEnable()
     {
         foreach (var runner in _services.Values)
@@ -65,6 +72,8 @@ public class ControllerServiceHub
             runner.Service.OnEnable();
             runner.IsEnabled = true;
         }
+        
+        _uiUpdateTimer.Start();
     }
     public void OnDisable()
     {
@@ -73,6 +82,8 @@ public class ControllerServiceHub
             runner.Service.OnDisable();
             runner.IsEnabled = false;
         }
+        
+        _uiUpdateTimer.Stop();
     }
     
     public void AddService(string name, IServiceUpdater service, TimeSpan interval)
@@ -114,7 +125,7 @@ public class ControllerServiceHub
         }
     }
     
-    private void UpdateTimers(object? state)
+    private void UpdateTimers(object? sender, ElapsedEventArgs e)
     {
         Application.Current?.Dispatcher.Invoke(() =>
         {
