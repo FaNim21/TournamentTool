@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Introduction](#introduction)
-- [Rules Edit Window Overview](#rules-edit-window-overview)
+- [Rules Edit Window](#rules-edit-window)
 - [API Overview](#api-overview)
 - [Variable Calls](#variable-calls)
     - [General Variables](#general-variables)
