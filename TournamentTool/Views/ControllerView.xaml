@@ -279,14 +279,17 @@
                         <DataTemplate DataType="viewModelModels:PlayerViewModel">
                             <Border BorderBrush="Gray"
                                     BorderThickness="1"
+                                    Background="Transparent"
                                     Width="110">
                                 <i:Interaction.Behaviors>
                                     <behaviors:BorderDragDropBehavior
                                         OnCommand="{Binding DataContext.UnSelectItemsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         DragDataType="{x:Type models:IPlayer}" />
                                 </i:Interaction.Behaviors>
-                                <Grid Margin="0 0 0 5">
+                                <Grid Margin="0 0 0 5"
+                                      Background="Transparent">
                                     <StackPanel Orientation="Vertical"
+                                                Background="Transparent"
                                                 Width="100">
                                         <StackPanel Visibility="{Binding IsShowingTeamName, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBlock FontSize="12"
@@ -308,6 +311,7 @@
                                                    TextAlignment="Center"
                                                    Margin="0 2 0 0">
                                         </TextBlock>
+
                                         <StackPanel Orientation="Horizontal"
                                                     HorizontalAlignment="Center"
                                                     Margin="0 5 0 0">
@@ -331,6 +335,7 @@
                                                    UseLayoutRounding="True"
                                                    Margin="0 0 5 0" /> 
                                         </StackPanel>
+
                                         <StackPanel Visibility="{Binding StreamData.LiveData.GameNameVisibility, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBlock FontSize="12"
                                                        VerticalAlignment="Bottom"
