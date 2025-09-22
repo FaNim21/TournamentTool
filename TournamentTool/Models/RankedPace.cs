@@ -1,6 +1,7 @@
 ﻿using System.Windows.Media.Imaging;
 using MethodTimer;
 using TournamentTool.Enums;
+using TournamentTool.Extensions;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
@@ -132,8 +133,7 @@ public class RankedPace
 
         if (Player == null)
         {
-            // string url = $"https://mc-heads.net/avatar/{InGameName}/8";
-            string url = $"https://minotar.net/helm/{InGameName}/8.png";
+            string url = _service.SettingsService.Settings.HeadAPIType.GetHeadURL(UUID, 8);
             Task.Run(async () =>
             {
                 HeadImage = await Helper.LoadImageFromUrlAsync(url);

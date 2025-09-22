@@ -7,6 +7,8 @@ namespace TournamentTool.ViewModels.Selectable;
 
 public class SettingsViewModel : SelectableViewModel
 {
+    private readonly ISettingsSaver _settingsSaver;
+    
     public List<ISettingsTab> Tabs { get; } = [];
 
     private ISettingsTab? _currentTab;
@@ -23,8 +25,9 @@ public class SettingsViewModel : SelectableViewModel
     public ICommand ChangeTabCommand { get; private set; }
 
 
-    public SettingsViewModel(ICoordinator coordinator, ISettings settingsService) : base(coordinator)
+    public SettingsViewModel(ICoordinator coordinator, ISettings settingsService, ISettingsSaver settingsSaver) : base(coordinator)
     {
+        _settingsSaver = settingsSaver;
         ChangeTabCommand = new RelayCommand<string>(ChangeTab);
         
         var general = new GeneralTabViewModel(settingsService.Settings);
@@ -36,6 +39,11 @@ public class SettingsViewModel : SelectableViewModel
         Tabs.Add(keys);
 
         ChangeTab("general");
+    }
+    public override bool OnDisable()
+    {
+        _settingsSaver.Save();
+        return true;
     }
 
     public void ChangeTab(string name)

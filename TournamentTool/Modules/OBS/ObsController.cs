@@ -6,6 +6,7 @@ using System.ComponentModel;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
 using TournamentTool.Enums;
+using TournamentTool.Interfaces;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
@@ -40,6 +41,7 @@ public interface IObsConnectionControl
 public class ObsController : IObsConnectionControl
 {
     public TournamentViewModel Tournament { get; }
+    private ISettings SettingsService { get; }
     public ILoggingService Logger { get; }
 
     public ObsClient Client { get; private set; }
@@ -59,12 +61,14 @@ public class ObsController : IObsConnectionControl
     private bool _tryingToConnect;
     
 
-    public ObsController(TournamentViewModel tournament, ILoggingService logger)
+    public ObsController(TournamentViewModel tournament, ISettings settingsService, ILoggingService logger)
     {
         Tournament = tournament;
+        SettingsService = settingsService;
         Logger = logger;
 
         Client = new ObsClient { RequestTimeout = 10000 };
+        Task.Run(Connect);
     }
  
     public void SwitchStudioMode()
@@ -85,7 +89,7 @@ public class ObsController : IObsConnectionControl
         
         Client.PropertyChanged += OnPropertyChanged;
         const EventSubscriptions subscription = EventSubscriptions.All;
-        await Client.ConnectAsync(true, Tournament.Password!, "localhost", Tournament.Port, subscription);
+        await Client.ConnectAsync(true, SettingsService.Settings.Password!, "localhost", SettingsService.Settings.Port, subscription);
     }
     private async Task OnConnected()
     {

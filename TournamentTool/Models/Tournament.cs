@@ -107,23 +107,18 @@ public class SoloManagementData : ManagementData
 public class Tournament : IPreset
 {
     public ManagementData? ManagementData { get; set; }
-
     public Leaderboard Leaderboard { get; init; } = new();
 
     public List<Player> Players { get; init; } = [];
 
     public string Name { get; set; } = string.Empty;
 
-    public bool IsAlwaysOnTop { get; set; } = true;
     public bool IsUsingTeamNames { get; set; }
     public bool IsUsingWhitelistOnPaceMan { get; set; } = true;
     public bool AddUnknownPacemanPlayersToWhitelist { get; set; } = false;
     public bool ShowOnlyLive { get; set; } = true;
 
-    public int Port { get; set; } = 4455;
-    public string Password { get; set; } = string.Empty;
     public string SceneCollection { get; set; } = string.Empty;
-    public string FilterNameAtStartForSceneItems { get; set; } = "pov"; //
 
     public bool SetPovHeadsInBrowser { get; set; }
     public bool SetPovPBText { get; set; }

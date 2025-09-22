@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using TournamentTool.Enums;
+using TournamentTool.Extensions;
+using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.OBS;
 using TournamentTool.ViewModels.Entities;
@@ -17,12 +19,14 @@ public interface IPointOfViewOBSController
 
 public class PointOfViewOBSController : IPointOfViewOBSController
 {
+    private ISettings SettingsService { get; }
     private readonly ObsController _obs;
     private readonly TournamentViewModel _tournament;
 
     
-    public PointOfViewOBSController(ObsController obs, TournamentViewModel tournament)
+    public PointOfViewOBSController(ObsController obs, TournamentViewModel tournament, ISettings settingsService)
     {
+        SettingsService = settingsService;
         _obs = obs;
         _tournament = tournament;
     }
@@ -37,12 +41,11 @@ public class PointOfViewOBSController : IPointOfViewOBSController
 
         if (_tournament.SetPovHeadsInBrowser)
         {
-            // string path = $"https://mc-heads.net/avatar/{data.HeadViewParametr}/180";
-            string path = $"minotar.net/helm/{data.HeadViewParametr}/180.png";
+            string url = SettingsService.Settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
             if (string.IsNullOrEmpty(data.HeadViewParametr))
-                path = string.Empty;
+                url = string.Empty;
 
-            SetBrowserURL(data.HeadItemName, path);
+            SetBrowserURL(data.HeadItemName, url);
         }
 
         if (_tournament.DisplayedNameType != DisplayedNameType.None)

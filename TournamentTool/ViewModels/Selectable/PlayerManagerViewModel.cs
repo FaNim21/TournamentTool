@@ -9,6 +9,7 @@ using TournamentTool.Commands;
 using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
+using TournamentTool.Extensions;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -27,6 +28,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
+    public ISettings SettingsService { get; }
 
     private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
     public ObservableCollection<PlayerViewModel> SelectedPlayers
@@ -149,12 +151,13 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private PlayerSortingType _lastSortingType;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger) : base(coordinator)
+    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService) : base(coordinator)
     {
         Tournament = tournament;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
+        SettingsService = settingsService;
 
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { Coordinator.ShowLoading(ValidateAllPlayers); });
@@ -404,7 +407,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         playerViewModel.StreamData.OtherType = windowsData.StreamData.OtherType;
 
         Tournament.PresetIsModified();
-        await playerViewModel.CompleteData();
+        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(playerViewModel.InGameName, 32);
+        await playerViewModel.CompleteData(url);
         return true;
     }
 
@@ -448,7 +452,9 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             var current = Tournament!.Players[i];
             progress.Report((float)i / count);
             logProgress.Report($"({i+1}/{count}) Checking skin to update {current.InGameName} head");
-            await current.ForceUpdateHeadImage();
+
+            string url = SettingsService.Settings.HeadAPIType.GetHeadURL(current.UUID, 32);
+            await current.ForceUpdateHeadImage(url);
         }
 
         Logger.Information("Done fixing players head skins");

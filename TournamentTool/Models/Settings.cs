@@ -1,5 +1,11 @@
 ﻿namespace TournamentTool.Models;
 
+public enum HeadAPIType
+{
+    minotar,
+    mcheads,
+}
+
 public class Settings
 {
     public string LastOpenedPresetName { get; set; } = string.Empty;
@@ -8,7 +14,10 @@ public class Settings
     public string Password { get; set; } = string.Empty;
     public string FilterNameAtStartForSceneItems { get; set; } = "pov";
 
-    public bool SaveTwitchToken { get; set; } = false;
+    public bool SaveTwitchToken { get; set; } = true;
+    public bool IsAlwaysOnTop { get; set; } = true;
+
+    public HeadAPIType HeadAPIType { get; set; }
 }
 
 public class APIKeys

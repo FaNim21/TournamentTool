@@ -1,4 +1,5 @@
-﻿using TournamentTool.Interfaces;
+﻿using TournamentTool.Extensions;
+using TournamentTool.Interfaces;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
@@ -35,7 +36,9 @@ public class FixPlayerHeadCommand : BaseCommand
             
         progress.Report(0.5f);
         logProgress.Report($"Checking skin to update {_player!.InGameName} head");
-        await _player.ForceUpdateHeadImage();
+        
+        string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(_player.UUID, 32);
+        await _player.ForceUpdateHeadImage(url);
         progress.Report(1);
         _presetSaver.SavePreset();
     }

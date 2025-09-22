@@ -433,7 +433,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         IsShowingTeamName = option;
     }
     
-    public async Task CompleteData(bool completeUUID = true)
+    public async Task CompleteData(string headUrl, bool completeUUID = true)
     {
         try
         {
@@ -454,7 +454,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
                 }
             }
                 
-            await UpdateHeadImageAsync();
+            await UpdateHeadImageAsync(headUrl);
         }
         catch (Exception ex)
         {
@@ -483,28 +483,26 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         Image = Helper.LoadImageFromStream(Data.ImageStream);
     }
 
-    public void UpdateHeadImage()
+    public void UpdateHeadImage(string headUrl)
     {
-        Task.Run(async () => await UpdateHeadImageAsync());
+        Task.Run(async () => await UpdateHeadImageAsync(headUrl));
     }
-    public async Task UpdateHeadImageAsync()
+    public async Task UpdateHeadImageAsync(string headUrl)
     {
         if (string.IsNullOrEmpty(InGameName) || Image != null) return;
-        Image = await RequestHeadImage();
+        Image = await RequestHeadImage(headUrl);
     }
-    public async Task ForceUpdateHeadImage()
+    public async Task ForceUpdateHeadImage(string headUrl)
     {
         if (string.IsNullOrEmpty(InGameName)) return;
-        Image = await RequestHeadImage();
+        Image = await RequestHeadImage(headUrl);
     }
-    private async Task<BitmapImage?> RequestHeadImage()
+    private async Task<BitmapImage?> RequestHeadImage(string url)
     {
         using HttpClient client = new();
         if (string.IsNullOrEmpty(InGameName)) return null;
     
-        // string path = $"https://mc-heads.net/avatar/{InGameName}/32";
-        string path = $"https://minotar.net/helm/{InGameName}/32.png";
-        HttpResponseMessage response = await client.GetAsync(path);
+        HttpResponseMessage response = await client.GetAsync(url);
         if (!response.IsSuccessStatusCode) return null;
     
         byte[] stream = await response.Content.ReadAsByteArrayAsync();

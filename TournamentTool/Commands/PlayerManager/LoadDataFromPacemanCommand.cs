@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Windows;
 using TournamentTool.Components.Controls;
+using TournamentTool.Extensions;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -114,7 +115,8 @@ public class LoadDataFromPacemanCommand : BaseCommand
                 player.StreamData.Main = twitch.liveAccount?.Trim() ?? string.Empty;
                 player.PersonalBest = string.Empty;
                 
-                await player.CompleteData();
+                string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
+                await player.CompleteData(url);
                 if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
                 logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
                 player.Name = twitch.liveAccount?.Trim() ?? player.InGameName;

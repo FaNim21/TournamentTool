@@ -42,6 +42,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     public ControllerViewModel Controller { get; }
     public TournamentViewModel Tournament { get; }
     public ILoggingService Logger { get; }
+    private ISettings SettingsService { get; }
     public ObsController OBS { get; }
 
     public Modules.OBS.Scene MainScene { get; }
@@ -117,14 +118,20 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     }
 
 
-    public SceneControllerViewmodel(ControllerViewModel controller, IDialogWindow dialogWindow, ObsController obs, TournamentViewModel tournament, ILoggingService logger)
+    public SceneControllerViewmodel(ControllerViewModel controller, 
+        IDialogWindow dialogWindow, 
+        ObsController obs,
+        TournamentViewModel tournament, 
+        ILoggingService logger,
+        ISettings settingsService)
     {
         Controller = controller;
         OBS = obs;
         Tournament = tournament;
         Logger = logger;
+        SettingsService = settingsService;
 
-        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament);
+        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament, settingsService);
         MainScene = new Modules.OBS.Scene(SceneType.Main, this, this, povController, dialogWindow, logger);
         PreviewScene = new Modules.OBS.Scene(SceneType.Preview, this, this, povController, dialogWindow, logger);
         
@@ -485,7 +492,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                         if (CheckForAdditionals(additionals, groupItem)) continue;
 
                         if (groupItem.InputKind!.Equals("browser_source") &&
-                            groupItem.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems,
+                            groupItem.SourceName.StartsWith(SettingsService.Settings.FilterNameAtStartForSceneItems,
                                 StringComparison.OrdinalIgnoreCase))
                         {
                             povItems.Add((groupItem, item));
@@ -497,7 +504,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                 if (CheckForAdditionals(additionals, item)) continue;
 
                 if (item.InputKind!.Equals("browser_source") &&
-                    item.SourceName.StartsWith(Tournament.FilterNameAtStartForSceneItems,
+                    item.SourceName.StartsWith(SettingsService.Settings.FilterNameAtStartForSceneItems,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     povItems.Add((item, null));

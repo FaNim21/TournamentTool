@@ -1,4 +1,7 @@
-﻿using System.Windows.Markup;
+﻿using System.Windows;
+using System.Windows.Input;
+using TournamentTool.Commands;
+using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 
@@ -93,11 +96,15 @@ public class APIKeysTabViewModel : BaseViewModel, ISettingsTab
         }
     }
 
+    public ICommand ClearAccessTokenCommand { get; private set; }
+
 
     public APIKeysTabViewModel(APIKeys apiKeys)
     {
         Name = "apikeys";
         _apiKeys = apiKeys;
+
+        ClearAccessTokenCommand = new RelayCommand(ClearAccessToken);
     }
     public void OnOpen()
     {
@@ -113,5 +120,15 @@ public class APIKeysTabViewModel : BaseViewModel, ISettingsTab
     public void OnClose()
     {
         IsChosen = true;
+    }
+
+    private void ClearAccessToken()
+    {
+        var result = DialogBox.Show("Are you sure you want to clear your twitch access token from tournament tool?", "Clearing access token", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+        
+        _apiKeys.TwitchAccessToken = string.Empty;
+        MaskedTwitchAccessToken = string.Empty;
+        OnPropertyChanged(nameof(MaskedTwitchAccessToken));
     }
 }

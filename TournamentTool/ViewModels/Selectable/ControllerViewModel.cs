@@ -36,6 +36,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public TournamentViewModel TournamentViewModel { get; }
     public LeaderboardPanelViewModel Leaderboard { get; }
     public ILoggingService Logger { get; }
+    public ISettings SettingsService { get; }
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -112,15 +113,23 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private CancellationTokenSource? _playersRefreshTokenSource;
     
 
-    public ControllerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, ObsController obs, TwitchService twitch, ILoggingService logger) : base(coordinator)
+    public ControllerViewModel(ICoordinator coordinator, 
+        TournamentViewModel tournamentViewModel,
+        LeaderboardPanelViewModel leaderboard, 
+        IBackgroundCoordinator backgroundCoordinator, 
+        ObsController obs,
+        TwitchService twitch, 
+        ILoggingService logger,
+        ISettings settingsService) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         Logger = logger;
+        SettingsService = settingsService;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
         
-        SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel, logger);
+        SceneController = new SceneControllerViewmodel(this, coordinator, obs, tournamentViewModel, logger, settingsService);
         _serviceHub = new ControllerServiceHub(this, twitch, logger, tournamentViewModel, obs);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });

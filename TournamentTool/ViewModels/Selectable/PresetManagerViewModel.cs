@@ -24,7 +24,6 @@ public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPreset> Presets { get; set; } = [];
 
-    private readonly IObsConnectionControl _obsConnectionControl;
     private readonly ISettings _settingsService;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
@@ -66,13 +65,12 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IObsConnectionControl obsConnectionControl, ISettings settingsService, ILuaScriptsManager luaScriptsManager) : base(coordinator)
+    public PresetManagerViewModel(ICoordinator coordinator, TournamentViewModel tournamentViewModel, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, ILuaScriptsManager luaScriptsManager) : base(coordinator)
     {
         TournamentViewModel = tournamentViewModel;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
-        _obsConnectionControl = obsConnectionControl;
         _settingsService = settingsService;
         _luaScriptsManager = luaScriptsManager;
 
@@ -117,9 +115,6 @@ public class PresetManagerViewModel : SelectableViewModel
             CurrentChosen = Presets[i];
             break;
         }
-
-        //TODO: 1 Usunac to dla 0.13, poniewaz obecnie problem jest z czytaniem polaczenia, a tak to bedzie oparte o dane z settings
-        _obsConnectionControl.Connect();
     }
     private void LoadCurrentPreset(string opened)
     {

@@ -41,12 +41,11 @@ public class PresetManagerTests
         _mockTournamentViewModel = new Mock<TournamentViewModel>();
         _mockCoordinator = new Mock<MainViewModelCoordinator>(null!);
         
-        var mockObsConnection = new Mock<IObsConnectionControl>();
         var mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
         var mockSettingsService = new Mock<SettingsService>();
         var luaScriptManager = new Mock<ILuaScriptsManager>();
 
-        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object, mockSettingsService.Object, luaScriptManager.Object);
+        _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _mockPresetService.Object, mockBackgroundCoordinator.Object, new TestLogger(), mockSettingsService.Object, luaScriptManager.Object);
     }
 
     [Fact]
@@ -130,7 +129,7 @@ public class PresetManagerTests
             var mockSettingsService = new Mock<SettingsService>();
             var luaScriptManager = new Mock<ILuaScriptsManager>();
 
-            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger(), mockObsConnection.Object, mockSettingsService.Object, luaScriptManager.Object);
+            _viewModel = new PresetManagerViewModel(_mockCoordinator.Object, _mockTournamentViewModel.Object, _presetService, _mockBackgroundCoordinator.Object, new TestLogger(), mockSettingsService.Object, luaScriptManager.Object);
         }
 
         [Fact]
@@ -182,14 +181,10 @@ public class PresetManagerTests
             {
                 Name = "_ClearTest",
                 
-                IsAlwaysOnTop = false,
                 IsUsingTeamNames = true,
                 IsUsingWhitelistOnPaceMan = false,
                 
-                Port = 1234,
-                Password = "asdf",
                 SceneCollection = "asdf",
-                FilterNameAtStartForSceneItems = "notPov",
                 
                 SetPovPBText = true,
                 SetPovHeadsInBrowser = true,
@@ -218,14 +213,10 @@ public class PresetManagerTests
             _mockTournamentViewModel.Object.Clear();
             var tournamentCleared = _mockTournamentViewModel.Object.GetData();
             
-            Assert.True(tournamentCleared.IsAlwaysOnTop);
             Assert.False(tournamentCleared.IsUsingTeamNames);
             Assert.True(tournamentCleared.IsUsingWhitelistOnPaceMan);
     
-            Assert.Equal(4455, tournamentCleared.Port);
-            Assert.Equal(string.Empty, tournamentCleared.Password);
             Assert.Equal(string.Empty, tournamentCleared.SceneCollection);
-            Assert.Equal("pov", tournamentCleared.FilterNameAtStartForSceneItems);
 
             Assert.False(tournamentCleared.SetPovHeadsInBrowser);
             Assert.False(tournamentCleared.SetPovPBText);

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Threading;
 using MethodTimer;
 using TournamentTool.Enums;
+using TournamentTool.Extensions;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
@@ -18,6 +19,7 @@ public class PaceManService : IBackgroundService
     private TournamentViewModel TournamentViewModel { get; }
     private ILeaderboardManager Leaderboard { get; }
     private IPresetSaver PresetSaver { get; }
+    public ISettings SettingsService { get; }
 
     private IPacemanDataReceiver? _pacemanSidePanelReceiver;
     private IPlayerAddReceiver? _playerAddReceiver;
@@ -29,11 +31,12 @@ public class PaceManService : IBackgroundService
     private bool _blockFirstPacemanRefresh = true;
 
 
-    public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver)
+    public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver, ISettings settingsService)
     {
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         PresetSaver = presetSaver;
+        SettingsService = settingsService;
     }
 
     public void RegisterData(IBackgroundDataReceiver? receiver)
@@ -161,7 +164,9 @@ public class PaceManService : IBackgroundService
         {
             playerViewModel.StreamData.SetName(paceManData.User.TwitchName);
         }
-        playerViewModel.UpdateHeadImage();
+        
+        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
+        playerViewModel.UpdateHeadImage(url);
 
         if (_playerAddReceiver != null)
         {

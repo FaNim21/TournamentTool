@@ -2,8 +2,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
+using TournamentTool.Modules.OBS;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Services;
@@ -26,7 +28,6 @@ public class SettingsService : ISettings, ISettingsSaver
         _settingsPath = Path.Combine(Consts.AppdataPath, _settingsFileName);
         _apiKeysPath = Path.Combine(Consts.AppdataPath, _apiKeysFileName);
         _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
-        
     }
 
     public void Load()
@@ -41,8 +42,9 @@ public class SettingsService : ISettings, ISettingsSaver
         Settings? data = JsonSerializer.Deserialize<Settings>(text);
         if (data == null) return;
         Settings = data;
+        
+        StartUp();
     }
-
     public void Save()
     {
         SaveAPIKeys();
@@ -76,5 +78,23 @@ public class SettingsService : ISettings, ISettingsSaver
 
         byte[] encrypted = ProtectedData.Protect(raw, null, DataProtectionScope.CurrentUser);
         File.WriteAllBytes(_apiKeysPath, encrypted);}
+
+    private void StartUp()
+    {
+        SetAlwaysOnTop();
+
+        //
+    }
+    
+    private void SetAlwaysOnTop()
+    {
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+            if (Application.Current.MainWindow != null)
+            {
+                Application.Current.MainWindow.Topmost = Settings.IsAlwaysOnTop;
+            }
+        });
+    }
 }
 

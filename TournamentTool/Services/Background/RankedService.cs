@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Threading;
 using TournamentTool.Enums;
+using TournamentTool.Extensions;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
@@ -38,6 +39,7 @@ public class RankedEvaluateTimelineData
 public class RankedService : IBackgroundService
 {
     private ILoggingService Logger { get; }
+    public ISettings SettingsService { get; }
     private readonly RankedManagementData _rankedManagementData;
     
     private TournamentViewModel TournamentViewModel { get; }
@@ -61,9 +63,10 @@ public class RankedService : IBackgroundService
     PrivRoomData? _privRoomData;
     
     
-    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, ILoggingService logger)
+    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService)
     {
         Logger = logger;
+        SettingsService = settingsService;
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         
@@ -227,7 +230,9 @@ public class RankedService : IBackgroundService
         };
 
         PlayerViewModel playerViewModel = new PlayerViewModel(player);
-        playerViewModel.UpdateHeadImage();
+        
+        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
+        playerViewModel.UpdateHeadImage(url);
 
         if (_playerManagerReceiver != null)
         {
@@ -262,7 +267,6 @@ public class RankedService : IBackgroundService
 
     private void SavePrivRoomFinishedData()
     {
-        //TODO: 1 zrobic generator json tutaj jako koniec priv room'a do zbierania wynikow pod testy i weryfikacje
         if (_privRoomData == null) return;
 
         try
@@ -292,7 +296,7 @@ public class RankedService : IBackgroundService
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
         
-        SavePrivRoomFinishedData();
+        //SavePrivRoomFinishedData();
         
         for (int i = 0; i < data.Completions.Length; i++)
         {

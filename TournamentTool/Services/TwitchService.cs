@@ -2,6 +2,8 @@
 using TwitchLib.Api.Helix.Models.Streams.GetStreams;
 using TournamentTool.Utils;
 using System.Diagnostics;
+using System.Windows;
+using TournamentTool.Components.Controls;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -68,6 +70,9 @@ public class TwitchService
                 SettingsService.APIKeys.TwitchAccessToken = string.Empty;
             }
         }
+        
+        var result = DialogBox.Show("Twitch authorization is required. A browser will open for login.\nDo you want to continue?", "Redirecting for authorization", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
         
         var state = Guid.NewGuid().ToString();
         var authScopes = new[] { "clips:edit" };

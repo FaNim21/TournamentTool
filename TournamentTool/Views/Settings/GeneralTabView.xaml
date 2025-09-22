@@ -5,41 +5,149 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Views.Settings"
              xmlns:settings="clr-namespace:TournamentTool.ViewModels.Settings"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:TournamentTool.Components.Behaviors"
+             xmlns:converters="clr-namespace:TournamentTool.Converters"
              d:DataContext="{d:DesignInstance Type=settings:GeneralTabViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="1024"
              d:DesignHeight="605">
-    <Grid>
-        <TextBlock Text="General"
-                   Foreground="White" />
-        
-        <!--
+    <StackPanel Orientation="Vertical"
+                Margin="15">
+
+        <!-- OBS -->
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="OBS"
+                       Foreground="Wheat"
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       Padding="0"
+                       Margin="0 0 0 5" />
+            <Border BorderBrush="Gray"
+                    BorderThickness="0.75"
+                    CornerRadius="5"
+                    Background="#1b1d1f"
+                    Width="25"
+                    Height="30"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ToolTipService.InitialShowDelay="0"
+                    ToolTipService.ShowDuration="60000"
+                    Margin="5 0 0 0">
+                <Border.ToolTip>
+                    <ToolTip>
+                        <TextBlock FontSize="14"
+                                   FontWeight="SemiBold">
+                            <Run Text="To configure OBS WebSocket go to Tools -> WebSocket Server Settings" />
+                            <LineBreak />
+                            <Run Text="Required OBS Studio 28+" />
+                        </TextBlock>
+                    </ToolTip>
+                </Border.ToolTip>
+
+                <TextBlock Text="?"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           FontSize="22"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Border>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 0 0 5">
+            <TextBox TextWrapping="Wrap"
+                     Width="50"
+                     Height="20"
+                     Text="{Binding Port}"
+                     Padding="0 2 0 0"
+                     Background="#9E9E9E"
+                     MaxLength="5">
+                <b:Interaction.Behaviors>
+                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                </b:Interaction.Behaviors>
+            </TextBox>
+            <TextBlock Text="Port"
+                       Foreground="White"
+                       Height="18"
+                       FontSize="16"
+                       Padding="0"
+                       Margin="5 0 0 3" />
+        </StackPanel>
         <StackPanel Orientation="Horizontal"
                     Margin="0 0 0 5">
             <TextBox TextWrapping="Wrap"
                      Width="120"
                      Height="20"
-                     Text="{Binding TournamentViewModel.PaceManRefreshRateMiliseconds}"
+                     Text="{Binding Password}"
                      Background="#9E9E9E"
                      HorizontalAlignment="Left"
-                     VerticalAlignment="Top">
-                <i:Interaction.Behaviors>
-                    <behaviors:NumericTextBoxBehavior AllowNegative="False" />
-                </i:Interaction.Behaviors>
-            </TextBox>
-            <TextBlock Text="PaceMan refresh (ms)"
-                       ToolTipService.InitialShowDelay="0"
-                       ToolTipService.ShowDuration="60000"
-                       ToolTip="How often it will try to obtain paceman data"
+                     VerticalAlignment="Top" />
+            <TextBlock Text="Password"
                        Foreground="White"
                        Height="20"
                        FontSize="16"
                        Padding="0"
+                       Margin="5 0 0 1" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 0 0 5">
+            <TextBox TextWrapping="Wrap"
+                     Width="120"
+                     Height="20"
+                     Text="{Binding FilterNameAtStartForSceneItems}"
+                     Background="#9E9E9E"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Top" />
+            <TextBlock Text="POV filter name"
+                       Foreground="White"
+                       Height="20"
+                       FontSize="16"
+                       Padding="0"
+                       ToolTipService.InitialShowDelay="0"
+                       ToolTipService.ShowDuration="60000"
+                       ToolTip="Given filter is used to find pov elements in scene"
                        Margin="5 0 0 3" />
         </StackPanel>
-        -->
+
+        <TextBlock Text="General"
+                   Foreground="Wheat"
+                   FontSize="24"
+                   FontWeight="SemiBold"
+                   Padding="0"
+                   Margin="0 0 0 5" />
+
+        <ToggleButton IsChecked="{Binding IsAlwaysOnTop}"
+                      Content="Always On Top"
+                      Margin="0 0 0 5" />
+
+        <ToggleButton IsChecked="{Binding SaveTwitchToken}"
+                      Content="Save twitch session"
+                      ToolTipService.InitialShowDelay="0"
+                      ToolTipService.ShowDuration="60000"
+                      ToolTip="Enabled saves logged in twitch access token session for ~60 days"
+                      Margin="0 0 0 5" />
         
-        <!-- Dac do wyboru jakiego back-end'u pod glowki uzywac, czyli mc-heads i minotar -->
-        
-    </Grid>
+        <StackPanel Orientation="Horizontal">
+            <ComboBox Style="{StaticResource ComboBoxTest2}"
+                      DisplayMemberPath="DisplayName"
+                      SelectedValuePath="Value"
+                      HorizontalAlignment="Left"
+                      ItemsSource="{Binding HeadAPIType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
+                      SelectedValue="{Binding Path=HeadAPIType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      Width="105"
+                      Height="20" />
+
+            <TextBlock Text="Head API type"
+                       Foreground="White"
+                       Height="20"
+                       FontSize="16"
+                       Padding="0"
+                       ToolTipService.InitialShowDelay="0"
+                       ToolTipService.ShowDuration="60000"
+                       ToolTip="Sets which api will be used to retrieve skin heads"
+                       Margin="5 0 0 3" />
+        </StackPanel>
+    </StackPanel>
 </UserControl>

@@ -53,38 +53,12 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top">
 
-                        <!-- GENERAL -->
-                        <TextBlock  Text="General"
-                                    Foreground="Wheat"
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Padding="0"
-                                    Margin="0 0 0 5" />
-
-                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsAlwaysOnTop}"
-                                      Content="Always On Top"
-                                      Margin="0 0 0 5" />
-                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
-                                      Content="Use Twitch API"
-                                      Margin="0 0 0 5" />
-                        <ToggleButton IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
-                                      IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
-                                      ToolTipService.InitialShowDelay="0"
-                                      ToolTipService.ShowDuration="60000"
-                                      ToolTip="With Twitch API enabled and connected in status bar it you a category form online stream in controller"
-                                      Content="Show stream category"
-                                      Margin="0 0 0 5" />
-                        <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
-                                      ToolTipService.InitialShowDelay="0"
-                                      ToolTipService.ShowDuration="60000"
-                                      ToolTip="Enabled gives you on top of every player in controller his team name text set in whitelist"
-                                      Content="Use team names"
-                                      Margin="0 0 0 5" />
-
                         <StackPanel Orientation="Vertical" >
                             <TextBlock Text="Controller Mode"
                                        HorizontalAlignment="Left"
-                                       Foreground="White"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Foreground="Wheat"
                                        ToolTipService.InitialShowDelay="0"
                                        ToolTipService.ShowDuration="60000"
                                        ToolTip="Controller mode defines you what type of service you will use to read player paces in controller and leaderboard"
@@ -399,81 +373,30 @@
                                     Margin="40 0 0 0">
 
                             <!-- OBS CONNECTION -->
-                            <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="General"
+                                       Foreground="Wheat"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Padding="0"
+                                       Margin="0 0 0 5" />
 
-                                <TextBlock Text="OBS Connection"
-                                           Foreground="Wheat"
-                                           FontSize="24"
-                                           FontWeight="SemiBold"
-                                           Padding="0"
-                                           Margin="0 0 0 5" />
-                                <Border BorderBrush="Gray"
-                                        BorderThickness="0.75"
-                                        CornerRadius="5"
-                                        Background="#1b1d1f"
-                                        Width="25"
-                                        Height="30"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        ToolTipService.InitialShowDelay="0"
-                                        ToolTipService.ShowDuration="60000"
-                                        Margin="5 0 0 0">
-                                    <Border.ToolTip>
-                                        <ToolTip>
-                                            <TextBlock FontSize="14"
-                                                       FontWeight="SemiBold">
-                                                <Run Text="To configure OBS WebSocket go to Tools -> WebSocket Server Settings" />
-                                                <LineBreak />
-                                                <Run Text="Required OBS Studio 28+" />
-                                            </TextBlock>
-                                        </ToolTip>
-                                    </Border.ToolTip>
+                            <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTwitchAPI}"
+                                          Content="Use Twitch API"
+                                          Margin="0 0 0 5" />
+                            <ToggleButton IsChecked="{Binding TournamentViewModel.ShowStreamCategory}"
+                                          IsEnabled="{Binding TournamentViewModel.IsUsingTwitchAPI}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="With Twitch API enabled and connected in status bar it you a category form online stream in controller"
+                                          Content="Show stream category"
+                                          Margin="0 0 0 5" />
+                            <ToggleButton IsChecked="{Binding TournamentViewModel.IsUsingTeamNames}"
+                                          ToolTipService.InitialShowDelay="0"
+                                          ToolTipService.ShowDuration="60000"
+                                          ToolTip="Enabled gives you on top of every player in controller his team name text set in whitelist"
+                                          Content="Use team names"
+                                          Margin="0 0 0 5" />
 
-                                    <TextBlock Text="?"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               FontSize="22"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                </Border>
-                            </StackPanel>
-                            
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="50"
-                                         Height="20"
-                                         Text="{Binding TournamentViewModel.Port}"
-                                         Padding="0 2 0 0"
-                                         Background="#9E9E9E"
-                                         MaxLength="5">
-                                    <i:Interaction.Behaviors>
-                                        <behaviors:NumericTextBoxBehavior AllowNegative="False" />
-                                    </i:Interaction.Behaviors>
-                                </TextBox>
-                                <TextBlock Text="Port"
-                                           Foreground="White"
-                                           Height="18"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 3" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="120"
-                                         Height="20"
-                                         Text="{Binding TournamentViewModel.Password}"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <TextBlock Text="Password"
-                                           Foreground="White"
-                                           Height="20"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 3" />
-                            </StackPanel>
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
@@ -490,7 +413,7 @@
                                            Padding="0"
                                            ToolTipService.InitialShowDelay="0"
                                            ToolTipService.ShowDuration="60000"
-                                           ToolTip="Opens given scene collection after connecting to OBS"
+                                           ToolTip="Opens given scene collection after connecting to OBS (Does nothing if empty)"
                                            Margin="5 0 0 3" />
                             </StackPanel>
 
@@ -502,25 +425,6 @@
                                        Padding="0"
                                        Margin="0 10 0 5" />
                             
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0 0 0 5">
-                                <TextBox TextWrapping="Wrap"
-                                         Width="120"
-                                         Height="20"
-                                         Text="{Binding TournamentViewModel.FilterNameAtStartForSceneItems}"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top" />
-                                <TextBlock Text="POV filter name"
-                                           Foreground="White"
-                                           Height="20"
-                                           FontSize="16"
-                                           Padding="0"
-                                           ToolTipService.InitialShowDelay="0"
-                                           ToolTipService.ShowDuration="60000"
-                                           ToolTip="Given filter is used to find pov elements in scene"
-                                           Margin="5 0 0 3" />
-                            </StackPanel>
                             <StackPanel Orientation="Vertical"
                                         Margin="0 0 0 5">
                                 <ToggleButton IsChecked="{Binding TournamentViewModel.SetPovHeadsInBrowser}"
@@ -536,7 +440,7 @@
                                               Content="Use personal best text"
                                               Margin="0 0 0 5" />
 
-                                <TextBlock Text="Use names for povs"
+                                <TextBlock Text="Display name in pov"
                                            HorizontalAlignment="Left"
                                            ToolTipService.InitialShowDelay="0"
                                            ToolTipService.ShowDuration="60000"

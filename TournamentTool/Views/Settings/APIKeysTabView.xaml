@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TournamentTool.Views.Settings"
              xmlns:settings="clr-namespace:TournamentTool.ViewModels.Settings"
+             xmlns:buttons="clr-namespace:TournamentTool.Components.Buttons"
              d:DataContext="{d:DesignInstance Type=settings:APIKeysTabViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="1024"
@@ -20,11 +21,15 @@
 
         <StackPanel Orientation="Horizontal"
                     Margin="0 0 0 5">
+            <buttons:ButtonNormal ContentText="Remove"
+                                  Width="60"
+                                  OnCommand="{Binding ClearAccessTokenCommand}" />
+            
             <TextBlock Text="Masked Access Token: "
                        Foreground="White"
                        FontSize="16"
                        Padding="0"
-                       Margin="0 0 0 0" />
+                       Margin="5 0 0 0" />
 
             <TextBlock Text="{Binding MaskedTwitchAccessToken}"
                        Width="268.5"
@@ -63,7 +68,7 @@
                 <TextBlock Text="Custom Client ID"
                            ToolTipService.InitialShowDelay="0"
                            ToolTipService.ShowDuration="60000"
-                           ToolTip="If you register your own twitch application at dev.twitch.tv/console/apps then you can set here client id from app type public"
+                           ToolTip="If you register your own twitch application at dev.twitch.tv/console/apps then you can set here client id from app type public with url: http://localhost:8080/"
                            Foreground="White"
                            FontSize="16"
                            Padding="0"

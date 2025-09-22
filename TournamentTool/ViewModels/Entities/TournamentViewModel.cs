@@ -58,19 +58,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
     }
     
-    public bool IsAlwaysOnTop
-    {
-        get => _tournament.IsAlwaysOnTop;
-        set
-        {
-            if (value == _tournament.IsAlwaysOnTop) return;
-            
-            _tournament.IsAlwaysOnTop = value;
-            OnPropertyChanged(nameof(IsAlwaysOnTop));
-            PresetIsModified();
-            SetAlwaysOnTop();
-        }
-    }
     public bool IsUsingTeamNames
     {
         get => _tournament.IsUsingTeamNames;
@@ -115,26 +102,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         }
     }
     
-    public int Port
-    {
-        get => _tournament.Port;
-        set
-        {
-            _tournament.Port = value;
-            OnPropertyChanged(nameof(Port));
-            PresetIsModified();
-        }
-    }
-    public string Password
-    {
-        get => _tournament.Password;
-        set
-        {
-            _tournament.Password = value;
-            OnPropertyChanged(nameof(Password));
-            PresetIsModified();
-        }
-    }
     public string SceneCollection
     {
         get => _tournament.SceneCollection;
@@ -142,18 +109,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         {
             _tournament.SceneCollection = value;
             OnPropertyChanged(nameof(SceneCollection));
-            PresetIsModified();
-        }
-    }
-    public string FilterNameAtStartForSceneItems
-    {
-        get => _tournament.FilterNameAtStartForSceneItems;
-        set
-        {
-            if (!value.StartsWith("head", StringComparison.OrdinalIgnoreCase))
-                _tournament.FilterNameAtStartForSceneItems = value;
-    
-            OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
             PresetIsModified();
         }
     }
@@ -408,25 +363,21 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     {
         UpdatePlayers();
         UpdateGoodPacesTexts();
-        
+
+        PaceManRefreshRateMiliseconds = _tournament.PaceManRefreshRateMiliseconds;
         RefreshUI();
-        
-        SetAlwaysOnTop();
+        UpdateTeamNamesForPlayers();
     }
     
     public void RefreshUI()
     {
         OnPropertyChanged(nameof(Name));
-        OnPropertyChanged(nameof(IsAlwaysOnTop));
         OnPropertyChanged(nameof(IsUsingTeamNames));
         OnPropertyChanged(nameof(IsUsingWhitelistOnPaceMan));
         OnPropertyChanged(nameof(ShowOnlyLive));
         OnPropertyChanged(nameof(AddUnknownPacemanPlayersToWhitelist));
         
-        OnPropertyChanged(nameof(Port));
-        OnPropertyChanged(nameof(Password));
         OnPropertyChanged(nameof(SceneCollection));
-        OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
         
         OnPropertyChanged(nameof(SetPovHeadsInBrowser));
         OnPropertyChanged(nameof(SetPovPBText));
@@ -597,16 +548,12 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     }
     public void Clear()
     {
-        IsAlwaysOnTop = true;
         IsUsingTeamNames = false;
         IsUsingWhitelistOnPaceMan = true;
         ShowOnlyLive = true;
         AddUnknownPacemanPlayersToWhitelist = false;
         
-        Port = 4455;
-        Password = string.Empty;
         SceneCollection = string.Empty;
-        FilterNameAtStartForSceneItems = "pov";
     
         SetPovHeadsInBrowser = false;
         SetPovPBText = false;
@@ -708,17 +655,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
     }
     
-    private void SetAlwaysOnTop()
-    {
-        Application.Current?.Dispatcher.Invoke(() =>
-        {
-            if (Application.Current.MainWindow != null)
-            {
-                Application.Current.MainWindow.Topmost = IsAlwaysOnTop;
-            }
-        });
-    }
-
     public bool IsNullOrEmpty()
     {
         return _tournament == null || HasBeenRemoved;

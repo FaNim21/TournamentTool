@@ -8,6 +8,7 @@ using System.Windows;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32;
 using TournamentTool.Components.Controls;
+using TournamentTool.Extensions;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
@@ -150,7 +151,9 @@ public class ImportWhitelistCommand : BaseCommand
             }
                     
             logProgress.Report($"({count+1}/{totalLines}) Completing data for {player.InGameName}");
-            await player.CompleteData();
+            
+            string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
+            await player.CompleteData(url);
             Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
             count++;
         }
@@ -186,7 +189,9 @@ public class ImportWhitelistCommand : BaseCommand
                 if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
                      
                 logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
-                await player.CompleteData(false);
+                
+                string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.InGameName, 32);
+                await player.CompleteData(url, false);
                 
                 if (string.IsNullOrEmpty(player.UUID)) playersToComplete.Add(player);
                 Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
