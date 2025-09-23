@@ -106,20 +106,15 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 
     public override void InitializeAPI(APIDataSaver api)
     {
-        api.CheckFile(_rankedPlayerCountFileName);
-        api.CheckFile(_rankedCompletedCountFileName);
-        api.CheckFile(_rankedRoundsFileName);
-        api.CheckFile(_rankedCustomTextFileName);
-
         Update();
     }
-    public override void UpdateAPI(APIDataSaver api)
+    public override async Task UpdateAPI(APIDataSaver api)
     {
-        api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
-        api.UpdateFileContent(_rankedPlayerCountFileName, Players);
+        await api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
+        await api.UpdateFileContent(_rankedPlayerCountFileName, Players);
 
-        api.UpdateFileContent(_rankedRoundsFileName, Rounds);
-        api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
+        await api.UpdateFileContent(_rankedRoundsFileName, Rounds);
+        await api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
     }
 
     public void Update()

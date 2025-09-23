@@ -64,7 +64,9 @@ public class APIUpdaterService : IServiceUpdater
 
     public async Task UpdateAsync(CancellationToken token)
     {
-        _controller.ManagementPanel?.UpdateAPI(_api);
+        if (_controller.ManagementPanel == null) return;
+        
+        await _controller.ManagementPanel.UpdateAPI(_api);
         try
         {
             await UpdateLeaderboardTopAPI();
@@ -74,7 +76,6 @@ public class APIUpdaterService : IServiceUpdater
         {
             Console.WriteLine(ex);
         }
-        // return Task.CompletedTask;
     }
 
     /// <summary>
@@ -82,10 +83,6 @@ public class APIUpdaterService : IServiceUpdater
     /// </summary>
     private void UpdateTwoPlayersAPICheck()
     {
-        _api.CheckFile(_rankedNames[0]);
-        _api.CheckFile(_rankedNames[1]);
-        _api.CheckFile(_rankedNames[2]);
-
         _splitsAPINames = new List<SplitsTwoPlayersAPINames>[3];
         _splitsAPINames[0] = [];
         _splitsAPINames[1] = [];
@@ -99,9 +96,6 @@ public class APIUpdaterService : IServiceUpdater
                 string currentSplit = _rankedSplits[j];
                 _splitsAPINames[i].Add(new SplitsTwoPlayersAPINames($"{number}_{currentSplit}_Time", 
                     $"{number}_{currentSplit}_Difference"));
-            
-                _api.CheckFile(_splitsAPINames[i][j].Time);
-                _api.CheckFile(_splitsAPINames[i][j].TimeDifference);
             }
         }
     }
@@ -278,10 +272,6 @@ public class APIUpdaterService : IServiceUpdater
             _leaderboardAPINames.Add(new LeaderboardPlayerAPINames($"{number}_Leaderboard_IGN", 
                 $"{number}_Leaderboard_PreviousRoundPoints", 
                 $"{number}_Leaderboard_OverallPoints"));
-            
-            _api.CheckFile(_leaderboardAPINames[i].IGN);
-            _api.CheckFile(_leaderboardAPINames[i].PreviousRoundPoints);
-            _api.CheckFile(_leaderboardAPINames[i].OverallPoints);
         }
     }
     private async Task UpdateLeaderboardTopAPI()

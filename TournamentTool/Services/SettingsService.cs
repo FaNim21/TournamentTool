@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Windows;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
-using TournamentTool.Modules.OBS;
 using TournamentTool.Utils;
 
 namespace TournamentTool.Services;

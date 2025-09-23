@@ -7,5 +7,5 @@ namespace TournamentTool.Modules.ManagementPanels;
 public abstract class ManagementPanel : BaseViewModel, IBackgroundDataReceiver
 {
     public abstract void InitializeAPI(APIDataSaver api);
-    public abstract void UpdateAPI(APIDataSaver api);
+    public abstract Task UpdateAPI(APIDataSaver api);
 }

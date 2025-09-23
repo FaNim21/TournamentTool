@@ -296,8 +296,6 @@ public class RankedService : IBackgroundService
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
         
-        //SavePrivRoomFinishedData();
-        
         for (int i = 0; i < data.Completions.Length; i++)
         {
             var completion = data.Completions[i];
