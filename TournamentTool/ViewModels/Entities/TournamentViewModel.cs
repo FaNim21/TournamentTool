@@ -265,7 +265,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     }
     public string? CreditsToText { set; get; }
 
-    public Action<ControllerMode, bool>? OnControllerModeChanged;
     public ControllerMode ControllerMode
     {
         get => _tournament.ControllerMode;
@@ -344,6 +343,9 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     }
     
     public bool HasBeenRemoved { get; set; } = true;
+    
+    public Action<ControllerMode, bool>? OnControllerModeChanged;
+    public Action<Tournament>? OnPresetChanged;
 
 
     public TournamentViewModel(IPlayerViewModelFactory playerViewModelFactory)
@@ -364,6 +366,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         _tournament.Leaderboard.Initialize();
         UpdateBackgroundService(ControllerMode);
         
+        OnPresetChanged?.Invoke(tournament);
         PresetIsSaved();
     }
 

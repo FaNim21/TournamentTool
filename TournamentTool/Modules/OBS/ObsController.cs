@@ -7,6 +7,7 @@ using OBSStudioClient.Classes;
 using OBSStudioClient.Responses;
 using TournamentTool.Enums;
 using TournamentTool.Interfaces;
+using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Utils.Parsers;
 using TournamentTool.ViewModels.Entities;
@@ -32,7 +33,7 @@ public class ConnectionStateChangedEventArgs : EventArgs
     }
 }
 
-public class ObsController
+public class ObsController : IDisposable
 {
     public TournamentViewModel Tournament { get; }
     private ISettings SettingsService { get; }
@@ -61,10 +62,24 @@ public class ObsController
         SettingsService = settingsService;
         Logger = logger;
 
+        Tournament.OnPresetChanged += PresetChanged;
+        
         Client = new ObsClient { RequestTimeout = 10000 };
         Task.Run(Connect);
     }
- 
+    public void Dispose()
+    {
+        Tournament.OnPresetChanged -= PresetChanged;
+    }
+
+    public void PresetChanged(Tournament preset)
+    {
+        if (!string.IsNullOrEmpty(Tournament.SceneCollection))
+        {
+            Client.SetCurrentSceneCollection(Tournament.SceneCollection);
+        }
+    }
+    
     public void SwitchStudioMode()
     {
         if (!IsConnectedToWebSocket) return;
@@ -90,11 +105,6 @@ public class ObsController
         if (IsConnectedToWebSocket) return;
         try
         {
-            if (!string.IsNullOrEmpty(Tournament.SceneCollection))
-            {
-                await Client.SetCurrentSceneCollection(Tournament.SceneCollection);
-            }
-
             bool studioMode = await Client.GetStudioModeEnabled();
             ChangeStudioMode(studioMode);
 
