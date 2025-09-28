@@ -55,7 +55,8 @@ public class LoadDataFromPacemanCommand : BaseCommand
         for (int i = 0; i < _chosenEvent!.WhiteList!.Length; i++)
         {
             var current = _chosenEvent!.WhiteList[i];
-            PlayerViewModel playerViewModel = new() { UUID = current.Replace("-", "") ?? string.Empty };
+            PlayerViewModel playerViewModel = PlayerManager.PlayerViewModelFactory.Create();
+            playerViewModel.UUID = current.Replace("-", "") ?? string.Empty;
             eventPlayers.Add(playerViewModel);
         }
 
@@ -115,8 +116,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
                 player.StreamData.Main = twitch.liveAccount?.Trim() ?? string.Empty;
                 player.PersonalBest = string.Empty;
                 
-                string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
-                await player.CompleteData(url);
+                await player.CompleteData();
                 if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
                 logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
                 player.Name = twitch.liveAccount?.Trim() ?? player.InGameName;

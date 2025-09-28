@@ -223,31 +223,6 @@ public static class Helper
         return bitmap;
     }
     
-    public static async Task<string> MakeRequestAsString(string ApiUrl)
-    {
-        using HttpClient client = new();
-        HttpResponseMessage response = await client.GetAsync(ApiUrl);
-
-        if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
-
-        return await response.Content.ReadAsStringAsync();
-    }
-    public static async Task<Stream> MakeRequestAsStream(string ApiUrl, string? key = null)
-    {
-        using HttpClient client = new();
-        if (!string.IsNullOrEmpty(key))
-        {
-            client.DefaultRequestHeaders.Add("Private-Key", key);
-        }
-        
-        HttpResponseMessage response = await client.GetAsync(ApiUrl);
-        if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
-
-        return await response.Content.ReadAsStreamAsync();
-    }
-    
     public static string ToPlainText(SecureString secureString)
     {
         if (secureString == null) return string.Empty;

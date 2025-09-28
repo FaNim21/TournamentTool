@@ -125,7 +125,6 @@ public class PresetManagerTests
             _presetService = new PresetService(_mockTournamentViewModel.Object);
             
             Mock<IBackgroundCoordinator> _mockBackgroundCoordinator = new Mock<IBackgroundCoordinator>();
-            var mockObsConnection = new Mock<IObsConnectionControl>();
             var mockSettingsService = new Mock<SettingsService>();
             var luaScriptManager = new Mock<ILuaScriptsManager>();
 

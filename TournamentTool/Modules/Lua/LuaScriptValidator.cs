@@ -27,10 +27,7 @@ public static class LuaScriptValidator
                 CreateMockPlayer("TestPlayer4", 4, 47, 120500),
             };
 
-            TournamentViewModel tournament = new TournamentViewModel();
-            tournament.ManagementData = new RankedManagementData { Rounds = 7, Completions = 3, Players = 4 };
-            
-            LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, tournament, players, null);
+            LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, null!, players, null);
             return context;
         }
         else
@@ -40,10 +37,7 @@ public static class LuaScriptValidator
             LeaderboardTimeline mainSplit = new LeaderboardTimeline(RunMilestone.PacemanEnterNether, 12345);
             LeaderboardPlayerEvaluateData data = new LeaderboardPacemanEvaluateData(new Player(), "asdf", mainSplit, null);
             
-            TournamentViewModel tournament = new TournamentViewModel();
-            tournament.ManagementData = new RankedManagementData { Rounds = 1, Completions = 1, Players = 2 };
-            
-            LuaAPIContext context = new LuaAPIContext(entry, data, rule, subRule, tournament, null);
+            LuaAPIContext context = new LuaAPIContext(entry, data, rule, subRule, null!, null);
             return context;
         }
     }

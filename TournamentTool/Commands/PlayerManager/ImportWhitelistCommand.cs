@@ -97,7 +97,7 @@ public class ImportWhitelistCommand : BaseCommand
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            var viewModel = new PlayerViewModel(player);
+            var viewModel = PlayerManager.PlayerViewModelFactory.Create(player);
             progress.Report((float)i/players.Count);
             logProgress.Report($"({i+1}/{players.Count}) Checking for duplicates for player: {player.InGameName}");
             if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
@@ -129,14 +129,12 @@ public class ImportWhitelistCommand : BaseCommand
                     
             string[]? fields = parser.ReadFields();
             if (fields == null) continue;
-        
-            PlayerViewModel player = new() 
-            {
-                Name = fields[0],
-                InGameName = fields[1].Trim(),
-                UUID = fields[2].Replace("-", ""),
-                PersonalBest = fields[3]
-            };
+
+            PlayerViewModel player = PlayerManager.PlayerViewModelFactory.Create();
+            player.Name = fields[0];
+            player.InGameName = fields[1].Trim();
+            player.UUID = fields[2].Replace("-", "");
+            player.PersonalBest = fields[3];
             if (fields.Length > 4) 
             {
                 player.StreamData.SetName(fields[4].ToLower().Trim());
@@ -151,9 +149,7 @@ public class ImportWhitelistCommand : BaseCommand
             }
                     
             logProgress.Report($"({count+1}/{totalLines}) Completing data for {player.InGameName}");
-            
-            string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
-            await player.CompleteData(url);
+            await player.CompleteData();
             Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
             count++;
         }
@@ -180,18 +176,14 @@ public class ImportWhitelistCommand : BaseCommand
                      
                 var loadedPlayer = loadedPlayers[i];
      
-                PlayerViewModel player = new()
-                {
-                    Name = loadedPlayer.DisplayName,
-                    InGameName = loadedPlayer.IGN.Trim(),
-                };
+                var player = PlayerManager.PlayerViewModelFactory.Create();
+                player.Name = loadedPlayer.DisplayName;
+                player.InGameName = loadedPlayer.IGN.Trim();
                 player.StreamData.SetName(loadedPlayer.Twitch.Trim());
                 if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
-                     
-                logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
                 
-                string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(player.InGameName, 32);
-                await player.CompleteData(url, false);
+                logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
+                await player.CompleteData(false);
                 
                 if (string.IsNullOrEmpty(player.UUID)) playersToComplete.Add(player);
                 Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });

@@ -32,13 +32,7 @@ public class ConnectionStateChangedEventArgs : EventArgs
     }
 }
 
-public interface IObsConnectionControl
-{
-    Task Connect();
-    Task Disconnect();
-}
-
-public class ObsController : IObsConnectionControl
+public class ObsController
 {
     public TournamentViewModel Tournament { get; }
     private ISettings SettingsService { get; }

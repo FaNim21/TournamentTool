@@ -6,9 +6,11 @@ using System.Windows.Threading;
 using MethodTimer;
 using TournamentTool.Enums;
 using TournamentTool.Extensions;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Services.External;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.ViewModels.Entities;
 
@@ -16,6 +18,8 @@ namespace TournamentTool.Services.Background;
 
 public class PaceManService : IBackgroundService
 {
+    private readonly IPlayerViewModelFactory _playerViewModelFactory;
+    private readonly IPacemanAPIService _pacemanApiService;
     private TournamentViewModel TournamentViewModel { get; }
     private ILeaderboardManager Leaderboard { get; }
     private IPresetSaver PresetSaver { get; }
@@ -25,14 +29,15 @@ public class PaceManService : IBackgroundService
     private IPlayerAddReceiver? _playerAddReceiver;
 
     private List<Paceman> _paces = [];
-    private List<PaceManData> _paceManData = [];
     
     private const int UiSendBatchSize = 2;
     private bool _blockFirstPacemanRefresh = true;
 
 
-    public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver, ISettings settingsService)
+    public PaceManService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, IPresetSaver presetSaver, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, IPacemanAPIService pacemanApiService)
     {
+        _playerViewModelFactory = playerViewModelFactory;
+        _pacemanApiService = pacemanApiService;
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         PresetSaver = presetSaver;
@@ -69,22 +74,15 @@ public class PaceManService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
-        await RefreshPaceManAsync();
+        await OrganizingPacemanData();
         await Task.Delay(TimeSpan.FromMilliseconds(TournamentViewModel.PaceManRefreshRateMiliseconds), token);
     }
-    private async Task RefreshPaceManAsync()
+    private async Task OrganizingPacemanData()
     {
-        string result = await Helper.MakeRequestAsString(Consts.PaceManAPI);
-        List<PaceManData>? paceMan = JsonSerializer.Deserialize<List<PaceManData>>(result);
-        _paceManData = paceMan ?? [];
-        OrganizingPacemanData();
-    }
-
-    private void OrganizingPacemanData()
-    {
+        var paceManData = await _pacemanApiService.GetPacemanLiveData(); 
         List<Paceman> currentPaces = new(_paces);
 
-        foreach (var pace in _paceManData)
+        foreach (var pace in paceManData)
         {
             bool wasPaceFound = false;
 
@@ -159,14 +157,13 @@ public class PaceManService : IBackgroundService
             InGameName = paceManData.Nickname,
         };
 
-        PlayerViewModel playerViewModel = new PlayerViewModel(player);
+        PlayerViewModel playerViewModel = _playerViewModelFactory.Create(player);
         if (!string.IsNullOrEmpty(paceManData.User.TwitchName))
         {
             playerViewModel.StreamData.SetName(paceManData.User.TwitchName);
         }
         
-        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
-        playerViewModel.UpdateHeadImage(url);
+        playerViewModel.UpdateHeadImage();
 
         if (_playerAddReceiver != null)
         {

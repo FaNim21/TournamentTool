@@ -10,10 +10,12 @@ using TournamentTool.Commands.PlayerManager;
 using TournamentTool.Components.Controls;
 using TournamentTool.Enums;
 using TournamentTool.Extensions;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Modules.Logging;
 using TournamentTool.Services.Background;
+using TournamentTool.Services.External;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.Windows;
@@ -29,6 +31,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
     public ISettings SettingsService { get; }
+    public IPlayerViewModelFactory PlayerViewModelFactory { get; }
 
     private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
     public ObservableCollection<PlayerViewModel> SelectedPlayers
@@ -151,13 +154,14 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     private PlayerSortingType _lastSortingType;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService) : base(coordinator)
+    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, IPacemanAPIService pacemanApiService) : base(coordinator)
     {
         Tournament = tournament;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
         SettingsService = settingsService;
+        PlayerViewModelFactory = playerViewModelFactory;
 
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { Coordinator.ShowLoading(ValidateAllPlayers); });
@@ -181,16 +185,16 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         SubmitSearchCommand = new RelayCommand(()=> { FilterWhitelist(); });
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
         
-        Task.Run(async () => {
+        Task.Run(async () => 
+        {
             PaceManEvent[]? eventsData = null;
             try
             {
-                string result = await Helper.MakeRequestAsString("https://paceman.gg/api/cs/eventlist");
-                eventsData = JsonSerializer.Deserialize<PaceManEvent[]>(result);
+                eventsData = await pacemanApiService.GetPacemanEvents();
             }
-            catch
+            catch (Exception ex)
             {
-                Logger.Error("Can't load paceman events"); 
+                Logger.Error($"Can't load paceman events: {ex.Message}"); 
             }
 
             if (eventsData == null) return;
@@ -337,10 +341,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         PlayerViewModel? playerViewModel = null;
         if (player != null)
         {
-            playerViewModel = new PlayerViewModel(player);
+            playerViewModel = PlayerViewModelFactory.Create(player);
         }
         
-        WhitelistPlayerWindowViewModel viewModel = new(this, playerViewModel);
+        WhitelistPlayerWindowViewModel viewModel = new(PlayerViewModelFactory, this, playerViewModel);
         WhitelistPlayerWindow window = new(viewModel);
 
         Coordinator.ShowDialog(window);
@@ -386,7 +390,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
     }
     private async Task<bool> AddPlayerToWhitelist(PlayerViewModel playerViewModel)
     {
-        PlayerViewModel newPlayerViewModel = new();
+        PlayerViewModel newPlayerViewModel = PlayerViewModelFactory.Create();
         bool success = await UpdatePlayerData(newPlayerViewModel, playerViewModel);
         if (!success) return false;
 
@@ -407,8 +411,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
         playerViewModel.StreamData.OtherType = windowsData.StreamData.OtherType;
 
         Tournament.PresetIsModified();
-        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(playerViewModel.InGameName, 32);
-        await playerViewModel.CompleteData(url);
+        await playerViewModel.CompleteData();
         return true;
     }
 
@@ -453,8 +456,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerManager, IPlay
             progress.Report((float)i / count);
             logProgress.Report($"({i+1}/{count}) Checking skin to update {current.InGameName} head");
 
-            string url = SettingsService.Settings.HeadAPIType.GetHeadURL(current.UUID, 32);
-            await current.ForceUpdateHeadImage(url);
+            await current.ForceUpdateHeadImage();
+            await Task.Delay(500);
         }
 
         Logger.Information("Done fixing players head skins");

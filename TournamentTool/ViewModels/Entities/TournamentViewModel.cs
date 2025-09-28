@@ -3,14 +3,17 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using TournamentTool.Enums;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
+using TournamentTool.Services;
 
 namespace TournamentTool.ViewModels.Entities;
 
 public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournamentManager, IPresetInfo, INotifyPresetModification
 {
+    private readonly IPlayerViewModelFactory _playerViewModelFactory;
     private readonly Dictionary<string, List<string>> _errors = [];
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
     public bool HasErrors => _errors.Count != 0;
@@ -343,6 +346,11 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
     public bool HasBeenRemoved { get; set; } = true;
 
 
+    public TournamentViewModel(IPlayerViewModelFactory playerViewModelFactory)
+    {
+        _playerViewModelFactory = playerViewModelFactory;
+    }
+
     public void ChangeData(Tournament tournament)
     {
         if (tournament == null) return;
@@ -364,6 +372,16 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         UpdatePlayers();
         UpdateGoodPacesTexts();
 
+        if (ManagementData == null)
+        {
+            if (ControllerMode == ControllerMode.Ranked)
+                ManagementData = new RankedManagementData();
+            else if (ControllerMode == ControllerMode.Paceman)
+                ManagementData = new PacemanManagementData();
+            else if (ControllerMode == ControllerMode.Solo)
+                ManagementData = new SoloManagementData();
+        }
+        
         PaceManRefreshRateMiliseconds = _tournament.PaceManRefreshRateMiliseconds;
         RefreshUI();
         UpdateTeamNamesForPlayers();
@@ -411,7 +429,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo, ITournam
         _lookupPlayers.Clear();
         foreach (var player in _tournament.Players)
         {
-            var playerViewModel = new PlayerViewModel(player);
+            PlayerViewModel playerViewModel = _playerViewModelFactory.Create(player);
             playerViewModel.Initialize();
             playerViewModel.StreamData.LiveData.Clear(false);
             Players.Add(playerViewModel);

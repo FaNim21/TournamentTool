@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Commands;
+using TournamentTool.Factories;
 using TournamentTool.Models;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable;
@@ -37,7 +38,7 @@ public class WhitelistPlayerWindowViewModel : BaseViewModel
     public event Action? closeWindow;
 
 
-    public WhitelistPlayerWindowViewModel(PlayerManagerViewModel playerManager, PlayerViewModel? playerViewModel)
+    public WhitelistPlayerWindowViewModel(IPlayerViewModelFactory playerViewModelFactory, PlayerManagerViewModel playerManager, PlayerViewModel? playerViewModel)
     {
         _playerManager = playerManager;
 
@@ -50,7 +51,8 @@ public class WhitelistPlayerWindowViewModel : BaseViewModel
             return;
         }
 
-        PlayerViewModel = new PlayerViewModel();
+        
+        PlayerViewModel = playerViewModelFactory.Create();
     }
 
     private async Task Save()

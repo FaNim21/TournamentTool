@@ -9,7 +9,7 @@ namespace TournamentTool.Models.Ranking;
 public abstract class LuaAPIBase
 {
     [MoonSharpHidden] protected readonly Action<LeaderboardEntry>? _onEntryRunRegistered;
-    [MoonSharpHidden] protected readonly TournamentViewModel _tournament;
+    [MoonSharpHidden] protected readonly TournamentViewModel? _tournament;
     [MoonSharpHidden] protected readonly LeaderboardRule _rule;
     [MoonSharpHidden] protected readonly LeaderboardSubRule _subRule;
     
@@ -111,6 +111,7 @@ public class LuaAPIRankedContext : LuaAPIBase
     {
         get
         {
+            if (_tournament == null) return 1;
             var player = Players[0];
             if (player is { data: LeaderboardRankedEvaluateData rankedData })
             {
@@ -119,11 +120,25 @@ public class LuaAPIRankedContext : LuaAPIBase
             return _tournament.ManagementData is RankedManagementData ranked ? ranked.Rounds : 1;
         }
     }
+    public int PlayersInRound
+    {
+        get
+        {
+            if (_tournament == null) return 1;
+            return _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
+        }
+    }
+    public int CompletionsInRound
+    {
+        get
+        {
+            if (_tournament == null) return 1;
+            return _tournament.ManagementData is RankedManagementData ranked ? ranked.Completions : 1;
+        }
+    }
     public int MaxWinners => _subRule.MaxWinners;
-    public int PlayersInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Players : 1;
-    public int CompletionsInRound => _tournament.ManagementData is RankedManagementData ranked ? ranked.Completions : 1;
-    
-    
+
+
     public LuaAPIRankedContext(LeaderboardRule rule,
         LeaderboardSubRule subRule, 
         TournamentViewModel tournament, 

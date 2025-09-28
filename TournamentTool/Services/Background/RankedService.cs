@@ -5,11 +5,13 @@ using System.Windows;
 using System.Windows.Threading;
 using TournamentTool.Enums;
 using TournamentTool.Extensions;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Models.Ranking;
 using TournamentTool.Modules.Logging;
+using TournamentTool.Services.External;
 using TournamentTool.Utils;
 using TournamentTool.Utils.Extensions;
 using TournamentTool.Utils.Parsers;
@@ -40,6 +42,8 @@ public class RankedService : IBackgroundService
 {
     private ILoggingService Logger { get; }
     public ISettings SettingsService { get; }
+    private readonly IPlayerViewModelFactory _playerViewModelFactory;
+    private readonly IRankedAPIService _rankedApiService;
     private readonly RankedManagementData _rankedManagementData;
     
     private TournamentViewModel TournamentViewModel { get; }
@@ -60,16 +64,18 @@ public class RankedService : IBackgroundService
 
     private const int UiSendBatchSize = 7;
     
-    PrivRoomData? _privRoomData;
+    private PrivRoomData? _privRoomData;
     
     
-    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService)
+    public RankedService(TournamentViewModel tournamentViewModel, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, IRankedAPIService rankedApiService)
     {
         Logger = logger;
         SettingsService = settingsService;
         TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
-        
+        _playerViewModelFactory = playerViewModelFactory;
+        _rankedApiService = rankedApiService;
+
         _rankedManagementData = (TournamentViewModel.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
@@ -139,8 +145,7 @@ public class RankedService : IBackgroundService
         */
         try
         {
-            await using Stream responseStream = await Helper.MakeRequestAsStream($"https://mcsrranked.com/api/users/{TournamentViewModel.RankedApiPlayerName}/live", TournamentViewModel.RankedApiKey);
-            PrivRoomAPIResult? rankedAPIResult = await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(responseStream, _options);
+            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(TournamentViewModel.RankedApiPlayerName, TournamentViewModel.RankedApiKey);
             if (rankedAPIResult == null) return;
             _privRoomData = rankedAPIResult.Data;
         }
@@ -229,10 +234,8 @@ public class RankedService : IBackgroundService
             InGameName = pace.InGameName,
         };
 
-        PlayerViewModel playerViewModel = new PlayerViewModel(player);
-        
-        string url = SettingsService.Settings.HeadAPIType.GetHeadURL(player.UUID, 32);
-        playerViewModel.UpdateHeadImage(url);
+        PlayerViewModel playerViewModel = _playerViewModelFactory.Create(player);
+        playerViewModel.UpdateHeadImage();
 
         if (_playerManagerReceiver != null)
         {

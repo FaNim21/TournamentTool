@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using TournamentTool.Factories;
 using TournamentTool.Interfaces;
 using TournamentTool.Managers;
 using TournamentTool.Modules;
@@ -8,6 +9,7 @@ using TournamentTool.Modules.Logging;
 using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
+using TournamentTool.Services.External;
 using TournamentTool.Utils;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities;
@@ -31,6 +33,12 @@ public partial class App : Application
             DataContext = provider.GetRequiredService<MainViewModel>()
         });
 
+        services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
+
+        services.AddHttpClient<IMinecraftDataService, MinecraftDataService>();
+        services.AddHttpClient<IPacemanAPIService, PacemanAPIService>();
+        services.AddHttpClient<IRankedAPIService, RankedAPIService>();
+
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<LogStore>();
         services.AddSingleton<NotificationPanelViewModel>();
@@ -39,7 +47,6 @@ public partial class App : Application
         services.AddSingleton<IPresetInfo>(s => s.GetRequiredService<TournamentViewModel>());
         
         services.AddSingleton<ObsController>();
-        services.AddSingleton<IObsConnectionControl>(s => s.GetRequiredService<ObsController>());
         
         services.AddSingleton<SettingsService>();
         services.AddSingleton<ISettings>(s => s.GetRequiredService<SettingsService>());
@@ -65,13 +72,7 @@ public partial class App : Application
         services.AddSingleton<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
         
-        //Daje to zeby pamietac o zasadzie ISP i ze mozna to tak rozwiazac z DI
-        /*
-        services.AddSingleton<IInterfaceOne>(s => sp.GetRequiredService<SomeClas>());
-        services.AddSingleton<IInterfaceTwo>(s => s.GetRequiredService<SomeClass>());
-        services.AddSingleton<IInterfaceThree>(s => s.GetRequiredService<SomeClass>());
-        */
-
+        
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
 

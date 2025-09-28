@@ -37,8 +37,7 @@ public class FixPlayerHeadCommand : BaseCommand
         progress.Report(0.5f);
         logProgress.Report($"Checking skin to update {_player!.InGameName} head");
         
-        string url = PlayerManager.SettingsService.Settings.HeadAPIType.GetHeadURL(_player.UUID, 32);
-        await _player.ForceUpdateHeadImage(url);
+        await _player.ForceUpdateHeadImage();
         progress.Report(1);
         _presetSaver.SavePreset();
     }

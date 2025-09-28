@@ -26,12 +26,12 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     private CancellationTokenSource? _cancellationTokenSource;
 
     
-    public BackgroundCoordinator(TournamentViewModel tournament, ILeaderboardManager leaderboard, IPresetSaver saver, ILoggingService logger, ISettings settingsService)
+    public BackgroundCoordinator(TournamentViewModel tournament, ILoggingService logger, IServiceProvider serviceProvider)
     {
         Logger = logger;
         _tournament = tournament;
         
-        _backgroundServiceFactory = new BackgroundServiceFactory(tournament, leaderboard, saver, logger, settingsService);
+        _backgroundServiceFactory = new BackgroundServiceFactory(serviceProvider);
     }
     
     public void Register(IBackgroundDataReceiver? receiver)
