@@ -2,14 +2,25 @@
 
 **MCSR Tournament Tool** is a desktop application designed to streamline the management of Points of View (POVs) in OBS during **Minecraft Speedrunning** tournaments. This tool is tailored for streamers and tournament organizers, providing a wide range of features to simplify configuration and enhance gameplay monitoring.
 
-Start app view as preset menu (view is WIP)
-![Start app view as preset menu (view is WIP)](Images/PresetMenu.png)
+<p align="center">
+  <img src="Images/PresetMenu.png" alt="Preset menu"/>
+</p>  
+<p align="center"><em>Start app view as preset menu (view is WIP)</em></p>
 
-Whitelist menu view
-![Whitelist panel view](Images/Whitelist.png)
+<p align="center">
+  <img src="Images/Whitelist.png" alt="Preset menu"/>
+</p>  
+<p align="center"><em>Whitelist menu view</em></p>
 
-Controller menu view with controller mode for Paceman (view is WIP)
-![Controller menu view with controller mode for Paceman (view is WIP)](Images/ControllerMenu-Mode_Paceman.png)
+<p align="center">
+  <img src="Images/ControllerMenu-Mode_Paceman.png" alt="Preset menu"/>
+</p>  
+<p align="center"><em>Controller menu view with controller mode for Paceman (view is WIP)</em></p>
+
+<p align="center">
+  <img src="Images/LeaderboardMenu.png" alt="Leaderboard Menu"/>
+</p>  
+<p align="center"><em>Leaderboard menu view with visible rules and evaluated players</em></p>
 
 ## Key Features  
 
@@ -25,12 +36,12 @@ Controller menu view with controller mode for Paceman (view is WIP)
 - **Dynamic OBS POV Management**  
   Effortlessly switch between player views with built-in POV management features using drag-and-drop functionality or by directly clicking on players and POVs.
 
+- **Leaderboard**  
+  Track player progress in real time with milestones, points, and custom scoring rules. Easily view best times, averages, and other performance statistics.
 ## Planned Enhancements  
 
-- A Built-in leaderboard for tracking player performance.
 - Support for displaying player statistics from MCSR Ranked and Paceman.
 - Automated processes for creating and managing POVs in OBS.
-- Settings menu for hotkeys configurations and more.
 - A more detailed API to display additional information to OBS for viewers.
 - Video and documentation tutorial.
 
