@@ -378,7 +378,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/TournamentTool/Utils/Consts.cs
 /TournamentTool/Properties/Settings.settings
 /TournamentTool/TT.ico
 /TournamentTool/FodyWeavers.xml

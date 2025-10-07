@@ -7,7 +7,6 @@ using TournamentTool.Managers;
 using TournamentTool.Models;
 using TournamentTool.Modules;
 using TournamentTool.Modules.Logging;
-using TournamentTool.Modules.OBS;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Utils;
