@@ -184,8 +184,12 @@ public class ImportWhitelistCommand : BaseCommand
                 
                 logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
                 await player.CompleteData(false);
-                
-                if (string.IsNullOrEmpty(player.UUID)) playersToComplete.Add(player);
+
+                if (string.IsNullOrWhiteSpace(player.UUID))
+                {
+                    player.IsUUIDEmpty = true;
+                    playersToComplete.Add(player);
+                }
                 Application.Current.Dispatcher.Invoke(() => { PlayerManager.Add(player); });
             }
             
@@ -198,9 +202,10 @@ public class ImportWhitelistCommand : BaseCommand
             progress.Report(1);
             Logger.Information($"Done loading data from {_fileName} ranked file");
         }
+        catch (OperationCanceledException){}
         catch (Exception ex)
         {
-            Logger.Error($"Error loading json data: {ex.Message}");
+            Logger.Error($"Error loading json data: {ex}");
         }   
     }
     
@@ -219,7 +224,7 @@ public class ImportWhitelistCommand : BaseCommand
                 var jsonRequest = JsonSerializer.Serialize(names);
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await client.PostAsync(Consts.MojangGetMultipleUUIDAPI, content, cancellationToken);
+                HttpResponseMessage response = await client.PostAsync("https://api.mojang.com/profiles/minecraft", content, cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     logProgress.Report($"Error fetching UUIDs: {response.StatusCode}");

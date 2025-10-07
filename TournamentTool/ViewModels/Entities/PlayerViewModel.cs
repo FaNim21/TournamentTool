@@ -37,7 +37,7 @@ public class PlayerViewModel : BaseViewModel, IPlayer
         {
             Data.UUID = value;
             OnPropertyChanged(nameof(UUID));
-            IsUUIDEmpty = string.IsNullOrEmpty(UUID);
+            IsUUIDEmpty = string.IsNullOrWhiteSpace(UUID);
         }
     }
     public string? Name
