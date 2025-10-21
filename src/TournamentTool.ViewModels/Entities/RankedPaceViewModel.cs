@@ -1,0 +1,197 @@
+﻿using TournamentTool.Core.Common;
+using TournamentTool.Core.Extensions;
+using TournamentTool.Core.Interfaces;
+using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Background;
+using TournamentTool.ViewModels.Selectable.Controller.SidePanel;
+
+namespace TournamentTool.ViewModels.Entities;
+
+public class RankedPaceViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
+{
+    public RankedPace Data { get; }
+    
+    public string GroupKey => SplitName!;
+    public int GroupSortOrder => (int)SplitType;
+    public long SortValue => CurrentSplitTimeMiliseconds;
+    public string SecondarySortValue => InGameName;
+    public string Identifier => InGameName;
+
+    public PlayerInventoryViewModel Inventory { get; }
+
+    public string DisplayName => Data.Player == null ? InGameName : Data.Player.Name ?? string.Empty;
+    public string GetPersonalBest => Data.Player == null ? "Unk" : Data.Player.PersonalBest;
+    public string HeadViewParameter => Data.Player == null ? InGameName : Data.Player.InGameName ?? string.Empty;
+    public StreamDisplayInfo StreamDisplayInfo => Data.Player == null ? new StreamDisplayInfo(string.Empty, StreamType.twitch) : Data.Player.StreamData.GetStreamDisplayInfo();
+    public bool IsFromWhitelist => Data.Player != null;
+    public bool IsLive => Data.IsLive;
+    
+    private bool _isUsedInPov;
+    public bool IsUsedInPov
+    {
+        get => _isUsedInPov; 
+        set
+        {
+            _isUsedInPov = value;
+            OnPropertyChanged(nameof(IsUsedInPov));
+        }
+    }
+
+    private bool _isUsedInPreview;
+    public bool IsUsedInPreview
+    {
+        get => _isUsedInPreview;
+        set
+        {
+            _isUsedInPreview = value;
+            OnPropertyChanged(nameof(IsUsedInPreview));
+        }
+    }
+
+    private object? _headImage;
+    public object? HeadImage
+    {
+        get => _headImage;
+        set
+        {
+            if (_headImage == value) return;
+            _headImage = value;
+            OnPropertyChanged(nameof(HeadImage));
+        }
+    }
+
+    private string _inGameName = string.Empty;
+    public string InGameName
+    {
+        get => _inGameName;
+        set
+        {
+            if (_inGameName == value) return;
+            _inGameName = value;
+            OnPropertyChanged(nameof(InGameName));
+        }
+    }
+
+    private float _headImageOpacity;
+    public float HeadImageOpacity
+    {
+        get => _headImageOpacity;
+        set
+        {
+            if (Math.Abs(_headImageOpacity - value) < 0.1f) return;
+            _headImageOpacity = value;
+            OnPropertyChanged(nameof(HeadImageOpacity));
+        }
+    }
+
+    private RankedSplitType _splitType;
+    public RankedSplitType SplitType
+    {
+        get => _splitType;
+        set
+        {
+            if (_splitType == value) return;
+            _splitType = value;
+            OnPropertyChanged(nameof(SplitType));
+            SplitName = value.ToString().Replace('_', ' ').CaptalizeAll();
+        }
+    }
+
+    private string? _splitName = string.Empty;
+    public string? SplitName
+    {
+        get => _splitName;
+        set
+        {
+            if (_splitName == value) return;
+            _splitName = value;
+            OnPropertyChanged(nameof(SplitName));
+        } 
+    }
+
+    private string _lastTimeline = string.Empty;
+    public string LastTimeline
+    {
+        get => _lastTimeline;
+        set
+        {
+            if (_lastTimeline == value) return;
+            _lastTimeline = value;
+            OnPropertyChanged(nameof(LastTimeline));
+        }
+    }
+
+    private long _currentSplitTimeMiliseconds;
+    public long CurrentSplitTimeMiliseconds
+    {
+        get => _currentSplitTimeMiliseconds;
+        set
+        {
+            if (_currentSplitTimeMiliseconds == value) return;
+            _currentSplitTimeMiliseconds = value;
+            OnPropertyChanged(nameof(CurrentSplitTimeMiliseconds));
+            CurrentSplitTime = TimeSpan.FromMilliseconds(value).ToFormattedTime();
+        } 
+    }
+    private string _currentSplitTime = "00:00.000";
+    public string CurrentSplitTime
+    {
+        get => _currentSplitTime;
+        set
+        {
+            _currentSplitTime = value;
+            OnPropertyChanged(nameof(CurrentSplitTime));
+        } 
+    }
+
+    private long _differenceSplitTimeMiliseconds;
+    public long DifferenceSplitTimeMiliseconds
+    {
+        get => _differenceSplitTimeMiliseconds;
+        set
+        {
+            if (_differenceSplitTimeMiliseconds == value) return;
+            _differenceSplitTimeMiliseconds = value;
+            SplitDifferenceTime = TimeSpan.FromMilliseconds(value).ToFormattedTime("+");
+        } 
+    }
+    private string _splitDifferenceTime = "00:00.000";
+    public string SplitDifferenceTime
+    {
+        get => _splitDifferenceTime;
+        set
+        {
+            _splitDifferenceTime = value;
+            OnPropertyChanged(nameof(SplitDifferenceTime));
+        } 
+    }
+
+
+    public RankedPaceViewModel() : base(null!) { }
+    public RankedPaceViewModel(RankedPace data, IDispatcherService dispatcher) : base(dispatcher)
+    {
+        Data = data;
+        Inventory = new PlayerInventoryViewModel(data.Inventory, dispatcher);
+        OnPropertyChanged(nameof(Inventory));
+        
+        Update();
+    }
+
+    public void Update()
+    {
+        HeadImage = Data.HeadImage;
+        HeadImageOpacity = Data.HeadImageOpacity;
+        
+        InGameName = Data.InGameName;
+        LastTimeline = Data.LastTimeline;
+        
+        DifferenceSplitTimeMiliseconds = Data.DifferenceSplitTimeMiliseconds;
+        
+        Inventory.Update();
+        
+        SplitType = Data.SplitType;
+        CurrentSplitTimeMiliseconds = Data.CurrentSplitTimeMiliseconds;
+    }
+}

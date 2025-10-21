@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TournamentTool.App\TournamentTool.App.csproj" />
+    <ProjectReference Include="..\..\src\TournamentTool.Core\TournamentTool.Core.csproj" />
+    <ProjectReference Include="..\..\src\TournamentTool.Domain\TournamentTool.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TournamentTool.Services\TournamentTool.Services.csproj" />
+    <ProjectReference Include="..\..\src\TournamentTool.ViewModels\TournamentTool.ViewModels.csproj" />
+    <ProjectReference Include="..\TournamentTool.App\TournamentTool.App.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ServicesTests\" />
+  </ItemGroup>
+
+</Project>

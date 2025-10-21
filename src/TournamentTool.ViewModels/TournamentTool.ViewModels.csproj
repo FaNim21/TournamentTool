@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TournamentTool.Core\TournamentTool.Core.csproj" />
+      <ProjectReference Include="..\TournamentTool.Domain\TournamentTool.Domain.csproj" />
+      <ProjectReference Include="..\TournamentTool.Services\TournamentTool.Services.csproj" />
+    </ItemGroup>
+
+</Project>

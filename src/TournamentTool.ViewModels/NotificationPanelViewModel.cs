@@ -1,0 +1,137 @@
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
+using TournamentTool.Core.Common;
+using TournamentTool.Core.Extensions;
+using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Logging;
+using TournamentTool.ViewModels.Commands;
+using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Modals;
+using ZLinq;
+
+namespace TournamentTool.ViewModels;
+
+public class NotificationPanelViewModel : BaseViewModel
+{
+    private readonly LogStore _store;
+    private readonly IDialogService _dialogService;
+    private readonly IDispatcherService _dispatcher;
+    private readonly IClipboardService _clipboard;
+
+    public event EventHandler? PanelOpened;
+
+    public ObservableCollection<LogEntryViewModel> Notifications { get; private set; } = [];
+
+    private bool _isNotificationPanelOpen;
+    public bool IsNotificationPanelOpen
+    {
+        get => _isNotificationPanelOpen;
+        set
+        {
+            if (_isNotificationPanelOpen == value) return;
+
+            _isNotificationPanelOpen = value;
+            OnPropertyChanged(nameof(IsNotificationPanelOpen));
+        }
+    }
+    
+    private const int _maxNotifications = 100;
+    private const LogLevel _minimumLevel = LogLevel.Info;
+    private DateTime _lastClearedTimestamp = DateTime.MinValue;
+    private bool _isOpened;
+
+    public event EventHandler<LogEntry>? NotificationReceived;
+    
+    public ICommand HidePanelCommand { get; private set; }
+    public ICommand ClearPanelCommand { get; private set; }
+    public ICommand CopyNotificationToClipboardCommand { get; private set; }
+
+
+    public NotificationPanelViewModel(LogStore store, IDialogService dialogService, IDispatcherService dispatcher, IClipboardService clipboard) : base(dispatcher)
+    {
+        _store = store;
+        _dialogService = dialogService;
+        _dispatcher = dispatcher;
+        _clipboard = clipboard;
+        _store.LogReceived += OnLiveLogReceived;
+        
+        HidePanelCommand = new RelayCommand(HidePanel);
+        ClearPanelCommand = new RelayCommand(Clear);
+        CopyNotificationToClipboardCommand = new RelayCommand<LogEntryViewModel>(CopyNotificationToClipboard);
+    }
+    public override void Dispose()
+    {
+        _store.LogReceived -= OnLiveLogReceived;
+    }
+
+    public override void OnEnable(object? parameter)
+    {
+        _isOpened = true;
+        
+        var logs = _store.Logs.AsValueEnumerable()
+            .Where(e => e.Level >= _minimumLevel)
+            .Where(e => e.Date > _lastClearedTimestamp)
+            .TakeLast(_maxNotifications)
+            .Select(e => new LogEntryViewModel(e, _dispatcher)).ToList();
+        
+        foreach (var logsChunk in logs.Batch(10))
+        {
+            _dispatcher.Invoke(() =>
+            {
+                foreach (var log in logsChunk)
+                {
+                    Notifications.Add(log);
+                }
+            }, CustomDispatcherPriority.Background);
+        }
+    }
+    public override bool OnDisable()
+    {
+        _isOpened = false;
+        _dispatcher.Invoke(() =>
+        {
+            Notifications.Clear();
+        });
+        return true;
+    }
+
+    public void ShowPanel()
+    {
+        PanelOpened?.Invoke(this, EventArgs.Empty);
+        IsNotificationPanelOpen = true;
+        OnEnable(null);
+    }
+    public void HidePanel()
+    {
+        OnDisable();
+        IsNotificationPanelOpen = false;
+    }
+
+    public void OnLiveLogReceived(object? sender, LogEntry log)
+    {
+        if (log.Level < _minimumLevel) return;
+        if (_isOpened)
+        {
+            _dispatcher.Invoke(() => Notifications.Add(new LogEntryViewModel(log, _dispatcher)));
+            return;
+        }
+
+        NotificationReceived?.Invoke(this, log);
+    }
+    
+    private void CopyNotificationToClipboard(LogEntryViewModel log)
+    {
+        _clipboard.SetText($"[{log.Level}] {log.Message}");
+    }
+    
+    private void Clear()
+    {
+        var option = _dialogService.Show("Are you sure you want to clear the notification panel?", "Clearing notification panel", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (option != MessageBoxResult.Yes) return;
+        
+        _lastClearedTimestamp = DateTime.Now;
+        _dispatcher.Invoke(() => Notifications.Clear());
+    }
+}

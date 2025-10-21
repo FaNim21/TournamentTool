@@ -1,0 +1,168 @@
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Windows.Input;
+using TournamentTool.Core.Interfaces;
+using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Entities;
+using TournamentTool.Services.Background;
+using TournamentTool.ViewModels.Commands;
+using TournamentTool.ViewModels.Entities;
+
+namespace TournamentTool.ViewModels.Selectable.Controller.ManagementPanel;
+
+public class RankedManagementPanel : ManagementPanel, IRankedManagementDataReceiver
+{
+    private RankedManagementData _data;
+
+    public string CustomText
+    {
+        get => _data.CustomText; 
+        set
+        {
+            _data.CustomText = value;
+            OnPropertyChanged(nameof(CustomText));
+        }
+    }
+    public int Rounds
+    {
+        get => _data.Rounds; 
+        set
+        {
+            _data.Rounds = value;
+            OnPropertyChanged(nameof(Rounds));
+        }
+    }
+    public int Completions
+    {
+        get => _data.Completions; 
+        set
+        {
+            _data.Completions = value;
+            OnPropertyChanged(nameof(Completions));
+        }
+    }
+    public int Players
+    {
+        get => _data.Players; 
+        set
+        {
+            _data.Players = value;
+            OnPropertyChanged(nameof(Players));
+        }
+    }
+    public long StartTime 
+    {
+        get => _data.StartTime;
+        set
+        {
+            _data.StartTime = value;  
+            OnPropertyChanged(nameof(StartTime));
+        } 
+    }
+    
+    private string _timeStartedText = string.Empty;
+    public string TimeStartedText
+    {
+        get => _timeStartedText; 
+        set
+        {
+            _timeStartedText = value;
+            OnPropertyChanged(nameof(TimeStartedText));
+        }
+    }
+
+    private ObservableCollection<RankedBestSplitViewModel> _bestSplits = [];
+    public ObservableCollection<RankedBestSplitViewModel> BestSplits
+    {
+        get => _bestSplits;
+        set
+        {
+            _bestSplits = value;
+            OnPropertyChanged(nameof(BestSplits));
+        }
+    }
+
+    public ICommand AddRoundCommand { get; set; }
+    public ICommand SubtractRoundCommand { get; set; }
+
+    private long _oldStartTime;
+
+    private const string _rankedPlayerCountFileName = "Ranked_players_count";
+    private const string _rankedCompletedCountFileName = "Ranked_completes_count";
+    private const string _rankedRoundsFileName = "Ranked_rounds";
+    private const string _rankedCustomTextFileName = "Ranked_customText";
+
+
+    public RankedManagementPanel(RankedManagementData managementData, IDispatcherService dispatcher) : base(dispatcher)
+    {
+        _data = managementData;
+        
+        AddRoundCommand = new RelayCommand(() => { Rounds++; });
+        SubtractRoundCommand = new RelayCommand(() => { Rounds--; });
+    }
+
+    public override void OnEnable(object? parameter) { }
+    public override bool OnDisable() => true;
+
+    public override void InitializeAPI(APIDataSaver api)
+    {
+        Update();
+    }
+    public override async Task UpdateAPI(APIDataSaver api)
+    {
+        await api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
+        await api.UpdateFileContent(_rankedPlayerCountFileName, Players);
+
+        await api.UpdateFileContent(_rankedRoundsFileName, Rounds);
+        await api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
+    }
+
+    public void Update()
+    {
+        if (StartTime != _oldStartTime)
+        {
+            _oldStartTime = StartTime;
+            DateTime date = DateTimeOffset.FromUnixTimeMilliseconds(StartTime).ToLocalTime().DateTime;
+            TimeStartedText = date.ToString("dd MMM yyyy hh:mm:ss tt", CultureInfo.CurrentCulture);
+        }
+
+        //ewentualnie to aktualizowanie zastapic guzikiem refresh
+        if (_data.BestSplitsDatas.Count == 0)
+        {
+            Dispatcher.Invoke(() => { BestSplits.Clear(); });
+        }
+        for (var i = 0; i < _data.BestSplitsDatas.Count; i++)
+        {
+            PrivRoomBestSplit bestSplit = _data.BestSplitsDatas[i];
+            if (i < BestSplits.Count) continue;
+            
+            Dispatcher.Invoke(() =>
+            {
+                var viewModel = new RankedBestSplitViewModel(bestSplit, Dispatcher);
+                BestSplits.Add(viewModel);
+            });
+        }
+
+        for (int i = 0; i < _data.BestSplitsDatas.Count; i++)
+        {
+            PrivRoomBestSplit bestSplit = _data.BestSplitsDatas[i];
+            for (int j = 0; j < bestSplit.Datas.Count; j++)
+            {
+                PrivRoomBestSplitData data = bestSplit.Datas[j];
+                if (j < BestSplits[i].Splits.Count) continue;
+                
+                Dispatcher.Invoke(() =>
+                {
+                    RankedBestSplitDataViewModel dataViewModel = new RankedBestSplitDataViewModel(data, Dispatcher);
+                    BestSplits[i].Splits.Add(dataViewModel);
+                });
+            }
+        }
+        
+        OnPropertyChanged(nameof(CustomText));
+        OnPropertyChanged(nameof(Rounds));
+        OnPropertyChanged(nameof(Players));
+        OnPropertyChanged(nameof(Completions));
+        OnPropertyChanged(nameof(StartTime));
+    }
+}

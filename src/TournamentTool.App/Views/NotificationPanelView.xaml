@@ -1,0 +1,154 @@
+﻿<UserControl x:Class="TournamentTool.App.Views.NotificationPanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
+             xmlns:viewModels="clr-namespace:TournamentTool.ViewModels;assembly=TournamentTool.ViewModels"
+             xmlns:entities="clr-namespace:TournamentTool.ViewModels.Entities;assembly=TournamentTool.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:NotificationPanelViewModel}"
+             d:DesignHeight="576"
+             d:DesignWidth="1024"
+             BorderThickness="0.75"
+             BorderBrush="Black" >
+    <Grid>
+        <Border Background="Black"
+                Opacity="0.5"
+                PreviewMouseDown="BorderMouseDown" />
+
+        <StackPanel Background="#1E1E1E"
+              HorizontalAlignment="Right"
+              Width="300">
+            <Grid Background="#2a2a2a"
+                  Height="30">
+                <TextBlock Text="Notifications - Errors, Warnings, Info"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Foreground="Wheat" 
+                           FontWeight="SemiBold"
+                           Margin="5 0 0 0"/>
+
+                <buttons:ButtonNormal ContentText="Clear"
+                                      OnCommand="{Binding ClearPanelCommand}"
+                                      HorizontalAlignment="Right"
+                                      Width="50"
+                                      Height="25"
+                                      Margin="0 0 3 0"/>
+            </Grid>
+
+            <Grid>
+                <ListBox ItemsSource="{Binding Notifications}"
+                         Width="300"
+                         MaxHeight="540"
+                         HorizontalAlignment="Left"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         VirtualizingPanel.ScrollUnit="Pixel">
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type entities:LogEntryViewModel}">
+                            <Border BorderBrush="{Binding BorderBrushColor, Converter={StaticResource StringToBrushConverter}}"
+                                    Width="280"
+                                    BorderThickness="0.5">
+                                <StackPanel Orientation="Vertical"
+                                            Margin="3 2 4 4">
+                                    <Grid>
+                                        <TextBlock Foreground="white">
+                                            <Run Text="{Binding DateMonth, Mode=OneTime}" />
+                                            <Run Text="{Binding Date, Mode=OneTime}" />
+                                            <Run Text=" - " />
+                                            <Run Text="{Binding Level, Mode=OneTime}"
+                                                 Foreground="{Binding BorderBrushColor, Converter={StaticResource StringToBrushConverter}}" />
+                                        </TextBlock>
+                                        <Button FontFamily="Segoe MDL2 Assets"
+                                                Content="&#xE8C8;"
+                                                HorizontalAlignment="Right"
+                                                Command="{Binding DataContext.CopyNotificationToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding .}"
+                                                Height="16"
+                                                Width="16"
+                                                Foreground="White"
+                                                ToolTip="Copy notification to clipboard"
+                                                ToolTipService.InitialShowDelay="0"
+                                                ToolTipService.ShowDuration="4000"
+                                                BorderThickness="0">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Cursor"
+                                                            Value="Hand" />
+                                                    <Setter Property="Background"
+                                                            Value="Transparent" />
+                                                    <Setter Property="Foreground"
+                                                            Value="White" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        CornerRadius="4">
+                                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver"
+                                                                             Value="True">
+                                                                        <Setter Property="Background"
+                                                                                Value="#66FFFFFF" />
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsPressed"
+                                                                             Value="True">
+                                                                        <Setter Property="Background"
+                                                                                Value="#AAFFFFFF" />
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Message, Mode=OneTime}"
+                                               TextWrapping="Wrap"
+                                               MaxHeight="48"
+                                               Foreground="white" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Focusable"
+                                    Value="False" />
+                            <Setter Property="IsHitTestVisible"
+                                    Value="True" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="Margin"
+                                    Value="0 2 0 2" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>
