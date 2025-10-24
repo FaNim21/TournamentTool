@@ -9,14 +9,14 @@ namespace TournamentTool.Services;
 
 public class PresetService : IPresetSaver
 {
-    public ITournamentPresetManager Tournament { get; set; }
+    private readonly ITournamentState _tournamentState;
     
     private readonly JsonSerializerOptions _serializerOptions;
 
 
-    public PresetService(ITournamentPresetManager tournament)
+    public PresetService(ITournamentState tournamentState)
     {
-        Tournament = tournament;
+        _tournamentState = tournamentState;
         
         _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
     }
@@ -33,12 +33,12 @@ public class PresetService : IPresetSaver
 
     public void SavePreset()
     {
-        if (Tournament.IsNullOrEmpty()) return;
+        if (_tournamentState.CurrentPreset == null) return;
         
-        IPreset preset = Tournament.GetData();
+        IPreset preset = _tournamentState.CurrentPreset;
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
         string path = preset.GetPath(Consts.AppdataPath);
         File.WriteAllText(path, data);
-        Tournament.PresetIsSaved();
+        _tournamentState.MarkAsUnmodified();
     }
 }

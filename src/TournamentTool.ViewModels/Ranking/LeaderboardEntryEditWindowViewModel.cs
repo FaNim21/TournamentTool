@@ -205,7 +205,7 @@ public class LeaderboardEntryEditWindowViewModel : BaseViewModel
         if (!_isSaved) return false;
         if (_madeChanges)
         {
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
         _leaderboardPanelViewModel.RecalculateAllEntries();
         

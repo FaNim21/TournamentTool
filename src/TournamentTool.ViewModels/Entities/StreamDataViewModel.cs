@@ -240,11 +240,7 @@ public class StreamDataViewModel : BaseViewModel
             Alt = name;
         }
     }
-    public bool ExistName(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return false;
-        return Main.Equals(name, _ordinalIgnoreCaseComparison) || Alt.Equals(name, _ordinalIgnoreCaseComparison);
-    }
+    public bool ExistName(string name) => Data.ExistName(name);
 
     public StreamDisplayInfo GetStreamDisplayInfo() => Data.GetStreamDisplayInfo();
 

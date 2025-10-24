@@ -222,12 +222,16 @@ public class Scene : BaseViewModel
             return;
         }
         
-        PlayerViewModel? player = SceneController.GetPlayerByStreamName(currentName, type);
+        IPlayerViewModel? player = SceneController.GetPlayerByStreamName(currentName, type);
+        
         pov.ChangeVolume(volume);
         
         if (player != null)
         {
-            pov.SetPOV(player);
+            if (player is PlayerViewModel playerViewModel)
+            {
+                pov.SetPOV(playerViewModel);
+            }
         }
         else
         {

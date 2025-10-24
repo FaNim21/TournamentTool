@@ -4,6 +4,7 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
@@ -21,14 +22,14 @@ public class PointOfViewOBSController : IPointOfViewOBSController
 {
     private ISettings SettingsService { get; }
     private readonly ObsController _obs;
-    private readonly TournamentViewModel _tournament;
+    private readonly ITournamentState _tournamentState;
 
-    
-    public PointOfViewOBSController(ObsController obs, TournamentViewModel tournament, ISettings settingsService)
+
+    public PointOfViewOBSController(ObsController obs, ITournamentState tournamentState, ISettings settingsService)
     {
         SettingsService = settingsService;
         _obs = obs;
-        _tournament = tournament;
+        _tournamentState = tournamentState;
     }
 
     public void UpdatePOVBrowser(PointOfViewOBSData data)
@@ -39,7 +40,7 @@ public class PointOfViewOBSController : IPointOfViewOBSController
     {
         if (!_obs.SetBrowserURL(data.SceneItemName, GetURL(data))) return;
 
-        if (_tournament.SetPovHeadsInBrowser)
+        if (_tournamentState.CurrentPreset.SetPovHeadsInBrowser)
         {
             string url = SettingsService.Settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
             if (string.IsNullOrEmpty(data.HeadViewParametr))
@@ -48,9 +49,9 @@ public class PointOfViewOBSController : IPointOfViewOBSController
             SetBrowserURL(data.HeadItemName, url);
         }
 
-        if (_tournament.DisplayedNameType != DisplayedNameType.None)
+        if (_tournamentState.CurrentPreset.DisplayedNameType != DisplayedNameType.None)
         {
-            string name = _tournament.DisplayedNameType switch
+            string name = _tournamentState.CurrentPreset.DisplayedNameType switch
             {
                 DisplayedNameType.Twitch => data.StreamDisplayInfo.Name,
                 DisplayedNameType.IGN => data.IsFromWhiteList ? data.HeadViewParametr : data.StreamDisplayInfo.Name,
@@ -61,7 +62,7 @@ public class PointOfViewOBSController : IPointOfViewOBSController
             SetTextField(data.TextFieldItemName, name);
         }
 
-        if (_tournament.SetPovPBText)
+        if (_tournamentState.CurrentPreset.SetPovPBText)
         {
             SetTextField(data.PersonalBestItemName, data.PersonalBest);
         }

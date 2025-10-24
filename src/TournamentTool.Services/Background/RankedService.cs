@@ -38,10 +38,11 @@ public class RankedService : IBackgroundService
     private ILoggingService Logger { get; }
     public ISettings SettingsService { get; }
     public IImageService ImageService { get; }
-    private IDispatcherService Dispatcher { get; }
 
     private readonly IPlayerViewModelFactory _playerViewModelFactory;
     private readonly IRankedAPIService _rankedApiService;
+    private readonly ITournamentState _tournamentState;
+    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly RankedManagementData _rankedManagementData;
     
     private ITournamentPresetManager Tournament { get; }
@@ -63,17 +64,21 @@ public class RankedService : IBackgroundService
     private PrivRoomData? _privRoomData;
     
     
-    public RankedService(ITournamentPresetManager tournament, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, IRankedAPIService rankedApiService, IImageService imageService, IDispatcherService dispatcher)
+    public RankedService(ITournamentPresetManager tournament, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, 
+        IPlayerViewModelFactory playerViewModelFactory, IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState,
+        ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         SettingsService = settingsService;
         ImageService = imageService;
-        Dispatcher = dispatcher;
         Tournament = tournament;
         Leaderboard = leaderboard;
         _playerViewModelFactory = playerViewModelFactory;
         _rankedApiService = rankedApiService;
+        _tournamentState = tournamentState;
+        _playerRepository = playerRepository;
 
+        // to nie wiem jeszcze jak rozwiazac, bo nie mam zrobionych wszystkich serwisow
         _rankedManagementData = (Tournament.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
@@ -110,8 +115,8 @@ public class RankedService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
-        if (string.IsNullOrWhiteSpace(Tournament.RankedApiKey) ||
-            string.IsNullOrWhiteSpace(Tournament.RankedApiPlayerName)) return;
+        if (string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiKey) ||
+            string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiPlayerName)) return;
         
         await LoadJsonFileAsync();
         await Task.Delay(TimeSpan.FromMilliseconds(1500), token);
@@ -133,7 +138,7 @@ public class RankedService : IBackgroundService
         */
         try
         {
-            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(Tournament.RankedApiPlayerName, Tournament.RankedApiKey);
+            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
             if (rankedAPIResult == null) return;
             _privRoomData = rankedAPIResult.Data;
         }
@@ -200,13 +205,13 @@ public class RankedService : IBackgroundService
             UUID = player.UUID,
             InGameName = player.InGameName,
             EloRate = player.EloRate ?? -1,
-            Player = Tournament.GetPlayerByIGN(player.InGameName)
+            Player = _playerRepository.GetPlayerByIGN(player.InGameName)?.Data,
         };
             
         _paces[player.UUID] = pace;
         
         pace.Initialize();
-        if (pace.Player == null && Tournament.AddUnknownRankedPlayersToWhitelist)
+        if (pace.Player == null && _tournamentState.CurrentPreset.AddUnknownRankedPlayersToWhitelist)
         {
             AddRankedPlayerToWhitelist(pace);
         }
@@ -231,7 +236,7 @@ public class RankedService : IBackgroundService
         }
         else
         {
-            Tournament.AddPlayer(playerViewModel);
+            _playerRepository.AddPlayer(playerViewModel);
         }
 
         pace.Player = player;

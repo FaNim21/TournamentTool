@@ -3,23 +3,24 @@ using System.Text.Json;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Commands.PlayerManager;
 
 public class ExportWhitelistCommand : BaseCommand
 {
-    private readonly ITournamentManager _tournamentManager;
-    private readonly Tournament _tournamentData;
+    private readonly ITournamentPlayerRepository _playerRepository;
+    private readonly ITournamentState _tournamentState;
     private readonly IDialogService _dialogService;
 
     private readonly JsonSerializerOptions _serializerOptions;
     private string _path = string.Empty;
     
-    public ExportWhitelistCommand(ITournamentManager tournamentManager, Tournament tournamentData, IDialogService dialogService)
+    public ExportWhitelistCommand(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IDialogService dialogService)
     {
-        _tournamentManager = tournamentManager;
-        _tournamentData = tournamentData;
+        _playerRepository = playerRepository;
+        _tournamentState = tournamentState;
         _dialogService = dialogService;
 
         _serializerOptions = new JsonSerializerOptions() { WriteIndented = true };
@@ -30,14 +31,14 @@ public class ExportWhitelistCommand : BaseCommand
         _path = _dialogService.ShowOpenFolder();
         if (string.IsNullOrEmpty(_path)) return;
         
-        var data = JsonSerializer.Serialize<object>(_tournamentData.Players, _serializerOptions);
+        var data = JsonSerializer.Serialize<object>(_playerRepository.Players, _serializerOptions);
         string date = DateTimeOffset.Now.ToString("HH.mm_dd-MM-yyyy");
-        string fileName = $"{_tournamentManager.Name}-Whitelist {date}.json";
+        string fileName = $"{_tournamentState.CurrentPreset.Name}-Whitelist {date}.json";
         
         int count = 1;
         while (File.Exists(Consts.AppdataPath + "\\" + fileName))
         {
-            fileName = $"{_tournamentManager.Name}-Whitelist {date} [{count}].json";
+            fileName = $"{_tournamentState.CurrentPreset.Name}-Whitelist {date} [{count}].json";
             count++;
         }
 

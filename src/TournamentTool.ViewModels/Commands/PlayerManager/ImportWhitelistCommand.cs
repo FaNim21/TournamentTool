@@ -6,6 +6,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Selectable;
@@ -30,7 +31,7 @@ public class ImportWhitelistCommand : BaseCommand
     public ILoggingService Logger { get; }
     private IDispatcherService Dispatcher { get; }
 
-    private readonly ITournamentManager _tournamentManager;
+    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly IPresetSaver _presetSaver;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
@@ -38,14 +39,14 @@ public class ImportWhitelistCommand : BaseCommand
     private string _fileName = string.Empty;
 
     
-    public ImportWhitelistCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, IPresetSaver presetSaver, ILoggingService logger, 
-        IWindowService windowService, IDispatcherService dispatcher, IDialogService dialogService)
+    public ImportWhitelistCommand(PlayerManagerViewModel playerManager, ITournamentPlayerRepository playerRepository, IPresetSaver presetSaver, 
+        ILoggingService logger, IWindowService windowService, IDispatcherService dispatcher, IDialogService dialogService)
     {
         PlayerManager = playerManager;
         Logger = logger;
         Dispatcher = dispatcher;
 
-        _tournamentManager = tournamentManager;
+        _playerRepository = playerRepository;
         _presetSaver = presetSaver;
         _windowService = windowService;
         _dialogService = dialogService;
@@ -100,7 +101,7 @@ public class ImportWhitelistCommand : BaseCommand
             
             progress.Report((float)i/players.Count);
             logProgress.Report($"({i+1}/{players.Count}) Checking for duplicates for player: {player.InGameName}");
-            if (_tournamentManager.ContainsDuplicatesNoDialog(player)) continue;
+            if (_playerRepository.ContainsDuplicatesNoDialog(player)) continue;
             logProgress.Report($"({i+1}/{players.Count}) Adding player: {player.InGameName}");
 
             viewModel.UpdateHeadBitmap();
@@ -144,7 +145,7 @@ public class ImportWhitelistCommand : BaseCommand
                     player.StreamData.SetName(fields[5].ToLower().Trim());
             }
 
-            if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data))
+            if (_playerRepository.ContainsDuplicatesNoDialog(player.Data))
             {
                 totalLines--;
                 continue;
@@ -184,7 +185,7 @@ public class ImportWhitelistCommand : BaseCommand
                 player.Name = loadedPlayer.DisplayName;
                 player.InGameName = loadedPlayer.IGN.Trim();
                 player.StreamData.SetName(loadedPlayer.Twitch.Trim());
-                if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
+                if (_playerRepository.ContainsDuplicatesNoDialog(player.Data)) continue;
                 
                 logProgress.Report($"({i+1}/{length}) Completing data for {player.InGameName}");
                 await player.CompleteData(false);

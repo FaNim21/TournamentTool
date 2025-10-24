@@ -53,6 +53,14 @@ public class StreamData
     public string Other { get; set; } = string.Empty;
     public StreamType OtherType { get; set; } = StreamType.kick;
     
+    
+    public bool ExistName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return false;
+        
+        return Main.Equals(name, StringComparison.OrdinalIgnoreCase) || Alt.Equals(name, StringComparison.OrdinalIgnoreCase);
+    }
+    
     public StreamDisplayInfo GetCorrectStream()
     {
         if (!string.IsNullOrEmpty(Other))

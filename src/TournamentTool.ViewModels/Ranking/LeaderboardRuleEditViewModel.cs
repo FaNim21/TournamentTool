@@ -143,7 +143,7 @@ public class LeaderboardRuleEditWindowViewModel : BaseViewModel
             var subRuleViewModel = new LeaderboardSubRuleViewModel(subRule, Rule, _notifyPresetModification, _dialogService, Dispatcher);
             subRuleViewModel.SelectedScript = LuaScripts[0];
             Rule.SubRules.Add(subRuleViewModel);
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         });
     }
 
@@ -153,7 +153,7 @@ public class LeaderboardRuleEditWindowViewModel : BaseViewModel
         {
             _ruleModel.SubRules.Remove(subRule.Model);
             Rule.SubRules.Remove(subRule);
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         });
     }
 

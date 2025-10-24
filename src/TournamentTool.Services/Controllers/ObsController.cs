@@ -36,7 +36,7 @@ public class ConnectionStateChangedEventArgs : EventArgs
 
 public class ObsController : IDisposable
 {
-    public ITournamentPresetManager Tournament { get; }
+    private readonly ITournamentState _tournamentState;
     private ISettings SettingsService { get; }
     public ILoggingService Logger { get; }
 
@@ -57,27 +57,29 @@ public class ObsController : IDisposable
     private bool _tryingToConnect;
     
 
-    public ObsController(ITournamentPresetManager tournament, ISettings settingsService, ILoggingService logger)
+    public ObsController(ITournamentState tournamentState, ISettings settingsService, ILoggingService logger)
     {
-        Tournament = tournament;
+        _tournamentState = tournamentState;
         SettingsService = settingsService;
         Logger = logger;
 
-        Tournament.OnPresetChanged += PresetChanged;
+        _tournamentState.PresetChanged += PresetChanged;
         
         Client = new ObsClient { RequestTimeout = 10000 };
         Task.Run(Connect);
     }
     public void Dispose()
     {
-        Tournament.OnPresetChanged -= PresetChanged;
+        _tournamentState.PresetChanged -= PresetChanged;
     }
 
-    public void PresetChanged(Tournament preset)
+    public void PresetChanged(object? sender, Tournament? tournament)
     {
-        if (!string.IsNullOrEmpty(Tournament.SceneCollection))
+        if (tournament == null) return;
+        
+        if (!string.IsNullOrEmpty(tournament.SceneCollection))
         {
-            Client.SetCurrentSceneCollection(Tournament.SceneCollection);
+            Client.SetCurrentSceneCollection(tournament.SceneCollection);
         }
     }
     

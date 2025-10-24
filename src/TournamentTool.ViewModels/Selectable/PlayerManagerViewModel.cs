@@ -8,6 +8,7 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.PlayerManager;
 using TournamentTool.ViewModels.Entities;
@@ -17,11 +18,12 @@ namespace TournamentTool.ViewModels.Selectable;
 
 public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 {
+    private readonly ITournamentState _tournamentState;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
     public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-     
-    public TournamentViewModel Tournament { get; }
+
+    public ITournamentPlayerRepository PlayerRepository { get; }
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
@@ -39,7 +41,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         }
     }
     
-    public IEnumerable<PlayerViewModel> Players => Tournament.Players;
+    public ReadOnlyObservableCollection<IPlayerViewModel> Players => PlayerRepository.Players;
     public Predicate<object> PlayerFilter => FilterPlayers;
     private int _playerViewRefreshTrigger = 0;
     public int PlayerViewRefreshTrigger
@@ -160,16 +162,18 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private PlayerSortingType _lastSortingType;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, 
-        ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, IPacemanAPIService pacemanApiService, 
-        IWindowService windowService, IDispatcherService dispatcher, IClipboardService clipboard, IDialogService dialogService) : base(coordinator, dispatcher)
+    public PlayerManagerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,IPresetSaver presetService, 
+        IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, 
+        IPacemanAPIService pacemanApiService, IWindowService windowService, IDispatcherService dispatcher, IClipboardService clipboard, 
+        IDialogService dialogService) : base(coordinator, dispatcher)
     {
-        Tournament = tournament;
+        PlayerRepository = playerRepository;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
         SettingsService = settingsService;
         PlayerViewModelFactory = playerViewModelFactory;
+        _tournamentState = tournamentState;
         _windowService = windowService;
         _dialogService = dialogService;
 
@@ -188,10 +192,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
-        ImportPlayersCommand = new ImportWhitelistCommand(this, tournament, presetService, logger, windowService, dispatcher, dialogService);
-        ExportPlayersCommand = new ExportWhitelistCommand(tournament, tournament.GetData(), dialogService);
+        ImportPlayersCommand = new ImportWhitelistCommand(this, playerRepository, presetService, logger, windowService, dispatcher, dialogService);
+        ExportPlayersCommand = new ExportWhitelistCommand(playerRepository, tournamentState, dialogService);
 
-        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, tournament, presetService, logger, windowService, dispatcher);
+        LoadFromPaceManCommand = new LoadDataFromPacemanCommand(this, playerRepository, presetService, logger, windowService, dispatcher);
 
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { windowService.ShowLoading(FixPlayersHeads); });
@@ -220,7 +224,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
     public override bool CanEnable()
     {
-        return !Tournament.IsNullOrEmpty();
+        return !_tournamentState.IsCurrentlyOpened;
     } 
     public override void OnEnable(object? parameter)
     {
@@ -238,10 +242,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
     private async Task ValidateAllPlayers(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-       int count = Tournament.Players.Count;
+       int count = PlayerRepository.Players.Count;
        for (int i = 0; i < count; i++)
        {
-           var player = Tournament.Players[i];
+           var player = PlayerRepository.Players[i];
            cancellationToken.ThrowIfCancellationRequested();
            progress.Report((float)i / count);
            if (string.IsNullOrEmpty(player.UUID)) continue;
@@ -268,14 +272,14 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
     public void Add(IPlayerViewModel playerViewModel)
     {
-        Tournament.AddPlayer(playerViewModel);
+        PlayerRepository.AddPlayer(playerViewModel);
         
         UpdateInformationCountText();
         RefreshFilteredCollectionView();
     }
     public void Remove(PlayerViewModel playerViewModel)
     {
-        Tournament.RemovePlayer(playerViewModel);
+        PlayerRepository.RemovePlayer(playerViewModel);
         UpdateInformationCountText();
     }
     
@@ -331,7 +335,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         /*if (string.IsNullOrEmpty(filteredCount))
             filteredCount = FilteredPlayersCollectionView!.Cast<PlayerViewModel>().Count().ToString();*/
         
-        InformationCount = $"{header} {filteredCount}/{Tournament.Players.Count}";
+        InformationCount = $"{header} {filteredCount}/{PlayerRepository.Players.Count}";
     }
     
     private void AddPlayer()
@@ -378,10 +382,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     }
     private async Task<bool> EditPlayer(PlayerViewModel playerViewModel)
     {
-        int n = Tournament!.Players.Count;
+        int n = PlayerRepository.Players.Count;
         for (int i = 0; i < n; i++)
         {
-            var current = Tournament!.Players[i];
+            var current = PlayerRepository.Players[i];
             if (!current.Id.Equals(playerViewModel.Id)) continue;
             
             bool success = await UpdatePlayerData(current, playerViewModel, playerViewModel.Id);
@@ -400,20 +404,13 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         Add(newPlayerViewModel);
         return true;
     }
-    private async Task<bool> UpdatePlayerData(PlayerViewModel playerViewModel, PlayerViewModel windowsData, Guid? excludeID = null)
+    private async Task<bool> UpdatePlayerData(IPlayerViewModel playerViewModel, IPlayerViewModel windowsData, Guid? excludeID = null)
     {
-        if (Tournament.ContainsDuplicates(windowsData.Data, excludeID)) return false;
+        if (PlayerRepository.ContainsDuplicates(windowsData.Data, excludeID)) return false;
 
-        playerViewModel.Name = windowsData.Name!;
-        playerViewModel.InGameName = windowsData.InGameName!.Trim();
-        playerViewModel.PersonalBest = windowsData.PersonalBest;
-        playerViewModel.TeamName = windowsData.TeamName?.Trim();
-        playerViewModel.StreamData.Main = windowsData.StreamData.Main.ToLower().Trim();
-        playerViewModel.StreamData.Alt = windowsData.StreamData.Alt.ToLower().Trim();
-        playerViewModel.StreamData.Other = windowsData.StreamData.Other.ToLower().Trim();
-        playerViewModel.StreamData.OtherType = windowsData.StreamData.OtherType;
+        playerViewModel.UpdateData(windowsData);
 
-        Tournament.PresetIsModified();
+        _tournamentState.MarkAsModified();
         await playerViewModel.CompleteData();
         return true;
     }
@@ -425,11 +422,11 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
         Dispatcher.Invoke(() =>
         {
-            int n = Tournament.Players.Count - 1;
+            int n = PlayerRepository.Players.Count - 1;
             for (var i = n; i >= 0; i--)
             {
-                var player = Tournament.Players[i];
-                Tournament.RemovePlayer(player);
+                var player = PlayerRepository.Players[i];
+                PlayerRepository.RemovePlayer(player);
             }
         });
         
@@ -450,12 +447,12 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
     private async Task FixPlayersHeads(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        int count = Tournament.Players.Count;
+        int count = PlayerRepository.Players.Count;
         for (int i = 0; i < count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var current = Tournament!.Players[i];
+            var current = PlayerRepository.Players[i];
             progress.Report((float)i / count);
             logProgress.Report($"({i+1}/{count}) Checking skin to update {current.InGameName} head");
 
@@ -464,7 +461,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         }
 
         Logger.Information("Done fixing players head skins");
-        Tournament.PresetIsModified();
+        _tournamentState.MarkAsModified();
     }
 
     private void ClearFilters()

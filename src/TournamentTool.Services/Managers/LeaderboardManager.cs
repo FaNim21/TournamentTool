@@ -109,7 +109,7 @@ public class LeaderboardManager : ILeaderboardManager
             luaPlayerDatas.Add(luaData);
         }
         
-        LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, Tournament.GetData(), luaPlayerDatas, OnEntryRunRegistered);
+        LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, Tournament.CurrentPreset, luaPlayerDatas, OnEntryRunRegistered);
         RunScript(subRule.LuaPath, context);
         
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
@@ -135,7 +135,7 @@ public class LeaderboardManager : ILeaderboardManager
     {
         Tournament.Leaderboard.RecalculateEntryPosition(entry);
         OnEntryUpdate?.Invoke(entry);
-        Tournament.PresetIsModified();
+        Tournament.MarkAsModified();
     }
 
     private void RunScript(string path, object context)

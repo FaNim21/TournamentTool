@@ -2,6 +2,7 @@
 using TournamentTool.Services;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
@@ -46,7 +47,7 @@ public class ControllerServiceHub
     private System.Timers.Timer _uiUpdateTimer;
     
     
-    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger, TournamentViewModel preset, ObsController obs)
+    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger, ObsController obs, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         
@@ -54,11 +55,11 @@ public class ControllerServiceHub
         _uiUpdateTimer.Elapsed += UpdateTimers;
         _uiUpdateTimer.AutoReset = true;
         _uiUpdateTimer.Start();
-        
-        TwitchUpdaterService twitchUpdater = new(controller, twitch);
+
+        TwitchUpdaterService twitchUpdater = new(controller, twitch, playerRepository);
         AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60));
 
-        APIUpdaterService apiUpdater = new(controller, logger, preset, obs);
+        APIUpdaterService apiUpdater = new(controller, logger, tournamentSerwisyTutaj, obs);
         AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5));
         //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
     }

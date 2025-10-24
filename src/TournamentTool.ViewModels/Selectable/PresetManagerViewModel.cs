@@ -26,12 +26,13 @@ public class PresetManagerViewModel : SelectableViewModel
 {
     public ObservableCollection<TournamentPresetViewModel> Presets { get; set; } = [];
 
+    private readonly ITournamentState _tournamentState;
+    private readonly IDialogService _dialogService;
     private readonly ISettings _settingsService;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IUIInteractionService _uiInteractionService;
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
-    public ITournamentPresetManager Tournament { get; }
     public IPresetSaver PresetService { get; }
 
     private TournamentPresetViewModel? _currentChosen;
@@ -53,6 +54,8 @@ public class PresetManagerViewModel : SelectableViewModel
         }
     }
 
+    public TournamentViewModel TournamentViewModel { get; private set; }
+
     public ICommand OpenControllerCommand { get; set; }
     public ICommand OpenLeaderboardCommand { get; set; }
 
@@ -67,18 +70,20 @@ public class PresetManagerViewModel : SelectableViewModel
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
 
-    public PresetManagerViewModel(ICoordinator coordinator, ITournamentPresetManager tournament, IPresetSaver presetService, 
+    public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
         IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, ILuaScriptsManager luaScriptsManager, 
         IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) : base(coordinator, dispatcher)
     {
-        Tournament = tournament;
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
+        _tournamentState = tournamentState;
+        _dialogService = dialogService;
         _settingsService = settingsService;
         _luaScriptsManager = luaScriptsManager;
         _uiInteractionService = uiInteractionService;
 
+        TournamentViewModel = new TournamentViewModel(playerRepository, tournamentState, dispatcher);
         Tournament.OnControllerModeChanged += UpdateBackgroundService;
         
         LoadPresetsList();
@@ -91,7 +96,7 @@ public class PresetManagerViewModel : SelectableViewModel
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
         OnItemListClickCommand = new OnItemListClickCommand(PresetService);
 
-        ClearCurrentPresetCommand = new RelayCommand(tournament.Clear);
+        ClearCurrentPresetCommand = new RelayCommand(Clear);
         DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, PresetService);
         RenameItemCommand = new RelayCommand(EditPresetName);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this, dialogService);
@@ -100,6 +105,8 @@ public class PresetManagerViewModel : SelectableViewModel
     }
     public override void Dispose()
     {
+        TournamentViewModel.Dispose();
+        
         Tournament.OnControllerModeChanged -= UpdateBackgroundService;
     }
 
@@ -125,7 +132,7 @@ public class PresetManagerViewModel : SelectableViewModel
     {
         if (string.IsNullOrEmpty(opened))
         {
-            Tournament.ChangeData(null);
+            _tournamentState.ChangePreset(null);
             return;
         }
 
@@ -139,7 +146,7 @@ public class PresetManagerViewModel : SelectableViewModel
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
 
-            Tournament.ChangeData(data);
+            _tournamentState.ChangePreset(data);
             _luaScriptsManager.LoadLuaScripts();
         }
         catch (Exception ex)
@@ -160,7 +167,7 @@ public class PresetManagerViewModel : SelectableViewModel
                 TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
                 if (data == null) continue;
 
-                TournamentPresetViewModel presetViewModel = new(data, Tournament, Dispatcher);
+                TournamentPresetViewModel presetViewModel = new(data, _tournamentState, Dispatcher);
                 Presets.Add(presetViewModel);
             }
             catch { /**/ }
@@ -184,7 +191,7 @@ public class PresetManagerViewModel : SelectableViewModel
     }
     public void AddItem(TournamentPreset item)
     {
-        TournamentPresetViewModel itemViewModel = new(item, Tournament, Dispatcher);
+        TournamentPresetViewModel itemViewModel = new(item, _tournamentState, Dispatcher);
         Presets.Add(itemViewModel);
     }
 
@@ -201,11 +208,22 @@ public class PresetManagerViewModel : SelectableViewModel
     public void RemoveItem(TournamentPresetViewModel item)
     {
         Presets.Remove(item);
-        if (Tournament.GetData().Name.Equals(item.Name))
+        
+        if (_tournamentState.CurrentPreset.Name.Equals(item.Name))
         {
-            Tournament.Delete();
+            _tournamentState.DeletePreset();
         }
         File.Delete(item.GetPath());
+    }
+    
+    public void Clear()
+    {
+        var result = _dialogService.Show($"Are you sure you want to clear all data in preset: {_tournamentState.CurrentPreset.Name}", "Clearing", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+
+        TournamentViewModel.Clear();
+        // _tournamentState.CurrentPreset.ClearPresetData();
+        _tournamentState.MarkAsModified();
     }
 
     private void OpenPresetFolder()

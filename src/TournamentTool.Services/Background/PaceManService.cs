@@ -15,11 +15,10 @@ public class PaceManService : IBackgroundService
     private readonly IPlayerViewModelFactory _playerViewModelFactory;
     private readonly IPacemanAPIService _pacemanApiService;
     private readonly IImageService _imageService;
-    private ITournamentPresetManager Tournament { get; }
+    private readonly ITournamentState _tournamentState;
+    private readonly ITournamentPlayerRepository _playerRepository;
     private ILeaderboardManager Leaderboard { get; }
-    private IPresetSaver PresetSaver { get; }
     public ISettings SettingsService { get; }
-    private IDispatcherService Dispatcher { get; }
 
     private IPacemanDataReceiver? _pacemanSidePanelReceiver;
     private IPlayerAddReceiver? _playerAddReceiver;
@@ -29,17 +28,16 @@ public class PaceManService : IBackgroundService
     private bool _blockFirstPacemanRefresh = true;
 
 
-    public PaceManService(ITournamentPresetManager tournament, ILeaderboardManager leaderboard, IPresetSaver presetSaver, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, IPacemanAPIService pacemanApiService, IImageService imageService, IDispatcherService dispatcher)
+    public PaceManService(ILeaderboardManager leaderboard, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, 
+        IPacemanAPIService pacemanApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
     {
-        Tournament = tournament;
-        Tournament = tournament;
         _playerViewModelFactory = playerViewModelFactory;
         _pacemanApiService = pacemanApiService;
         _imageService = imageService;
+        _tournamentState = tournamentState;
+        _playerRepository = playerRepository;
         Leaderboard = leaderboard;
-        PresetSaver = presetSaver;
         SettingsService = settingsService;
-        Dispatcher = dispatcher;
     }
 
     public void RegisterData(IBackgroundDataReceiver? receiver)
@@ -63,7 +61,7 @@ public class PaceManService : IBackgroundService
     public async Task Update(CancellationToken token)
     {
         await OrganizingPacemanData();
-        await Task.Delay(TimeSpan.FromMilliseconds(Tournament.PaceManRefreshRateMiliseconds), token);
+        await Task.Delay(TimeSpan.FromMilliseconds(_tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds), token);
     }
     private async Task OrganizingPacemanData()
     {
@@ -75,14 +73,14 @@ public class PaceManService : IBackgroundService
             bool wasPaceFound = false;
 
             if (pace.IsHidden || pace.IsCheated) continue;
-            if (!pace.IsLive() && Tournament.ShowOnlyLive) continue;
-            pace.ShowOnlyLive = Tournament.ShowOnlyLive;
+            if (!pace.IsLive() && _tournamentState.CurrentPreset.ShowOnlyLive) continue;
+            pace.ShowOnlyLive = _tournamentState.CurrentPreset.ShowOnlyLive;
             
             for (int j = 0; j < currentPaces.Count; j++)
             {
                 var currentPace = currentPaces[j];
                 if (!pace.Nickname.Equals(currentPace.Nickname, StringComparison.OrdinalIgnoreCase)) continue;
-                if (Tournament.IsUsingWhitelistOnPaceMan && currentPace.Player == null) break;
+                if (_tournamentState.CurrentPreset.IsUsingWhitelistOnPaceMan && currentPace.Player == null) break;
                 
                 wasPaceFound = true;
                 currentPace.Update(pace);
@@ -92,14 +90,14 @@ public class PaceManService : IBackgroundService
 
             if (wasPaceFound) continue;
 
-            IPlayerViewModel? player = Tournament.GetPlayerByIGN(pace.Nickname);
-            if (Tournament.IsUsingWhitelistOnPaceMan && player == null) continue;
-            if (Tournament.AddUnknownPacemanPlayersToWhitelist && player == null)
+            IPlayerViewModel? player = _playerRepository.GetPlayerByIGN(pace.Nickname);
+            if (_tournamentState.CurrentPreset.IsUsingWhitelistOnPaceMan && player == null) continue;
+            if (_tournamentState.CurrentPreset.AddUnknownPacemanPlayersToWhitelist && player == null)
             {
                 player = AddPaceManPlayerToWhiteList(pace);
             }
 
-            var paceman = new Paceman(this, pace, player.Data!);
+            var paceman = new Paceman(this, pace, player.Data);
             UpdateHeadImage(paceman);
             
             AddPaceMan(paceman);
@@ -149,13 +147,13 @@ public class PaceManService : IBackgroundService
     {
         if (string.IsNullOrWhiteSpace(twitchName)) return;
 
-        var player = Tournament.GetPlayerByIGN(inGameName);
+        var player = _playerRepository.GetPlayerByIGN(inGameName);
         if (player == null) return;
         
-        player.StreamData.SetName(twitchName);
-        if (!Tournament.IsUsingTwitchAPI)
+        player.SetStreamName(twitchName);
+        if (!_tournamentState.CurrentPreset.IsUsingTwitchAPI)
         {
-            player.StreamData.LiveData.Clear(false);
+            player.ClearStreamData();
         }
     }
 
@@ -182,7 +180,7 @@ public class PaceManService : IBackgroundService
         }
         else
         {
-            Tournament.AddPlayer(playerViewModel);
+            _playerRepository.AddPlayer(playerViewModel);
         }
         return playerViewModel;
     }
@@ -199,11 +197,11 @@ public class PaceManService : IBackgroundService
     {
         bool isPacePriority = splitType switch
         {
-            SplitType.structure_2 => Tournament.Structure2GoodPaceMiliseconds > lastMilestone.IGT,
-            SplitType.first_portal => Tournament.FirstPortalGoodPaceMiliseconds > lastMilestone.IGT,
-            SplitType.enter_stronghold => Tournament.EnterStrongholdGoodPaceMiliseconds > lastMilestone.IGT,
-            SplitType.enter_end => Tournament.EnterEndGoodPaceMiliseconds > lastMilestone.IGT,
-            SplitType.credits => Tournament.CreditsGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.structure_2 => _tournamentState.CurrentPreset.Structure2GoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.first_portal => _tournamentState.CurrentPreset.FirstPortalGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.enter_stronghold => _tournamentState.CurrentPreset.EnterStrongholdGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.enter_end => _tournamentState.CurrentPreset.EnterEndGoodPaceMiliseconds > lastMilestone.IGT,
+            SplitType.credits => _tournamentState.CurrentPreset.CreditsGoodPaceMiliseconds > lastMilestone.IGT,
             _ => false
         };
         return isPacePriority;

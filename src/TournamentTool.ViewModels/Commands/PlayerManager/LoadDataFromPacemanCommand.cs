@@ -4,6 +4,7 @@ using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Selectable;
@@ -16,7 +17,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
     private ILoggingService Logger { get; }
     private IDispatcherService Dispatcher { get; }
 
-    private readonly ITournamentManager _tournamentManager;
+    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly IPresetSaver _presetSaver;
     private readonly IWindowService _windowService;
 
@@ -25,12 +26,12 @@ public class LoadDataFromPacemanCommand : BaseCommand
 
     private PaceManEvent? _chosenEvent;
 
-    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager, ITournamentManager tournamentManager, IPresetSaver presetSaver, ILoggingService logger, IWindowService windowService, IDispatcherService dispatcher)
+    public LoadDataFromPacemanCommand(PlayerManagerViewModel playerManager, ITournamentPlayerRepository playerRepository, IPresetSaver presetSaver, ILoggingService logger, IWindowService windowService, IDispatcherService dispatcher)
     {
         PlayerManager = playerManager;
         Logger = logger;
         Dispatcher = dispatcher;
-        _tournamentManager = tournamentManager;
+        _playerRepository = playerRepository;
         _presetSaver = presetSaver;
         _windowService = windowService;
     }
@@ -95,9 +96,9 @@ public class LoadDataFromPacemanCommand : BaseCommand
         {
             var current = _twitchNames[i];
             cancellationToken.ThrowIfCancellationRequested();
-            foreach (var player in _tournamentManager.Players)
+            foreach (var player in _playerRepository.Players)
             {
-                if (!player.StreamData.ExistName(current.liveAccount)) continue;
+                if (!player.Data.StreamData.ExistName(current.liveAccount)) continue;
                 
                 _twitchNames.RemoveAt(i);
                 i--;
@@ -118,7 +119,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
                 player.PersonalBest = string.Empty;
                 
                 await player.CompleteData();
-                if (_tournamentManager.ContainsDuplicatesNoDialog(player.Data)) continue;
+                if (_playerRepository.ContainsDuplicatesNoDialog(player.Data)) continue;
                 logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
                 player.Name = twitch.liveAccount?.Trim() ?? player.InGameName;
                 await Dispatcher.InvokeAsync(() => { PlayerManager.Add(player); });

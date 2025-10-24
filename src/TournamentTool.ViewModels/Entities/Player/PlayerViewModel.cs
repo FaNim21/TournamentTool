@@ -157,9 +157,10 @@ public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
         }
         Data = data;
         StreamData = new StreamDataViewModel(Data.StreamData, dispatcher, dialogService);
+        
+        Initialize();
     }
-    
-    public void Initialize()
+    private void Initialize()
     {
         LoadHead();
         CleanUpUUID();
@@ -179,6 +180,20 @@ public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
     public void ShowTeamName(bool option)
     {
         IsShowingTeamName = option;
+    }
+
+    public void UpdateData(IPlayerViewModel dataToUpdate)
+    {
+        if (dataToUpdate is not PlayerViewModel data) return;
+        
+        Name = data.Name!;
+        InGameName = data.InGameName!.Trim();
+        PersonalBest = data.PersonalBest;
+        TeamName = data.TeamName?.Trim();
+        StreamData.Main = data.StreamData.Main.ToLower().Trim();
+        StreamData.Alt = data.StreamData.Alt.ToLower().Trim();
+        StreamData.Other = data.StreamData.Other.ToLower().Trim();
+        StreamData.OtherType = data.StreamData.OtherType;
     }
     
     public async Task CompleteData(bool completeUUID = true)
@@ -268,6 +283,15 @@ public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
     {
         IsUsedInPov = false;
     }
+    public void ClearStreamData()
+    {
+        StreamData.Live.Clear(false);
+    }
+    public void ClearPOVDependencies()
+    {
+        IsUsedInPov = false;
+        IsUsedInPreview = false;
+    }
     
     public void CleanUpUUID()
     {
@@ -283,7 +307,6 @@ public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
         if (InGameName!.Equals(player.InGameName, _ordinalIgnoreCaseComparison)) return true;
         return StreamData.EqualsNoDialog(player.StreamData);
     }
-        
     public bool Equals(Domain.Entities.Player player)
     {
         if (Name!.Trim().Equals(player.Name!.Trim(), _ordinalIgnoreCaseComparison))

@@ -18,10 +18,14 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    public DebugWindowViewModel? DebugWindowViewModel { get; private set; }
-
+    public ILoggingService Logger { get; }
     public IPresetSaver PresetSaver { get; }
-    public IPresetInfo PresetInfo { get; }
+    public ITournamentState TournamentState { get; }
+
+    private readonly IUpdateCheckerService _updateChecker;
+    private readonly IApplicationState _applicationState;
+    private readonly IWindowService _windowService;
+    private readonly IDialogService _dialogService;
 
     private INavigationService? _navigationService;
     public INavigationService NavigationService
@@ -55,12 +59,7 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged(nameof(NotificationPanel));
         }
     }
-    
-    private readonly IUpdateCheckerService _updateChecker;
-    private readonly IApplicationState _applicationState;
-    private readonly IWindowService _windowService;
-    private readonly IDialogService _dialogService;
-    public ILoggingService Logger { get; }
+    public DebugWindowViewModel? DebugWindowViewModel { get; private set; }
 
     private bool _isHamburgerMenuOpen;
     public bool IsHamburgerMenuOpen
@@ -105,7 +104,9 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; private set; }
 
 
-    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel, IPresetSaver presetSaver, IPresetInfo presetInfo, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, IWindowService windowService, IDialogService dialogService) : base(dispatcher)
+    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel,
+        IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, 
+        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState) : base(dispatcher)
     {
         _updateChecker = updateChecker;
         _applicationState = applicationState;
@@ -116,7 +117,7 @@ public class MainViewModel : BaseViewModel
         Logger = logger;
         NotificationPanel = notificationPanel;
         PresetSaver = presetSaver;
-        PresetInfo = presetInfo;
+        TournamentState = tournamentState;
 
         NavigationService.OnSelectedViewModelChanged += UpdateDebugWindowViewModel;
         _applicationState.WindowBlockedChanged += OnWindowBlockedChanged;

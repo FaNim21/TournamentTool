@@ -102,7 +102,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
     <Grid Margin="4 1 2 1"
@@ -115,11 +114,11 @@
         <StackPanel Grid.Column="0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left">
-            <TextBlock Text="{Binding PresetInfo.Name}"
+            <TextBlock Text="{Binding PresetName}"
                        FontSize="16"
                        FontWeight="Thin"
                        Foreground="AntiqueWhite" />
-            <TextBlock Visibility="{Binding PresetInfo.IsPresetModified, Converter={StaticResource BoolToVisibilityConverter}}"
+            <TextBlock Visibility="{Binding IsPresetModified, Converter={StaticResource BoolToVisibilityConverter}}"
                        Foreground="Gray"
                        FontWeight="Bold"
                        Padding="0"
@@ -182,6 +181,5 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
     </Grid>
 </UserControl>

@@ -1,6 +1,9 @@
-﻿using TournamentTool.Domain.Entities;
+﻿using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Services;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Entities.Player;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
 
@@ -8,12 +11,14 @@ public class TwitchUpdaterService : IServiceUpdater, IServiceUpdaterTimer
 {
     private readonly ControllerViewModel _controller;
     private readonly TwitchService _twitch;
+    private readonly ITournamentPlayerRepository _playerRepository;
 
 
-    public TwitchUpdaterService(ControllerViewModel controller, TwitchService twitch)
+    public TwitchUpdaterService(ControllerViewModel controller, TwitchService twitch, ITournamentPlayerRepository playerRepository)
     {
         _controller = controller;
         _twitch = twitch;
+        _playerRepository = playerRepository;
     }
     public void OnEnable()
     {
@@ -36,17 +41,19 @@ public class TwitchUpdaterService : IServiceUpdater, IServiceUpdaterTimer
         List<string> logins = [];
         List<StreamDataViewModel> notLivePlayers = [];
 
-        for (int i = 0; i < _controller.TournamentViewModel.Players.Count; i++)
+        for (int i = 0; i < _playerRepository.Players.Count; i++)
         {
-            var current = _controller.TournamentViewModel.Players[i];
-            current.StreamData.Live.WasUpdated = false;
+            IPlayerViewModel current = _playerRepository.Players[i];
+            if (current is not PlayerViewModel currentPlayer) continue;
+            
+            currentPlayer.StreamData.Live.WasUpdated = false;
 
-            if (!string.IsNullOrEmpty(current.StreamData.Main))
-                logins.Add(current.StreamData.Main!);
-            if (!string.IsNullOrEmpty(current.StreamData.Alt))
-                logins.Add(current.StreamData.Alt!);
+            if (!string.IsNullOrEmpty(currentPlayer.StreamData.Main))
+                logins.Add(currentPlayer.StreamData.Main!);
+            if (!string.IsNullOrEmpty(currentPlayer.StreamData.Alt))
+                logins.Add(currentPlayer.StreamData.Alt!);
 
-            notLivePlayers.Add(current.StreamData);
+            notLivePlayers.Add(currentPlayer.StreamData);
         }
 
         var streams = await _twitch.GetAllStreamsAsync(logins);

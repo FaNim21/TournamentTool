@@ -14,7 +14,6 @@ public class APIUpdaterService : IServiceUpdater
     private ILoggingService Logger { get; }
     
     private readonly ControllerViewModel _controller;
-    private readonly TournamentViewModel _preset;
     private readonly ObsController _obs;
     private readonly APIDataSaver _api;
 
@@ -31,11 +30,10 @@ public class APIUpdaterService : IServiceUpdater
     private string[] _savedNames = new string[3];
     
     
-    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, TournamentViewModel preset, ObsController obs)
+    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, ObsController obs)
     {
         Logger = logger;
         _controller = controller;
-        _preset = preset;
         _obs = obs;
 
         _api = new APIDataSaver();
@@ -98,7 +96,7 @@ public class APIUpdaterService : IServiceUpdater
     }
     private async Task UpdateTwoPlayersSplits()
     {
-        if (_preset.ManagementData is not RankedManagementData rankedManagementData) return;
+        if (_tournamentState.CurrentPreset.ManagementData is not RankedManagementData rankedManagementData) return;
         
         for (int i = 0; i < 3; i++)
         {

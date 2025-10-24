@@ -11,10 +11,10 @@ namespace TournamentTool.ViewModels.Selectable.Preset;
 
 public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
 {
-    private ITournamentPresetManager Tournament { get; }
+    private readonly ITournamentState _tournamentState;
     
     private readonly TournamentPreset _data;
-    
+
     public string Name
     {
         get => _data.Name;
@@ -26,10 +26,10 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
     } 
 
 
-    public TournamentPresetViewModel(TournamentPreset data, ITournamentPresetManager tournament, IDispatcherService dispatcher) : base(dispatcher)
+    public TournamentPresetViewModel(TournamentPreset data, ITournamentState tournamentState, IDispatcherService dispatcher) : base(dispatcher)
     {
         _data = data;
-        Tournament = tournament;
+        _tournamentState = tournamentState;
     }
 
     public void ChangeName(string name)
@@ -43,6 +43,7 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
         var newPath = Path.Combine(directoryName, jsonName);
 
         File.Move(path, newPath);
+        _tournamentState.ChangeName(name);
         Name = name;
     }
 

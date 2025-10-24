@@ -10,6 +10,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
@@ -27,7 +28,7 @@ public interface ISceneController
 {
     void ClearPlayersFromPovs();
 
-    PlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
+    IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName);
     Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene);
 }
@@ -37,10 +38,10 @@ public interface ISceneController
 /// </summary>
 public class SceneControllerViewmodel : BaseViewModel, ISceneController, IScenePovInteractable
 {
+    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly Lock _lock = new();
     
     public ControllerViewModel Controller { get; }
-    public TournamentViewModel Tournament { get; }
     public ILoggingService Logger { get; }
     private ISettings SettingsService { get; }
     public ObsController OBS { get; }
@@ -118,21 +119,16 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     }
 
 
-    public SceneControllerViewmodel(ControllerViewModel controller, 
-        ObsController obs,
-        TournamentViewModel tournament, 
-        ILoggingService logger,
-        ISettings settingsService, 
-        IDispatcherService dispatcher,
-        IWindowService windowService) : base(dispatcher)
+    public SceneControllerViewmodel(ControllerViewModel controller, ObsController obs, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
+        ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
     {
+        _playerRepository = playerRepository;
         Controller = controller;
         OBS = obs;
-        Tournament = tournament;
         Logger = logger;
         SettingsService = settingsService;
 
-        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournament, settingsService);
+        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournamentState, settingsService);
         MainScene = new Scene(SceneType.Main, this, this, povController, windowService, logger, dispatcher);
         PreviewScene = new Scene(SceneType.Preview, this, this, povController, windowService, logger, dispatcher);
         
@@ -223,7 +219,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     private void OnOBSDisconnected()
     {
         UpdateView();
-        Tournament.ClearPlayersFromPOVS();
+        ClearPlayersFromPovs();
         ClearScenes();
     }
 
@@ -391,7 +387,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
     public void ClearPlayersFromPovs()
     {
-        Tournament.ClearPlayersFromPOVS();
+        _playerRepository.ClearPlayersFromPOVS();
     }
     
     private async Task LoadScenesForStudioMode(bool force = true)
@@ -465,7 +461,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         Controller.UnSelectItems(clearAll);
     }
 
-    public PlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => Tournament.GetPlayerByStreamName(name, type);
+    public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => _playerRepository.GetPlayerByStreamName(name, type);
     public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName) => await OBS.GetBrowserURLStreamInfo(sceneItemName);
     public async Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene)
     {

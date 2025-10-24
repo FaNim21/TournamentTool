@@ -81,4 +81,36 @@ public class Tournament : IPreset
     public string RankedApiPlayerName { get; set; } = string.Empty;
     public string RankedApiKey { get; set; } = string.Empty;
     public bool AddUnknownRankedPlayersToWhitelist { get; set; }
+    
+    
+    public void ClearPresetData()
+    {
+        IsUsingTeamNames = false;
+        IsUsingWhitelistOnPaceMan = true;
+        ShowOnlyLive = true;
+        AddUnknownPacemanPlayersToWhitelist = false;
+
+        SceneCollection = string.Empty;
+
+        SetPovHeadsInBrowser = false;
+        SetPovPBText = false;
+        DisplayedNameType = DisplayedNameType.None;
+
+        IsUsingTwitchAPI = false;
+        ShowStreamCategory = true;
+
+        PaceManRefreshRateMiliseconds = 3000;
+
+        Structure2GoodPaceMiliseconds = 270000;
+        FirstPortalGoodPaceMiliseconds = 360000;
+        EnterStrongholdGoodPaceMiliseconds = 450000;
+        EnterEndGoodPaceMiliseconds = 480000;
+        CreditsGoodPaceMiliseconds = 600000;
+
+        ControllerMode = ControllerMode.None;
+
+        RankedApiPlayerName = string.Empty;
+        RankedApiKey = string.Empty;
+        AddUnknownRankedPlayersToWhitelist = false;
+    }
 }

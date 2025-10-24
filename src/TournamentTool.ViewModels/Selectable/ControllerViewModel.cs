@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Net.Mime;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
@@ -10,6 +9,7 @@ using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
@@ -24,12 +24,14 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 {
     private readonly TwitchService _twitch;
 
+    private readonly ITournamentPlayerRepository _playerRepository;
+    private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     
     public SceneControllerViewmodel SceneController { get; }
     private readonly ControllerServiceHub _serviceHub;
 
-    public IEnumerable<PlayerViewModel> Players => TournamentViewModel.Players;
+    public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
     public Predicate<object> PlayerFilter => FilterPlayers;
     private int _playerViewRefreshTrigger = 0;
     public int PlayerViewRefreshTrigger
@@ -45,7 +47,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
 
-    public TournamentViewModel TournamentViewModel { get; }
     public LeaderboardPanelViewModel Leaderboard { get; }
     public ILoggingService Logger { get; }
     public ISettings SettingsService { get; }
@@ -118,7 +119,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }
     }
 
-    public bool IsUsingTwitchAPI => TournamentViewModel.IsUsingTwitchAPI;
+    public bool IsUsingTwitchAPI => _tournamentState.CurrentPreset.IsUsingTwitchAPI;
 
     public ICommand UnSelectItemsCommand { get; set; }
     
@@ -126,7 +127,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     
 
     public ControllerViewModel(ICoordinator coordinator, 
-        TournamentViewModel tournamentViewModel,
+        ITournamentPlayerRepository playerRepository,
+        ITournamentState tournamentState,
         LeaderboardPanelViewModel leaderboard, 
         IBackgroundCoordinator backgroundCoordinator, 
         ObsController obs,
@@ -136,26 +138,27 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         IDispatcherService dispatcher,
         IWindowService windowService) : base(coordinator, dispatcher)
     {
-        TournamentViewModel = tournamentViewModel;
         Leaderboard = leaderboard;
         Logger = logger;
         SettingsService = settingsService;
+        _playerRepository = playerRepository;
+        _tournamentState = tournamentState;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
         
-        SceneController = new SceneControllerViewmodel(this, obs, tournamentViewModel, logger, settingsService, dispatcher, windowService);
-        _serviceHub = new ControllerServiceHub(this, twitch, logger, tournamentViewModel, obs);
+        SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsService, dispatcher, windowService);
+        _serviceHub = new ControllerServiceHub(this, twitch, logger, tournamentSerwisyTutaj, obs);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
 
     public override bool CanEnable()
     {
-        return !TournamentViewModel.IsNullOrEmpty();
+        return !_tournamentState.IsCurrentlyOpened;
     } 
     public override void OnEnable(object? parameter)
     {
-        switch(TournamentViewModel.ControllerMode)
+        switch(_tournamentState.CurrentPreset.ControllerMode)
         {
             case ControllerMode.None:
                 UseSidePanel = false;
@@ -181,7 +184,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
                     SidePanel = new RankedPacePanel(this, Dispatcher);
-                    ManagementPanel = new RankedManagementPanel((RankedManagementData)TournamentViewModel.ManagementData!, Dispatcher);
+                    ManagementPanel = new RankedManagementPanel((RankedManagementData)_tournamentState.CurrentPreset.ManagementData!, Dispatcher);
                 }
                 break;
         }
@@ -197,7 +200,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
         if (!IsUsingTwitchAPI || !_twitch.IsConnected)
         {
-            TournamentViewModel.ClearPlayerStreamData();
+            _playerRepository.ClearPlayerStreamData();
         }
     }
     public override bool OnDisable()
@@ -211,7 +214,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         SceneController.OnDisable();
         _serviceHub.OnDisable();
 
-        TournamentViewModel.ClearFromController();
+        _playerRepository.ClearFromController();
 
         // FilteredPlayers!.Clear();
         CurrentChosenPOV = null;
@@ -234,7 +237,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     
     public void Add(IPlayerViewModel playerViewModel)
     {
-        TournamentViewModel.AddPlayer(playerViewModel);
+        _playerRepository.AddPlayer(playerViewModel);
         
         RefreshFilteredCollection();
     }

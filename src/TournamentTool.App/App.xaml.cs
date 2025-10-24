@@ -53,6 +53,7 @@ public partial class App : Application
             DataContext = provider.GetRequiredService<MainViewModel>()
         });
 
+        //App services implementations
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IApplicationState, ApplicationState>();
@@ -62,22 +63,27 @@ public partial class App : Application
         services.AddSingleton<IDataProtect, WindowsDataProtect>();
         services.AddSingleton<IMenuService, MenuService>();
         
+        //View model factories
         services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
-
+        
+        //Http access services
         services.AddHttpClient<IImageService, ImageService>();
         services.AddHttpClient<IUpdateCheckerService, UpdateCheckerService>();
         services.AddHttpClient<IMinecraftDataService, MinecraftDataService>();
         services.AddHttpClient<IPacemanAPIService, PacemanAPIService>();
         services.AddHttpClient<IRankedAPIService, RankedAPIService>();
 
+        //Logging control
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<LogStore>();
         services.AddSingleton<NotificationPanelViewModel>();
         
+        //Tournament preset control
+        services.AddSingleton<ITournamentState, TournamentState>();
+        services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentPresetManager, TournamentPresetManager>();
-        services.AddSingleton<IPresetInfo>(s => s.GetRequiredService<ITournamentPresetManager>());
-        services.AddSingleton<INotifyPresetModification>(s => s.GetRequiredService<ITournamentPresetManager>());
         
+        //Rest xd
         services.AddSingleton<ObsController>();
         
         services.AddSingleton<SettingsService>();
