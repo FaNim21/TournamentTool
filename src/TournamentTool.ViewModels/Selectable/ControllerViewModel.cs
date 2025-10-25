@@ -22,8 +22,7 @@ namespace TournamentTool.ViewModels.Selectable;
 
 public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, IPlayerAddReceiver, IHotkeyReceiver
 {
-    private readonly TwitchService _twitch;
-
+    private readonly ITwitchService _twitch;
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
@@ -126,17 +125,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private CancellationTokenSource? _playersRefreshTokenSource;
     
 
-    public ControllerViewModel(ICoordinator coordinator, 
-        ITournamentPlayerRepository playerRepository,
-        ITournamentState tournamentState,
-        LeaderboardPanelViewModel leaderboard, 
-        IBackgroundCoordinator backgroundCoordinator, 
-        ObsController obs,
-        TwitchService twitch, 
-        ILoggingService logger,
-        ISettings settingsService,
-        IDispatcherService dispatcher,
-        IWindowService windowService) : base(coordinator, dispatcher)
+    public ControllerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
+        ITournamentLeaderboardRepository leaderboardRepository, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, 
+        ObsController obs, ITwitchService twitch, ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
     {
         Leaderboard = leaderboard;
         Logger = logger;
@@ -147,7 +138,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _twitch = twitch;
         
         SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsService, dispatcher, windowService);
-        _serviceHub = new ControllerServiceHub(this, twitch, logger, tournamentSerwisyTutaj, obs);
+        _serviceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
@@ -200,7 +191,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
         if (!IsUsingTwitchAPI || !_twitch.IsConnected)
         {
-            _playerRepository.ClearPlayerStreamData();
+            _playerRepository.ClearPlayersStreamData();
         }
     }
     public override bool OnDisable()
@@ -214,7 +205,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         SceneController.OnDisable();
         _serviceHub.OnDisable();
 
-        _playerRepository.ClearFromController();
+        _playerRepository.ClearPlayersFromController();
 
         // FilteredPlayers!.Clear();
         CurrentChosenPOV = null;

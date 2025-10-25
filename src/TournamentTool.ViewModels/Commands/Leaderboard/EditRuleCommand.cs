@@ -9,20 +9,17 @@ namespace TournamentTool.ViewModels.Commands.Leaderboard;
 
 public class EditRuleCommand : BaseCommand
 {
-    private ITournamentPresetManager Tournament { get; }
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IDialogService _dialogService;
     private readonly IDispatcherService _dispatcher;
     private readonly IWindowService _windowService;
-    private readonly INotifyPresetModification _notifyPresetModification;
+    private readonly ITournamentState _tournamentState;
 
 
-    public EditRuleCommand(IWindowService windowService, ITournamentPresetManager tournament, INotifyPresetModification notifyPresetModification, ILuaScriptsManager luaScriptsManager, IDialogService dialogService, IDispatcherService dispatcher)
+    public EditRuleCommand(IWindowService windowService, ITournamentState tournamentState, ILuaScriptsManager luaScriptsManager, IDialogService dialogService, IDispatcherService dispatcher)
     {
         _windowService = windowService;
-        _notifyPresetModification = notifyPresetModification;
-        Tournament = tournament;
-        Tournament = tournament;
+        _tournamentState = tournamentState;
         _luaScriptsManager = luaScriptsManager;
         _dialogService = dialogService;
         _dispatcher = dispatcher;
@@ -32,8 +29,8 @@ public class EditRuleCommand : BaseCommand
     {
         if (parameter is not LeaderboardRuleViewModel rule) return;
 
-        rule.FilterSplitsAndAdvancements(Tournament.ControllerMode);
-        LeaderboardRuleEditWindowViewModel windowViewModel = new(rule, _luaScriptsManager, _notifyPresetModification, _dialogService, _dispatcher);
+        rule.FilterSplitsAndAdvancements(_tournamentState.CurrentPreset.ControllerMode);
+        LeaderboardRuleEditWindowViewModel windowViewModel = new(rule, _luaScriptsManager, _tournamentState, _dialogService, _dispatcher);
         _windowService.ShowDialog(windowViewModel);
     }
 }

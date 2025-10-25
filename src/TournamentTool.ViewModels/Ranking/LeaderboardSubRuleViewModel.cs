@@ -6,6 +6,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities.Lua;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 
@@ -35,7 +36,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.Description = value;
             OnPropertyChanged(nameof(Description));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         } 
     }
     public int Time
@@ -46,7 +47,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
             Model.Time = value;
             OnPropertyChanged(nameof(Time));
             SetTime();
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         } 
     }
     public int BasePoints
@@ -56,7 +57,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.BasePoints = value;
             OnPropertyChanged(nameof(BasePoints));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         } 
     }
     public int MaxWinners
@@ -66,7 +67,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.MaxWinners = value;
             OnPropertyChanged(nameof(MaxWinners));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         } 
     }
     public bool Repeatable
@@ -76,7 +77,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
         {
             Model.Repeatable = value;
             OnPropertyChanged(nameof(Repeatable));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         } 
     }
 
@@ -124,7 +125,7 @@ public class LeaderboardSubRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedScript));
 
             LuaPath = _selectedScript.Name;
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
 
             Model.CustomVariables.Clear();
             foreach (var variable in _selectedScript.CustomVariables)

@@ -80,8 +80,9 @@ public partial class App : Application
         
         //Tournament preset control
         services.AddSingleton<ITournamentState, TournamentState>();
-        services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentPresetManager, TournamentPresetManager>();
+        services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
+        services.AddSingleton<ITournamentLeaderboardRepository, TournamentLeaderboardRepository>();
         
         //Rest xd
         services.AddSingleton<ObsController>();
@@ -91,7 +92,7 @@ public partial class App : Application
         services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsService>());
         
         services.AddSingleton<IPresetSaver, PresetService>();
-        services.AddSingleton<TwitchService>();
+        services.AddSingleton<ITwitchService, TwitchService>();
         
         services.AddSingleton<ILeaderboardManager, LeaderboardManager>();
         services.AddSingleton<ILuaScriptsManager, LuaScriptsManager>();

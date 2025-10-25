@@ -2,6 +2,7 @@
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities.Lua;
+using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.ViewModels.Entities;
 
@@ -22,7 +23,7 @@ public class LuaCustomVariableViewModel : BaseViewModel
             if (_model.Value == value) return;
             _model.Value = value;
             OnPropertyChanged(nameof(Value));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
     public bool ValueBool
@@ -32,7 +33,7 @@ public class LuaCustomVariableViewModel : BaseViewModel
         {
             _model.Value = value.ToString();
             OnPropertyChanged(nameof(ValueBool));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
     public double ValueNumeric
@@ -42,7 +43,7 @@ public class LuaCustomVariableViewModel : BaseViewModel
         {
             _model.Value = value.ToString(CultureInfo.InvariantCulture);
             OnPropertyChanged(nameof(ValueNumeric));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
 

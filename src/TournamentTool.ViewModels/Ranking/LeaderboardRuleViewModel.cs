@@ -7,6 +7,7 @@ using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Attributes;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 
@@ -25,7 +26,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
         {
             _rule.Name = value;
             OnPropertyChanged(nameof(Name));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
     public bool IsEnabled
@@ -37,7 +38,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(IsEnabled));
             
             SetIsEnabledButton();
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
     public LeaderboardRuleType RuleType
@@ -48,7 +49,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
             _rule.RuleType = value;
             RuleTypeText = value.ToString();
             OnPropertyChanged(nameof(RuleType));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
 
@@ -65,7 +66,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
             
             _rule.ChosenAdvancement = value; 
             OnPropertyChanged(nameof(ChosenMilestone));
-            _notifyPresetModification.PresetIsModified();
+            _notifyPresetModification.MarkAsModified();
         }
     }
 
@@ -215,7 +216,7 @@ public class LeaderboardRuleViewModel : BaseViewModel
     {
         RuleType = RuleType == LeaderboardRuleType.Split ? LeaderboardRuleType.Advancement : LeaderboardRuleType.Split;
         FilterSplitsAndAdvancements(ControllerMode);
-        _notifyPresetModification.PresetIsModified();
+        _notifyPresetModification.MarkAsModified();
     }
     private void SwitchSubRulesVisibility()
     {

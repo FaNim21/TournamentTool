@@ -5,6 +5,7 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
@@ -15,6 +16,9 @@ public class APIUpdaterService : IServiceUpdater
     
     private readonly ControllerViewModel _controller;
     private readonly ObsController _obs;
+    private readonly ITournamentState _tournamentState;
+    private readonly ITournamentLeaderboardRepository _leaderboardRepository;
+    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly APIDataSaver _api;
 
     private record LeaderboardPlayerAPINames(string IGN, string PreviousRoundPoints, string OverallPoints);
@@ -30,11 +34,15 @@ public class APIUpdaterService : IServiceUpdater
     private string[] _savedNames = new string[3];
     
     
-    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, ObsController obs)
+    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, ObsController obs, ITournamentState tournamentState, 
+        ITournamentLeaderboardRepository leaderboardRepository, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         _controller = controller;
         _obs = obs;
+        _tournamentState = tournamentState;
+        _leaderboardRepository = leaderboardRepository;
+        _playerRepository = playerRepository;
 
         _api = new APIDataSaver();
         
@@ -282,20 +290,20 @@ public class APIUpdaterService : IServiceUpdater
         
         for (int i = 0; i < 20; i++)
         {
-            if (i >= _preset.Leaderboard.OrderedEntries.Count) break;
+            if (i >= _leaderboardRepository.OrderedEntries.Count) break;
             
-            var entry = _preset.Leaderboard.OrderedEntries[i];
-            var player = _preset.GetPlayerByUUID(entry.PlayerUUID);
+            var entry = _leaderboardRepository.OrderedEntries[i];
+            var player = _playerRepository.GetPlayerByUUID(entry.PlayerUUID);
             if (player == null) continue;
             
             await _api.UpdateFileContent(_leaderboardAPINames[i].IGN, player.InGameName!);
             await _api.UpdateFileContent(_leaderboardAPINames[i].OverallPoints, entry.Points);
 
-            if (_preset.ManagementData is RankedManagementData data)
+            if (_tournamentState.CurrentPreset.ManagementData is RankedManagementData data)
             {
                 var previousRoundPoints = entry.Milestones.
                     OfType<EntryRankedMilestoneData>().
-                    FirstOrDefault(e => e.Main.Milestone == _preset.Leaderboard.Rules[0].ChosenAdvancement && e.Round == (data.Rounds - 1));
+                    FirstOrDefault(e => e.Main.Milestone == _leaderboardRepository.Rules[0].ChosenAdvancement && e.Round == (data.Rounds - 1));
                 
                 await _api.UpdateFileContent(_leaderboardAPINames[i].PreviousRoundPoints, previousRoundPoints?.Points ?? 0);
             }
@@ -326,12 +334,12 @@ public class APIUpdaterService : IServiceUpdater
             
             number -= 1;
             if (number is < 0 or > 19) continue;
-            if (number >= _preset.Leaderboard.OrderedEntries.Count)
+            if (number >= _leaderboardRepository.OrderedEntries.Count)
             {
                 _obs.SetBrowserURL(item.SourceName, string.Empty);
                 continue;
             }
-            var entry = _preset.Leaderboard.OrderedEntries[number];
+            var entry = _leaderboardRepository.OrderedEntries[number];
 
             string url = _controller.SettingsService.Settings.HeadAPIType.GetHeadURL(entry.PlayerUUID, 180);
             _obs.SetBrowserURL(item.SourceName, url);

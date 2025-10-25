@@ -12,7 +12,19 @@ using Stream = TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream;
 
 namespace TournamentTool.Services;
 
-public class TwitchService
+public interface ITwitchService
+{
+    bool IsConnected { get; }
+    DateTime? TokenExpiresAt { get; }
+
+    Task ConnectAsync(bool silent = false);
+    void Disconnect();
+
+    Task<List<Stream>> GetAllStreamsAsync(List<string> logins);
+    Task<CreatedClipResponse?> CreateClipAsync(string broadcasterID);
+}
+
+public class TwitchService : ITwitchService
 {
     private readonly IDialogService _dialogService;
     public ILoggingService Logger { get; }

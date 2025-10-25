@@ -23,16 +23,18 @@ public interface ILuaScriptsManager : ILuaScriptsProvider
 
 public class LuaScriptsManager : ILuaScriptsManager
 {
+    private readonly ITournamentState _tournamentState;
+    private readonly ITournamentLeaderboardRepository _leaderboardRepository;
     private ILoggingService Logger { get; }
-    private readonly ITournamentPresetManager _tournament;
     
     private readonly Dictionary<string, LuaLeaderboardScript> _leaderboardScripts = [];
 
     
-    public LuaScriptsManager(ITournamentPresetManager tournament, ILoggingService logger)
+    public LuaScriptsManager(ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ILoggingService logger)
     {
+        _tournamentState = tournamentState;
+        _leaderboardRepository = leaderboardRepository;
         Logger = logger;
-        _tournament = tournament;
         
         CheckDefaultScriptsForUpdate();
     }
@@ -91,9 +93,9 @@ public class LuaScriptsManager : ILuaScriptsManager
         _leaderboardScripts[name] = loaded;
 
         if (loaded.CustomVariables.Count == 0) return loaded;
-        for (int i = 0; i < _tournament.Leaderboard.Rules.Count; i++)
+        for (int i = 0; i < _leaderboardRepository.Rules.Count; i++)
         {
-            var rule = _tournament.Leaderboard.Rules[i];
+            var rule = _leaderboardRepository.Rules[i];
             for (int j = 0; j < rule.SubRules.Count; j++)
             {
                 var subRule = rule.SubRules[j];
@@ -112,7 +114,7 @@ public class LuaScriptsManager : ILuaScriptsManager
     }
     public IReadOnlyList<LuaLeaderboardScriptEntry> GetScriptsList()
     {
-        LuaLeaderboardType type = _tournament.ControllerMode == ControllerMode.Ranked ? LuaLeaderboardType.ranked : LuaLeaderboardType.normal;
+        LuaLeaderboardType type = _tournamentState.CurrentPreset.ControllerMode == ControllerMode.Ranked ? LuaLeaderboardType.ranked : LuaLeaderboardType.normal;
         
         return _leaderboardScripts
             .AsValueEnumerable()

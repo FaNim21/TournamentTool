@@ -15,6 +15,7 @@ public class TournamentPresetManager : ITournamentPresetManager
 {
     public ITournamentState State { get; }
     public ITournamentPlayerRepository PlayerRepository { get; }
+    public ITournamentLeaderboardRepository LeaderboardRepository { get; }
 
     public Tournament CurrentPreset => State.CurrentPreset;
     public bool IsModified => State.IsModified;
@@ -32,10 +33,11 @@ public class TournamentPresetManager : ITournamentPresetManager
     */
     
 
-    public TournamentPresetManager(ITournamentState state, ITournamentPlayerRepository playerRepository)
+    public TournamentPresetManager(ITournamentState state, ITournamentPlayerRepository playerRepository, ITournamentLeaderboardRepository leaderboardRepository)
     {
         State = state;
         PlayerRepository = playerRepository;
+        LeaderboardRepository = leaderboardRepository;
     }
 
     public void MarkAsModified() => State.MarkAsModified();

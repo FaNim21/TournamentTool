@@ -6,10 +6,8 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Attributes;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Selectable;
 
@@ -17,7 +15,6 @@ namespace TournamentTool.ViewModels.Ranking;
 
 public class LeaderboardEntryEditWindowViewModel : BaseViewModel
 {
-    private ITournamentPresetManager Tournament { get; }
     private readonly LeaderboardPanelViewModel _leaderboardPanelViewModel;
     private readonly LeaderboardEntry _originalEntry;
     private readonly PlayerViewModel? _player;
@@ -177,11 +174,9 @@ public class LeaderboardEntryEditWindowViewModel : BaseViewModel
     private bool _madeChanges = false;
     
 
-    public LeaderboardEntryEditWindowViewModel(ITournamentPresetManager tournament, LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, 
-        PlayerViewModel? player, INotifyPresetModification notifyPresetModification, IDispatcherService dispatcher, IDialogService dialogService) : base(dispatcher)
+    public LeaderboardEntryEditWindowViewModel(LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, PlayerViewModel? player, 
+        INotifyPresetModification notifyPresetModification, IDispatcherService dispatcher, IDialogService dialogService) : base(dispatcher)
     {
-        Tournament = tournament;
-        Tournament = tournament;
         _leaderboardPanelViewModel = leaderboardPanelViewModel;
         _originalEntry = originalEntry;
         _player = player;

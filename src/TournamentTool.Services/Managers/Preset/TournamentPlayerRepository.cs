@@ -22,8 +22,9 @@ public interface ITournamentPlayerRepository
     void UpdateCategoryForPlayers();
     void UpdateTeamNamesForPlayers();
     
-    void ClearPlayerStreamData();
-    void ClearFromController();
+    // \/ te 3 metody do przekminienia czy jak i tak nie maja duzej ilosci uzyc to czy nei lepiej dac je w wyzej
+    void ClearPlayersStreamData();
+    void ClearPlayersFromController();
     void ClearPlayersFromPOVS();
 }
 
@@ -63,11 +64,14 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
     }
     private void UpdatePlayers(IReadOnlyList<Player> players)
     {
-        foreach (var player in players)
+        Dispatcher.Invoke(() =>
         {
-            var viewModel = _playerFactory.Create(player);
-            _players.Add(viewModel);
-        }
+            foreach (var player in players)
+            {
+                var viewModel = _playerFactory.Create(player);
+                _players.Add(viewModel);
+            }
+        }, CustomDispatcherPriority.Background);
     }
     
     public void AddPlayer(IPlayerViewModel player)
@@ -160,12 +164,12 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
         }
     }
     
-    public void ClearPlayerStreamData()
+    public void ClearPlayersStreamData()
     {
         for (int i = 0; i < Players.Count; i++)
             Players[i].ClearStreamData();
     }
-    public void ClearFromController()
+    public void ClearPlayersFromController()
     {
         for (int i = 0; i < Players.Count; i++)
             Players[i].ClearFromController();

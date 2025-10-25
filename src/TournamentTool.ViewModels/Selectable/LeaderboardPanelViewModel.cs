@@ -10,9 +10,9 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
+using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.Leaderboard;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Ranking;
 
@@ -20,14 +20,15 @@ namespace TournamentTool.ViewModels.Selectable;
 
 public class LeaderboardPanelViewModel : SelectableViewModel
 {
+    private readonly ITournamentLeaderboardRepository _leaderboardRepository;
+    private readonly ITournamentState _tournamentState;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IDialogService _dialogService;
+    private readonly ITournamentPlayerRepository _playerRepository;
 
     public IPresetSaver PresetSaver { get; private set; }
     private ILeaderboardManager LeaderboardManager { get; }
 
-    private TournamentViewModel Tournament { get; }
-    private Leaderboard Leaderboard { get; }
 
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     private int _entriesViewRefreshTrigger = 0;
@@ -61,24 +62,26 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand MoveRuleItemCommand { get; set; }
 
 
-    public LeaderboardPanelViewModel(ICoordinator coordinator, TournamentViewModel tournament, IPresetSaver presetSaver, ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, IDispatcherService dispatcher, IDialogService dialogService) : base(coordinator, dispatcher)
+    public LeaderboardPanelViewModel(ICoordinator coordinator, ITournamentLeaderboardRepository leaderboardRepository, ITournamentState tournamentState,
+        IPresetSaver presetSaver, ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, 
+        IDispatcherService dispatcher, IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(coordinator, dispatcher)
     {
-        Tournament = tournament;
         PresetSaver = presetSaver;
         LeaderboardManager = leaderboardManager;
+        _leaderboardRepository = leaderboardRepository;
+        _tournamentState = tournamentState;
         _luaScriptsManager = luaScriptsManager;
         _dialogService = dialogService;
+        _playerRepository = playerRepository;
 
-        Leaderboard = Tournament.Leaderboard; 
-        
         AddRuleCommand = new RelayCommand(() => AddRule(new LeaderboardRule()));
         AddFromWhitelistCommand = new RelayCommand(() => { windowService.ShowLoading(AddFromWhitelist); });
 
-        EditRuleCommand = new EditRuleCommand(windowService, Tournament, luaScriptsManager, dialogService, dispatcher);
+        EditRuleCommand = new EditRuleCommand(windowService, tournamentState, luaScriptsManager, dialogService, dispatcher);
         RemoveRuleCommand = new RemoveRuleCommand(this, dialogService);
 
         ViewEntryCommand = new ViewEntryCommand(windowService);
-        EditEntryCommand = new EditEntryCommand(windowService, tournament, this, tournament, dispatcher, dialogService);
+        EditEntryCommand = new EditEntryCommand(windowService, tournamentState, this, dispatcher, dialogService);
         RemoveEntryCommand = new RemoveEntryCommand(this, dialogService);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
@@ -91,7 +94,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     
     public override bool CanEnable()
     {
-        return !Tournament.IsNullOrEmpty();
+        return !_tournamentState.IsCurrentlyOpened;
     }
 
     public override void OnEnable(object? parameter)
@@ -115,30 +118,30 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     {
         Dispatcher.Invoke(() =>
         {
-            foreach (var entry in Leaderboard.OrderedEntries)
+            foreach (var entry in _leaderboardRepository.OrderedEntries)
             {
-                var player = Tournament.GetPlayerByUUID(entry.PlayerUUID);
-                Entries.Add(new LeaderboardEntryViewModel(entry, player, Dispatcher));
+                var player = _playerRepository.GetPlayerByUUID(entry.PlayerUUID);
+                if (player is not PlayerViewModel playerViewModel) continue;
+                
+                Entries.Add(new LeaderboardEntryViewModel(entry, playerViewModel, Dispatcher));
             }
         
-            foreach (var rule in Leaderboard.Rules)
+            foreach (var rule in _leaderboardRepository.Rules)
             {
-                Rules.Add(new LeaderboardRuleViewModel(rule, Tournament, _dialogService, Dispatcher));
+                Rules.Add(new LeaderboardRuleViewModel(rule, _tournamentState, _dialogService, Dispatcher));
             }
 
             if (Rules.Count > 1)
                 Rules[0].IsFocused = true;
         });
         
-        /*
-        var collectionViewSource = CollectionViewSource.GetDefaultView(Entries);
+        /*var collectionViewSource = CollectionViewSource.GetDefaultView(Entries);
         using (collectionViewSource.DeferRefresh())
         {
             collectionViewSource.Filter = null;
             collectionViewSource.SortDescriptions.Clear();
             collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(LeaderboardEntryViewModel.Position), ListSortDirection.Ascending));
-        }
-        */
+        }*/
         
         RefreshAllEntries();
     }
@@ -148,8 +151,10 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         var entryViewModel = Entries.FirstOrDefault(vm => vm.GetLeaderboardEntry().PlayerUUID.Equals(newEntry.PlayerUUID));
         if (entryViewModel == null)
         {
-            var player = Tournament.GetPlayerByUUID(newEntry.PlayerUUID);
-            entryViewModel = new LeaderboardEntryViewModel(newEntry, player, Dispatcher);
+            var player = _playerRepository.GetPlayerByUUID(newEntry.PlayerUUID);
+            if (player is not PlayerViewModel playerViewModel) return;
+            
+            entryViewModel = new LeaderboardEntryViewModel(newEntry, playerViewModel, Dispatcher);
             Dispatcher.Invoke(() =>
             {
                 Entries.Add(entryViewModel);
@@ -182,7 +187,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             
         foreach (var entry in Entries)
         {
-            Leaderboard.RecalculateEntryPosition(entry.GetLeaderboardEntry());
+            _leaderboardRepository.RecalculateEntryPosition(entry.GetLeaderboardEntry());
             entry.Refresh(Rules[0].ChosenMilestone);
         }
 
@@ -203,41 +208,41 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     
     public void AddLeaderboardEntry(LeaderboardEntry entry, PlayerViewModel playerViewModel)
     {
-        Leaderboard.AddEntry(entry);
+        _leaderboardRepository.AddEntry(entry);
         Dispatcher.Invoke(() =>
         {
             Entries.Add(new LeaderboardEntryViewModel(entry, playerViewModel, Dispatcher));
-            Tournament.PresetIsModified();
+            _tournamentState.MarkAsModified();
         });
     }
     public void RemoveLeaderboardEntry(LeaderboardEntryViewModel entry)
     {
-        Leaderboard.RemoveEntry(entry.GetLeaderboardEntry());
+        _leaderboardRepository.RemoveEntry(entry.GetLeaderboardEntry());
         Dispatcher.Invoke(() =>
         {
             Entries.Remove(entry);
-            Tournament.PresetIsModified();
+            _tournamentState.MarkAsModified();
         });
     }
 
     public void AddRule(LeaderboardRule rule)
     {
-        var ruleViewModel = new LeaderboardRuleViewModel(rule, Tournament, _dialogService, Dispatcher);
-        Leaderboard.AddRule(rule);
+        var ruleViewModel = new LeaderboardRuleViewModel(rule, _tournamentState, _dialogService, Dispatcher);
+        _leaderboardRepository.AddRule(rule);
         Dispatcher.Invoke(() =>
         {
             Rules.Add(ruleViewModel);
-            Tournament.PresetIsModified();
+            _tournamentState.MarkAsModified();
         });
         UpdateFocusedRule();
     }
     public void RemoveRule(LeaderboardRuleViewModel rule)
     {
-        Leaderboard.RemoveRule(rule.GetLeaderboardRule());
+        _leaderboardRepository.RemoveRule(rule.GetLeaderboardRule());
         Dispatcher.Invoke(() =>
         {
             Rules.Remove(rule);
-            Tournament.PresetIsModified();
+            _tournamentState.MarkAsModified();
         });
         UpdateFocusedRule();
     }
@@ -250,11 +255,11 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         if (oldIndex < 0 || 
             newIndex < 0 || 
             oldIndex == newIndex || 
-            oldIndex >= Leaderboard.Rules.Count ||
-            newIndex >= Leaderboard.Rules.Count) return;
+            oldIndex >= _leaderboardRepository.Rules.Count ||
+            newIndex >= _leaderboardRepository.Rules.Count) return;
         
         Rules.Move(oldIndex, newIndex);
-        Leaderboard.MoveRule(oldIndex, newIndex);
+        _leaderboardRepository.MoveRule(oldIndex, newIndex);
         
         RecalculateAllEntries();
         UpdateFocusedRule();
@@ -274,20 +279,21 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     private async Task AddFromWhitelist(IProgress<float> progress, IProgress<string> logProgress, CancellationToken cancellationToken)
     {
-        int count = Tournament.Players.Count;
+        int count = _playerRepository.Players.Count;
         for (var i = 0; i < count; i++)
         {
             if (cancellationToken.IsCancellationRequested) break;
             progress.Report((float)i / count);
             
-            var player = Tournament.Players[i];
-            if (string.IsNullOrEmpty(player.UUID)) continue;
-            if (Leaderboard.GetEntry(player.UUID) != null) continue;
+            var player = _playerRepository.Players[i];
             
-            logProgress.Report($"({i+1})/{count}) Adding player {player.DisplayName} to leaderboard");
+            if (string.IsNullOrEmpty(player.UUID)) continue;
+            if (_leaderboardRepository.GetEntry(player.UUID) != null) continue;
+            
+            logProgress.Report($"({i+1})/{count}) Adding player {player.Name} to leaderboard");
             
             var entry = new LeaderboardEntry { PlayerUUID = player.UUID };
-            AddLeaderboardEntry(entry, player);
+            AddLeaderboardEntry(entry, (PlayerViewModel)player);
 
             await Task.Delay(10);
         }

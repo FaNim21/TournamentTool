@@ -47,7 +47,8 @@ public class ControllerServiceHub
     private System.Timers.Timer _uiUpdateTimer;
     
     
-    public ControllerServiceHub(ControllerViewModel controller, TwitchService twitch, ILoggingService logger, ObsController obs, ITournamentPlayerRepository playerRepository)
+    public ControllerServiceHub(ControllerViewModel controller, ITwitchService twitch, ILoggingService logger, ObsController obs, 
+        ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         
@@ -59,7 +60,7 @@ public class ControllerServiceHub
         TwitchUpdaterService twitchUpdater = new(controller, twitch, playerRepository);
         AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60));
 
-        APIUpdaterService apiUpdater = new(controller, logger, tournamentSerwisyTutaj, obs);
+        APIUpdaterService apiUpdater = new(controller, logger, obs, tournamentState, leaderboardRepository, playerRepository);
         AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5));
         //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
     }

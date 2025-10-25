@@ -3,7 +3,7 @@ using TournamentTool.Domain.Entities;
 
 namespace TournamentTool.Services.Managers.Preset;
 
-public interface ITournamentState
+public interface ITournamentState : INotifyPresetModification
 {
     Tournament CurrentPreset { get; }
     bool IsModified { get; }
@@ -13,13 +13,16 @@ public interface ITournamentState
     event EventHandler<bool>? ModificationStateChanged;
     event EventHandler<string>? PresetNameChanged;
 
-    void MarkAsModified();
-    void MarkAsUnmodified();
-
     void ChangePreset(Tournament? newPreset);
     void DeletePreset();
     
     void ChangeName(string newName);
+}
+
+public interface INotifyPresetModification
+{
+    void MarkAsModified();
+    void MarkAsUnmodified();
 }
 
 public class TournamentState : ITournamentState

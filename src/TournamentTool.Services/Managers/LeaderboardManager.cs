@@ -17,16 +17,18 @@ public interface ILeaderboardManager
 
 public class LeaderboardManager : ILeaderboardManager
 {
-    private ITournamentPresetManager Tournament { get; }
+    private readonly ITournamentState _tournamentState;
+    private readonly ITournamentLeaderboardRepository _leaderboardRepository;
     private ILuaScriptsManager LuaManager { get; }
     private ILoggingService Logger { get; }
 
     public event Action<LeaderboardEntry>? OnEntryUpdate;
 
     
-    public LeaderboardManager(ITournamentPresetManager tournament, ILuaScriptsManager luaManager, ILoggingService logger)
+    public LeaderboardManager(ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ILuaScriptsManager luaManager, ILoggingService logger)
     {
-        Tournament = tournament;
+        _tournamentState = tournamentState;
+        _leaderboardRepository = leaderboardRepository;
         LuaManager = luaManager;
         Logger = logger;
     }
@@ -49,9 +51,9 @@ public class LeaderboardManager : ILeaderboardManager
     private void EvaluateTimelines(Dictionary<RunMilestone, RankedEvaluateTimelineData> data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
     {
         if (data.Count == 0) return;
-        if (Tournament.Leaderboard.Rules.Count == 0) return;
+        if (_leaderboardRepository.Rules.Count == 0) return;
 
-        foreach (var rule in Tournament.Leaderboard.Rules)
+        foreach (var rule in _leaderboardRepository.Rules)
         {
             if (!rule.IsEnabled) continue;
             if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
@@ -83,9 +85,9 @@ public class LeaderboardManager : ILeaderboardManager
     private void EvaluatePlayer(LeaderboardPlayerEvaluateData data, LeaderboardRuleType ruleType = LeaderboardRuleType.None)
     {
         if (data.Player == null) return;
-        if (Tournament.Leaderboard.Rules.Count == 0) return;
+        if (_leaderboardRepository.Rules.Count == 0) return;
         
-        foreach (var rule in Tournament.Leaderboard.Rules)
+        foreach (var rule in _leaderboardRepository.Rules)
         {
             if (!rule.IsEnabled) continue;
             if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
@@ -104,12 +106,12 @@ public class LeaderboardManager : ILeaderboardManager
         foreach (var data in datas)
         {
             if (data.Player == null) continue;
-            LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
+            LeaderboardEntry entry = _leaderboardRepository.GetOrCreateEntry(data.Player.UUID);
             LuaPlayerData luaData = new LuaPlayerData(entry, data);
             luaPlayerDatas.Add(luaData);
         }
         
-        LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, Tournament.CurrentPreset, luaPlayerDatas, OnEntryRunRegistered);
+        LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, _tournamentState.CurrentPreset, luaPlayerDatas, OnEntryRunRegistered);
         RunScript(subRule.LuaPath, context);
         
         var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
@@ -118,8 +120,8 @@ public class LeaderboardManager : ILeaderboardManager
     }
     private void UpdateEntry(LeaderboardRule rule, LeaderboardSubRule subRule, LeaderboardPlayerEvaluateData data)
     {
-        LeaderboardEntry entry = Tournament.Leaderboard.GetOrCreateEntry(data.Player.UUID);
-        LuaAPIContext context = new LuaAPIContext(entry, data, rule, subRule, Tournament.GetData(), OnEntryRunRegistered);
+        LeaderboardEntry entry = _leaderboardRepository.GetOrCreateEntry(data.Player.UUID);
+        LuaAPIContext context = new LuaAPIContext(entry, data, rule, subRule, _tournamentState.CurrentPreset, OnEntryRunRegistered);
         
         int oldPosition = entry.Position;
         RunScript(subRule.LuaPath, context);
@@ -133,9 +135,9 @@ public class LeaderboardManager : ILeaderboardManager
     
     private void OnEntryRunRegistered(LeaderboardEntry entry)
     {
-        Tournament.Leaderboard.RecalculateEntryPosition(entry);
+        _leaderboardRepository.RecalculateEntryPosition(entry);
         OnEntryUpdate?.Invoke(entry);
-        Tournament.MarkAsModified();
+        _tournamentState.MarkAsModified();
     }
 
     private void RunScript(string path, object context)

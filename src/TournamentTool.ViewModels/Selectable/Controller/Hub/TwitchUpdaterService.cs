@@ -10,11 +10,11 @@ namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
 public class TwitchUpdaterService : IServiceUpdater, IServiceUpdaterTimer
 {
     private readonly ControllerViewModel _controller;
-    private readonly TwitchService _twitch;
+    private readonly ITwitchService _twitch;
     private readonly ITournamentPlayerRepository _playerRepository;
 
 
-    public TwitchUpdaterService(ControllerViewModel controller, TwitchService twitch, ITournamentPlayerRepository playerRepository)
+    public TwitchUpdaterService(ControllerViewModel controller, ITwitchService twitch, ITournamentPlayerRepository playerRepository)
     {
         _controller = controller;
         _twitch = twitch;
