@@ -16,6 +16,8 @@ public interface ITwitchService
 {
     bool IsConnected { get; }
     DateTime? TokenExpiresAt { get; }
+    
+    event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
 
     Task ConnectAsync(bool silent = false);
     void Disconnect();

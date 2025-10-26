@@ -21,7 +21,6 @@ using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Menu;
 using TournamentTool.ViewModels.Selectable;
@@ -62,6 +61,7 @@ public partial class App : Application
         services.AddSingleton<IInputController, InputController>();
         services.AddSingleton<IDataProtect, WindowsDataProtect>();
         services.AddSingleton<IMenuService, MenuService>();
+        services.AddSingleton<IUIInteractionService, UIInteractionService>();
         
         //View model factories
         services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
@@ -116,9 +116,6 @@ public partial class App : Application
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
 
         _serviceProvider = services.BuildServiceProvider();
-
-        var loggingService = _serviceProvider.GetRequiredService<ILoggingService>();
-        LogService.Initialize(loggingService);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -130,6 +127,9 @@ public partial class App : Application
         
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.DisableStylusAndTouchSupport", true);
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+        
+        var loggingService = _serviceProvider.GetRequiredService<ILoggingService>();
+        LogService.Initialize(loggingService);
         
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var settingsService = _serviceProvider.GetRequiredService<ISettingsSaver>();

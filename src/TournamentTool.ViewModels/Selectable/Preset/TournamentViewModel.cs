@@ -4,14 +4,16 @@ using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Background;
 using TournamentTool.Services.Managers.Preset;
 
-namespace TournamentTool.App;
+namespace TournamentTool.ViewModels.Selectable.Preset;
 
 public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
 {
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
+    private readonly IBackgroundCoordinator _backgroundCoordinator;
     private readonly Dictionary<string, List<string>> _errors = [];
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
     public bool HasErrors => _errors.Count != 0;
@@ -298,11 +300,13 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
     }
 
     
-    public TournamentViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IDispatcherService dispatcher) : base(dispatcher)
+    public TournamentViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IBackgroundCoordinator backgroundCoordinator, 
+        IDispatcherService dispatcher) : base(dispatcher)
     {
         _playerRepository = playerRepository;
         _tournamentState = tournamentState;
-        
+        _backgroundCoordinator = backgroundCoordinator;
+
         _tournamentState.PresetChanged += OnPresetChanged;
     }
     public override void Dispose()
@@ -329,6 +333,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             else if (ControllerMode == ControllerMode.Solo)
                 _tournamentState.CurrentPreset.ManagementData = new SoloManagementData();
         }
+        UpdateBackgroundService(_tournamentState.CurrentPreset.ControllerMode);
         
         PaceManRefreshRateMiliseconds = _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
         RefreshUI();
@@ -413,8 +418,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
                 break;
         }
         
-        //TODO: 0 tutaj potrzebny jest controller mode repository czy service i stamtad trzeba bedzie
-        //OnControllerModeChanged?.Invoke(mode, isValidated);
+        _backgroundCoordinator.Initialize(mode, isValidated);
     }
     
     private void PresetIsModified()

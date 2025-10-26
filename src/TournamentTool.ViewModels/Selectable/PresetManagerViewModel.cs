@@ -78,13 +78,11 @@ public class PresetManagerViewModel : SelectableViewModel
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
         _tournamentState = tournamentState;
-        _dialogService = dialogService;
-        _settingsService = settingsService;
+        _dialogService = dialogService; _settingsService = settingsService;
         _luaScriptsManager = luaScriptsManager;
         _uiInteractionService = uiInteractionService;
 
-        TournamentViewModel = new TournamentViewModel(playerRepository, tournamentState, dispatcher);
-        Tournament.OnControllerModeChanged += UpdateBackgroundService;
+        TournamentViewModel = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
         
         LoadPresetsList();
 
@@ -92,7 +90,7 @@ public class PresetManagerViewModel : SelectableViewModel
         OpenLeaderboardCommand = new RelayCommand(navigationService.NavigateTo<LeaderboardPanelViewModel>);
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
-        SavePresetCommand = new RelayCommand(() => PresetService.SavePreset());
+        SavePresetCommand = new RelayCommand(presetService.SavePreset);
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
         OnItemListClickCommand = new OnItemListClickCommand(PresetService);
 
@@ -106,8 +104,6 @@ public class PresetManagerViewModel : SelectableViewModel
     public override void Dispose()
     {
         TournamentViewModel.Dispose();
-        
-        Tournament.OnControllerModeChanged -= UpdateBackgroundService;
     }
 
     public override bool CanEnable() { return true; }
@@ -239,11 +235,6 @@ public class PresetManagerViewModel : SelectableViewModel
     public void SaveLastOpened(string presetName)
     {
         _settingsService.Settings.LastOpenedPresetName = presetName;
-    }
-
-    private void UpdateBackgroundService(ControllerMode mode, bool isValidated)
-    {
-        BackgroundCoordinator.Initialize(mode, isValidated);
     }
 
     private void EditPresetName()

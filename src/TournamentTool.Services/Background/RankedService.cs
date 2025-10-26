@@ -45,7 +45,6 @@ public class RankedService : IBackgroundService
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly RankedManagementData _rankedManagementData;
     
-    private ITournamentPresetManager Tournament { get; }
     private ILeaderboardManager Leaderboard { get; }
 
     private IRankedDataReceiver? _rankedDataReceiver;
@@ -64,22 +63,19 @@ public class RankedService : IBackgroundService
     private PrivRoomData? _privRoomData;
     
     
-    public RankedService(ITournamentPresetManager tournament, ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, 
-        IPlayerViewModelFactory playerViewModelFactory, IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState,
-        ITournamentPlayerRepository playerRepository)
+    public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, 
+        IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         SettingsService = settingsService;
         ImageService = imageService;
-        Tournament = tournament;
         Leaderboard = leaderboard;
         _playerViewModelFactory = playerViewModelFactory;
         _rankedApiService = rankedApiService;
         _tournamentState = tournamentState;
         _playerRepository = playerRepository;
 
-        // to nie wiem jeszcze jak rozwiazac, bo nie mam zrobionych wszystkich serwisow
-        _rankedManagementData = (Tournament.ManagementData as RankedManagementData)!;
+        _rankedManagementData = (tournamentState.CurrentPreset.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
         _options = new JsonSerializerOptions

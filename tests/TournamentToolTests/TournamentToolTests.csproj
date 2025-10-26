@@ -17,12 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TournamentTool.App\TournamentTool.App.csproj" />
     <ProjectReference Include="..\..\src\TournamentTool.Core\TournamentTool.Core.csproj" />
     <ProjectReference Include="..\..\src\TournamentTool.Domain\TournamentTool.Domain.csproj" />
     <ProjectReference Include="..\..\src\TournamentTool.Services\TournamentTool.Services.csproj" />
     <ProjectReference Include="..\..\src\TournamentTool.ViewModels\TournamentTool.ViewModels.csproj" />
-    <ProjectReference Include="..\TournamentTool.App\TournamentTool.App.csproj" />
   </ItemGroup>
 
   <ItemGroup>

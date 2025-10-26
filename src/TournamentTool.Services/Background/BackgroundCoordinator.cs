@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
 public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
 {
-    private ITournamentPresetManager Tournament { get; }
+    private readonly ITournamentState _tournamentState;
     private ILoggingService Logger { get; }
     
     private readonly BackgroundServiceFactory _backgroundServiceFactory;
@@ -22,11 +21,10 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     private CancellationTokenSource? _cancellationTokenSource;
 
     
-    public BackgroundCoordinator(ITournamentPresetManager tournament, ILoggingService logger, IServiceProvider serviceProvider)
+    public BackgroundCoordinator(ITournamentState tournamentState, ILoggingService logger, IServiceProvider serviceProvider)
     {
-        Tournament = tournament;
+        _tournamentState = tournamentState;
         Logger = logger;
-        Tournament = tournament;
         
         _backgroundServiceFactory = new BackgroundServiceFactory(serviceProvider);
     }
@@ -71,7 +69,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         }
         
         Logger.Log($"New service {service.GetType()} just started");
-        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(Tournament.ControllerMode, true));
+        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, true));
     }
 
     private async void Update(object? sender, DoWorkEventArgs e)
@@ -122,6 +120,6 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         Logger.Log($"Service {Service!.GetType()} just stopped");
         Service = null;
         
-        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(Tournament.ControllerMode, false));
+        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, false));
     }
 }

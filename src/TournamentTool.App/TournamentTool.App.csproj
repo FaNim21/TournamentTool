@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <Deterministic>true</Deterministic>
-    <ApplicationIcon>TT.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\TT.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\audio.png" />
@@ -26,9 +26,9 @@
     <None Remove="Resources\StatusBarIcons\twitch-off.png" />
     <None Remove="Resources\StatusBarIcons\twitch-on.png" />
     <None Remove="Resources\StatusBarIcons\twitch-wait.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="TT.ico" />
+    <None Include="..\..\TT.ico">
+      <Link>TT.ico</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MethodTimer.Fody" Version="3.2.3" />
@@ -109,10 +109,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\TournamentTool.Core\TournamentTool.Core.csproj" />
-    <ProjectReference Include="..\src\TournamentTool.Domain\TournamentTool.Domain.csproj" />
-    <ProjectReference Include="..\src\TournamentTool.Services\TournamentTool.Services.csproj" />
-    <ProjectReference Include="..\src\TournamentTool.ViewModels\TournamentTool.ViewModels.csproj" />
     <ProjectReference Include="..\TournamentTool.Core\TournamentTool.Core.csproj" />
     <ProjectReference Include="..\TournamentTool.Domain\TournamentTool.Domain.csproj" />
     <ProjectReference Include="..\TournamentTool.Services\TournamentTool.Services.csproj" />
