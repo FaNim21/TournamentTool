@@ -28,7 +28,7 @@ public class DialogBoxViewModel : DialogBaseViewModel
         }
     }
 
-    public DialogBoxViewModel(IWindowService windowService, IDispatcherService dispatcher) : base(windowService, dispatcher)
+    public DialogBoxViewModel(IDispatcherService dispatcher) : base(dispatcher)
     {
         ButtonPress = new DialogBoxButtonClickCommand(this);
     }

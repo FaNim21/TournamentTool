@@ -323,7 +323,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         }
         IsCurrentlyOpened = true;
         
-        //update background service bedzie raczej w servisie do controllermode i tak samo leaderboard initialize
         if (_tournamentState.CurrentPreset.ManagementData == null)
         {
             if (ControllerMode == ControllerMode.Ranked)
@@ -335,7 +334,10 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         }
         UpdateBackgroundService(_tournamentState.CurrentPreset.ControllerMode);
         
-        PaceManRefreshRateMiliseconds = _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
+        int time = _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
+        _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds = time < 3000 ? 3000 : time;
+        OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));
+        
         RefreshUI();
         UpdateGoodPacesTexts();
     }

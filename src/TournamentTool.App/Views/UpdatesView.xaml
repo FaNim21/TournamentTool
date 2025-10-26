@@ -6,6 +6,7 @@
              xmlns:viewmodels="clr-namespace:TournamentTool.ViewModels"
              xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable;assembly=TournamentTool.ViewModels"
+             xmlns:extension="clr-namespace:TournamentTool.App.Components.Extension"
              d:DataContext="{d:DesignInstance Type=selectable:UpdatesViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="1024"
@@ -39,9 +40,10 @@
                                FontWeight="SemiBold"
                                Margin="10 0 10 0" />
 
-                    <TextBlock Text="{Binding Elements, Converter={StaticResource MarkdownToTextBlockConverter}, Mode=OneWay}"
-                               VerticalAlignment="Top"
-                               Margin="10 25 10 50" />
+                    <TextBlock extension:TextBlockExtensions.BindableInlines="{Binding Elements, Converter={StaticResource MarkdownToInlinesConverter}, Mode=OneWay}"
+                               TextWrapping="Wrap"
+                               Foreground="#e6e6e6" 
+                               Margin="10 25 10 50"/>
                 </Grid>
             </Grid>
         </ScrollViewer>
@@ -69,7 +71,7 @@
                        Text="{Binding ProgressText}"
                        Margin="0 0 0 0" />
 
-            <TextBlock Text="After download is finished it should take 3 seconds to reopen MultiOpener with new version"
+            <TextBlock Text="After download is finished it should take 3 seconds to reopen Tournament Tool with new version"
                        Foreground="White"
                        FontSize="16"
                        VerticalAlignment="Center"

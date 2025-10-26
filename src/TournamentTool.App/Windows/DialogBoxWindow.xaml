@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
+        xmlns:enums="clr-namespace:TournamentTool.Domain.Enums;assembly=TournamentTool.Domain"
         xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
         xmlns:modals="clr-namespace:TournamentTool.ViewModels.Modals;assembly=TournamentTool.ViewModels"
         xmlns:converters="clr-namespace:TournamentTool.App.Converters"
-        d:DataContext="{d:DesignInstance Type=modals:DialogBaseViewModel}"
+        d:DataContext="{d:DesignInstance Type=modals:DialogBoxViewModel}"
         mc:Ignorable="d"
         Title="DialogBoxWindow"
         Width="325"
@@ -61,22 +62,22 @@
                         <Style TargetType="Image">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Icon}"
-                                             Value="{x:Static MessageBoxImage.Warning}">
+                                             Value="{x:Static enums:MessageBoxImage.Warning}">
                                     <Setter Property="Source"
                                             Value="{Binding Source={x:Static drawing:SystemIcons.Warning}, Converter={StaticResource IconConverter}}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Icon}"
-                                             Value="{x:Static MessageBoxImage.Information}">
+                                             Value="{x:Static enums:MessageBoxImage.Information}">
                                     <Setter Property="Source"
                                             Value="{Binding Source={x:Static drawing:SystemIcons.Information}, Converter={StaticResource IconConverter}}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Icon}"
-                                             Value="{x:Static MessageBoxImage.Error}">
+                                             Value="{x:Static enums:MessageBoxImage.Error}">
                                     <Setter Property="Source"
                                             Value="{Binding Source={x:Static drawing:SystemIcons.Error}, Converter={StaticResource IconConverter}}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Icon}"
-                                             Value="{x:Static MessageBoxImage.None}">
+                                             Value="{x:Static enums:MessageBoxImage.None}">
                                     <Setter Property="Visibility"
                                             Value="Collapsed" />
                                 </DataTrigger>
@@ -109,10 +110,10 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <buttons:ButtonNormal ContentText="{Binding Title}"
-                                            MinHeight="25"
-                                            MaxWidth="80"
-                                            OnCommand="{Binding DataContext.ButtonPress, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                            OnCommandParameter="{Binding Result}" />
+                                              MinHeight="25"
+                                              MaxWidth="80"
+                                              OnCommand="{Binding DataContext.ButtonPress, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                              OnCommandParameter="{Binding Result}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemsPanel>

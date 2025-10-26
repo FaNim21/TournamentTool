@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Services.State;
@@ -120,10 +121,9 @@ public class WindowService : IWindowService
 
     private Window? CreateWindowForViewModel<TViewModel>(TViewModel viewModel, string? windowTypeName = null)
     {
-        var vmType = typeof(TViewModel);
-        var viewAssembly = vmType.Assembly;
-        var viewTypeName = vmType.FullName!.Replace("ViewModel", windowTypeName ?? string.Empty);
-        Type? viewType = viewAssembly.GetType(viewTypeName) ?? null;
+        Type vmType = typeof(TViewModel);
+        string viewTypeName = $"TournamentTool.App.Windows.{vmType.Name.Replace("ViewModel", windowTypeName ?? string.Empty)}";
+        Type? viewType = Type.GetType(viewTypeName) ?? null;
 
         if (viewType == null || Activator.CreateInstance(viewType) is not Window window) return null;
 

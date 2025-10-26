@@ -1,8 +1,5 @@
-﻿using Meziantou.Xunit;
+﻿namespace TournamentTool.Domain.Tests.Lua;
 
-namespace TournamentToolTests.LuaTests;
-
-[DisableParallelization]
 public class LuaCustomVariableTests
 {
     [Fact]

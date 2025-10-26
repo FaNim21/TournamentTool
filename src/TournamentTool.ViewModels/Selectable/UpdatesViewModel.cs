@@ -69,7 +69,6 @@ public class UpdatesViewModel : SelectableViewModel
             _bodyText = value;
             OnPropertyChanged(nameof(BodyText));
             
-            //TODO: 0 Przetestowac tez Markdown update'u
             Elements = MarkdownParser.Parse(_bodyText);
             OnPropertyChanged(nameof(Elements));
         }
@@ -113,7 +112,8 @@ public class UpdatesViewModel : SelectableViewModel
     private bool canDownloadUpdate;
 
 
-    public UpdatesViewModel(ICoordinator coordinator, ILoggingService logger, IDispatcherService dispatcher, IWindowService windowService, IUpdateCheckerService updateChecker, IDialogService dialogService) : base(coordinator, dispatcher)
+    public UpdatesViewModel(ICoordinator coordinator, ILoggingService logger, IDispatcherService dispatcher, IWindowService windowService, 
+        IUpdateCheckerService updateChecker, IDialogService dialogService) : base(coordinator, dispatcher)
     {
         _windowService = windowService;
         _updateChecker = updateChecker;

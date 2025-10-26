@@ -5,7 +5,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable.Controller;
 
-namespace TournamentToolTests.ObsTests;
+namespace TournamentTool.ViewModels.Tests;
 
 public class PointOfViewTests
 {

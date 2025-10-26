@@ -54,7 +54,7 @@ public class PresetManagerViewModel : SelectableViewModel
         }
     }
 
-    public TournamentViewModel TournamentViewModel { get; private set; }
+    public TournamentViewModel Tournament { get; }
 
     public ICommand OpenControllerCommand { get; set; }
     public ICommand OpenLeaderboardCommand { get; set; }
@@ -82,7 +82,7 @@ public class PresetManagerViewModel : SelectableViewModel
         _luaScriptsManager = luaScriptsManager;
         _uiInteractionService = uiInteractionService;
 
-        TournamentViewModel = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
+        Tournament = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
         
         LoadPresetsList();
 
@@ -103,7 +103,7 @@ public class PresetManagerViewModel : SelectableViewModel
     }
     public override void Dispose()
     {
-        TournamentViewModel.Dispose();
+        Tournament.Dispose();
     }
 
     public override bool CanEnable() { return true; }
@@ -217,8 +217,7 @@ public class PresetManagerViewModel : SelectableViewModel
         var result = _dialogService.Show($"Are you sure you want to clear all data in preset: {_tournamentState.CurrentPreset.Name}", "Clearing", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
 
-        TournamentViewModel.Clear();
-        // _tournamentState.CurrentPreset.ClearPresetData();
+        Tournament.Clear();
         _tournamentState.MarkAsModified();
     }
 

@@ -11,18 +11,19 @@ public interface IPacemanAPIService
 
 public class PacemanAPIService : IPacemanAPIService
 {
-    private readonly HttpClient _client;
+    private readonly IHttpClientFactory _clientFactory;
 
-    
-    public PacemanAPIService(HttpClient client)
+
+    public PacemanAPIService(IHttpClientFactory clientFactory)
     {
-        _client = client;
+        _clientFactory = clientFactory;
     }
 
 
     public async Task<PaceManEvent[]> GetPacemanEvents()
     {
-        HttpResponseMessage response = await _client.GetAsync("https://paceman.gg/api/cs/eventlist");
+        var client = _clientFactory.CreateClient();
+        HttpResponseMessage response = await client.GetAsync("https://paceman.gg/api/cs/eventlist");
         if (!response.IsSuccessStatusCode) return [];
             
         string result = await response.Content.ReadAsStringAsync();
@@ -31,7 +32,8 @@ public class PacemanAPIService : IPacemanAPIService
 
     public async Task<PaceManData[]> GetPacemanLiveData()
     {
-        HttpResponseMessage response = await _client.GetAsync("https://paceman.gg/api/ars/liveruns");
+        var client = _clientFactory.CreateClient();
+        HttpResponseMessage response = await client.GetAsync("https://paceman.gg/api/ars/liveruns");
         if (!response.IsSuccessStatusCode) return [];
             
         Stream result = await response.Content.ReadAsStreamAsync();

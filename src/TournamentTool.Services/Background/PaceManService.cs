@@ -125,8 +125,8 @@ public class PaceManService : IBackgroundService
         }
         else
         {
-            paceman.HeadImageOpacity = 1f;
             byte[] stream = paceman.Player.ImageStream ?? [];
+            paceman.HeadImageOpacity = 1f;
             paceman.HeadImage = _imageService.LoadImageFromStream(stream);
         }
     }

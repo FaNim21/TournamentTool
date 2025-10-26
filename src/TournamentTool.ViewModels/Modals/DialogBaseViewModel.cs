@@ -5,11 +5,9 @@ using TournamentTool.Domain.Enums;
 
 namespace TournamentTool.ViewModels.Modals;
 
-public class DialogBaseViewModel : BaseViewModel
+public class DialogBaseViewModel : BaseWindowViewModel
 {
-    public IWindowService WindowService { get; set; }
     private string? _text;
-
     public string? Text
     {
         get => _text;
@@ -45,12 +43,9 @@ public class DialogBaseViewModel : BaseViewModel
     public ICommand? ButtonPress { get; set; }
 
 
-    protected DialogBaseViewModel(IWindowService windowService, IDispatcherService dispatcher) : base(dispatcher)
-    {
-        WindowService = windowService;
-    }
+    protected DialogBaseViewModel(IDispatcherService dispatcher) : base(dispatcher) { }
     public void Close()
     {
-        WindowService.Close<DialogBaseViewModel>();
+        RequestClose?.Invoke();
     }
 }

@@ -27,7 +27,7 @@ public class InputController : IInputController, IDisposable
     {
         _navigationService = navigationService;
 
-        //TODO: 0 to tymczasowo, do zrobienia hotkey przez settings z zapisywaniem i wczytywaniem
+        //TODO: 2 to tymczasowo, do zrobienia hotkey przez settings z zapisywaniem i wczytywaniem
         var renameTextBox = new Hotkey(KeyCode.F2, ModifierKeysModel.None, "Triggers renaming elements for now mainly in preset panel");
         var toggleHamburgerMenu = new Hotkey(KeyCode.F1, ModifierKeysModel.None, "Toggle visibility for hamburger menu");
         var toggleStudioMode = new Hotkey(KeyCode.S, ModifierKeysModel.Shift, "Toggle Studio Mode in controller panel");
@@ -46,7 +46,9 @@ public class InputController : IInputController, IDisposable
     }
     public void Dispose()
     {
-        Application.Current.MainWindow!.KeyDown -= HandleKeyDown;
+        if (Application.Current.MainWindow == null) return;
+        
+        Application.Current.MainWindow.KeyDown -= HandleKeyDown;
         Application.Current.MainWindow.KeyUp -= HandleKeyUp;
         HotkeyPressed -= HandleNavigationHotkeys;
     }
@@ -84,6 +86,7 @@ public class InputController : IInputController, IDisposable
 
     private void CheckHotkeys()
     {
+        //TODO: 0 problem z tym ze ctrl+s nie przechwyci, bo rejestruje ctrl jako pressed keys i wtedy count jest == 2 z wcisnietym pozniej s
         if (_pressedKeys.Count != 1) return;
 
         Key pressedKey = _pressedKeys.FirstOrDefault();

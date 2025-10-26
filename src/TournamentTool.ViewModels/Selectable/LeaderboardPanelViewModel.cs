@@ -94,7 +94,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     
     public override bool CanEnable()
     {
-        return !_tournamentState.IsCurrentlyOpened;
+        return _tournamentState.IsCurrentlyOpened;
     }
 
     public override void OnEnable(object? parameter)

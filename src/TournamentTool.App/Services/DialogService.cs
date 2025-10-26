@@ -22,7 +22,7 @@ public class DialogService : IDialogService
     public MessageBoxResult Show(string text, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None)
     {
         var buttons = CreateButtons(button);
-        DialogBoxViewModel model = new(_windowService, Dispatcher)
+        DialogBoxViewModel model = new(Dispatcher)
         {
             Text = text,
             Caption = caption,
@@ -31,7 +31,7 @@ public class DialogService : IDialogService
             Result = MessageBoxResult.None,
         };
         
-        _windowService.ShowDialog(model);
+        _windowService.ShowDialog(model, null, "Window");
 
         return model.Result;
     }

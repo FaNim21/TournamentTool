@@ -2,9 +2,7 @@
 using Moq;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
-using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Preset;
-using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
@@ -12,9 +10,8 @@ using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Selectable;
-using TournamentTool.ViewModels.Selectable.Preset;
 
-namespace TournamentToolTests.ViewModelsTests;
+namespace TournamentTool.ViewModels.Tests;
 
 public class PresetManagerTests
 {

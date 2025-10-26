@@ -3,7 +3,6 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using TournamentTool.App.Components;
-using TournamentTool.App.Components.Behaviors;
 using TournamentTool.App.Services;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
@@ -67,11 +66,11 @@ public partial class App : Application
         services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
         
         //Http access services
-        services.AddHttpClient<IImageService, ImageService>();
-        services.AddHttpClient<IUpdateCheckerService, UpdateCheckerService>();
-        services.AddHttpClient<IMinecraftDataService, MinecraftDataService>();
-        services.AddHttpClient<IPacemanAPIService, PacemanAPIService>();
-        services.AddHttpClient<IRankedAPIService, RankedAPIService>();
+        services.AddSingleton<IMinecraftDataService, MinecraftDataService>();
+        services.AddSingleton<IPacemanAPIService, PacemanAPIService>();
+        services.AddSingleton<IRankedAPIService, RankedAPIService>();
+        services.AddSingleton<IImageService, ImageService>();
+        services.AddSingleton<IUpdateCheckerService, UpdateCheckerService>();
 
         //Logging control
         services.AddSingleton<ILoggingService, LoggingService>();
@@ -108,7 +107,7 @@ public partial class App : Application
         services.AddSingleton<PlayerManagerViewModel>();
         services.AddTransient<LeaderboardPanelViewModel>();
         services.AddTransient<SceneManagementViewModel>();
-        services.AddSingleton<UpdatesViewModel>();
+        services.AddTransient<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
         
         

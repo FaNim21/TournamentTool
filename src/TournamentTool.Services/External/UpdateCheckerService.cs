@@ -19,7 +19,7 @@ public interface IUpdateCheckerService
 
 public class UpdateCheckerService : IUpdateCheckerService
 {
-    private readonly HttpClient _client;
+    private readonly IHttpClientFactory _clientFactory;
     private ILoggingService Logger { get; }
     
     private const string OWNER = "FaNim21";
@@ -29,12 +29,10 @@ public class UpdateCheckerService : IUpdateCheckerService
     public bool AvailableUpdate { get; private set; }
 
 
-    public UpdateCheckerService(HttpClient client, ILoggingService logger)
+    public UpdateCheckerService(IHttpClientFactory clientFactory, ILoggingService logger)
     {
-        _client = client;
+        _clientFactory = clientFactory;
         Logger = logger;
-        
-        _client.DefaultRequestHeaders.Add("User-Agent", REPO);
     }
     
     public async Task<bool> CheckForUpdates(string? version = null)
@@ -44,7 +42,8 @@ public class UpdateCheckerService : IUpdateCheckerService
             version = Consts.Version[1..];
         }
 
-        var response = await _client.GetAsync(URL);
+        var client = _clientFactory.CreateClient();
+        var response = await client.GetAsync(URL);
         if (response.IsSuccessStatusCode)
         {
             string responseBody = await response.Content.ReadAsStringAsync();

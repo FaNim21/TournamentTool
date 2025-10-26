@@ -31,6 +31,7 @@
         <converters:BooleanInverterConverter x:Key="BooleanInverterConverter" />
         <converters:EnumDisplayNameConverter x:Key="EnumDisplayNameConverter" />
         <converters:MarkdownToTextBlockConverter x:Key="MarkdownToTextBlockConverter" />
+        <converters:MarkdownToInlinesConverter x:Key="MarkdownToInlinesConverter" />
         <converters:FontWeightConverter x:Key="FontWeightConverter" />
         <converters:StringToBrushConverter x:Key="StringToBrushConverter" />
          

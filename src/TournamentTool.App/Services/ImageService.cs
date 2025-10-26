@@ -8,20 +8,22 @@ namespace TournamentTool.App.Services;
 
 public class ImageService : IImageService
 {
+    private readonly IHttpClientFactory _clientFactory;
     private ILoggingService Logger { get; }
-    private readonly HttpClient _client;
 
-    public ImageService(HttpClient client, ILoggingService logger)
+    
+    public ImageService(IHttpClientFactory clientFactory, ILoggingService logger)
     {
+        _clientFactory = clientFactory;
         Logger = logger;
-        _client = client;
     }
     
     public async Task<object?> LoadImageFromUrlAsync(string url)
     {
         try
         {
-            var response = await _client.GetAsync(url);
+            var client = _clientFactory.CreateClient();
+            var response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var imageStream = await response.Content.ReadAsStreamAsync();
 
@@ -42,6 +44,8 @@ public class ImageService : IImageService
     }
     public object LoadImageFromStream(byte[] imageData)
     {
+        if (imageData == null || imageData.Length == 0) return null!;
+        
         using var ms = new MemoryStream(imageData);
         var image = new BitmapImage();
         image.BeginInit();

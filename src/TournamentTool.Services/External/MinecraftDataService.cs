@@ -13,13 +13,13 @@ public interface IMinecraftDataService
 
 public class MinecraftDataService : IMinecraftDataService
 {
-    private readonly HttpClient _client;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly SettingsService _settingsService;
 
 
-    public MinecraftDataService(HttpClient client, SettingsService settingsService)
+    public MinecraftDataService(IHttpClientFactory clientFactory, SettingsService settingsService)
     {
-        _client = client;
+        _clientFactory = clientFactory;
         _settingsService = settingsService;
     }
 
@@ -28,7 +28,8 @@ public class MinecraftDataService : IMinecraftDataService
         string url = _settingsService.Settings.HeadAPIType.GetHeadURL(id, size);
         try
         {
-            HttpResponseMessage response = await _client.GetAsync(url);
+            var client = _clientFactory.CreateClient();
+            HttpResponseMessage response = await client.GetAsync(url);
             if (!response.IsSuccessStatusCode) return [];
 
             return await response.Content.ReadAsByteArrayAsync();
@@ -43,7 +44,8 @@ public class MinecraftDataService : IMinecraftDataService
     {
         if (string.IsNullOrEmpty(UUID)) return null;
             
-        HttpResponseMessage response = await _client.GetAsync($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
+        var client = _clientFactory.CreateClient();
+        HttpResponseMessage response = await client.GetAsync($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
         if (!response.IsSuccessStatusCode) return null;
         
         string result = await response.Content.ReadAsStringAsync();
@@ -53,7 +55,8 @@ public class MinecraftDataService : IMinecraftDataService
     {
         if (string.IsNullOrEmpty(inGameName)) return null;
             
-        HttpResponseMessage response = await _client.GetAsync($"https://api.mojang.com/users/profiles/minecraft/{inGameName}");
+        var client = _clientFactory.CreateClient();
+        HttpResponseMessage response = await client.GetAsync($"https://api.mojang.com/users/profiles/minecraft/{inGameName}");
         if (!response.IsSuccessStatusCode) return null;
         
         string result = await response.Content.ReadAsStringAsync();

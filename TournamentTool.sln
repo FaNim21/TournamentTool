@@ -5,8 +5,6 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.App", "src\TournamentTool.App\TournamentTool.App.csproj", "{054B8006-E40F-4EC3-A13F-A3D55DCF044E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentToolTests", "tests\TournamentToolTests\TournamentToolTests.csproj", "{CD35A964-129E-4C9B-AF1D-8F2F6274DB3A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.ViewModels", "src\TournamentTool.ViewModels\TournamentTool.ViewModels.csproj", "{33C3D2E3-D6B7-49C8-9B2D-7E3E6863026F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Domain", "src\TournamentTool.Domain\TournamentTool.Domain.csproj", "{A216517F-0FF0-4EA1-B07A-A226B2997870}"
@@ -14,6 +12,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Core", "src\TournamentTool.Core\TournamentTool.Core.csproj", "{8F178AF6-E3B0-40DD-B580-19E4D74ECF8C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Services", "src\TournamentTool.Services\TournamentTool.Services.csproj", "{D30C9753-F862-4391-A510-A305A17D1D44}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{45885B8E-84E6-42A7-A112-183AFCC4B47A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Services.Tests", "tests\TournamentTool.Services.Tests\TournamentTool.Services.Tests.csproj", "{27F95575-F934-4290-A4DE-C2D377BB69D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Domain.Tests", "tests\TournamentTool.Domain.Tests\TournamentTool.Domain.Tests.csproj", "{F1E35BB8-061A-4764-B71C-253A00C39C9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.ViewModels.Tests", "tests\TournamentTool.ViewModels.Tests\TournamentTool.ViewModels.Tests.csproj", "{F58A4C08-421A-41FE-B7B8-3D595428DA08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +31,6 @@ Global
 		{054B8006-E40F-4EC3-A13F-A3D55DCF044E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{054B8006-E40F-4EC3-A13F-A3D55DCF044E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{054B8006-E40F-4EC3-A13F-A3D55DCF044E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD35A964-129E-4C9B-AF1D-8F2F6274DB3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD35A964-129E-4C9B-AF1D-8F2F6274DB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD35A964-129E-4C9B-AF1D-8F2F6274DB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD35A964-129E-4C9B-AF1D-8F2F6274DB3A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{33C3D2E3-D6B7-49C8-9B2D-7E3E6863026F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{33C3D2E3-D6B7-49C8-9B2D-7E3E6863026F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33C3D2E3-D6B7-49C8-9B2D-7E3E6863026F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +47,18 @@ Global
 		{D30C9753-F862-4391-A510-A305A17D1D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D30C9753-F862-4391-A510-A305A17D1D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D30C9753-F862-4391-A510-A305A17D1D44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27F95575-F934-4290-A4DE-C2D377BB69D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27F95575-F934-4290-A4DE-C2D377BB69D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27F95575-F934-4290-A4DE-C2D377BB69D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27F95575-F934-4290-A4DE-C2D377BB69D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1E35BB8-061A-4764-B71C-253A00C39C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1E35BB8-061A-4764-B71C-253A00C39C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1E35BB8-061A-4764-B71C-253A00C39C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1E35BB8-061A-4764-B71C-253A00C39C9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,5 +67,8 @@ Global
 		SolutionGuid = {19A7D6C8-4D2A-42A1-85DA-2AB499B641A4}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{27F95575-F934-4290-A4DE-C2D377BB69D5} = {45885B8E-84E6-42A7-A112-183AFCC4B47A}
+		{F1E35BB8-061A-4764-B71C-253A00C39C9D} = {45885B8E-84E6-42A7-A112-183AFCC4B47A}
+		{F58A4C08-421A-41FE-B7B8-3D595428DA08} = {45885B8E-84E6-42A7-A112-183AFCC4B47A}
 	EndGlobalSection
 EndGlobal
