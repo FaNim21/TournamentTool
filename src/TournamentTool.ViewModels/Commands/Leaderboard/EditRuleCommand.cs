@@ -31,6 +31,6 @@ public class EditRuleCommand : BaseCommand
 
         rule.FilterSplitsAndAdvancements(_tournamentState.CurrentPreset.ControllerMode);
         LeaderboardRuleEditWindowViewModel windowViewModel = new(rule, _luaScriptsManager, _tournamentState, _dialogService, _dispatcher);
-        _windowService.ShowDialog(windowViewModel);
+        _windowService.ShowDialog(windowViewModel, null, "LeaderboardRuleEditWindow");
     }
 }

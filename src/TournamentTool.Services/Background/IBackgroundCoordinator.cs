@@ -1,5 +1,4 @@
 ﻿using TournamentTool.Domain.Enums;
-using TournamentTool.Domain.Interfaces;
 
 namespace TournamentTool.Services.Background;
 
@@ -8,7 +7,6 @@ public interface IBackgroundCoordinator
     void Register(IBackgroundDataReceiver? receiver);
     void Unregister(IBackgroundDataReceiver? receiver);
     void Initialize(ControllerMode mode, bool isValidated);
-    void Clear();
 }
 
 public interface IBackgroundServiceRegistry

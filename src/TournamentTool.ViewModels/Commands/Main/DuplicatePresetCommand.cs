@@ -1,8 +1,7 @@
 ﻿using System.Text.Json;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
-using TournamentTool.Domain.Entities.Preset;
-using TournamentTool.Domain.Interfaces;
+using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.Selectable.Preset;
 
@@ -10,14 +9,14 @@ namespace TournamentTool.ViewModels.Commands.Main;
 
 public class DuplicatePresetCommand : BaseCommand
 {
+    private ILoggingService Logger { get; }
     public PresetManagerViewModel PresetManager { get; set; }
-    private IPresetSaver _PresetSaver { get; }
 
-    
-    public DuplicatePresetCommand(PresetManagerViewModel presetManager, IPresetSaver presetSaver)
+
+    public DuplicatePresetCommand(PresetManagerViewModel presetManager, ILoggingService logger)
     {
         PresetManager = presetManager;
-        _PresetSaver = presetSaver;
+        Logger = logger;
     }
 
     public override void Execute(object? parameter)
@@ -27,22 +26,25 @@ public class DuplicatePresetCommand : BaseCommand
         string name = tournament.Name;
         name = Helper.GetUniqueName(name, name, PresetManager.IsPresetNameUnique);
 
-        string duplicatePath = Path.Combine(Consts.PresetsPath, name + ".json");
+        string duplicatePath = Path.Combine(Consts.PresetsPath, $"{name}.json");
         string originalPath = tournament.GetPath();
         File.Copy(originalPath, duplicatePath);
-
+        
         string text = File.ReadAllText(duplicatePath) ?? string.Empty;
+        
         try
         {
             if (string.IsNullOrEmpty(text)) return;
+
             Tournament? data = JsonSerializer.Deserialize<Tournament>(text);
             if (data == null) return;
-            data.Name = name;
-            _PresetSaver.SavePreset(data);
 
-            TournamentPreset preset = new TournamentPreset(name);
-            PresetManager.AddItem(preset);
+            data.Name = name;
+            PresetManager.AddDuplicatedItem(data);
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 }

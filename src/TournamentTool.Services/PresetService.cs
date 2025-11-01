@@ -2,7 +2,6 @@
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services;
@@ -27,17 +26,18 @@ public class PresetService : IPresetSaver
         if (preset == null) return;
 
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
-        string path = preset.GetPath(Consts.AppdataPath);
+        string path = preset.GetPath(Consts.PresetsPath);
+        
         File.WriteAllText(path, data);
     }
 
     public void SavePreset()
     {
-        if (_tournamentState.CurrentPreset == null) return;
+        if (_tournamentState.CurrentPreset == null || string.IsNullOrEmpty(_tournamentState.CurrentPreset.Name)) return;
         
         IPreset preset = _tournamentState.CurrentPreset;
         var data = JsonSerializer.Serialize<object>(preset, _serializerOptions);
-        string path = preset.GetPath(Consts.AppdataPath);
+        string path = preset.GetPath(Consts.PresetsPath);
         File.WriteAllText(path, data);
         _tournamentState.MarkAsUnmodified();
     }

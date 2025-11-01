@@ -387,7 +387,10 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
     public void ClearPlayersFromPovs()
     {
-        _playerRepository.ClearPlayersFromPOVS();
+        foreach (var player in _playerRepository.Players)
+        {
+            player.ClearPOVDependencies();
+        }
     }
     
     private async Task LoadScenesForStudioMode(bool force = true)

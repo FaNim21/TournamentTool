@@ -21,11 +21,6 @@ public interface ITournamentPlayerRepository
 
     void UpdateCategoryForPlayers();
     void UpdateTeamNamesForPlayers();
-    
-    // \/ te 3 metody do przekminienia czy jak i tak nie maja duzej ilosci uzyc to czy nei lepiej dac je w wyzej
-    void ClearPlayersStreamData();
-    void ClearPlayersFromController();
-    void ClearPlayersFromPOVS();
 }
 
 public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposable
@@ -162,21 +157,5 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
         {
             player.ShowTeamName(_state.CurrentPreset.IsUsingTeamNames);
         }
-    }
-    
-    public void ClearPlayersStreamData()
-    {
-        for (int i = 0; i < Players.Count; i++)
-            Players[i].ClearStreamData();
-    }
-    public void ClearPlayersFromController()
-    {
-        for (int i = 0; i < Players.Count; i++)
-            Players[i].ClearFromController();
-    }
-    public void ClearPlayersFromPOVS()
-    {
-        for (int i = 0; i < Players.Count; i++)
-            Players[i].ClearPOVDependencies();
     }
 }

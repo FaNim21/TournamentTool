@@ -46,6 +46,8 @@ public class RankedService : IBackgroundService
     private readonly RankedManagementData _rankedManagementData;
     
     private ILeaderboardManager Leaderboard { get; }
+    
+    public int DelayMiliseconds => 1500;
 
     private IRankedDataReceiver? _rankedDataReceiver;
     private IRankedManagementDataReceiver? _rankedManagementDataReceiver;
@@ -115,7 +117,6 @@ public class RankedService : IBackgroundService
             string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiPlayerName)) return;
         
         await LoadJsonFileAsync();
-        await Task.Delay(TimeSpan.FromMilliseconds(1500), token);
     }
     
     private async Task LoadJsonFileAsync()

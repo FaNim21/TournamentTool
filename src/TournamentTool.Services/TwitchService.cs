@@ -47,6 +47,7 @@ public class TwitchService : ITwitchService
         _dialogService = dialogService;
         Logger = logger;
         SettingsService = settingsService;
+        
         _api = new TwitchAPI { Settings = { ClientId = ClientID } };
     }
 
@@ -108,6 +109,7 @@ public class TwitchService : ITwitchService
 
         try
         {
+            //TODO: 0 nie dziala to niestety trzeba zobaczyc glebiej w web server
             var server = new WebServer(Consts.RedirectURL, state);
 
             Process.Start(new ProcessStartInfo

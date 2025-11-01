@@ -56,6 +56,11 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
         {
             string state = _isWorking ? "activated" : "deactivated";
             SetToolTip($"{_mode} mode {state}");
+            
+            if (!_isWorking)
+            {
+                SetState("none");
+            }
         }
     }
     

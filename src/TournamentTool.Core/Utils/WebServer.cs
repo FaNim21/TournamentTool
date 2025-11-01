@@ -19,12 +19,9 @@ public class WebServer
     public async Task<Authorization?> Listen()
     {
         listener.Start();
-        return await OnRequest();
-    }
-    private async Task<Authorization?> OnRequest()
-    {
+        
         Authorization? authorization = null;
-
+        
         while (listener.IsListening)
         {
             HttpListenerContext ctx;

@@ -188,7 +188,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         EditPlayerCommand = new EditPlayerCommand(this);
         ValidatePlayerCommand = new ValidatePlayerCommand(this, presetService, windowService);
         FixPlayerHeadCommand = new FixPlayerHeadCommand(this, presetService, windowService);
-        RemovePlayerCommand = new RemovePlayerCommand(this, presetService);
+        RemovePlayerCommand = new RemovePlayerCommand(this, presetService, dialogService);
 
         RemoveSelectedPlayerCommand = new RelayCommand(RemoveSelectedPlayer);
 
@@ -352,7 +352,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         }
         
         WhitelistPlayerWindowViewModel viewModel = new(PlayerViewModelFactory, this, playerViewModel, Dispatcher);
-        _windowService.ShowDialog(viewModel);
+        _windowService.ShowDialog(viewModel, null, "WhitelistPlayerWindow");
     }
 
     public async Task<bool> SavePlayer(PlayerViewModel playerViewModel, bool isEditing)

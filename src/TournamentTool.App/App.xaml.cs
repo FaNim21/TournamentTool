@@ -110,7 +110,6 @@ public partial class App : Application
         services.AddTransient<UpdatesViewModel>();
         services.AddTransient<SettingsViewModel>();
         
-        
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
 

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using TournamentTool.Domain.Enums;
+﻿using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 
@@ -17,7 +16,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     public IBackgroundService? Service { get; private set; }
     public List<IBackgroundDataReceiver> Receivers { get; } = [];
 
-    private BackgroundWorker? _worker;
+    private Task? _taskWorker;
     private CancellationTokenSource? _cancellationTokenSource;
 
     
@@ -46,6 +45,14 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
 
     public void Initialize(ControllerMode mode, bool isValidated)
     {
+        try
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+        catch { /**/ }
+
         if (!isValidated || mode == ControllerMode.None)
         {
             ClearService();
@@ -55,69 +62,64 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         var service = _backgroundServiceFactory.Create(mode)!;
         Service = service;
 
-        if (_worker == null)
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _worker = new BackgroundWorker { WorkerSupportsCancellation = true };
-            _worker.DoWork += Update;
-            _worker.RunWorkerAsync();
-        }
+        _cancellationTokenSource = new CancellationTokenSource();
+        _taskWorker = Task.Run(async () => await UpdateAsync(service, _cancellationTokenSource.Token), _cancellationTokenSource.Token);
 
         for (int i = 0; i < Receivers.Count; i++)
         {
             Service.RegisterData(Receivers[i]);
         }
         
-        Logger.Log($"New service {service.GetType()} just started");
+        Logger.Debug($"New service {service.GetType()} just started");
         ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, true));
     }
 
-    private async void Update(object? sender, DoWorkEventArgs e)
+    private async Task UpdateAsync(IBackgroundService activeService, CancellationToken token)
     {
         try
         {
-            var cancellationToken = _cancellationTokenSource!.Token;
-            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
-            
-            while (!_worker!.CancellationPending && !cancellationToken.IsCancellationRequested)
+            await Task.Delay(TimeSpan.FromSeconds(2), token);
+
+            while (!token.IsCancellationRequested && Service == activeService)
             {
-                if (Service == null) continue;
-                await Service.Update(cancellationToken);
+                if (Service == null) break;
+                await Service.Update(token);
+
+                if (activeService.DelayMiliseconds <= 1000) break;
+                await Task.Delay(TimeSpan.FromMilliseconds(activeService.DelayMiliseconds), token);
             }
         }
-        catch (TaskCanceledException) { Clear(); }
+        catch (OperationCanceledException)
+        {
+            string serviceName = Service != null ? Service.GetType().ToString() : _tournamentState.CurrentPreset.ControllerMode.ToString();
+            Logger.Debug($"Background service '{serviceName}' was canceled");
+        }
         catch (Exception ex)
         {
             Logger.Error($"Error while updating background service: {ex}");
-            Clear();
+        }
+        finally
+        {
+            if (Service == activeService)
+            {
+                ClearService();
+            }
         }
     }
 
     public void Clear()
     {
-        if (_worker != null)
-        {
-            _worker.CancelAsync();
-            try
-            {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-            }
-            _worker.DoWork -= Update;
-            _worker.Dispose();
-        }
-
-        _worker = null;
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+        _taskWorker = null;
         ClearService();
     }
+    
     private void ClearService()
     {
         if (Service == null) return;
-        Logger.Log($"Service {Service!.GetType()} just stopped");
+        Logger.Debug($"Service {Service!.GetType()} just stopped");
         Service = null;
         
         ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, false));

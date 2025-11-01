@@ -43,7 +43,7 @@ public class PresetManagerTests
     public void AddItem_AddsPresetToCollection()
     {
         var preset = new TournamentPreset("TestPreset");
-        _viewModel.AddItem(preset);
+        _viewModel.AddNewItem(preset);
 
         Assert.Single(_viewModel.Presets);
     }
@@ -53,7 +53,7 @@ public class PresetManagerTests
     {
         var preset = new TournamentPreset("TestPreset");
         
-        _viewModel.AddItem(preset);
+        _viewModel.AddNewItem(preset);
         _viewModel.RemoveItem(preset.Name);
         
         Assert.Empty(_viewModel.Presets);
@@ -64,8 +64,8 @@ public class PresetManagerTests
     {
         var preset1 = new TournamentPreset("Preset1");
         var preset2 = new TournamentPreset("NameUnique");
-        _viewModel.AddItem(preset1);
-        _viewModel.AddItem(preset2);
+        _viewModel.AddNewItem(preset1);
+        _viewModel.AddNewItem(preset2);
         
         Assert.True(_viewModel.IsPresetNameUnique("UniqueName"));
     }
@@ -74,7 +74,7 @@ public class PresetManagerTests
     public void IsPresetNameUnique_ReturnsFalseForDuplicateName()
     {
         var preset = new TournamentPreset("Duplicate");
-        _viewModel.AddItem(preset);
+        _viewModel.AddNewItem(preset);
 
         Assert.False(_viewModel.IsPresetNameUnique("Duplicate"));
     }

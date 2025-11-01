@@ -8,6 +8,8 @@ public class SoloService : IBackgroundService
 {
     private ITournamentPresetManager Tournament { get; }
     private ILeaderboardManager Leaderboard { get; }
+    
+    public int DelayMiliseconds => 10_000;
 
     private readonly string _speedrunIGTPath;
     private string _playingWorldName = string.Empty;
@@ -38,7 +40,6 @@ public class SoloService : IBackgroundService
         }
         
         await LoadSpeedrunIGTData();
-        await Task.Delay(TimeSpan.FromMilliseconds(10_000), token);
     }
 
     private async Task LoadSpeedrunIGTData()

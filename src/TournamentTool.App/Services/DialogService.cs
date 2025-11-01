@@ -31,7 +31,7 @@ public class DialogService : IDialogService
             Result = MessageBoxResult.None,
         };
         
-        _windowService.ShowDialog(model, null, "Window");
+        _windowService.ShowDialog(model, null, "DialogBoxWindow");
 
         return model.Result;
     }

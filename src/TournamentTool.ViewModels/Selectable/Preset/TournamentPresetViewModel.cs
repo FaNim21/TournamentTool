@@ -4,7 +4,6 @@ using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Preset;
 using TournamentTool.Domain.Interfaces;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.ViewModels.Selectable.Preset;
@@ -12,6 +11,8 @@ namespace TournamentTool.ViewModels.Selectable.Preset;
 public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
 {
     private readonly ITournamentState _tournamentState;
+    private readonly IPresetSaver _presetSaver;
+    private readonly PresetManagerViewModel _presetManager;
     
     private readonly TournamentPreset _data;
 
@@ -26,25 +27,33 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
     } 
 
 
-    public TournamentPresetViewModel(TournamentPreset data, ITournamentState tournamentState, IDispatcherService dispatcher) : base(dispatcher)
+    public TournamentPresetViewModel(TournamentPreset data, PresetManagerViewModel presetManager, ITournamentState tournamentState, IDispatcherService dispatcher,
+        IPresetSaver presetSaver) : base(dispatcher)
     {
         _data = data;
+        _presetManager = presetManager;
         _tournamentState = tournamentState;
+        _presetSaver = presetSaver;
     }
 
-    public void ChangeName(string name)
+    public string ChangeName(string name)
     {
-        if (string.IsNullOrEmpty(name) || Name.Equals(name)) return;
-
-        var jsonName = name + ".json";
-        var path = Path.Combine(Consts.PresetsPath, Name + ".json");
-
+        if (string.IsNullOrEmpty(name) || Name.Equals(name)) return string.Empty;
+        if (!_presetManager!.IsPresetNameUnique(name))
+        {
+            return $"Preset item named '{name}' already exists";
+        }
+        
+        var path = Path.Combine(Consts.PresetsPath, $"{Name}.json");
         var directoryName = Path.GetDirectoryName(path)!;
-        var newPath = Path.Combine(directoryName, jsonName);
+        var newPath = Path.Combine(directoryName, $"{name}.json");
 
         File.Move(path, newPath);
         _tournamentState.ChangeName(name);
         Name = name;
+        _presetSaver.SavePreset();
+        
+        return string.Empty;
     }
 
     public string GetPath()

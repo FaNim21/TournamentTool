@@ -191,7 +191,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
         if (!IsUsingTwitchAPI || !_twitch.IsConnected)
         {
-            _playerRepository.ClearPlayersStreamData();
+            for (int i = 0; i < Players.Count; i++)
+                Players[i].ClearStreamData();
         }
     }
     public override bool OnDisable()
@@ -205,9 +206,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         SceneController.OnDisable();
         _serviceHub.OnDisable();
 
-        _playerRepository.ClearPlayersFromController();
+        for (int i = 0; i < Players.Count; i++)
+            Players[i].ClearFromController();
 
-        // FilteredPlayers!.Clear();
         CurrentChosenPOV = null;
         SelectedWhitelistPlayer = null;
         CurrentChosenPlayer = null;

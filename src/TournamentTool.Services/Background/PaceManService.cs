@@ -20,6 +20,8 @@ public class PaceManService : IBackgroundService
     private ILeaderboardManager Leaderboard { get; }
     public ISettings SettingsService { get; }
 
+    public int DelayMiliseconds => _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
+
     private IPacemanDataReceiver? _pacemanSidePanelReceiver;
     private IPlayerAddReceiver? _playerAddReceiver;
 
@@ -60,11 +62,6 @@ public class PaceManService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
-        await OrganizingPacemanData();
-        await Task.Delay(TimeSpan.FromMilliseconds(_tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds), token);
-    }
-    private async Task OrganizingPacemanData()
-    {
         var paceManData = await _pacemanApiService.GetPacemanLiveData(); 
         List<Paceman> currentPaces = new(_paces);
 
@@ -97,6 +94,7 @@ public class PaceManService : IBackgroundService
                 player = AddPaceManPlayerToWhiteList(pace);
             }
 
+            //TODO: 0 to tez zweryfikowac, bo stare rozwiazanie
             var paceman = new Paceman(this, pace, player.Data);
             UpdateHeadImage(paceman);
             

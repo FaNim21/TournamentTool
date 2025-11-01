@@ -12,12 +12,10 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.Main;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Selectable.Preset;
 
 namespace TournamentTool.ViewModels.Selectable;
@@ -31,7 +29,6 @@ public class PresetManagerViewModel : SelectableViewModel
     private readonly ISettings _settingsService;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IUIInteractionService _uiInteractionService;
-    private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
     public IPresetSaver PresetService { get; }
 
@@ -75,10 +72,10 @@ public class PresetManagerViewModel : SelectableViewModel
         IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) : base(coordinator, dispatcher)
     {
         PresetService = presetService;
-        BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
         _tournamentState = tournamentState;
-        _dialogService = dialogService; _settingsService = settingsService;
+        _dialogService = dialogService; 
+        _settingsService = settingsService;
         _luaScriptsManager = luaScriptsManager;
         _uiInteractionService = uiInteractionService;
 
@@ -92,10 +89,10 @@ public class PresetManagerViewModel : SelectableViewModel
         AddNewPresetCommand = new AddNewPresetCommand(this);
         SavePresetCommand = new RelayCommand(presetService.SavePreset);
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
-        OnItemListClickCommand = new OnItemListClickCommand(PresetService);
+        OnItemListClickCommand = new OnItemListClickCommand(presetService);
 
         ClearCurrentPresetCommand = new RelayCommand(Clear);
-        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, PresetService);
+        DuplicateCurrentPresetCommand = new DuplicatePresetCommand(this, logger);
         RenameItemCommand = new RelayCommand(EditPresetName);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this, dialogService);
 
@@ -116,6 +113,8 @@ public class PresetManagerViewModel : SelectableViewModel
     private void LoadStartupPreset()
     {
         string lastOpened = _settingsService.Settings.LastOpenedPresetName;
+        if (string.IsNullOrWhiteSpace(lastOpened)) return;
+        
         for (int i = 0; i < Presets.Count; i++)
         {
             if (!Presets[i].Name.Equals(lastOpened)) continue;
@@ -163,10 +162,13 @@ public class PresetManagerViewModel : SelectableViewModel
                 TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
                 if (data == null) continue;
 
-                TournamentPresetViewModel presetViewModel = new(data, _tournamentState, Dispatcher);
+                TournamentPresetViewModel presetViewModel = new(data, this, _tournamentState, Dispatcher, PresetService);
                 Presets.Add(presetViewModel);
             }
-            catch { /**/ }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
     }
 
@@ -179,15 +181,20 @@ public class PresetManagerViewModel : SelectableViewModel
         }
         return true;
     }
-
-    public void AddItem(IPreset preset)
+    
+    public void AddDuplicatedItem(IPreset preset)
     {
         PresetService.SavePreset(preset);
-        AddItem(new TournamentPreset(preset.Name));
+        
+        TournamentPreset item = new(preset.Name);
+        TournamentPresetViewModel itemViewModel = new(item, this, _tournamentState, Dispatcher, PresetService);
+        Presets.Add(itemViewModel);
     }
-    public void AddItem(TournamentPreset item)
+    public void AddNewItem(TournamentPreset preset)
     {
-        TournamentPresetViewModel itemViewModel = new(item, _tournamentState, Dispatcher);
+        TournamentPresetViewModel itemViewModel = new(preset, this, _tournamentState, Dispatcher, PresetService);
+        PresetService.SavePreset(itemViewModel);
+        
         Presets.Add(itemViewModel);
     }
 
@@ -209,6 +216,7 @@ public class PresetManagerViewModel : SelectableViewModel
         {
             _tournamentState.DeletePreset();
         }
+        
         File.Delete(item.GetPath());
     }
     

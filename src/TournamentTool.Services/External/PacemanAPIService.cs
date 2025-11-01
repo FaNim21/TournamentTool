@@ -19,7 +19,6 @@ public class PacemanAPIService : IPacemanAPIService
         _clientFactory = clientFactory;
     }
 
-
     public async Task<PaceManEvent[]> GetPacemanEvents()
     {
         var client = _clientFactory.CreateClient();

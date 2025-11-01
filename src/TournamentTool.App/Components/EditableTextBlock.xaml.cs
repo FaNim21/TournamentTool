@@ -102,23 +102,20 @@ public partial class EditableTextBlock : UserControl
                     return;
                 }
 
-                MainViewModel? main = ((MainWindow)Application.Current.MainWindow).DataContext as MainViewModel;
-                //TODO: 2 Zrobic w przyszlosci interface do tego zeby sprawdzac unique name dla edytowanego elementu
-                if (DataContext is IPreset)
+                IRenameItem context = (IRenameItem)DataContext;
+                if (context != null)
                 {
-                    PresetManagerViewModel? presetManager = main!.NavigationService.SelectedView as PresetManagerViewModel;
-                    if (!presetManager!.IsPresetNameUnique(textBlock.Text))
+                    string output = context.ChangeName(textBlock.Text);
+                    if (!string.IsNullOrWhiteSpace(output))
                     {
-                        ShowPopup($"Preset item named '{textBlock.Text}' already exists", 2);
+                        ShowPopup(output, 2);
                         return;
                     }
                 }
-
-                IRenameItem context = (IRenameItem)DataContext;
-                if (context != null)
-                    context.ChangeName(textBlock.Text);
                 else
+                {
                     Text = textBlock.Text;
+                }
 
                 popup.IsOpen = false;
             }
@@ -145,7 +142,7 @@ public partial class EditableTextBlock : UserControl
         PopupText = text;
 
         DoubleAnimation animation = new(1, 0, new Duration(TimeSpan.FromSeconds(duration)));
-        animation.Completed += (sender, e) =>
+        animation.Completed += (_, _) =>
         {
             popup.IsOpen = false;
             popup.Opacity = 1;

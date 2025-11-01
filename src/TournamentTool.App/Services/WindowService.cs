@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Windows;
+﻿using System.Windows;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Services.State;
@@ -106,7 +105,7 @@ public class WindowService : IWindowService
     public void ShowLoading(Func<IProgress<float>, IProgress<string>, CancellationToken, Task> loading)
     {
         var viewModel = new LoadingWindowViewModel(loading, Dispatcher);
-        ShowInternal(viewModel, true);
+        ShowInternal(viewModel, true, null, "LoadingWindow");
     }
 
     private void StartBlockingWindow()
@@ -122,8 +121,10 @@ public class WindowService : IWindowService
     private Window? CreateWindowForViewModel<TViewModel>(TViewModel viewModel, string? windowTypeName = null)
     {
         Type vmType = typeof(TViewModel);
-        string viewTypeName = $"TournamentTool.App.Windows.{vmType.Name.Replace("ViewModel", windowTypeName ?? string.Empty)}";
-        Type? viewType = Type.GetType(viewTypeName) ?? null;
+        string windowName = !string.IsNullOrWhiteSpace(windowTypeName) ? 
+            $"TournamentTool.App.Windows.{windowTypeName}" : 
+            $"TournamentTool.App.Windows.{vmType.Name.Replace("ViewModel", "Window")}";
+        Type? viewType = Type.GetType(windowName) ?? null;
 
         if (viewType == null || Activator.CreateInstance(viewType) is not Window window) return null;
 
