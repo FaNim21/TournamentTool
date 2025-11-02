@@ -107,8 +107,6 @@ public class Tournament : IPreset
         EnterEndGoodPaceMiliseconds = 480000;
         CreditsGoodPaceMiliseconds = 600000;
 
-        ControllerMode = ControllerMode.None;
-
         RankedApiPlayerName = string.Empty;
         RankedApiKey = string.Empty;
         AddUnknownRankedPlayersToWhitelist = false;

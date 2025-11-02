@@ -1,4 +1,4 @@
-﻿using Moq;
+﻿using NSubstitute;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
@@ -9,15 +9,15 @@ namespace TournamentTool.ViewModels.Tests;
 
 public class PointOfViewTests
 {
-    private readonly Mock<IPointOfViewOBSController> _mockController;
+    private readonly IPointOfViewOBSController _mockController;
     private readonly PointOfViewOBSData _testData;
     private readonly PointOfView _sut;
 
     protected PointOfViewTests()
     {
-        _mockController = new Mock<IPointOfViewOBSController>();
+        _mockController = Substitute.For<IPointOfViewOBSController>();
         _testData = new PointOfViewOBSData(1, "TestGroup", "TestScene", "TestSceneItem");
-        _sut = new PointOfView(_mockController.Object, _testData, new Mock<IDispatcherService>().Object)
+        _sut = new PointOfView(_mockController, _testData, Substitute.For<IDispatcherService>())
         {
             OriginWidth = 1920,
             OriginHeight = 1080,
@@ -66,7 +66,7 @@ public class PointOfViewTests
             Assert.Equal(0, _sut.Volume);
             Assert.Null(_sut.player);
             Assert.Equal(fullClear ? string.Empty : "CustomStream", _sut.CustomStreamName);
-            _mockController.Verify(c => c.Clear(_testData), Times.Once);
+            _mockController.Received(1).Clear(_testData);
         }
     }
 
@@ -84,7 +84,7 @@ public class PointOfViewTests
 
             Assert.Equal(volume, _sut.Volume);
             Assert.Equal(expectedMuted, _sut.IsMuted);
-            _mockController.Verify(c => c.UpdatePOVBrowser(_testData), Times.Once);
+            _mockController.Received(1).UpdatePOVBrowser(_testData);
         }
 
         [Theory]
@@ -104,16 +104,19 @@ public class PointOfViewTests
 
     public class SetPOVTests : PointOfViewTests
     {
-        private Mock<IPlayer> CreateMockPlayer(bool isFromWhitelist = true, string displayName = "TestPlayer")
+        private IPlayer CreateMockPlayer(bool isFromWhitelist = true, string displayName = "TestPlayer")
         {
-            var player = new Mock<IPlayer>();
-            player.Setup(p => p.DisplayName).Returns(displayName);
-            player.Setup(p => p.StreamDisplayInfo).Returns(new StreamDisplayInfo("TestStream", StreamType.twitch));
-            player.Setup(p => p.HeadViewParameter).Returns("HeadParam");
-            player.Setup(p => p.GetPersonalBest).Returns("1:00:00");
-            player.Setup(p => p.IsFromWhitelist).Returns(isFromWhitelist);
-            player.SetupProperty(p => p.IsUsedInPov);
-            player.SetupProperty(p => p.IsUsedInPreview);
+            var player = Substitute.For<IPlayer>();
+            
+            player.DisplayName.Returns(displayName);
+            player.StreamDisplayInfo.Returns(new StreamDisplayInfo("TestStream", StreamType.twitch));
+            player.HeadViewParameter.Returns("HeadParam");
+            player.GetPersonalBest.Returns("1:00:00");
+            player.IsFromWhitelist.Returns(isFromWhitelist);
+
+            player.IsUsedInPov = false;
+            player.IsUsedInPreview = false;
+
             return player;
         }
 
@@ -123,7 +126,7 @@ public class PointOfViewTests
             _sut.SetPOV(null);
 
             Assert.True(_sut.IsEmpty);
-            _mockController.Verify(c => c.Clear(_testData), Times.Once);
+            _mockController.Received(1).Clear(_testData);
         }
 
         [Fact]
@@ -131,11 +134,11 @@ public class PointOfViewTests
         {
             var player = CreateMockPlayer(isFromWhitelist: true);
 
-            _sut.SetPOV(player.Object);
+            _sut.SetPOV(player);
 
             Assert.Equal("TestPlayer", _sut.DisplayedPlayer);
             Assert.False(_sut.IsEmpty);
-            _mockController.Verify(c => c.SendOBSInformations(_testData), Times.Once);
+            _mockController.Received(1).SendOBSInformations(_testData);
         }
 
         [Fact]
@@ -143,11 +146,11 @@ public class PointOfViewTests
         {
             var player = CreateMockPlayer(isFromWhitelist: false);
 
-            _sut.SetPOV(player.Object);
+            _sut.SetPOV(player);
 
             Assert.Equal("TestStream", _sut.CustomStreamName);
             Assert.Equal("TestStream", _sut.DisplayedPlayer);
-            _mockController.Verify(c => c.SendOBSInformations(_testData), Times.Once);
+            _mockController.Received(1).SendOBSInformations(_testData);
         }
 
         [Theory]
@@ -155,13 +158,13 @@ public class PointOfViewTests
         [InlineData(SceneType.Preview, false, true)]
         public void SetPOV_UpdatesCorrectUsageFlag(SceneType sceneType, bool expectedUsedInPov, bool expectedUsedInPreview)
         {
-            var pov = new PointOfView(_mockController.Object, _testData, new Mock<IDispatcherService>().Object, sceneType);
+            var pov = new PointOfView(_mockController, _testData, Substitute.For<IDispatcherService>(), sceneType);
             var player = CreateMockPlayer();
 
-            pov.SetPOV(player.Object);
+            pov.SetPOV(player);
 
-            Assert.Equal(expectedUsedInPov, player.Object.IsUsedInPov);
-            Assert.Equal(expectedUsedInPreview, player.Object.IsUsedInPreview);
+            Assert.Equal(expectedUsedInPov, player.IsUsedInPov);
+            Assert.Equal(expectedUsedInPreview, player.IsUsedInPreview);
         }
     }
 
@@ -177,7 +180,7 @@ public class PointOfViewTests
             _sut.SetCustomPOV();
 
             Assert.Equal(string.Empty, _sut.CurrentCustomStreamName);
-            _mockController.Verify(c => c.Clear(_testData), Times.Once);
+            _mockController.Received(1).Clear(_testData);
         }
 
         [Theory]
@@ -193,7 +196,7 @@ public class PointOfViewTests
             Assert.Equal(streamName, _sut.DisplayedPlayer);
             Assert.Equal(streamName, _sut.CurrentCustomStreamName);
             Assert.Equal(streamType, _sut.CurrentCustomStreamType);
-            _mockController.Verify(c => c.SendOBSInformations(_testData), Times.Once);
+            _mockController.Received(1).SendOBSInformations(_testData);
         }
 
         [Fact]
@@ -208,7 +211,7 @@ public class PointOfViewTests
 
             _sut.SetCustomPOV();
 
-            _mockController.Verify(c => c.SendOBSInformations(It.IsAny<PointOfViewOBSData>()), Times.Once);
+            _mockController.Received(1).SendOBSInformations(Arg.Any<PointOfViewOBSData>());
         }
     }
 
@@ -225,7 +228,7 @@ public class PointOfViewTests
         [Fact]
         public void Swap_WithDifferentSceneType_ReturnsFalse()
         {
-            var otherPov = new PointOfView(_mockController.Object, new PointOfViewOBSData(2, "G2", "S2", "I2"), new Mock<IDispatcherService>().Object, SceneType.Preview);
+            var otherPov = new PointOfView(_mockController, new PointOfViewOBSData(2, "G2", "S2", "I2"), Substitute.For<IDispatcherService>(), SceneType.Preview);
 
             var result = _sut.Swap(otherPov);
 
@@ -236,7 +239,7 @@ public class PointOfViewTests
         public void Swap_WithSameSceneType_SwapsSuccessfully()
         {
             var otherData = new PointOfViewOBSData(2, "G2", "S2", "I2");
-            var otherPov = new PointOfView(_mockController.Object, otherData, new Mock<IDispatcherService>().Object, SceneType.Main);
+            var otherPov = new PointOfView(_mockController, otherData, Substitute.For<IDispatcherService>());
             
             _sut.CustomStreamName = "Stream1";
             otherPov.CustomStreamName = "Stream2";
@@ -254,17 +257,17 @@ public class PointOfViewTests
         private PointOfView CreatePOV(int id, SceneType sceneType = SceneType.Main)
         {
             var data = new PointOfViewOBSData(id, $"Group{id}", $"Scene{id}", $"Item{id}");
-            return new PointOfView(_mockController.Object, data, new Mock<IDispatcherService>().Object, sceneType);
+            return new PointOfView(_mockController, data, Substitute.For<IDispatcherService>(), sceneType);
         }
 
-        private Mock<IPlayer> CreatePlayer(string name, bool isFromWhitelist = true)
+        private IPlayer CreatePlayer(string name, bool isFromWhitelist = true)
         {
-            var player = new Mock<IPlayer>();
-            player.Setup(p => p.DisplayName).Returns(name);
-            player.Setup(p => p.StreamDisplayInfo).Returns(new StreamDisplayInfo(name + "Stream", StreamType.twitch));
-            player.Setup(p => p.IsFromWhitelist).Returns(isFromWhitelist);
-            player.SetupProperty(p => p.IsUsedInPov);
-            player.SetupProperty(p => p.IsUsedInPreview);
+            var player = Substitute.For<IPlayer>();
+            player.DisplayName.Returns(name);
+            player.StreamDisplayInfo.Returns(new StreamDisplayInfo("Stream", StreamType.twitch));
+            player.IsFromWhitelist.Returns(isFromWhitelist);
+            player.IsUsedInPov = false;
+            player.IsUsedInPreview = false;
             return player;
         }
 
@@ -307,8 +310,8 @@ public class PointOfViewTests
             var player1 = CreatePlayer("Player1");
             var player2 = CreatePlayer("Player2");
             
-            pov1.SetPOV(player1.Object);
-            pov2.SetPOV(player2.Object);
+            pov1.SetPOV(player1);
+            pov2.SetPOV(player2);
             
             var swapResult = pov1.Swap(pov2);
             
@@ -324,10 +327,10 @@ public class PointOfViewTests
             var pov = CreatePOV(1);
             var player = CreatePlayer("TestPlayer");
             
-            pov.SetPOV(player.Object);
+            pov.SetPOV(player);
             
             Assert.Equal("TestPlayer", pov.DisplayedPlayer);
-            Assert.True(player.Object.IsUsedInPov);
+            Assert.True(player.IsUsedInPov);
         }
 
         [Theory]
@@ -341,7 +344,7 @@ public class PointOfViewTests
             var pov2 = CreatePOV(2, scene2Type);
             var player = CreatePlayer("Player1");
             
-            pov1.SetPOV(player.Object);
+            pov1.SetPOV(player);
             
             var swapResult = pov1.Swap(pov2);
             
@@ -368,9 +371,9 @@ public class PointOfViewTests
             var player2 = CreatePlayer("Player2");
             
             // Step 1: Set player1 to mainPov1
-            mainPov1.SetPOV(player1.Object);
+            mainPov1.SetPOV(player1);
             Assert.Equal("Player1", mainPov1.DisplayedPlayer);
-            Assert.True(player1.Object.IsUsedInPov);
+            Assert.True(player1.IsUsedInPov);
             
             // Step 2: Try to swap with preview POV (should fail)
             var swapResult = mainPov1.Swap(previewPov1);
@@ -385,10 +388,10 @@ public class PointOfViewTests
             Assert.Equal("Player1", mainPov2.DisplayedPlayer);
             
             // Step 4: Set player2 to preview POV
-            previewPov1.SetPOV(player2.Object);
+            previewPov1.SetPOV(player2);
             Assert.Equal("Player2", previewPov1.DisplayedPlayer);
-            Assert.True(player2.Object.IsUsedInPreview);
-            Assert.False(player2.Object.IsUsedInPov);
+            Assert.True(player2.IsUsedInPreview);
+            Assert.False(player2.IsUsedInPov);
         }
 
         [Fact]
@@ -400,12 +403,12 @@ public class PointOfViewTests
             var player = CreatePlayer("Player1");
             
             // Set player to pov1
-            pov1.SetPOV(player.Object);
-            Assert.True(player.Object.IsUsedInPov);
+            pov1.SetPOV(player);
+            Assert.True(player.IsUsedInPov);
             
             // Try to set same player to pov2 (should keep old player)
-            player.Object.IsUsedInPov = true; // Simulate player already in use
-            pov2.SetPOV(player.Object);
+            player.IsUsedInPov = true; // Simulate player already in use
+            pov2.SetPOV(player);
             
             // Since SetPlayerToPOV checks IsPlayerUsed, it should not change
             Assert.True(pov2.IsEmpty || pov2.DisplayedPlayer != "Player1");
@@ -453,18 +456,18 @@ public class PointOfViewTests
             var player2 = CreatePlayer("Player2");
             
             // Set first player
-            pov.SetPOV(player1.Object);
+            pov.SetPOV(player1);
             Assert.Equal("Player1", pov.DisplayedPlayer);
             
             // Clear
             pov.Clear(fullClear: true);
             Assert.True(pov.IsEmpty);
-            Assert.False(player1.Object.IsUsedInPov);
+            Assert.False(player1.IsUsedInPov);
             
             // Set new player
-            pov.SetPOV(player2.Object);
+            pov.SetPOV(player2);
             Assert.Equal("Player2", pov.DisplayedPlayer);
-            Assert.True(player2.Object.IsUsedInPov);
+            Assert.True(player2.IsUsedInPov);
         }
 
         [Fact]
@@ -504,19 +507,19 @@ public class PointOfViewTests
             var customPlayer = CreatePlayer("CustomPlayer", isFromWhitelist: false);
             
             // Set whitelisted player
-            pov1.SetPOV(whitelistedPlayer.Object);
+            pov1.SetPOV(whitelistedPlayer);
             Assert.Equal("WhitelistedPlayer", pov1.DisplayedPlayer);
             Assert.Equal(string.Empty, pov1.CustomStreamName); // Should not set custom stream
             
             // Set non-whitelisted player (creates custom POV)
-            pov2.SetPOV(customPlayer.Object);
-            Assert.Equal("CustomPlayerStream", pov2.DisplayedPlayer);
-            Assert.Equal("CustomPlayerStream", pov2.CustomStreamName); // Should set custom stream
+            pov2.SetPOV(customPlayer);
+            Assert.Equal("Stream", pov2.DisplayedPlayer);
+            Assert.Equal("Stream", pov2.CustomStreamName); // Should set custom stream
             
             // Swap them
-            var swapResult = pov1.Swap(pov2);
+            bool swapResult = pov1.Swap(pov2);
             Assert.True(swapResult);
-            Assert.Equal("CustomPlayerStream", pov1.DisplayedPlayer);
+            Assert.Equal("Stream", pov1.DisplayedPlayer);
             Assert.Equal("WhitelistedPlayer", pov2.DisplayedPlayer);
         }
     }

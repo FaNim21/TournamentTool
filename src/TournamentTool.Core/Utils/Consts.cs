@@ -7,7 +7,7 @@ public static class Consts
     public static bool IsTesting { get; set; }
 
     public static readonly string AppdataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TournamentTool");
-    public static readonly string PresetsPath = Path.Combine(AppdataPath, "Presets");
+    public static string PresetsPath => IsTesting ? Path.Combine(AppdataPath, "TestPresets") : Path.Combine(AppdataPath, "Presets");
     public static readonly string AppAPIPath = Path.Combine(AppdataPath, "API");
     public static readonly string LogsPath = Path.Combine(AppdataPath, "Logs");
     public static readonly string ScriptsPath = Path.Combine(AppdataPath, "Scripts");

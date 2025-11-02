@@ -82,12 +82,13 @@ public class PresetManagerViewModel : SelectableViewModel
         Tournament = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
         
         LoadPresetsList();
+        
+        SavePresetCommand = new RelayCommand(presetService.SavePreset);
 
         OpenControllerCommand = new RelayCommand(navigationService.NavigateTo<ControllerViewModel>);
         OpenLeaderboardCommand = new RelayCommand(navigationService.NavigateTo<LeaderboardPanelViewModel>);
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
-        SavePresetCommand = new RelayCommand(presetService.SavePreset);
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
         OnItemListClickCommand = new OnItemListClickCommand(presetService);
 
@@ -103,15 +104,14 @@ public class PresetManagerViewModel : SelectableViewModel
         Tournament.Dispose();
     }
 
-    public override bool CanEnable() { return true; }
+    public override bool CanEnable() => true;
     public override void OnEnable(object? parameter) { }
-    public override bool OnDisable()
-    {
-        return true;
-    }
+    public override bool OnDisable() => true;
 
     private void LoadStartupPreset()
     {
+        if (_settingsService.Settings == null) return;
+        
         string lastOpened = _settingsService.Settings.LastOpenedPresetName;
         if (string.IsNullOrWhiteSpace(lastOpened)) return;
         
@@ -152,6 +152,7 @@ public class PresetManagerViewModel : SelectableViewModel
     private void LoadPresetsList()
     {
         var presets = Directory.GetFiles(Consts.PresetsPath, "*.json", SearchOption.TopDirectoryOnly).AsSpan();
+        
         for (int i = presets.Length - 1; i >= 0; i--)
         {
             string text = File.ReadAllText(presets[i]) ?? string.Empty;
@@ -190,12 +191,13 @@ public class PresetManagerViewModel : SelectableViewModel
         TournamentPresetViewModel itemViewModel = new(item, this, _tournamentState, Dispatcher, PresetService);
         Presets.Add(itemViewModel);
     }
-    public void AddNewItem(TournamentPreset preset)
+    public TournamentPresetViewModel AddNewItem(TournamentPreset preset)
     {
         TournamentPresetViewModel itemViewModel = new(preset, this, _tournamentState, Dispatcher, PresetService);
         PresetService.SavePreset(itemViewModel);
         
         Presets.Add(itemViewModel);
+        return itemViewModel;
     }
 
     public void RemoveItem(string name)
@@ -239,8 +241,10 @@ public class PresetManagerViewModel : SelectableViewModel
         });
     }
 
-    public void SaveLastOpened(string presetName)
+    private void SaveLastOpened(string presetName)
     {
+        if (_settingsService.Settings == null) return;
+        
         _settingsService.Settings.LastOpenedPresetName = presetName;
     }
 

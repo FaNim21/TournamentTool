@@ -37,12 +37,11 @@ public class WindowService : IWindowService
         var vmType = typeof(TViewModel);
         if (!modal && _windows.ContainsKey(vmType)) return;
 
-        var window = CreateWindowForViewModel(viewModel, windowTypeName);
+        Window? window = CreateWindowForViewModel(viewModel, windowTypeName);
         if (window == null) return;
 
         void OnWindowClosed(object? sender, EventArgs e)
         {
-            //TODO: 0 to przetestowac czy dobrze okna czysci
             window.Closed -= OnWindowClosed;
             
             if (modal)
