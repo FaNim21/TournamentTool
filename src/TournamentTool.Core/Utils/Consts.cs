@@ -13,7 +13,7 @@ public static class Consts
     public static readonly string ScriptsPath = Path.Combine(AppdataPath, "Scripts");
     public static readonly string LeaderboardScriptsPath = Path.Combine(ScriptsPath, "Leaderboard");
 
-    public const string RedirectURL = "http://localhost:8080/redirect/";
+    public const string RedirectURL = "http://localhost:8080/";
 
     public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
     public const string PaceManTwitchAPI = "https://paceman.gg/api/us/twitch";

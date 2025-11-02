@@ -53,6 +53,8 @@ public class TwitchService : ITwitchService
 
     public async Task ConnectAsync(bool silent = false)
     {
+        if (SettingsService.APIKeys == null) return;
+        
         _api.Settings.ClientId = !string.IsNullOrEmpty(SettingsService.APIKeys.CustomTwitchClientID) ? SettingsService.APIKeys.CustomTwitchClientID : ClientID;
         
         if (!string.IsNullOrEmpty(SettingsService.APIKeys.TwitchAccessToken))
@@ -109,7 +111,6 @@ public class TwitchService : ITwitchService
 
         try
         {
-            //TODO: 0 nie dziala to niestety trzeba zobaczyc glebiej w web server
             var server = new WebServer(Consts.RedirectURL, state);
 
             Process.Start(new ProcessStartInfo
