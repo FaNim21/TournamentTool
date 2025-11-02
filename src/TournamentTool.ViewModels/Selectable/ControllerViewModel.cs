@@ -26,13 +26,15 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
+    public ILoggingService Logger { get; }
+    public ISettings SettingsService { get; }
     
     public SceneControllerViewmodel SceneController { get; }
     private readonly ControllerServiceHub _serviceHub;
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
     public Predicate<object> PlayerFilter => FilterPlayers;
-    private int _playerViewRefreshTrigger = 0;
+    private int _playerViewRefreshTrigger;
     public int PlayerViewRefreshTrigger
     {
         get => _playerViewRefreshTrigger;
@@ -45,10 +47,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public SidePanel? SidePanel { get; set; }
     public ManagementPanel? ManagementPanel { get; set; }
-
-    public LeaderboardPanelViewModel Leaderboard { get; }
-    public ILoggingService Logger { get; }
-    public ISettings SettingsService { get; }
 
     private IPlayer? _currentChosenPlayer;
     public IPlayer? CurrentChosenPlayer
@@ -122,14 +120,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public ICommand UnSelectItemsCommand { get; set; }
     
-    private CancellationTokenSource? _playersRefreshTokenSource;
-    
 
     public ControllerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
-        ITournamentLeaderboardRepository leaderboardRepository, LeaderboardPanelViewModel leaderboard, IBackgroundCoordinator backgroundCoordinator, 
-        ObsController obs, ITwitchService twitch, ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
+        ITournamentLeaderboardRepository leaderboardRepository, IBackgroundCoordinator backgroundCoordinator, ObsController obs, ITwitchService twitch, 
+        ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
     {
-        Leaderboard = leaderboard;
         Logger = logger;
         SettingsService = settingsService;
         _playerRepository = playerRepository;
@@ -246,24 +241,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public void RefreshFilteredCollection()
     {
-        _playersRefreshTokenSource?.Cancel();
-        _playersRefreshTokenSource = new CancellationTokenSource();
-        var token = _playersRefreshTokenSource.Token;
-
-        //TODO: 3 ???????????? to jest do weryfikacji i testow, bo jest giga glupie
-        try
-        {
-            Task.Delay(1000, token).ContinueWith(_ =>
-            {
-                if (token.IsCancellationRequested) return;
-            
-                Dispatcher.Invoke(() =>
-                {
-                    PlayerViewRefreshTrigger++;
-                });
-            }, TaskScheduler.Default);
-        }
-        catch { /**/ }
+        PlayerViewRefreshTrigger++;
     }
 
     public void SetPovAfterClickedCanvas(IPlayer chosenPlayer)

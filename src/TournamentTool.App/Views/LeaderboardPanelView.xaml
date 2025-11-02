@@ -246,6 +246,7 @@
                                           VirtualizingStackPanel.ScrollUnit="Pixel">
                 <i:Interaction.Behaviors>
                     <behaviors:CollectionViewBehavior Source="{Binding Entries}"
+                                                      RefreshTrigger="{Binding EntriesViewRefreshTrigger}"
                                                       SortProperty="Position"
                                                       SortDirection="Ascending" />
                 </i:Interaction.Behaviors>

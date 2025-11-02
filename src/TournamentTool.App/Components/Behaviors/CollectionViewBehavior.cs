@@ -13,7 +13,7 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
 
     public static readonly DependencyProperty SortPropertyProperty =
         DependencyProperty.Register(nameof(SortProperty), typeof(string), typeof(CollectionViewBehavior),
-            new PropertyMetadata(null, OnSortChanged));
+            new PropertyMetadata(string.Empty, OnSortChanged));
     
     public static readonly DependencyProperty SortDirectionProperty =
         DependencyProperty.Register(nameof(SortDirection), typeof(ListSortDirection), typeof(CollectionViewBehavior),
@@ -97,7 +97,6 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
     {
         if (_view == null) return;
         _view.Filter = Filter;
-        RefreshView(); //? czy to na pewno potrzebne
     }
     
     private void RefreshView()

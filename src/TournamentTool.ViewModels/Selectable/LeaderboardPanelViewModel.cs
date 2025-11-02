@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Exceptions;
@@ -7,7 +6,6 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
@@ -25,8 +23,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IDialogService _dialogService;
     private readonly ITournamentPlayerRepository _playerRepository;
-
-    public IPresetSaver PresetSaver { get; private set; }
     private ILeaderboardManager LeaderboardManager { get; }
 
 
@@ -63,10 +59,9 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
 
     public LeaderboardPanelViewModel(ICoordinator coordinator, ITournamentLeaderboardRepository leaderboardRepository, ITournamentState tournamentState,
-        IPresetSaver presetSaver, ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, 
-        IDispatcherService dispatcher, IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(coordinator, dispatcher)
+        ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, IDispatcherService dispatcher, 
+        IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(coordinator, dispatcher)
     {
-        PresetSaver = presetSaver;
         LeaderboardManager = leaderboardManager;
         _leaderboardRepository = leaderboardRepository;
         _tournamentState = tournamentState;
@@ -162,10 +157,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         }
         else
         {
-            Dispatcher.Invoke(() =>
-            {
-                EntriesViewRefreshTrigger++;
-            });
+            RefreshEntriesPanel();
         }
 
         for (int i = 0; i < Rules.Count; i++)
@@ -191,10 +183,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             entry.Refresh(Rules[0].ChosenMilestone);
         }
 
-        Dispatcher.Invoke(() =>
-        {
-            EntriesViewRefreshTrigger++;
-        });
+        RefreshEntriesPanel();
     }
     public void RefreshAllEntries()
     {
@@ -247,6 +236,11 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         UpdateFocusedRule();
     }
 
+    private void RefreshEntriesPanel()
+    {
+        EntriesViewRefreshTrigger++;
+    }
+    
     private void MoveRuleItem((int oldIndex, int newIndex) indexTuple)
     {
         int oldIndex = indexTuple.oldIndex;

@@ -323,10 +323,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
     private void RefreshFilteredCollectionView()
     {
-        Dispatcher.InvokeAsync(() =>
-        {
-            PlayerViewRefreshTrigger++;
-        }, CustomDispatcherPriority.Background);
+        PlayerViewRefreshTrigger++;
     }
     
     private void UpdateInformationCountText(string header = "Found", string filteredCount = "")

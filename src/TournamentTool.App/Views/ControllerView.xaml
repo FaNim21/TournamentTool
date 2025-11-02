@@ -273,6 +273,7 @@
                         <behaviors:CollectionViewBehavior Source="{Binding Players}"
                                                           SortProperty="IsStreamLive"
                                                           SortDirection="Descending"
+                                                          RefreshTrigger="{Binding PlayerViewRefreshTrigger}"
                                                           Filter="{Binding PlayerFilter}" />
                         <behaviors:ListBoxUpdateBehavior DragAndDropContext="{Binding .}" />
                         <behaviors:ListBoxSelectionBehavior />
