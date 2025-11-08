@@ -214,14 +214,13 @@ public class MainViewModel : BaseViewModel
             {
                 SelectedViewModel = NavigationService.SelectedView,
             };
-            _windowService.Show(DebugWindowViewModel);
+            _windowService.Show(DebugWindowViewModel, null, "DebugWindow");
             _windowService.FocusMainWindow();
             IsDebugWindowOpened = true;
         }
         else
         {
             DebugWindowViewModel?.RequestClose?.Invoke();
-            //TODO: 0 sprawdzic czy invoke rzeczywiscie wywoluje dispose i przez to nulluje requestClose
         }
     }
 

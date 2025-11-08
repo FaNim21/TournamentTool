@@ -21,14 +21,13 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private readonly ITournamentState _tournamentState;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
-    public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
-
     public ITournamentPlayerRepository PlayerRepository { get; }
     public IPresetSaver PresetService { get; }
     private IBackgroundCoordinator BackgroundCoordinator { get; }
     public ILoggingService Logger { get; }
-    public ISettings SettingsService { get; }
     public IPlayerViewModelFactory PlayerViewModelFactory { get; }
+    
+    public ObservableCollection<PaceManEvent> PaceManEvents { get; set; } = [];
 
     private ObservableCollection<PlayerViewModel> _selectedPlayers = [];
     public ObservableCollection<PlayerViewModel> SelectedPlayers
@@ -53,7 +52,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
             OnPropertyChanged(nameof(PlayerViewRefreshTrigger));
         }
     }
-    
+    public int FilteredCount { get; set; }
+
     private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
     {
@@ -162,8 +162,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private PlayerSortingType _lastSortingType;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,IPresetSaver presetService, 
-        IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, 
+    public PlayerManagerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, 
+        IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IPlayerViewModelFactory playerViewModelFactory, 
         IPacemanAPIService pacemanApiService, IWindowService windowService, IDispatcherService dispatcher, IClipboardService clipboard, 
         IDialogService dialogService) : base(coordinator, dispatcher)
     {
@@ -171,7 +171,6 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         PresetService = presetService;
         BackgroundCoordinator = backgroundCoordinator;
         Logger = logger;
-        SettingsService = settingsService;
         PlayerViewModelFactory = playerViewModelFactory;
         _tournamentState = tournamentState;
         _windowService = windowService;
@@ -234,6 +233,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public override bool OnDisable()
     {
         BackgroundCoordinator.Unregister(this);
+        PaceManEvents.Clear();
+        SelectedPlayers.Clear();
         ChosenEvent = null;
         ShowPlayers = false;
         
@@ -328,9 +329,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     
     private void UpdateInformationCountText(string header = "Found", string filteredCount = "")
     {
-        //TODO: 0 Dorobic wynik filtrowania pod info zwrotne
-        /*if (string.IsNullOrEmpty(filteredCount))
-            filteredCount = FilteredPlayersCollectionView!.Cast<PlayerViewModel>().Count().ToString();*/
+        if (string.IsNullOrEmpty(filteredCount))
+            filteredCount = FilteredCount.ToString();
         
         InformationCount = $"{header} {filteredCount}/{PlayerRepository.Players.Count}";
     }

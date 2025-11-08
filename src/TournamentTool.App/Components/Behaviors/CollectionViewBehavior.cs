@@ -26,6 +26,10 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
     public static readonly DependencyProperty RefreshTriggerProperty =
         DependencyProperty.Register(nameof(RefreshTrigger), typeof(int), typeof(CollectionViewBehavior),
             new PropertyMetadata(0, OnRefreshTriggered));
+    
+    public static readonly DependencyProperty VisibleCountProperty =
+        DependencyProperty.Register(nameof(VisibleCount), typeof(int), typeof(CollectionViewBehavior),
+            new PropertyMetadata(0));
 
     private ICollectionView? _view;
 
@@ -57,6 +61,12 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
         set => SetValue(RefreshTriggerProperty, value);
     }
     
+    public int VisibleCount
+    {
+        get => (int)GetValue(VisibleCountProperty);
+        set => SetValue(VisibleCountProperty, value);
+    } 
+    
     
     protected override void OnAttached()
     {
@@ -82,6 +92,7 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
         _view = CollectionViewSource.GetDefaultView(Source);
         ApplySorting();
         ApplyFilter();
+        UpdateVisibleCount();
 
         AssociatedObject.ItemsSource = _view;
     }
@@ -102,5 +113,12 @@ public class CollectionViewBehavior : BehaviorBase<ItemsControl>
     private void RefreshView()
     {
         _view?.Refresh();
+        UpdateVisibleCount();
+    }
+    
+    private void UpdateVisibleCount()
+    {
+        if (_view == null) return;
+        VisibleCount = _view.Cast<object>().Count();
     }
 }

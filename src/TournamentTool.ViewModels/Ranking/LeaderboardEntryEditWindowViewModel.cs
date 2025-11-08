@@ -171,9 +171,12 @@ public class LeaderboardEntryEditWindowViewModel : BaseViewModel
 
     private int _currentEditedMilestone = -1;
     private bool _isSaved = true;
-    private bool _madeChanges = false;
+    private bool _madeChanges;
     
 
+    /// <summary>
+    /// TODO: 0 Nie wczytuje edytowanego gracza
+    /// </summary>
     public LeaderboardEntryEditWindowViewModel(LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, PlayerViewModel? player, 
         INotifyPresetModification notifyPresetModification, IDispatcherService dispatcher, IDialogService dialogService) : base(dispatcher)
     {

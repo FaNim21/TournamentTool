@@ -32,4 +32,5 @@ public class APIDataSaver
                 await Task.Delay(delayMs);
             }
         }
-    }}
+    }
+}

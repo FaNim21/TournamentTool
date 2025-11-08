@@ -104,7 +104,7 @@ public partial class App : Application
         
         services.AddSingleton<ControllerViewModel>();
         services.AddSingleton<PresetManagerViewModel>();
-        services.AddSingleton<PlayerManagerViewModel>();
+        services.AddSingleton<PlayerManagerViewModel>(); //zanim transient to trzeba bedzie zrobic serwis, ktory trzyma info o eventach pacemanowych, bo sa w ctor
         services.AddTransient<LeaderboardPanelViewModel>();
         services.AddTransient<SceneManagementViewModel>();
         services.AddTransient<UpdatesViewModel>();

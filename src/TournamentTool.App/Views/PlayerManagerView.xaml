@@ -329,6 +329,7 @@
                 <i:Interaction.Behaviors>
                     <behaviors:CollectionViewBehavior Source="{Binding Players}"
                                                       RefreshTrigger="{Binding PlayerViewRefreshTrigger}"
+                                                      VisibleCount="{Binding FilteredCount, Mode=OneWayToSource}"
                                                       Filter="{Binding PlayerFilter}" />
                     <behaviors:ListBoxExtendSelection />
                 </i:Interaction.Behaviors>

@@ -127,23 +127,17 @@ public class ControllerServiceHub
     
     private void UpdateTimers(object? sender, ElapsedEventArgs e)
     {
-        //TODO: 0 czy ten dispatcher fr jest potrzebny tu? xd
-        /*
-        Application.Current?.Dispatcher.Invoke(() =>
+        foreach (var runner in _services.Values)
         {
-            */
-            foreach (var runner in _services.Values)
-            {
-                if (runner.Service is not IServiceUpdaterTimer timer) continue;
-                if (runner.LastUpdate == DateTime.MinValue) continue;
+            if (runner.Service is not IServiceUpdaterTimer timer) continue;
+            if (runner.LastUpdate == DateTime.MinValue) continue;
                 
-                var elapsed = DateTime.Now - runner.LastUpdate;
-                var remaining = runner.Interval - elapsed;
+            var elapsed = DateTime.Now - runner.LastUpdate;
+            var remaining = runner.Interval - elapsed;
                     
-                var time = remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
-                string TimeToNextUpdateText = time.TotalSeconds > 0 ? $"{time:mm\\:ss}" : "Updating...";
-                timer.UpdateTimer(TimeToNextUpdateText);
-            }
-        // });
+            var time = remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+            string TimeToNextUpdateText = time.TotalSeconds > 0 ? $"{time:mm\\:ss}" : "Updating...";
+            timer.UpdateTimer(TimeToNextUpdateText);
+        }
     }
 }
