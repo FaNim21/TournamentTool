@@ -2,13 +2,67 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Attributes;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.ViewModels.Commands;
 
 namespace TournamentTool.ViewModels;
+
+public class ProfileRecord : BaseViewModel
+{
+    public string MethodName { get; private set; } = string.Empty;
+    public string ClassName { get; private set; } = string.Empty;
+
+    private string _fullName = string.Empty;
+    public string FullName
+    {
+        get => _fullName;
+        set
+        {
+            if (_fullName == value) return;
+            _fullName = value;
+            OnPropertyChanged(nameof(FullName));
+        }
+    }
+
+    private string _timeMiliseconds = string.Empty;
+    public string TimeMiliseconds
+    {
+        get => _timeMiliseconds;
+        set
+        {
+            if (_fullName == value) return;
+            _timeMiliseconds = value;
+            OnPropertyChanged(nameof(TimeMiliseconds));
+        }
+    }
+
+
+    public ProfileRecord(IDispatcherService dispatcher) : base(dispatcher) { }
+
+    public void Update(MethodBase method, TimeSpan time)
+    {
+        string className = method.DeclaringType?.Name ?? "<UnknownClass>";
+        string methodName = method.Name;
+
+        if (string.IsNullOrEmpty(methodName))
+        {
+            MethodName = methodName;
+            ClassName = className;
+            
+            OnPropertyChanged(nameof(MethodName));
+            OnPropertyChanged(nameof(className));
+        }
+        
+        FullName = $"{className}.{methodName}";
+        TimeMiliseconds = $"{time.TotalMilliseconds} ms";
+    }
+}
 
 public class DebugVariable : BaseViewModel
 {
@@ -78,6 +132,7 @@ public class DebugVariable : BaseViewModel
 public class DebugWindowViewModel : BaseWindowViewModel
 {
     public MainViewModel MainViewModel { get; set; }
+    public ILoggingService Logger { get; }
 
     private INotifyPropertyChanged? _notifyingSelectedViewModel;
 
@@ -105,16 +160,8 @@ public class DebugWindowViewModel : BaseWindowViewModel
         }
     }
 
-    private ObservableCollection<DebugVariable> _variables = [];
-    public ObservableCollection<DebugVariable> Variables
-    {
-        get => _variables;
-        set
-        {
-            _variables = value;
-            OnPropertyChanged(nameof(Variables));
-        }
-    }
+    public ObservableCollection<DebugVariable> Variables { get; private set; } = [];
+    public ObservableCollection<ProfileRecord> ProfilingMethods { get; } = [];
 
     private string _selectedViewModelName = string.Empty;
     public string SelectedViewModelName
@@ -133,16 +180,23 @@ public class DebugWindowViewModel : BaseWindowViewModel
     public ICommand ToggleExpandCommand { get; set; }
 
 
-    public DebugWindowViewModel(MainViewModel mainViewModel, IDispatcherService dispatcher) : base(dispatcher)
+    public DebugWindowViewModel(MainViewModel mainViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(dispatcher)
     {
         MainViewModel = mainViewModel;
+        Logger = logger;
 
-        Variables = [];
+        ProfilerManager.IsEnabled = true;
+        ProfilerManager.OnProfiled += OnProfiled;
+
         ToggleExpandCommand = new RelayCommand<DebugVariable>(ToggleExpand);
     }
     public override void Dispose()
     {
+        ProfilerManager.IsEnabled = true;
+        ProfilerManager.OnProfiled -= OnProfiled;
+        
         MainViewModel.IsDebugWindowOpened = false;
+        SelectedViewModel = null!;
         SelectedViewModelName = string.Empty;
 
         UnsubscribeFromAllViewModels();
@@ -151,6 +205,21 @@ public class DebugWindowViewModel : BaseWindowViewModel
         
         MainViewModel.CloseDebugWindow();
         base.Dispose();
+    }
+
+    private void OnProfiled(MethodBase method, TimeSpan time)
+    {
+        if (string.IsNullOrEmpty(method.Name)) return;
+        
+        ProfileRecord? methodProfile = ProfilingMethods.FirstOrDefault(r => r.FullName != method.Name);
+        if (methodProfile == null)
+        {
+            methodProfile = new ProfileRecord(Dispatcher);
+            Dispatcher.Invoke(() => { ProfilingMethods.Add(methodProfile); });
+        }
+        
+        methodProfile.Update(method, time);
+        Logger.Log($"Updated - name: {methodProfile.FullName}, time: {methodProfile.TimeMiliseconds} ms");
     }
 
     private void ToggleExpand(DebugVariable variable)

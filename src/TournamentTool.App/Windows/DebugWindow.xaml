@@ -8,7 +8,7 @@
         d:DataContext="{d:DesignInstance Type=viewModels:DebugWindowViewModel}"
         mc:Ignorable="d"
         Title="DebugWindow"
-        Height="450"
+        Height="650"
         Width="800"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
@@ -23,89 +23,173 @@
     </WindowChrome.WindowChrome>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="29"/>
-            <RowDefinition />
+            <RowDefinition Height="450" />
+            <RowDefinition Height="200" />
         </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="29" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="#000D14">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0"
+                  Background="#000D14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Margin="5 0 0 0">
-                <TextBlock FontSize="22">
-                    <Run Text="Selected:" Foreground="White"/>
-                    <Run Text="{Binding SelectedViewModelName}" Foreground="Cyan"/>
-                </TextBlock>
+                <Grid Grid.Column="0"
+                      Margin="5 0 0 0">
+                    <TextBlock FontSize="22">
+                        <Run Text="Selected:"
+                             Foreground="White" />
+                        <Run Text="{Binding SelectedViewModelName}"
+                             Foreground="Cyan" />
+                    </TextBlock>
+                </Grid>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <buttons:ButtonTaskbar Width="30"
+                                           Height="30"
+                                           FontSize="20"
+                                           WindowChrome.IsHitTestVisibleInChrome="True"
+                                           HorizontalAlignment="Right"
+                                           ColorBrush="#5a5d65"
+                                           ContentText="-"
+                                           Padding="2"
+                                           Click="MinimizeButtonsClick" />
+                    <buttons:ButtonTaskbar Width="30"
+                                           Height="30"
+                                           FontSize="20"
+                                           WindowChrome.IsHitTestVisibleInChrome="True"
+                                           HorizontalAlignment="Right"
+                                           ColorBrush="#ff000f"
+                                           ContentText="X"
+                                           Padding="1"
+                                           Click="ExitButtonClick" />
+                </StackPanel>
             </Grid>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <buttons:ButtonTaskbar Width="30"
-                                     Height="30"
-                                     FontSize="20"
-                                     WindowChrome.IsHitTestVisibleInChrome="True"
-                                     HorizontalAlignment="Right"
-                                     ColorBrush="#5a5d65"
-                                     ContentText="-"
-                                     Padding="2"
-                                     Click="MinimizeButtonsClick" />
-                <buttons:ButtonTaskbar Width="30"
-                                     Height="30"
-                                     FontSize="20"
-                                     WindowChrome.IsHitTestVisibleInChrome="True"
-                                     HorizontalAlignment="Right"
-                                     ColorBrush="#ff000f"
-                                     ContentText="X"
-                                     Padding="1"
-                                     Click="ExitButtonClick" />
-            </StackPanel>
+            <Grid Grid.Row="1">
+                <ListBox Background="Transparent"
+                         Foreground="FloralWhite"
+                         BorderThickness="0"
+                         ItemsSource="{Binding Variables}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Focusable"
+                                    Value="False" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel.Margin>
+                                    <MultiBinding Converter="{StaticResource IndentConverter}">
+                                        <Binding Path="IndentLevel" />
+                                    </MultiBinding>
+                                </StackPanel.Margin>
+                                <Button Width="20"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Foreground="Cyan"
+                                        FontSize="16"
+                                        Padding="0 -5 2 0"
+                                        Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverterHidden}}"
+                                        Content="{Binding IsExpanded, Converter={StaticResource ExpandCollapseConverter}}"
+                                        Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}">
+                                </Button>
+                                <TextBlock Text="{Binding Name, Mode=OneWay}"
+                                           Foreground="Wheat">
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run Text=":"
+                                         Foreground="Wheat" />
+                                    <Run Text="{Binding Value, Mode=OneWay}"
+                                         Foreground="White" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1">
-            <ListBox Background="Transparent"
-                     Foreground="FloralWhite"
-                     BorderThickness="0"
-                     ItemsSource="{Binding Variables}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="Focusable"
-                                Value="False" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel.Margin>
-                                <MultiBinding Converter="{StaticResource IndentConverter}">
-                                    <Binding Path="IndentLevel" />
-                                </MultiBinding>
-                            </StackPanel.Margin>
-                            <Button Width="20"
-                                    Background="Transparent"
-                                    BorderBrush="Transparent"
-                                    Foreground="Cyan"
-                                    FontSize="16"
-                                    Padding="0 -5 2 0"
-                                    Visibility="{Binding IsExpandable, Converter={StaticResource BoolToVisibilityConverterHidden}}"
-                                    Content="{Binding IsExpanded, Converter={StaticResource ExpandCollapseConverter}}"
-                                    Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                    CommandParameter="{Binding}">
-                            </Button>
-                            <TextBlock Text="{Binding Name, Mode=OneWay}"
-                                       Foreground="Wheat">
-                            </TextBlock>
-                            <TextBlock>
-                                <Run Text=":"
-                                     Foreground="Wheat" />
-                                <Run Text="{Binding Value, Mode=OneWay}"
-                                     Foreground="White" />
-                            </TextBlock>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <DataGrid ItemsSource="{Binding ProfilingMethods}"
+                      AutoGenerateColumns="False"
+                      CanUserSortColumns="True"
+                      CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal"
+                      AlternatingRowBackground="#F5F5F5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Class"
+                                        Binding="{Binding FullName}"
+                                        Width="200" />
+                    <DataGridTextColumn Header="Method"
+                                        Binding="{Binding MethodName}"
+                                        Width="250" />
+                    <DataGridTextColumn Header="Time (ms)"
+                                        Binding="{Binding CallCount}"
+                                        Width="80">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment"
+                                        Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Total (ms)"
+                                        Binding="{Binding TotalMillisecondsFormatted}"
+                                        Width="100"
+                                        SortMemberPath="TotalMilliseconds">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment"
+                                        Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Average (ms)"
+                                        Binding="{Binding AverageMillisecondsFormatted}"
+                                        Width="100"
+                                        SortMemberPath="AverageMilliseconds">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment"
+                                        Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Min (ms)"
+                                        Binding="{Binding MinMillisecondsFormatted}"
+                                        Width="80"
+                                        SortMemberPath="MinMilliseconds">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment"
+                                        Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Max (ms)"
+                                        Binding="{Binding MaxMillisecondsFormatted}"
+                                        Width="80"
+                                        SortMemberPath="MaxMilliseconds">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment"
+                                        Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
     </Grid>
 </Window>

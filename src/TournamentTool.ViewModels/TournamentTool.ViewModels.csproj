@@ -12,4 +12,8 @@
       <ProjectReference Include="..\TournamentTool.Services\TournamentTool.Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MethodBoundaryAspect.Fody" Version="2.0.150" />
+    </ItemGroup>
+
 </Project>

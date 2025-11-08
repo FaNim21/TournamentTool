@@ -2,11 +2,13 @@
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.Services.Background;
 
 public record PacemanTimeline(string name, RunMilestone Milestone, long RTA, long IGT);
 
+[Profile]
 public class Paceman
 {
     private PaceManService Service { get; }

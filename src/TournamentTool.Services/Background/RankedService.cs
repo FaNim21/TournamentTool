@@ -9,11 +9,13 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
+[Profile]
 public class RankedEvaluateTimelineData
 {
     public readonly List<LeaderboardRankedEvaluateData> Evaluations = [];
@@ -33,6 +35,7 @@ public class RankedEvaluateTimelineData
     }
 }
 
+[Profile]
 public class RankedService : IBackgroundService
 {
     private ILoggingService Logger { get; }

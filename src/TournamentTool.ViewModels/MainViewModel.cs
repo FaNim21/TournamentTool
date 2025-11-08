@@ -210,7 +210,7 @@ public class MainViewModel : BaseViewModel
     {
         if (!IsDebugWindowOpened)
         {
-            DebugWindowViewModel = new DebugWindowViewModel(this, Dispatcher)
+            DebugWindowViewModel = new DebugWindowViewModel(this, Dispatcher, Logger)
             {
                 SelectedViewModel = NavigationService.SelectedView,
             };

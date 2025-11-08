@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace TournamentTool.Domain.Attributes;
+namespace TournamentTool.Services.Logging.Profiling;
 
 
 public static class ProfilerManager

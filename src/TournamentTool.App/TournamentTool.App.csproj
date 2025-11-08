@@ -31,6 +31,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MethodBoundaryAspect.Fody" Version="2.0.150" />
     <PackageReference Include="MethodTimer.Fody" Version="3.2.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />

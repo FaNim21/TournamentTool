@@ -2,12 +2,14 @@
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.Services.Background;
 
 public record RankedPaceTimeline(string name, RunMilestone Milestone, long Time);
 public record RankedPaceSplit(string Name, RankedSplitType Split, long Time);
 
+// [Profile]
 public class RankedPace
 {
     private RankedService _service;

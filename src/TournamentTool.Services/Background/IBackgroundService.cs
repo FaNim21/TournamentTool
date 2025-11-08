@@ -1,4 +1,6 @@
-﻿namespace TournamentTool.Services.Background;
+﻿using TournamentTool.Services.Logging.Profiling;
+
+namespace TournamentTool.Services.Background;
 
 public interface IBackgroundService
 {
