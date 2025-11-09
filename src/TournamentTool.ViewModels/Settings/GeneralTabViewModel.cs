@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using TournamentTool.Core.Common;
+﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;

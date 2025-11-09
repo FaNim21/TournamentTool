@@ -16,13 +16,27 @@ public class ProfileAttribute : OnMethodBoundaryAspect
         
         stopwatch = Stopwatch.StartNew();
     }
-
     public override void OnExit(MethodExecutionArgs args)
     {
         if (!ProfilerManager.IsEnabled || stopwatch == null || NeedsToBeIgnored(args)) return;
         
         stopwatch.Stop();
         ProfilerManager.Report(args.Method, stopwatch.Elapsed);
+    }
+
+    public override void OnException(MethodExecutionArgs args)
+    {
+        //TODO: 0 to jest do wywalenia, trzeba zastapic na metalama, daje wiecej tez mozliwosci i moze debugger IDE
+        // args.FlowBehavior = FlowBehavior.RethrowException;
+        
+        Console.WriteLine(args.Exception.StackTrace);
+        
+        stopwatch?.Stop();
+        // return;
+        // if (!ProfilerManager.IsEnabled || NeedsToBeIgnored(arg)) return;
+
+        // throw arg.Exception;
+        base.OnException(args);
     }
 
     private bool NeedsToBeIgnored(MethodExecutionArgs args)

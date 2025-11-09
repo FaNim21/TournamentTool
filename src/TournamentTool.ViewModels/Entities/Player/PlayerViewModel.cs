@@ -4,16 +4,18 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.ViewModels.Entities.Player;
 
+[Profile]
 public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
 {
     private readonly IMinecraftDataService _minecraftDataService;
     private readonly IImageService _imageService;
     private readonly IDialogService _dialogService;
     
-    public Domain.Entities.Player Data { get; private set; }
+    public Domain.Entities.Player Data { get; }
 
     public Guid Id => Data.Id;
     public StreamDataViewModel StreamData { get; set; }

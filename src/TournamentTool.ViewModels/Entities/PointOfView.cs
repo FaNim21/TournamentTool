@@ -223,7 +223,7 @@ public class PointOfView : BaseViewModel
         CurrentCustomStreamType = CustomStreamType;
 
         CustomPlayer customPlayer = new(new StreamDisplayInfo(CustomStreamName, _customStreamType), "Unk", string.Empty);
-        CustomPlayerViewModel playerViewModel = new CustomPlayerViewModel(customPlayer, other);
+        CustomPlayerViewModel playerViewModel = new(customPlayer, other);
         
         SetPlayerToPOV(playerViewModel);
     }

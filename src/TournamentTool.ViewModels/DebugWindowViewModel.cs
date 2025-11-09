@@ -336,7 +336,7 @@ public class DebugWindowViewModel : BaseWindowViewModel
     {
         while (!token.IsCancellationRequested)
         {
-            _process.Refresh();
+            // _process.Refresh();
             TimeSpan currentTotalProcessorTime = _process.TotalProcessorTime;
             DateTime currentTime = DateTime.UtcNow;
 

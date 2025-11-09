@@ -4,6 +4,7 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
+using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Entities;
 
@@ -18,6 +19,7 @@ public interface IPointOfViewOBSController
     void Clear(PointOfViewOBSData data);
 }
 
+[Profile]
 public class PointOfViewOBSController : IPointOfViewOBSController
 {
     private ISettings SettingsService { get; }
@@ -40,32 +42,23 @@ public class PointOfViewOBSController : IPointOfViewOBSController
     {
         if (!_obs.SetBrowserURL(data.SceneItemName, GetURL(data))) return;
 
-        if (_tournamentState.CurrentPreset.SetPovHeadsInBrowser)
+        string headUrl = SettingsService.Settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
+        if (string.IsNullOrEmpty(data.HeadViewParametr) || _tournamentState is { CurrentPreset.SetPovHeadsInBrowser: false })
         {
-            string url = SettingsService.Settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
-            if (string.IsNullOrEmpty(data.HeadViewParametr))
-                url = string.Empty;
-
-            SetBrowserURL(data.HeadItemName, url);
+            headUrl = string.Empty;
         }
+        SetBrowserURL(data.HeadItemName, headUrl);
 
-        if (_tournamentState.CurrentPreset.DisplayedNameType != DisplayedNameType.None)
+        string displayName = _tournamentState.CurrentPreset.DisplayedNameType switch
         {
-            string name = _tournamentState.CurrentPreset.DisplayedNameType switch
-            {
-                DisplayedNameType.Twitch => data.StreamDisplayInfo.Name,
-                DisplayedNameType.IGN => data.IsFromWhiteList ? data.HeadViewParametr : data.StreamDisplayInfo.Name,
-                DisplayedNameType.WhiteList => data.DisplayedPlayer,
-                _ => string.Empty
-            };
+            DisplayedNameType.Twitch => data.StreamDisplayInfo.Name,
+            DisplayedNameType.IGN => data.IsFromWhiteList ? data.HeadViewParametr : data.StreamDisplayInfo.Name,
+            DisplayedNameType.WhiteList => data.DisplayedPlayer,
+            _ => string.Empty
+        };
+        SetTextField(data.TextFieldItemName, displayName);
 
-            SetTextField(data.TextFieldItemName, name);
-        }
-
-        if (_tournamentState.CurrentPreset.SetPovPBText)
-        {
-            SetTextField(data.PersonalBestItemName, data.PersonalBest);
-        }
+        SetTextField(data.PersonalBestItemName, _tournamentState.CurrentPreset.SetPovPBText ? data.PersonalBest : string.Empty);
     }
 
     public void SetBrowserURL(string itemName, string data)

@@ -174,9 +174,6 @@ public class LeaderboardEntryEditWindowViewModel : BaseViewModel
     private bool _madeChanges;
     
 
-    /// <summary>
-    /// TODO: 0 Nie wczytuje edytowanego gracza
-    /// </summary>
     public LeaderboardEntryEditWindowViewModel(LeaderboardPanelViewModel leaderboardPanelViewModel, LeaderboardEntry originalEntry, PlayerViewModel? player, 
         INotifyPresetModification notifyPresetModification, IDispatcherService dispatcher, IDialogService dialogService) : base(dispatcher)
     {

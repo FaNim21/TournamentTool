@@ -113,7 +113,6 @@ public class WindowService : IWindowService
     }
     private void StopBlockingWindow()
     {
-        if (_windows.Count != 0) return;
         _applicationState.IsWindowBlocked = false;
     }
 

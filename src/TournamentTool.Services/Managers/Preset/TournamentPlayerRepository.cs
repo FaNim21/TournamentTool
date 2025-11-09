@@ -2,6 +2,7 @@
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.Services.Managers.Preset;
 
@@ -23,6 +24,7 @@ public interface ITournamentPlayerRepository
     void UpdateTeamNamesForPlayers();
 }
 
+[Profile]
 public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposable
 {
     private IDispatcherService Dispatcher { get; }

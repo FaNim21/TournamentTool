@@ -9,6 +9,7 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.PlayerManager;
@@ -17,6 +18,7 @@ using TournamentTool.ViewModels.Entities.Player;
 
 namespace TournamentTool.ViewModels.Selectable;
 
+[Profile]
 public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 {
     private readonly ITournamentState _tournamentState;
@@ -275,10 +277,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public void Add(IPlayerViewModel playerViewModel)
     {
         PlayerRepository.AddPlayer(playerViewModel);
-        
         UpdateInformationCountText();
-        RefreshFilteredCollectionView();
-    }
+    } 
     public void Remove(PlayerViewModel playerViewModel)
     {
         PlayerRepository.RemovePlayer(playerViewModel);

@@ -130,7 +130,7 @@
             <TextBlock Grid.Row="0"
                        Text="{Binding GeneralUsageInfo, Mode=OneWay}"
                        Foreground="White"
-                       Margin="0 5 0 5" />
+                       Margin="5 5 0 5" />
 
             <Border Grid.Row="1"
                     MinHeight="185"
