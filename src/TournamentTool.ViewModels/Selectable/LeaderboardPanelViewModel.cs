@@ -80,7 +80,13 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveEntryCommand = new RemoveEntryCommand(this, dialogService);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
-        OpenScriptingDocsCommand = new RelayCommand(() => { Helper.StartProcess("https://github.com/FaNim21/TournamentTool/blob/master/Docs/LeaderboardScripting.md");});
+        OpenScriptingDocsCommand = new RelayCommand(() =>
+        {
+            var result = _dialogService.Show("A browser will open in tournament tool Github Wiki for leaderboard scripting.\nDo you want to continue?", "Redirecting for docs", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
+            
+            Helper.StartProcess("https://github.com/FaNim21/TournamentTool/wiki/Leaderboard-Scripting");
+        });
         RefreshScriptsCommand = new RelayCommand(RefreshScripts);
         OpenScriptsFolderCommand = new RelayCommand(() => { Helper.StartProcess(Consts.ScriptsPath);});
 

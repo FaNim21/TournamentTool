@@ -5,6 +5,13 @@
             TournamentTool.Services.*
             TournamentTool.Core.*
         </IncludeNamespaces>
+        
+        <IncludeAssemblies>TournamentTool.*</IncludeAssemblies>
+        <ExcludeSpecialName>true</ExcludeSpecialName>
+        <ExcludeAttributes>
+            System.Runtime.CompilerServices.AsyncStateMachineAttribute;
+            System.Runtime.CompilerServices.IteratorStateMachineAttribute;
+        </ExcludeAttributes>
 
         <ExcludeNamespaces>
             System.*

@@ -8,7 +8,8 @@
         d:DataContext="{d:DesignInstance Type=viewModels:DebugWindowViewModel}"
         mc:Ignorable="d"
         Title="DebugWindow"
-        Height="650"
+        MinHeight="662"
+        Height="662"
         Width="800"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
@@ -24,7 +25,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="450" />
-            <RowDefinition Height="200" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0">
@@ -121,75 +122,176 @@
         </Grid>
 
         <Grid Grid.Row="1">
-            <DataGrid ItemsSource="{Binding ProfilingMethods}"
-                      AutoGenerateColumns="False"
-                      CanUserSortColumns="True"
-                      CanUserResizeColumns="True"
-                      GridLinesVisibility="Horizontal"
-                      AlternatingRowBackground="#F5F5F5">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Class"
-                                        Binding="{Binding FullName}"
-                                        Width="200" />
-                    <DataGridTextColumn Header="Method"
-                                        Binding="{Binding MethodName}"
-                                        Width="250" />
-                    <DataGridTextColumn Header="Time (ms)"
-                                        Binding="{Binding CallCount}"
-                                        Width="80">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextAlignment"
-                                        Value="Right" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Total (ms)"
-                                        Binding="{Binding TotalMillisecondsFormatted}"
-                                        Width="100"
-                                        SortMemberPath="TotalMilliseconds">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextAlignment"
-                                        Value="Right" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Average (ms)"
-                                        Binding="{Binding AverageMillisecondsFormatted}"
-                                        Width="100"
-                                        SortMemberPath="AverageMilliseconds">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextAlignment"
-                                        Value="Right" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Min (ms)"
-                                        Binding="{Binding MinMillisecondsFormatted}"
-                                        Width="80"
-                                        SortMemberPath="MinMilliseconds">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextAlignment"
-                                        Value="Right" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Max (ms)"
-                                        Binding="{Binding MaxMillisecondsFormatted}"
-                                        Width="80"
-                                        SortMemberPath="MaxMilliseconds">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextAlignment"
-                                        Value="Right" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="{Binding GeneralUsageInfo, Mode=OneWay}"
+                       Foreground="White"
+                       Margin="0 5 0 5" />
+
+            <Border Grid.Row="1"
+                    MinHeight="185"
+                    Background="#1E1E1E"
+                    BorderThickness="1"
+                    BorderBrush="#3F3F3F">
+                <DataGrid ItemsSource="{Binding ProfilingMethods}"
+                          IsReadOnly="True"
+                          Height="auto"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.CanContentScroll="True"
+                          AutoGenerateColumns="False"
+                          CanUserSortColumns="True"
+                          CanUserResizeColumns="True"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column"
+                          RowHeaderWidth="0"
+                          EnableColumnVirtualization="True"
+                          EnableRowVirtualization="True"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          Background="#1E1E1E"
+                          Foreground="#E0E0E0"
+                          BorderBrush="#3F3F3F"
+                          AlternatingRowBackground="#2a2a2a">
+                    <DataGrid.Resources>
+                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="Background"
+                                    Value="#2D2D30" />
+                            <Setter Property="Foreground"
+                                    Value="#F1F1F1" />
+                            <Setter Property="BorderBrush"
+                                    Value="#3F3F3F" />
+                            <Setter Property="BorderThickness"
+                                    Value="0,0,1,1" />
+                            <Setter Property="Padding"
+                                    Value="8,4" />
+                            <Setter Property="FontWeight"
+                                    Value="SemiBold" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                    <Setter Property="Background"
+                                            Value="#3E3E42" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="{x:Type DataGridRow}">
+                            <Setter Property="Background"
+                                    Value="#252526" />
+                            <Setter Property="Foreground"
+                                    Value="#E0E0E0" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                    <Setter Property="Background"
+                                            Value="#2A2A2D" />
+                                </Trigger>
+                                <Trigger Property="IsSelected"
+                                         Value="True">
+                                    <Setter Property="Background"
+                                            Value="#094771" />
+                                    <Setter Property="Foreground"
+                                            Value="#FFFFFF" />
+                                </Trigger>
+                                <Trigger Property="AlternationIndex"
+                                         Value="1">
+                                    <Setter Property="Background"
+                                            Value="#2D2D30" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="BorderBrush"
+                                    Value="#3F3F3F" />
+                            <Setter Property="BorderThickness"
+                                    Value="0,0,1,1" />
+                            <Setter Property="Padding"
+                                    Value="4,2" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected"
+                                         Value="True">
+                                    <Setter Property="Background"
+                                            Value="Transparent" />
+                                    <Setter Property="Foreground"
+                                            Value="#FFFFFF" />
+                                    <Setter Property="BorderBrush"
+                                            Value="#3F3F3F" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding ClassName, Mode=OneWay}"
+                                            Width="150" />
+                        <DataGridTextColumn Header="Method"
+                                            Binding="{Binding MethodName, Mode=OneWay}"
+                                            Width="150" />
+                        <DataGridTextColumn Header="Calls"
+                                            Binding="{Binding CallCount, Mode=OneWay}"
+                                            Width="60">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment"
+                                            Value="Right" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Last (ms)"
+                                            Width="100"
+                                            Binding="{Binding LastMilisecondsText, Mode=OneWay}"
+                                            SortMemberPath="TotalMilliseconds">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment"
+                                            Value="Right" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Average (ms)"
+                                            Binding="{Binding AverageMilisecondsText, Mode=OneWay}"
+                                            Width="100"
+                                            SortMemberPath="AverageMiliseconds">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment"
+                                            Value="Right" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Min (ms)"
+                                            Binding="{Binding MinMilisecondsText, Mode=OneWay}"
+                                            Width="80"
+                                            SortMemberPath="MinMiliseconds">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment"
+                                            Value="Right" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Max (ms)"
+                                            Binding="{Binding MaxMilisecondsText, Mode=OneWay}"
+                                            Width="80"
+                                            SortMemberPath="MaxMiliseconds">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment"
+                                            Value="Right" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

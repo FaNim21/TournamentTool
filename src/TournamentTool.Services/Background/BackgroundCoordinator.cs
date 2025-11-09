@@ -1,9 +1,11 @@
 ﻿using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
+[Profile]
 public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
 {
     private readonly ITournamentState _tournamentState;

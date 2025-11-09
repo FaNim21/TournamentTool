@@ -126,16 +126,14 @@ public class RankedService : IBackgroundService
     {
 
         //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
-        /*
-        string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
+        /*string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
         try
         {
             await using FileStream stream = File.OpenRead(path);
             PrivRoomAPIResult? rankedAPIResult = await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(stream, _options);
             if (rankedAPIResult == null) return;
-            privRoomData = rankedAPIResult.Data;
-        }
-        */
+            _privRoomData = rankedAPIResult.Data;
+        }*/
         try
         {
             PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
@@ -200,14 +198,7 @@ public class RankedService : IBackgroundService
 
     private void AddPace(PrivRoomPlayer player)
     {
-        RankedPace pace = new RankedPace(this)
-        {
-            UUID = player.UUID,
-            InGameName = player.InGameName,
-            EloRate = player.EloRate ?? -1,
-            Player = _playerRepository.GetPlayerByIGN(player.InGameName)?.Data,
-        };
-            
+        RankedPace pace = new RankedPace(this, player, _playerRepository.GetPlayerByIGN(player.InGameName)?.Data);
         _paces[player.UUID] = pace;
         
         pace.Initialize();

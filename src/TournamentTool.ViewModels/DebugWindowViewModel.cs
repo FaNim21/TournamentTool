@@ -2,11 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.Domain.Attributes;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.ViewModels.Commands;
@@ -15,8 +15,23 @@ namespace TournamentTool.ViewModels;
 
 public class ProfileRecord : BaseViewModel
 {
-    public string MethodName { get; private set; } = string.Empty;
-    public string ClassName { get; private set; } = string.Empty;
+    private Lock _lock = new();
+    
+    public string MethodName { get; }
+    public string ClassName { get; }
+
+    public double TotalMiliseconds;
+
+    public int _callCount;
+    public int CallCount
+    {
+        get => _callCount;
+        set
+        {
+            _callCount = value;
+            OnPropertyChanged(nameof(CallCount));
+        }
+    }
 
     private string _fullName = string.Empty;
     public string FullName
@@ -30,37 +45,87 @@ public class ProfileRecord : BaseViewModel
         }
     }
 
-    private string _timeMiliseconds = string.Empty;
-    public string TimeMiliseconds
+    private double _lastMiliseconds;
+    public double LastMiliseconds
     {
-        get => _timeMiliseconds;
+        get => _lastMiliseconds;
         set
         {
-            if (_fullName == value) return;
-            _timeMiliseconds = value;
-            OnPropertyChanged(nameof(TimeMiliseconds));
+            _lastMiliseconds = value;
+            OnPropertyChanged(nameof(LastMiliseconds));
+            OnPropertyChanged(nameof(LastMilisecondsText));
         }
     }
+    public string LastMilisecondsText => $"{LastMiliseconds:F2}";
 
-
-    public ProfileRecord(IDispatcherService dispatcher) : base(dispatcher) { }
-
-    public void Update(MethodBase method, TimeSpan time)
+    private double _minMiliseconds = double.MaxValue;
+    public double MinMiliseconds
     {
-        string className = method.DeclaringType?.Name ?? "<UnknownClass>";
-        string methodName = method.Name;
-
-        if (string.IsNullOrEmpty(methodName))
+        get => _minMiliseconds;
+        set
         {
-            MethodName = methodName;
-            ClassName = className;
-            
-            OnPropertyChanged(nameof(MethodName));
-            OnPropertyChanged(nameof(className));
+            _minMiliseconds = value;
+            OnPropertyChanged(nameof(MinMiliseconds));
+            OnPropertyChanged(nameof(MinMilisecondsText));
         }
+    }
+    public string MinMilisecondsText => $"{MinMiliseconds:F2}";
+    
+    private double _averageMiliseconds;
+    public double AverageMiliseconds
+    {
+        get => _averageMiliseconds;
+        set
+        {
+            _averageMiliseconds = value;
+            OnPropertyChanged(nameof(AverageMiliseconds));
+            OnPropertyChanged(nameof(AverageMilisecondsText));
+        }
+    }
+    public string AverageMilisecondsText => $"{AverageMiliseconds:F2}";
+    
+    private double _maxMiliseconds;
+    public double MaxMiliseconds
+    {
+        get => _maxMiliseconds;
+        set
+        {
+            _maxMiliseconds = value;
+            OnPropertyChanged(nameof(MaxMiliseconds));
+            OnPropertyChanged(nameof(MaxMilisecondsText));
+        }
+    }
+    public string MaxMilisecondsText => $"{MaxMiliseconds:F2}";
+
+    public ProfileRecord(IDispatcherService dispatcher, string className, string methodName) : base(dispatcher)
+    {
+        MethodName = methodName;
+        OnPropertyChanged(nameof(MethodName));
+            
+        ClassName = className;
+        OnPropertyChanged(nameof(ClassName));
         
         FullName = $"{className}.{methodName}";
-        TimeMiliseconds = $"{time.TotalMilliseconds} ms";
+    }
+
+    public void Update(TimeSpan time)
+    {
+        lock(_lock)
+        {
+            double milliseconds = time.TotalMilliseconds;
+            
+            CallCount++;
+            LastMiliseconds = milliseconds;
+            TotalMiliseconds += milliseconds;
+            
+            if (milliseconds < MinMiliseconds)
+                MinMiliseconds = milliseconds;
+            
+            if (milliseconds > MaxMiliseconds)
+                MaxMiliseconds = milliseconds;
+
+            AverageMiliseconds = TotalMiliseconds / CallCount;
+        }
     }
 }
 
@@ -129,8 +194,13 @@ public class DebugVariable : BaseViewModel
     public DebugVariable(IDispatcherService dispatcher) : base(dispatcher) { }
 }
 
+/// <summary>
+/// THAT class is a mess, but i don't care for now i just need any profiler/debug for external tests
+/// </summary>
 public class DebugWindowViewModel : BaseWindowViewModel
 {
+    private Lock _cacheLock = new();
+    
     public MainViewModel MainViewModel { get; set; }
     public ILoggingService Logger { get; }
 
@@ -160,7 +230,10 @@ public class DebugWindowViewModel : BaseWindowViewModel
         }
     }
 
-    public ObservableCollection<DebugVariable> Variables { get; private set; } = [];
+    public ObservableCollection<DebugVariable> Variables { get; } = [];
+    
+    private readonly Process _process = Process.GetCurrentProcess();
+    private readonly Dictionary<string, ProfileRecord> _profileCache = [];
     public ObservableCollection<ProfileRecord> ProfilingMethods { get; } = [];
 
     private string _selectedViewModelName = string.Empty;
@@ -174,8 +247,25 @@ public class DebugWindowViewModel : BaseWindowViewModel
         }
     }
 
+    private string _generalUsageInfo = string.Empty;
+    public string GeneralUsageInfo
+    {
+        get => _generalUsageInfo;
+        set
+        {
+            _generalUsageInfo = value;
+            OnPropertyChanged(nameof(GeneralUsageInfo));
+        }
+    }
+
     private Dictionary<object, List<DebugVariable>> _viewModelToVariablesMap = [];
     private HashSet<object> _visitedInstances = [];
+    
+    //cpu
+    private TimeSpan _lastTotalProcessorTime;
+    private DateTime _lastCheckTime;
+    
+    private CancellationTokenSource? _cancellationTokenSource;
 
     public ICommand ToggleExpandCommand { get; set; }
 
@@ -188,12 +278,18 @@ public class DebugWindowViewModel : BaseWindowViewModel
         ProfilerManager.IsEnabled = true;
         ProfilerManager.OnProfiled += OnProfiled;
 
+        _cancellationTokenSource = new CancellationTokenSource();
+        Task.Run(async () => await UpdateProfilerUI(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
+
         ToggleExpandCommand = new RelayCommand<DebugVariable>(ToggleExpand);
     }
     public override void Dispose()
     {
-        ProfilerManager.IsEnabled = true;
+        ProfilerManager.IsEnabled = false;
         ProfilerManager.OnProfiled -= OnProfiled;
+        
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
         
         MainViewModel.IsDebugWindowOpened = false;
         SelectedViewModel = null!;
@@ -209,19 +305,55 @@ public class DebugWindowViewModel : BaseWindowViewModel
 
     private void OnProfiled(MethodBase method, TimeSpan time)
     {
-        if (string.IsNullOrEmpty(method.Name)) return;
+        if (method == null || string.IsNullOrEmpty(method.Name)) return;
         
-        ProfileRecord? methodProfile = ProfilingMethods.FirstOrDefault(r => r.FullName != method.Name);
-        if (methodProfile == null)
+        string className = method.DeclaringType?.Name ?? "<UnknownClass>";
+        string methodName = method.Name;
+        string fullName = $"{className}.{methodName}";
+        
+        ProfileRecord? record;
+        bool isNew = false;
+        
+        lock (_cacheLock)
         {
-            methodProfile = new ProfileRecord(Dispatcher);
-            Dispatcher.Invoke(() => { ProfilingMethods.Add(methodProfile); });
+            if (!_profileCache.TryGetValue(fullName, out record))
+            {
+                record = new ProfileRecord(Dispatcher, className, methodName);
+                _profileCache[fullName] = record;
+                isNew = true;
+            }
         }
         
-        methodProfile.Update(method, time);
-        Logger.Log($"Updated - name: {methodProfile.FullName}, time: {methodProfile.TimeMiliseconds} ms");
+        record.Update(time);
+        
+        if (isNew)
+        {
+            Dispatcher.Invoke(() => ProfilingMethods.Add(record));
+        } 
     }
 
+    private async Task UpdateProfilerUI(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            _process.Refresh();
+            TimeSpan currentTotalProcessorTime = _process.TotalProcessorTime;
+            DateTime currentTime = DateTime.UtcNow;
+
+            double cpuUsedMs = (currentTotalProcessorTime - _lastTotalProcessorTime).TotalMilliseconds;
+            double elapsedMs = (currentTime - _lastCheckTime).TotalMilliseconds;
+            double cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * elapsedMs) * 100;
+            double cpuUsage = Math.Max(0, Math.Min(100, cpuUsageTotal));
+            
+            _lastTotalProcessorTime = currentTotalProcessorTime;
+            _lastCheckTime = currentTime;
+            
+            GeneralUsageInfo = $"CPU: {cpuUsage:F2}%";
+            
+            await Task.Delay(250, token);
+        } 
+    }
+    
     private void ToggleExpand(DebugVariable variable)
     {
         if (!variable.IsExpandable) return;
@@ -636,7 +768,7 @@ public class DebugWindowViewModel : BaseWindowViewModel
 
             if (kvp.Key is INotifyCollectionChanged collection)
             {
-                LogService.Log($"Cleared Collection changed in: {kvp.Key}");
+                // LogService.Log($"Cleared Collection changed in: {kvp.Key}");
                 collection.CollectionChanged -= OnCollectionChanged;
             }
 

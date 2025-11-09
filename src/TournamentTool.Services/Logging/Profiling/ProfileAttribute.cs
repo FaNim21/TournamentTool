@@ -7,7 +7,6 @@ namespace TournamentTool.Services.Logging.Profiling;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class ProfileAttribute : OnMethodBoundaryAspect
 {
-    //TODO: Problem z profile z racji crashowania tworzenia instancji klasy, ktora ma atrybut [Profile]
     [NonSerialized] private Stopwatch? stopwatch;
     
     

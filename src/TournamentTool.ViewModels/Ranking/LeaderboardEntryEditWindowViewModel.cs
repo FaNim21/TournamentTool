@@ -406,8 +406,9 @@ public class LeaderboardEntryEditWindowViewModel : BaseViewModel
         }
         
         EditedEntry = new LeaderboardEntryViewModel(duplicatedEntry, _player, Dispatcher);
-        OnPropertyChanged(nameof(EditedEntry));
         EditedEntry.SetupOpeningWindow();
+        OnPropertyChanged(nameof(EditedEntry));
+        OnPropertyChanged(nameof(EditedEntry.Milestones));
         Clear();
     }
 }

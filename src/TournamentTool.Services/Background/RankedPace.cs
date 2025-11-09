@@ -9,18 +9,17 @@ namespace TournamentTool.Services.Background;
 public record RankedPaceTimeline(string name, RunMilestone Milestone, long Time);
 public record RankedPaceSplit(string Name, RankedSplitType Split, long Time);
 
-// [Profile]
+[Profile]
 public class RankedPace
 {
     private RankedService _service;
 
-    public StreamData streamServiceData;
-    public Player? Player { get; set; }
+    public Player Player { get; set; }
     public PlayerInventory Inventory { get; set; } = new();
 
-    public string UUID { get; init; } = string.Empty;
-    public string InGameName { get; init; } = string.Empty;
-    public int EloRate { get; set; } = -1;
+    public string UUID { get; }
+    public string InGameName { get; }
+    public int EloRate { get; }
     public List<RankedPaceTimeline> Timelines { get; set; } = [];
     public List<RankedPaceSplit> Splits { get; set; } = [];
     public object? HeadImage { get; set; }
@@ -33,9 +32,14 @@ public class RankedPace
     public long DifferenceSplitTimeMiliseconds { get; set; }
 
 
-    public RankedPace(RankedService service)
+    public RankedPace(RankedService service, PrivRoomPlayer privRoomPlayer, Player? player)
     {
         _service = service;
+        
+        UUID = privRoomPlayer.UUID;
+        InGameName = privRoomPlayer.InGameName;
+        EloRate = privRoomPlayer.EloRate ?? -1;
+        Player = player ?? new Player();
     }
     public void Initialize()
     {
