@@ -15,7 +15,6 @@ using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
-[Profile]
 public class RankedEvaluateTimelineData
 {
     public readonly List<LeaderboardRankedEvaluateData> Evaluations = [];
@@ -35,7 +34,6 @@ public class RankedEvaluateTimelineData
     }
 }
 
-[Profile]
 public class RankedService : IBackgroundService
 {
     private ILoggingService Logger { get; }

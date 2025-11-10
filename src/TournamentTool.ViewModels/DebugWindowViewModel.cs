@@ -5,6 +5,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Services.Logging;
@@ -266,7 +269,10 @@ public class DebugWindowViewModel : BaseWindowViewModel
     private DateTime _lastCheckTime;
     
     private CancellationTokenSource? _cancellationTokenSource;
-
+    
+    //oxyplot testing
+    public PlotModel CpuPlotModel { get; }
+    private LineSeries _cpuSeries;
     public ICommand ToggleExpandCommand { get; set; }
 
 
@@ -275,6 +281,32 @@ public class DebugWindowViewModel : BaseWindowViewModel
         MainViewModel = mainViewModel;
         Logger = logger;
 
+        CpuPlotModel = new PlotModel();
+        CpuPlotModel.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Left,
+            Minimum = 0,
+            Maximum = 100,
+            Title = "CPU %",
+        });
+        CpuPlotModel.Axes.Add(new LinearAxis
+        {
+            Position = AxisPosition.Bottom,
+            Title = "Time (s)",
+            IsZoomEnabled = false,
+            IsPanEnabled = false
+        });
+
+        // Create series
+        _cpuSeries = new LineSeries
+        {
+            Title = "CPU",
+            Color = OxyColors.Lime,
+            MarkerType = MarkerType.None
+        };
+        //Na razie nie ma sensu tego uzywac, zostawiam to tak i kiedys sie to zrobi sensowniej z klikaniem, poki co szkoda czasu
+        CpuPlotModel.Series.Add(_cpuSeries);
+        
         ProfilerManager.IsEnabled = true;
         ProfilerManager.OnProfiled += OnProfiled;
 
@@ -303,12 +335,10 @@ public class DebugWindowViewModel : BaseWindowViewModel
         base.Dispose();
     }
 
-    private void OnProfiled(MethodBase method, TimeSpan time)
+    private void OnProfiled(string className, string methodName, TimeSpan time)
     {
-        if (method == null || string.IsNullOrEmpty(method.Name)) return;
+        if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(methodName)) return;
         
-        string className = method.DeclaringType?.Name ?? "<UnknownClass>";
-        string methodName = method.Name;
         string fullName = $"{className}.{methodName}";
         
         ProfileRecord? record;
@@ -347,6 +377,12 @@ public class DebugWindowViewModel : BaseWindowViewModel
             
             _lastTotalProcessorTime = currentTotalProcessorTime;
             _lastCheckTime = currentTime;
+            
+            //Zostawic to na kiedy indziej
+            /*_cpuSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(currentTime), cpuUsage));
+            if (_cpuSeries.Points.Count > 10) _cpuSeries.Points.RemoveAt(0);
+
+            CpuPlotModel.InvalidatePlot(true);*/
             
             GeneralUsageInfo = $"CPU: {cpuUsage:F2}%";
             
@@ -618,8 +654,8 @@ public class DebugWindowViewModel : BaseWindowViewModel
                 RemoveCollectionItems(variables, parentName);
                 break;
 
-                // case NotifyCollectionChangedAction.Move:
-                // case NotifyCollectionChangedAction.Replace:
+            // case NotifyCollectionChangedAction.Move:
+            // case NotifyCollectionChangedAction.Replace:
         }
     }
     private void OnCollectionReset(object? sender, NotifyCollectionChangedEventArgs e)

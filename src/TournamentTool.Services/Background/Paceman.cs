@@ -8,7 +8,6 @@ namespace TournamentTool.Services.Background;
 
 public record PacemanTimeline(string name, RunMilestone Milestone, long RTA, long IGT);
 
-[Profile]
 public class Paceman
 {
     private PaceManService Service { get; }
@@ -64,6 +63,7 @@ public class Paceman
         ShowOnlyLive = paceman.ShowOnlyLive;
         IsLive = ShowOnlyLive || paceman.IsLive();
         _lastUpdate = paceman.LastUpdate;
+        
         if (paceman.Splits.Count == 0) return;
         
         for (; _lastTimelineIndex < paceman.Splits.Count; _lastTimelineIndex++)

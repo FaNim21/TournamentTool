@@ -19,7 +19,6 @@ public interface IPointOfViewOBSController
     void Clear(PointOfViewOBSData data);
 }
 
-[Profile]
 public class PointOfViewOBSController : IPointOfViewOBSController
 {
     private ISettings SettingsService { get; }

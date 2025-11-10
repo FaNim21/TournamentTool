@@ -18,7 +18,6 @@ using TournamentTool.ViewModels.Entities.Player;
 
 namespace TournamentTool.ViewModels.Selectable;
 
-[Profile]
 public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 {
     private readonly ITournamentState _tournamentState;
@@ -204,8 +203,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
         SubmitSearchCommand = new RelayCommand(()=> { FilterWhitelist(); });
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
-        
-        Task.Run(async () => 
+
+        Dispatcher.Invoke(async () =>
         {
             PaceManEvent[]? eventsData = null;
             try
@@ -221,7 +220,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
             PaceManEvents = new ObservableCollection<PaceManEvent>(eventsData);
             OnPropertyChanged(nameof(PaceManEvents));
-        });
+        }, CustomDispatcherPriority.Background);
     }
 
     public override bool CanEnable()

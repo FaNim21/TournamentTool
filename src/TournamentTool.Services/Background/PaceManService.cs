@@ -5,13 +5,11 @@ using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.External;
-using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
-[Profile]
 public class PaceManService : IBackgroundService
 {
     private readonly IPlayerViewModelFactory _playerViewModelFactory;
@@ -95,8 +93,8 @@ public class PaceManService : IBackgroundService
             {
                 player = AddPaceManPlayerToWhiteList(pace);
             }
+            if (player == null) continue;
 
-            //TODO: 0 to tez zweryfikowac, bo stare rozwiazanie
             var paceman = new Paceman(this, pace, player.Data);
             UpdateHeadImage(paceman);
             

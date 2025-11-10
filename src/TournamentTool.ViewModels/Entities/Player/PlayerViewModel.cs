@@ -8,7 +8,6 @@ using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.ViewModels.Entities.Player;
 
-[Profile]
 public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
 {
     private readonly IMinecraftDataService _minecraftDataService;

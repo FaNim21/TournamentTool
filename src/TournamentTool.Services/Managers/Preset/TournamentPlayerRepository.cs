@@ -24,7 +24,6 @@ public interface ITournamentPlayerRepository
     void UpdateTeamNamesForPlayers();
 }
 
-[Profile]
 public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposable
 {
     private IDispatcherService Dispatcher { get; }

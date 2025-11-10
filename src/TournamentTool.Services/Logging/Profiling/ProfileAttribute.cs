@@ -1,49 +1,91 @@
 ﻿using System.Diagnostics;
-using MethodBoundaryAspect.Fody.Attributes;
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Fabrics;
 
 namespace TournamentTool.Services.Logging.Profiling;
 
-[Serializable]
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class ProfileAttribute : OnMethodBoundaryAspect
+public class ProfilingFabric : ProjectFabric
 {
-    [NonSerialized] private Stopwatch? stopwatch;
+    public override void AmendProject(IProjectAmender amender)
+    {
+        amender
+            .SelectMany(p => p.AllTypes)
+            .Where(t =>
+                t.ContainingNamespace?.FullName.StartsWith("TournamentTool") == true &&
+                !t.ContainingNamespace.FullName.StartsWith("TournamentTool.Services.Logging") &&
+                !t.Name.Contains("<") &&
+                t.TypeKind == TypeKind.Class)
+            .AddAspectIfEligible<ProfileAttribute>();
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class ProfileAttribute : Attribute, IAspect<IMethod>, IAspect<INamedType>
+{
+    void IAspect<IMethod>.BuildAspect(IAspectBuilder<IMethod> builder)
+    {
+        builder.Override(nameof(OverrideMethod));
+    }
+    void IAspect<INamedType>.BuildAspect(IAspectBuilder<INamedType> builder)
+    {
+        foreach (var method in builder.Target.Methods)
+        {
+            if (method.MethodKind == MethodKind.Default && 
+                !method.Name.StartsWith(".") &&
+                !method.Name.Contains("<"))
+            {
+                builder.With(method).Override(nameof(OverrideMethod));
+            }
+        }
+    }
     
-    
-    public override void OnEntry(MethodExecutionArgs args)
+    [Template]
+    dynamic? OverrideMethod()
     {
-        if (!ProfilerManager.IsEnabled || NeedsToBeIgnored(args)) return;
+        if (!ProfilerManager.IsEnabled) return meta.Proceed();
         
-        stopwatch = Stopwatch.StartNew();
-    }
-    public override void OnExit(MethodExecutionArgs args)
-    {
-        if (!ProfilerManager.IsEnabled || stopwatch == null || NeedsToBeIgnored(args)) return;
+        var method = meta.Target.Method;
+        var className = method.DeclaringType.Name;
+        var methodName = method.Name;
         
-        stopwatch.Stop();
-        ProfilerManager.Report(args.Method, stopwatch.Elapsed);
-    }
-
-    public override void OnException(MethodExecutionArgs args)
-    {
-        //TODO: 0 to jest do wywalenia, trzeba zastapic na metalama, daje wiecej tez mozliwosci i moze debugger IDE
-        // args.FlowBehavior = FlowBehavior.RethrowException;
+        /*string? caller = null;
+        try
+        {
+            var stack = new StackTrace(1, false);
+            var frame = stack.GetFrame(1);
+            caller = frame?.GetMethod()?.DeclaringType?.FullName + "." + frame?.GetMethod()?.Name;
+        }
+        catch
+        {
+            caller = "<unknown>";
+        }*/
         
-        Console.WriteLine(args.Exception.StackTrace);
+        var stopwatch = Stopwatch.StartNew();
         
-        stopwatch?.Stop();
-        // return;
-        // if (!ProfilerManager.IsEnabled || NeedsToBeIgnored(arg)) return;
-
-        // throw arg.Exception;
-        base.OnException(args);
-    }
-
-    private bool NeedsToBeIgnored(MethodExecutionArgs args)
-    {
-        return args.Method.IsSpecialName ||
-               args.Method.IsConstructor ||
-               (args.Method.DeclaringType != null &&
-                args.Method.DeclaringType.Name.StartsWith('<'));
+        try
+        {
+            var result = meta.Proceed();
+            
+            stopwatch.Stop();
+            ProfilerManager.Report(className, methodName, stopwatch.Elapsed);
+            
+            return result;
+        }
+        catch (Exception)
+        {
+            stopwatch.Stop();
+            throw;
+        }
+        finally
+        {
+            if (stopwatch.IsRunning)
+            {
+                stopwatch.Stop();
+            }
+                
+            ProfilerManager.Report(className, methodName, stopwatch.Elapsed);
+        }
     }
 }
