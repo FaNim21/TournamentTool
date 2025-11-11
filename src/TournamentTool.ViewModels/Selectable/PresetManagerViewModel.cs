@@ -38,8 +38,10 @@ public class PresetManagerViewModel : SelectableViewModel
         get => _currentChosen;
         set
         {
+            if (_currentChosen != null && value != null && _currentChosen.Name.Equals(value.Name)) return;
+            
             _currentChosen = value;
-
+            
             bool isEmpty = _currentChosen == null;
             if (!isEmpty)
             {
@@ -110,18 +112,29 @@ public class PresetManagerViewModel : SelectableViewModel
 
     private void LoadStartupPreset()
     {
+        if (!_tournamentState.IsEmpty())
+        {
+            TournamentPresetViewModel? currentlyOpened = Presets.FirstOrDefault(p => p.Name.Equals(_tournamentState.CurrentPreset.Name));
+            _currentChosen = currentlyOpened;
+            OnPropertyChanged(nameof(CurrentChosen));
+            
+            Tournament.IsCurrentlyOpened = true;
+            
+            return;
+        }
         if (_settingsService.Settings == null) return;
         
         string lastOpened = _settingsService.Settings.LastOpenedPresetName;
         if (string.IsNullOrWhiteSpace(lastOpened)) return;
-        
-        for (int i = 0; i < Presets.Count; i++)
+
+        TournamentPresetViewModel? lastOpenedPreset = Presets.FirstOrDefault(p => p.Name.Equals(lastOpened));
+        if (lastOpenedPreset == null)
         {
-            if (!Presets[i].Name.Equals(lastOpened)) continue;
-            
-            CurrentChosen = Presets[i];
-            break;
+            //TODO: 2 Tutaj jedna z sytuacji gdzie trzeba uwzglednic odpalany pusty preset
+            return;
         }
+
+        CurrentChosen = lastOpenedPreset;
     }
     private void LoadCurrentPreset(string opened)
     {
@@ -244,7 +257,6 @@ public class PresetManagerViewModel : SelectableViewModel
     private void SaveLastOpened(string presetName)
     {
         if (_settingsService.Settings == null) return;
-        
         _settingsService.Settings.LastOpenedPresetName = presetName;
     }
 

@@ -12,8 +12,7 @@ public interface IPacemanAPIService
 public class PacemanAPIService : IPacemanAPIService
 {
     private readonly IHttpClientFactory _clientFactory;
-    
-    
+    //in future caching paceman events etc so no need to have playermanager as singleton by this
 
 
     public PacemanAPIService(IHttpClientFactory clientFactory)

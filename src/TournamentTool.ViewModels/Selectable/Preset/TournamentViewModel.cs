@@ -14,6 +14,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
+    
     private readonly Dictionary<string, List<string>> _errors = [];
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
     public bool HasErrors => _errors.Count != 0;
@@ -340,7 +341,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         RefreshUI();
     }
 
-    public void RefreshUI()
+    private void RefreshUI()
     {
         OnPropertyChanged(nameof(Name));
         OnPropertyChanged(nameof(IsUsingTeamNames));
@@ -378,7 +379,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         
         UpdateGoodPacesTexts();
     }
-    public void UpdateGoodPacesTexts()
+    private void UpdateGoodPacesTexts()
     {
         var time = TimeSpan.FromMilliseconds(Structure2GoodPaceMiliseconds).ToString(@"mm\:ss");
         Structure2ToText = $"Structure 2 (sub {time})";

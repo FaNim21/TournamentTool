@@ -55,4 +55,9 @@ public class TournamentState : ITournamentState
         CurrentPreset.Name = newName;
         PresetNameChanged?.Invoke(this, newName);
     }
+
+    public bool IsEmpty()
+    {
+        return CurrentPreset == null || string.IsNullOrEmpty(CurrentPreset.Name);
+    }
 }

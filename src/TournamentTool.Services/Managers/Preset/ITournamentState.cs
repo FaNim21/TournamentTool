@@ -16,4 +16,6 @@ public interface ITournamentState : INotifyPresetModification
     void DeletePreset();
     
     void ChangeName(string newName);
+
+    bool IsEmpty();
 }
