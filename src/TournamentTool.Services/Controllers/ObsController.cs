@@ -212,7 +212,10 @@ public class ObsController : IDisposable
                 return;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
 
         Input input = new(inputKind, newSceneItemName, inputKind);
         await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);

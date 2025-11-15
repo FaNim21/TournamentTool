@@ -118,12 +118,15 @@ public class APIUpdaterService : IServiceUpdater
         
         SceneItem[] itemsInHeadsGroup = [];
         List<string> sourceNames = [];
-        
+
         try
         {
             itemsInHeadsGroup = await _obs.GetGroupSceneItemList("splits_heads");
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
 
         for (int i = 0; i < itemsInHeadsGroup.Length; i++)
         {
@@ -320,7 +323,10 @@ public class APIUpdaterService : IServiceUpdater
         {
             itemsInHeadsGroup = await _obs.GetGroupSceneItemList("leaderboard_heads");
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
         
         for (int i = 0; i < itemsInHeadsGroup.Length; i++)
         {

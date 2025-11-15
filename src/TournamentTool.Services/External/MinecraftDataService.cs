@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Interfaces;
+using TournamentTool.Services.Logging;
 
 namespace TournamentTool.Services.External;
 
@@ -14,13 +16,15 @@ public interface IMinecraftDataService
 public class MinecraftDataService : IMinecraftDataService
 {
     private readonly IHttpClientFactory _clientFactory;
-    private readonly SettingsService _settingsService;
+    private readonly ISettings _settingsService;
+    private readonly ILoggingService _logger;
 
 
-    public MinecraftDataService(IHttpClientFactory clientFactory, SettingsService settingsService)
+    public MinecraftDataService(IHttpClientFactory clientFactory, ISettings settingsService, ILoggingService logger)
     {
         _clientFactory = clientFactory;
         _settingsService = settingsService;
+        _logger = logger;
     }
 
     public async Task<byte[]> GetPlayerHeadAsync(string id, int size)
@@ -30,7 +34,12 @@ public class MinecraftDataService : IMinecraftDataService
         {
             var client = _clientFactory.CreateClient();
             HttpResponseMessage response = await client.GetAsync(url);
-            if (!response.IsSuccessStatusCode) return [];
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorResult = await response.Content.ReadAsStringAsync();
+                _logger.Error($"{_settingsService.Settings.HeadAPIType.ToString()} api error {response.StatusCode}: {errorResult}");
+                return [];
+            }
 
             return await response.Content.ReadAsByteArrayAsync();
         }
@@ -46,7 +55,12 @@ public class MinecraftDataService : IMinecraftDataService
             
         var client = _clientFactory.CreateClient();
         HttpResponseMessage response = await client.GetAsync($"https://sessionserver.mojang.com/session/minecraft/profile/{UUID}");
-        if (!response.IsSuccessStatusCode) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorResult = await response.Content.ReadAsStringAsync();
+            _logger.Error($"Mojang sessionserver profiles api error{response.StatusCode}: {errorResult}");
+            return null;
+        }
         
         string result = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);
@@ -57,7 +71,12 @@ public class MinecraftDataService : IMinecraftDataService
             
         var client = _clientFactory.CreateClient();
         HttpResponseMessage response = await client.GetAsync($"https://api.mojang.com/users/profiles/minecraft/{inGameName}");
-        if (!response.IsSuccessStatusCode) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorResult = await response.Content.ReadAsStringAsync();
+            _logger.Error($"Mojang profiles api error {response.StatusCode}: {errorResult}");
+            return null;
+        }
         
         string result = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<ResponseMojangProfileAPI>(result);

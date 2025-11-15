@@ -52,7 +52,10 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
 
         if (!isValidated || mode == ControllerMode.None)
         {
@@ -108,15 +111,6 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         }
     }
 
-    public void Clear()
-    {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-        _taskWorker = null;
-        ClearService();
-    }
-    
     private void ClearService()
     {
         if (Service == null) return;

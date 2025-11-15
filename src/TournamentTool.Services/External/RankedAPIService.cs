@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Services.Logging;
 
 namespace TournamentTool.Services.External;
 
@@ -8,16 +9,20 @@ public interface IRankedAPIService
     Task<PrivRoomAPIResult?> GetRankedPrivateRoomLiveData(string playerName, string apiKey);
 }
 
+public readonly record struct RankedErrorResponse(string status, string data);
+
 public class RankedAPIService : IRankedAPIService
 {
     private readonly IHttpClientFactory _clientFactory;
-    //API oparte o https://docs.mcsrranked.com/
+    private readonly ILoggingService _logger;
     
+    //API oparte o https://docs.mcsrranked.com/
 
     
-    public RankedAPIService(IHttpClientFactory clientFactory)
+    public RankedAPIService(IHttpClientFactory clientFactory, ILoggingService logger)
     {
         _clientFactory = clientFactory;
+        _logger = logger;
     }
     
     public async Task<PrivRoomAPIResult?> GetRankedPrivateRoomLiveData(string playerName, string apiKey)
@@ -27,8 +32,14 @@ public class RankedAPIService : IRankedAPIService
 
         var client = _clientFactory.CreateClient();
         using HttpResponseMessage response = await client.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorResult = await response.Content.ReadAsStringAsync();
+            _logger.Error($"Ranked priv room data api error {response.StatusCode}: {errorResult}");
+            return null;
+        }
 
         await using Stream result = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(result);}
+        return await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(result);
+    }
 }

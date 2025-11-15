@@ -21,22 +21,12 @@ public class MainViewModel : BaseViewModel
     public ILoggingService Logger { get; }
     public IPresetSaver PresetSaver { get; }
     public ITournamentState TournamentState { get; }
+    public INavigationService NavigationService { get; }
 
     private readonly IUpdateCheckerService _updateChecker;
     private readonly IApplicationState _applicationState;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
-
-    private INavigationService? _navigationService;
-    public INavigationService NavigationService
-    {
-        get => _navigationService!;
-        set
-        {
-            _navigationService = value;
-            OnPropertyChanged(nameof(NavigationService));
-        }
-    }
 
     private StatusBarViewModel? _statusBar;
     public StatusBarViewModel? StatusBar

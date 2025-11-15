@@ -48,6 +48,9 @@ public class SoloService : IBackgroundService
         {
             await JsonFileHelper.LoadAsync<object>("");
         }
-        catch { /**/ }
+        catch
+        {
+            // asdf
+        }
     }
 }

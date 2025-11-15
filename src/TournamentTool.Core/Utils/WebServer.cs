@@ -139,16 +139,10 @@ public class WebServer
         await using var writer = new StreamWriter(response.OutputStream);
         await writer.WriteAsync(html);
 
-        _ = Task.Run(() =>
-        {
-            Thread.Sleep(500);
-            try
-            {
-                if (!listener.IsListening) return;
-                            
-                listener.Stop();
-                listener.Close();
-            } catch { /**/ }
-        });
+        await Task.Delay(500);
+        if (!listener.IsListening) return;
+
+        listener.Stop();
+        listener.Close();
     }
 }

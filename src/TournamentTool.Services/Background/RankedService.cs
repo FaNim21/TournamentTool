@@ -134,11 +134,15 @@ public class RankedService : IBackgroundService
         }*/
         try
         {
-            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
+            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(
+                _tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
             if (rankedAPIResult == null) return;
             _privRoomData = rankedAPIResult.Data;
         }
-        catch { /**/ }
+        catch (Exception ex)
+        {
+             Logger.Error(ex);
+        }
 
         if (_privRoomData == null) return;
 
