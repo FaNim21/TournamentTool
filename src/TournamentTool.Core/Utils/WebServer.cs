@@ -13,7 +13,7 @@ public class WebServer
         expectedState = state;
         
         listener = new HttpListener();
-        listener.Prefixes.Add(uri.EndsWith('/') ? uri : uri + "/");
+        listener.Prefixes.Add(uri.EndsWith("/") ? uri : uri + "/");
     }
 
     public async Task<Authorization?> Listen()
@@ -119,7 +119,7 @@ public class WebServer
             authorization = new Authorization(accessToken);
             response.StatusCode = 302;
             response.RedirectLocation = "http://localhost:8080/success";
-            response.Close();
+            // response.Close();
         }
 
         return authorization;
@@ -139,10 +139,16 @@ public class WebServer
         await using var writer = new StreamWriter(response.OutputStream);
         await writer.WriteAsync(html);
 
-        await Task.Delay(500);
-        if (!listener.IsListening) return;
-
-        listener.Stop();
-        listener.Close();
+        _ = Task.Run(() =>
+        {
+            Thread.Sleep(500);
+            try
+            {
+                if (!listener.IsListening) return;
+                            
+                listener.Stop();
+                listener.Close();
+            } catch { /**/ }
+        });
     }
 }
