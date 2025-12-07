@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Services.Logging;
 
@@ -27,7 +28,7 @@ public class PacemanAPIService : IPacemanAPIService
     public async Task<PaceManEvent[]> GetPacemanEvents()
     {
         var client = _clientFactory.CreateClient();
-        HttpResponseMessage response = await client.GetAsync("https://paceman.gg/api/cs/eventlist");
+        HttpResponseMessage response = await client.GetAsync(Consts.PacemanEventListAPI);
         if (!response.IsSuccessStatusCode)
         {
             string errorResult = await response.Content.ReadAsStringAsync();
@@ -42,7 +43,7 @@ public class PacemanAPIService : IPacemanAPIService
     public async Task<PaceManData[]> GetPacemanLiveData()
     {
         var client = _clientFactory.CreateClient();
-        HttpResponseMessage response = await client.GetAsync("https://paceman.gg/api/ars/liveruns");
+        HttpResponseMessage response = await client.GetAsync(Consts.PacemanAPI);
         if (!response.IsSuccessStatusCode)
         {
             string errorResult = await response.Content.ReadAsStringAsync();

@@ -15,7 +15,8 @@ public static class Consts
 
     public const string RedirectURL = "http://localhost:8080/";
 
-    public const string PaceManAPI = "https://paceman.gg/api/ars/liveruns";
+    public const string PacemanAPI = "https://paceman.gg/api/ars/liveruns";
+    public const string PacemanEventListAPI = "https://paceman.gg/api/cs/eventlist";
     public const string PaceManTwitchAPI = "https://paceman.gg/api/us/twitch";
     public const string PaceManUserAPI = "https://paceman.gg/api/us/user";
     public const string PaceManGetUserAPI = "https://paceman.gg/api/us/getuser?uuid=";

@@ -181,7 +181,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { windowService.ShowLoading(ValidateAllPlayers); });
 
-        ViewPlayerInfoCommand = new RelayCommand<PlayerViewModel>((player) =>
+        ViewPlayerInfoCommand = new RelayCommand<PlayerViewModel>(player =>
         {
             ViewWhitelistPlayerViewModel viewModel = new(player, presetService, logger, dispatcher, windowService, clipboard, dialogService);
             _windowService.ShowDialog(viewModel);

@@ -52,6 +52,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
 
         eventPlayers.Clear();
         logProgress.Report("Setting up players from paceman");
+        
         for (int i = 0; i < _chosenEvent!.WhiteList!.Length; i++)
         {
             var current = _chosenEvent!.WhiteList[i];
@@ -80,6 +81,7 @@ public class LoadDataFromPacemanCommand : BaseCommand
         }
 
         if (_twitchNames == null) return;
+        
         cancellationToken.ThrowIfCancellationRequested();
         await UpdateWhitelist(progress, logProgress, cancellationToken);
 
@@ -96,9 +98,10 @@ public class LoadDataFromPacemanCommand : BaseCommand
         {
             var current = _twitchNames[i];
             cancellationToken.ThrowIfCancellationRequested();
+            
             foreach (var player in _playerRepository.Players)
             {
-                if (!player.Data.StreamData.ExistName(current.liveAccount)) continue;
+                if (!player.Data.StreamData.ExistName(current.Main)) continue;
                 
                 _twitchNames.RemoveAt(i);
                 i--;
@@ -114,14 +117,19 @@ public class LoadDataFromPacemanCommand : BaseCommand
             {
                 var twitch = _twitchNames[j];
                 progress.Report((float)i / eventPlayers.Count);
-                if (player.UUID != twitch.uuid.Replace("-", "")) continue;
-                player.StreamData.Main = twitch.liveAccount?.Trim() ?? string.Empty;
+                
+                if (player.UUID != twitch.UUID.Replace("-", "")) continue;
+
+                player.UUID = twitch.UUID;
+                player.StreamData.Main = twitch.Main?.Trim() ?? string.Empty;
+                player.StreamData.Alt = twitch.Alt?.Trim() ?? string.Empty;
                 player.PersonalBest = string.Empty;
                 
                 await player.CompleteData();
                 if (_playerRepository.ContainsDuplicatesNoDialog(player.Data)) continue;
+                
                 logProgress.Report($"({i+1}/{_twitchNames.Count}) Completed data from Paceman for player: {player.InGameName}");
-                player.Name = twitch.liveAccount?.Trim() ?? player.InGameName;
+                player.Name = twitch.Main?.Trim() ?? player.InGameName;
                 await Dispatcher.InvokeAsync(() => { PlayerManager.Add(player); });
                 break;
             }
