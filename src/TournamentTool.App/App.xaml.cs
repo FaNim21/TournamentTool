@@ -132,6 +132,9 @@ public partial class App : Application
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         var settingsService = _serviceProvider.GetRequiredService<ISettingsSaver>();
         settingsService.Load();
+        
+        var obsController = _serviceProvider.GetRequiredService<ObsController>();
+        Task.Run(obsController.Connect);
 
         var navigationService = _serviceProvider.GetRequiredService<INavigationService>();
         var startupSelectable = _serviceProvider.GetRequiredService<PresetManagerViewModel>();

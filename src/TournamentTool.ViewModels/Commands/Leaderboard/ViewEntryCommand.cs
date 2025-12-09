@@ -18,6 +18,6 @@ public class ViewEntryCommand : BaseCommand
         if (parameter is not LeaderboardEntryViewModel entry) return;
 
         entry.SetupOpeningWindow();
-        _windowService.ShowDialog(entry, null, "LeaderboardEntryWindow");
+        _windowService.ShowCustomDialog(entry, null, "LeaderboardEntryWindow");
     }
 }

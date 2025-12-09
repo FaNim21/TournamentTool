@@ -40,11 +40,15 @@
                        FontSize="10"
                        Padding="4 3 0 0"
                        Foreground="LightCyan" />
+            
             <buttons:ButtonTaskbar Width="18"
-                                 FontSize="12"
-                                 HorizontalAlignment="Right"
-                                 ContentText="X"
-                                 Click="ExitButtonClick" />
+                                   FontSize="12"
+                                   WindowChrome.IsHitTestVisibleInChrome="True"
+                                   HorizontalAlignment="Right"
+                                   ColorBrush="#ff000f"
+                                   ContentText="X"
+                                   Padding="1"
+                                   Click="ExitButtonClick" />
         </Grid>
 
         <Grid Grid.Row="1">

@@ -23,6 +23,6 @@ public class ShowPOVInfoWindowCommand : BaseCommand
         if (parameter is not PointOfView pov) return;
 
         POVInformationViewModel viewModel = new(pov, _scene, _dispatcher);
-        _windowService.ShowDialog(viewModel);
+        _windowService.ShowCustomDialog(viewModel);
     }
 }

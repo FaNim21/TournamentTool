@@ -28,28 +28,10 @@ public class MainViewModel : BaseViewModel
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
 
-    private StatusBarViewModel? _statusBar;
-    public StatusBarViewModel? StatusBar
-    {
-        get => _statusBar;
-        set
-        {
-            _statusBar = value;
-            OnPropertyChanged(nameof(StatusBar));
-        }
-    }
-
-    public NotificationPanelViewModel? notificationPanel;
-    public NotificationPanelViewModel? NotificationPanel
-    {
-        get => notificationPanel;
-        set
-        {
-            notificationPanel = value;
-            OnPropertyChanged(nameof(NotificationPanel));
-        }
-    }
     public DebugWindowViewModel? DebugWindowViewModel { get; private set; }
+    
+    public StatusBarViewModel? StatusBar { get; }
+    public NotificationPanelViewModel NotificationPanel { get; }
 
     private bool _isHamburgerMenuOpen;
     public bool IsHamburgerMenuOpen
@@ -57,7 +39,8 @@ public class MainViewModel : BaseViewModel
         get => _isHamburgerMenuOpen;
         set
         {
-            if (NavigationService.SelectedView is UpdatesViewModel updates && updates.Downloading) return;
+            if (IsWindowBlocked) return;
+            if (NavigationService.SelectedView is UpdatesViewModel { Downloading: true }) return;
             if (_isHamburgerMenuOpen == value) return;
 
             NotificationPanel?.HidePanel();
@@ -124,7 +107,7 @@ public class MainViewModel : BaseViewModel
     {
         NavigationService.OnSelectedViewModelChanged -= UpdateDebugWindowViewModel;
         _applicationState.WindowBlockedChanged -= OnWindowBlockedChanged;
-        NotificationPanel!.PanelOpened -= OnNotificationPanelOnPanelOpened;
+        NotificationPanel.PanelOpened -= OnNotificationPanelOnPanelOpened;
     }
 
     public override bool OnDisable()
@@ -170,9 +153,9 @@ public class MainViewModel : BaseViewModel
     {
         IsHamburgerMenuOpen = false;
     }
-    private void OnWindowBlockedChanged(object? sender, bool e)
+    private void OnWindowBlockedChanged(object? sender, bool isBlocked)
     {
-        IsWindowBlocked = e;
+        IsWindowBlocked = isBlocked;
     }
 
     private async Task CheckForUpdate()

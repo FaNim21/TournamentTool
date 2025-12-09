@@ -23,11 +23,11 @@ public class PaceManEvent
 public struct PaceManTwitchResponse
 {
     [JsonPropertyName("uuid")]
-    public string UUID { get; set; }
+    public string UUID { get; init; }
     
     [JsonPropertyName("liveAccount")]
-    public string Main { get; set; }
+    public string Main { get; init; }
 
     [JsonPropertyName("alt")] 
-    public string Alt { get; set; }
+    public string Alt { get; init; }
 }

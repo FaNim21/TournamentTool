@@ -30,6 +30,6 @@ public class EditEntryCommand : BaseCommand
         LeaderboardEntryEditWindowViewModel editWindowViewModel = new LeaderboardEntryEditWindowViewModel(_leaderboardPanelViewModel, entry.GetLeaderboardEntry(), entry.Player, _tournamentState, _dispatcher, _dialogService);
         editWindowViewModel.SetPresetFilters(_tournamentState.CurrentPreset.ControllerMode);
         
-        _windowService.ShowDialog(editWindowViewModel, null, "LeaderboardEntryEditWindow");
+        _windowService.ShowCustomDialog(editWindowViewModel, null, "LeaderboardEntryEditWindow");
     }
 }

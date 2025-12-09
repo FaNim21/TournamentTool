@@ -184,7 +184,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         ViewPlayerInfoCommand = new RelayCommand<PlayerViewModel>(player =>
         {
             ViewWhitelistPlayerViewModel viewModel = new(player, presetService, logger, dispatcher, windowService, clipboard, dialogService);
-            _windowService.ShowDialog(viewModel);
+            _windowService.ShowCustomDialog(viewModel);
         });
         EditPlayerCommand = new EditPlayerCommand(this);
         ValidatePlayerCommand = new ValidatePlayerCommand(this, presetService, windowService);
@@ -349,7 +349,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         }
         
         WhitelistPlayerWindowViewModel viewModel = new(PlayerViewModelFactory, this, playerViewModel, Dispatcher);
-        _windowService.ShowDialog(viewModel, null, "WhitelistPlayerWindow");
+        _windowService.ShowCustomDialog(viewModel, null, "WhitelistPlayerWindow");
     }
 
     public async Task<bool> SavePlayer(PlayerViewModel playerViewModel, bool isEditing)

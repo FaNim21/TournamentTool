@@ -66,7 +66,6 @@ public class ObsController : IDisposable
         _tournamentState.PresetChanged += PresetChanged;
         
         Client = new ObsClient { RequestTimeout = 10000 };
-        Task.Run(Connect);
     }
     public void Dispose()
     {
@@ -101,7 +100,7 @@ public class ObsController : IDisposable
         
         Client.PropertyChanged += OnPropertyChanged;
         const EventSubscriptions subscription = EventSubscriptions.All;
-        await Client.ConnectAsync(true, SettingsService.Settings.Password!, "localhost", SettingsService.Settings.Port, subscription);
+        await Client.ConnectAsync(true, SettingsService.Settings.Password, "localhost", SettingsService.Settings.Port, subscription);
     }
     private async Task OnConnected()
     {

@@ -39,14 +39,14 @@
         <Grid Grid.Row="0"
               Background="#000D14">
             <buttons:ButtonTaskbar Width="30"
-                                      Height="30"
-                                      FontSize="20"
-                                      WindowChrome.IsHitTestVisibleInChrome="True"
-                                      HorizontalAlignment="Right"
-                                      ColorBrush="#ff000f"
-                                      ContentText="X"
-                                      Padding="1"
-                                      Click="ExitButtonClick" />
+                                   Height="30"
+                                   FontSize="20"
+                                   WindowChrome.IsHitTestVisibleInChrome="True"
+                                   HorizontalAlignment="Right"
+                                   ColorBrush="#ff000f"
+                                   ContentText="X"
+                                   Padding="1"
+                                   Click="ExitButtonClick" />
         </Grid>
 
         <Grid Grid.Row="1">
@@ -64,10 +64,10 @@
 
                 <Grid Grid.Row="0">
                     <buttons:ButtonNormal HorizontalAlignment="Center"
-                                             Width="100"
-                                             ContentText="Settings"
-                                             FontSize="20"
-                                             OnCommand="{Binding OpenGeneralCommand}" />
+                                          Width="100"
+                                          ContentText="Settings"
+                                          FontSize="20"
+                                          OnCommand="{Binding OpenGeneralCommand}" />
                 </Grid>
 
                 <ListView Grid.Row="1"
