@@ -65,7 +65,6 @@ public class Tournament : IPreset
     public bool SetPovPBText { get; set; }
     public DisplayedNameType DisplayedNameType { get; set; }
 
-    public bool IsUsingTwitchAPI { get; set; }
     public bool ShowStreamCategory { get; set; } = true;
     
     public int PaceManRefreshRateMiliseconds { get; set; } = 3000;
@@ -96,7 +95,6 @@ public class Tournament : IPreset
         SetPovPBText = false;
         DisplayedNameType = DisplayedNameType.None;
 
-        IsUsingTwitchAPI = false;
         ShowStreamCategory = true;
 
         PaceManRefreshRateMiliseconds = 3000;

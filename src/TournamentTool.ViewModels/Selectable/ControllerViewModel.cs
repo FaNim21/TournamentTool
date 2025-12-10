@@ -104,19 +104,27 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }
     }
 
-    public string _twitchUpdateProgressText = string.Empty;
+    private string _twitchUpdateProgressText = string.Empty;
     public string TwitchUpdateProgressText
     {
         get => _twitchUpdateProgressText;
         set
         {
-            
             _twitchUpdateProgressText = value;
             OnPropertyChanged(nameof(TwitchUpdateProgressText));
         }
     }
 
-    public bool IsUsingTwitchAPI => _tournamentState.CurrentPreset.IsUsingTwitchAPI;
+    private bool _isTwitchAPIConnect;
+    public bool IsTwitchAPIConnect
+    {
+        get => _isTwitchAPIConnect;
+        set
+        {
+            _isTwitchAPIConnect = value;
+            OnPropertyChanged(nameof(IsTwitchAPIConnect));
+        }
+    }
 
     public ICommand UnSelectItemsCommand { get; set; }
     
@@ -144,6 +152,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
+        IsTwitchAPIConnect = _twitch.IsConnected;
+        _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
+        
         switch(_tournamentState.CurrentPreset.ControllerMode)
         {
             case ControllerMode.None:
@@ -184,14 +195,12 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _backgroundCoordinator.Register(ManagementPanel);
         _backgroundCoordinator.Register(SidePanel);
 
-        if (!IsUsingTwitchAPI || !_twitch.IsConnected)
-        {
-            for (int i = 0; i < Players.Count; i++)
-                Players[i].ClearStreamData();
-        }
+        ClearPlayerStreamData();
     }
     public override bool OnDisable()
     {
+        _twitch.ConnectionStateChanged -= OnTwitchConnectionChanged;
+        
         _backgroundCoordinator.Unregister(SidePanel);
         _backgroundCoordinator.Unregister(this);
         _backgroundCoordinator.Unregister(ManagementPanel);
@@ -209,6 +218,14 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         CurrentChosenPlayer = null;
 
         return true;
+    }
+
+    private void OnTwitchConnectionChanged(object? sender, ConnectionStateChangedEventArgs e)
+    {
+        //tutaj ogarnac przechwytywanie tego czy wystartowac licznik
+        IsTwitchAPIConnect = e.NewState == ConnectionState.Connected;
+
+        ClearPlayerStreamData();
     }
 
     public void OnHotkey(HotkeyActionType actionType)
@@ -281,5 +298,13 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     {
         _selectedWhitelistPlayer = null;
         OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+    }
+
+    private void ClearPlayerStreamData()
+    {
+        if (IsTwitchAPIConnect) return;
+        
+        for (int i = 0; i < Players.Count; i++)
+            Players[i].ClearStreamData();
     }
 }

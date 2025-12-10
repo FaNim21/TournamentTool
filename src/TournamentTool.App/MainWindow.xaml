@@ -238,13 +238,14 @@
             </controls:HamburgerMenu.HamburgerContent>
         </controls:HamburgerMenu>
 
-        <Border Grid.Row="1"
-                Visibility="{Binding IsWindowBlocked, Converter={StaticResource BoolToVisibilityConverter}}"
-                Background="Black"
-                Opacity="0.5" />
-
         <!-- STATUS BAR -->
         <ContentPresenter Grid.Row="2"
                           Content="{Binding StatusBar}" />
+
+        <Border Grid.Row="1"
+                Grid.RowSpan="2"
+                Visibility="{Binding IsWindowBlocked, Converter={StaticResource BoolToVisibilityConverter}}"
+                Background="Black"
+                Opacity="0.5" />
     </Grid>
 </Window>

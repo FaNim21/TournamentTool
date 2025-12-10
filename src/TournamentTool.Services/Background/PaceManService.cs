@@ -13,6 +13,7 @@ namespace TournamentTool.Services.Background;
 public class PaceManService : IBackgroundService
 {
     private readonly IPlayerViewModelFactory _playerViewModelFactory;
+    private readonly ITwitchService _twitchService;
     private readonly IPacemanAPIService _pacemanApiService;
     private readonly IImageService _imageService;
     private readonly ITournamentState _tournamentState;
@@ -30,10 +31,11 @@ public class PaceManService : IBackgroundService
     private bool _blockFirstPacemanRefresh = true;
 
 
-    public PaceManService(ILeaderboardManager leaderboard, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, 
+    public PaceManService(ILeaderboardManager leaderboard, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, ITwitchService twitchService,
         IPacemanAPIService pacemanApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
     {
         _playerViewModelFactory = playerViewModelFactory;
+        _twitchService = twitchService;
         _pacemanApiService = pacemanApiService;
         _imageService = imageService;
         _tournamentState = tournamentState;
@@ -149,7 +151,8 @@ public class PaceManService : IBackgroundService
         if (player == null) return;
         
         player.SetStreamName(twitchName);
-        if (!_tournamentState.CurrentPreset.IsUsingTwitchAPI)
+        
+        if (!_twitchService.IsConnected)
         {
             player.ClearStreamData();
         }

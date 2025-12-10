@@ -28,18 +28,20 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
 {
     private IDispatcherService Dispatcher { get; }
     private readonly IPlayerViewModelFactory _playerFactory;
-    
+    private readonly ITwitchService _twitchService;
+
     private readonly ITournamentState _state;
 
     private ObservableCollection<IPlayerViewModel> _players { get; } = [];
     public ReadOnlyObservableCollection<IPlayerViewModel> Players { get; }
 
     
-    public TournamentPlayerRepository(ITournamentState state, IPlayerViewModelFactory playerFactory, IDispatcherService dispatcher)
+    public TournamentPlayerRepository(ITournamentState state, IPlayerViewModelFactory playerFactory, IDispatcherService dispatcher, ITwitchService twitchService)
     {
         Dispatcher = dispatcher;
         _state = state;
         _playerFactory = playerFactory;
+        _twitchService = twitchService;
 
         Players = new ReadOnlyObservableCollection<IPlayerViewModel>(_players);
         
@@ -149,7 +151,7 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
     {
         foreach (var player in Players)
         {
-            player.ShowCategory(_state.CurrentPreset is { ShowStreamCategory: true, IsUsingTwitchAPI: true });
+            player.ShowCategory(_state.CurrentPreset is { ShowStreamCategory: true } && _twitchService.IsConnected);
         }
     }
     public void UpdateTeamNamesForPlayers()

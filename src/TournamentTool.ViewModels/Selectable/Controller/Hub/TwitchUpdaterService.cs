@@ -31,7 +31,7 @@ public class TwitchUpdaterService : IServiceUpdater, IServiceUpdaterTimer
     
     public async Task UpdateAsync(CancellationToken token)
     {
-        if (!_twitch.IsConnected || !_controller.IsUsingTwitchAPI) return;
+        if (!_twitch.IsConnected) return;
         
         await UpdateStreamDatas();
         _controller.RefreshFilteredCollection();

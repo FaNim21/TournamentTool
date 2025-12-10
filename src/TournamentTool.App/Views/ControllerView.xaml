@@ -66,8 +66,8 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1"
-                        Visibility="{Binding TournamentViewModel.IsUsingTwitchAPI, Converter={StaticResource BoolToVisibilityConverter}}" 
-                        Orientation="Horizontal" >
+                        Visibility="{Binding IsTwitchAPIConnect, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Orientation="Horizontal">
                <TextBlock Text="Stream update: "
                           FontSize="18"
                           Foreground="#CCCCCC">

@@ -85,19 +85,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         }
     }
     
-    public bool IsUsingTwitchAPI
-    {
-        get => _tournamentState.CurrentPreset.IsUsingTwitchAPI;
-        set
-        {
-            if (_tournamentState.CurrentPreset.IsUsingTwitchAPI == value) return;
-                
-            _tournamentState.CurrentPreset.IsUsingTwitchAPI = value;
-            OnPropertyChanged(nameof(IsUsingTwitchAPI));
-            PresetIsModified();
-            _playerRepository.UpdateCategoryForPlayers();
-        }
-    }
     public bool ShowStreamCategory
     {
         get => _tournamentState.CurrentPreset.ShowStreamCategory;
@@ -355,7 +342,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         OnPropertyChanged(nameof(SetPovPBText));
         OnPropertyChanged(nameof(DisplayedNameType));
         
-        OnPropertyChanged(nameof(IsUsingTwitchAPI));
         OnPropertyChanged(nameof(ShowStreamCategory));
         
         OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));

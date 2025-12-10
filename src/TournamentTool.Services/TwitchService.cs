@@ -141,6 +141,7 @@ public class TwitchService : ITwitchService
         }
         catch (Exception ex)
         {
+            _dialogService.Show("Couldn't connect to twitch API. Check notifications panel (bell in status bar) for more info");
             Logger.Error($"Error: {ex}");
             Disconnect();
         }

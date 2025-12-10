@@ -378,14 +378,10 @@
                                        Padding="0"
                                        Margin="0 0 0 5" />
 
-                            <ToggleButton IsChecked="{Binding Tournament.IsUsingTwitchAPI}"
-                                          Content="Use Twitch API"
-                                          Margin="0 0 0 5" />
                             <ToggleButton IsChecked="{Binding Tournament.ShowStreamCategory}"
-                                          IsEnabled="{Binding Tournament.IsUsingTwitchAPI}"
                                           ToolTipService.InitialShowDelay="0"
                                           ToolTipService.ShowDuration="60000"
-                                          ToolTip="With Twitch API enabled and connected in status bar it you a category form online stream in controller"
+                                          ToolTip="With Twitch API connected in status bar it shows you a category form online stream in controller"
                                           Content="Show stream category"
                                           Margin="0 0 0 5" />
                             <ToggleButton IsChecked="{Binding Tournament.IsUsingTeamNames}"
