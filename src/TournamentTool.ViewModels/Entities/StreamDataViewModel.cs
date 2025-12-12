@@ -97,7 +97,8 @@ public class TwitchStreamDataViewModel : BaseViewModel
     public TwitchStreamDataViewModel(TwitchStreamData data, IDispatcherService dispatcher) : base(dispatcher)
     {
         Data = data;
-        Update(data);
+        // Update(data);
+        Clear(false);
     }
 
     public void Update(TwitchStreamData data)
@@ -143,7 +144,7 @@ public class TwitchStreamDataViewModel : BaseViewModel
         UserLogin = string.Empty;
         GameName = string.Empty;
         Title = string.Empty;
-        ViewerCount = 0;
+        ViewerCount = -1;
         StartedAt = DateTime.MinValue;
         Language = string.Empty;
         ThumbnailUrl = string.Empty;
@@ -223,7 +224,7 @@ public class StreamDataViewModel : BaseViewModel
         _dialogService = dialogService;
         Data = data;
         Data.StreamService = new TwitchStreamData();
-        // to wiadomo do przerobienia, bo trzeba to porzadnie zrobic po tym jak skoncze folder refactor
+        // to do przerobienia, bo trzeba to porzadnie zrobic po tym jak skoncze folder refactor
         Live = new TwitchStreamDataViewModel((TwitchStreamData)Data.StreamService, dispatcher);
     }
     
@@ -282,6 +283,6 @@ public class StreamDataViewModel : BaseViewModel
         Main = string.Empty;
         Alt = string.Empty;
 
-        Live.Clear();
+        Live.Clear(false);
     }
 }

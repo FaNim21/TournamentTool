@@ -30,7 +30,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     public ISettings SettingsService { get; }
     
     public SceneControllerViewmodel SceneController { get; }
-    private readonly ControllerServiceHub _serviceHub;
+    public ControllerServiceHub ServiceHub { get; }
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
     public Predicate<object> PlayerFilter => FilterPlayers;
@@ -141,7 +141,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _twitch = twitch;
         
         SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsService, dispatcher, windowService);
-        _serviceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
+        ServiceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }
@@ -152,7 +152,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
-        IsTwitchAPIConnect = _twitch.IsConnected;
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
         
         switch(_tournamentState.CurrentPreset.ControllerMode)
@@ -186,20 +185,21 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 break;
         }
         
+        UpdateTwitchConnectionData(_twitch.IsConnected);
+        
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
         SceneController.OnEnable(null);
-        _serviceHub.OnEnable();
+        ServiceHub.OnEnable();
         
         _backgroundCoordinator.Register(this);
         _backgroundCoordinator.Register(ManagementPanel);
         _backgroundCoordinator.Register(SidePanel);
-
-        ClearPlayerStreamData();
     }
     public override bool OnDisable()
     {
-        _twitch.ConnectionStateChanged -= OnTwitchConnectionChanged;
+        //TODO: 0 POKI CONTROLLER JEST SINGLETONEM TO BEZ CZYSZCZENIA
+        // _twitch.ConnectionStateChanged -= OnTwitchConnectionChanged;
         
         _backgroundCoordinator.Unregister(SidePanel);
         _backgroundCoordinator.Unregister(this);
@@ -208,7 +208,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         SidePanel?.OnDisable();
         ManagementPanel?.OnDisable();
         SceneController.OnDisable();
-        _serviceHub.OnDisable();
+        ServiceHub.OnDisable();
 
         for (int i = 0; i < Players.Count; i++)
             Players[i].ClearFromController();
@@ -222,10 +222,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     private void OnTwitchConnectionChanged(object? sender, ConnectionStateChangedEventArgs e)
     {
-        //tutaj ogarnac przechwytywanie tego czy wystartowac licznik
-        IsTwitchAPIConnect = e.NewState == ConnectionState.Connected;
-
-        ClearPlayerStreamData();
+        UpdateTwitchConnectionData(e.NewState == ConnectionState.Connected);
     }
 
     public void OnHotkey(HotkeyActionType actionType)
@@ -300,9 +297,12 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         OnPropertyChanged(nameof(SelectedWhitelistPlayer));
     }
 
-    private void ClearPlayerStreamData()
+    private void UpdateTwitchConnectionData(bool isConnected)
     {
-        if (IsTwitchAPIConnect) return;
+        IsTwitchAPIConnect = isConnected;
+        ServiceHub.ChangeServiceStatus("Twitch-streams", isConnected);
+        
+        if (isConnected) return;
         
         for (int i = 0; i < Players.Count; i++)
             Players[i].ClearStreamData();
