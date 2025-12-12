@@ -42,7 +42,7 @@ public class Paceman
     private int _lastAdvancementIndex = 0;
 
     
-    public Paceman(PaceManService service, PaceManData data, Player player)
+    public Paceman(PaceManService service, PaceManData data, Player? player)
     {
         Service = service;
         Player = player;
@@ -151,6 +151,8 @@ public class Paceman
 
     private void AddTimelineToEvaluation(PacemanTimeline main, PacemanTimeline? previous)
     {
+        if (Player == null) return;
+        
         LeaderboardTimeline mainTimeline = new LeaderboardTimeline(main.Milestone, (int)main.IGT);
         LeaderboardTimeline? previousTimeline = null;
         if (previous != null)
@@ -158,7 +160,6 @@ public class Paceman
             previousTimeline = new LeaderboardTimeline(previous.Milestone, (int)previous.IGT);
         }
 
-        if (Player == null) return;
         Service.AddEvaluationData(Player, WorldID, mainTimeline, previousTimeline);
     }
     

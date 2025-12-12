@@ -95,9 +95,14 @@ public class PaceManService : IBackgroundService
             {
                 player = AddPaceManPlayerToWhiteList(pace);
             }
-            if (player == null) continue;
 
-            var paceman = new Paceman(this, pace, player.Data);
+            Player? data = null;
+            if (player != null)
+            {
+                data = player.Data;
+            }
+            
+            var paceman = new Paceman(this, pace, data);
             UpdateHeadImage(paceman);
             
             AddPaceMan(paceman);
