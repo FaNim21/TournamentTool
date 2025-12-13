@@ -65,7 +65,16 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
             OnPropertyChanged(nameof(SaveTwitchToken));
         }
     }
-
+    public bool AutoLoginToTwitch
+    {
+        get => _settings.AutoLoginToTwitch;
+        set
+        {
+            _settings.AutoLoginToTwitch = value;
+            OnPropertyChanged(nameof(AutoLoginToTwitch));
+        }
+    }
+    
     public HeadAPIType HeadAPIType
     {
         get => _settings.HeadAPIType;

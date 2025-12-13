@@ -128,6 +128,7 @@ public class TwitchService : ITwitchService
 
             var validateResponse = await _api.Auth.ValidateAccessTokenAsync(authResponse.Code);
             _api.Settings.AccessToken = authResponse.Code;
+            
             if (SettingsService.Settings.SaveTwitchToken)
             {
                 SettingsService.APIKeys.TwitchAccessToken = authResponse.Code;
@@ -201,6 +202,7 @@ public class TwitchService : ITwitchService
 
         return allStreams.DistinctBy(stream => stream.UserId).ToList();
     }
+    
     public async Task<CreatedClipResponse?> CreateClipAsync(string broadcasterID)
     {
         CreatedClipResponse? response = null;

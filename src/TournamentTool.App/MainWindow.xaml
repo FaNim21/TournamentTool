@@ -3,8 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:TournamentTool.ViewModels"
-        xmlns:ranking="clr-namespace:TournamentTool.ViewModels.Ranking"
         xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable;assembly=TournamentTool.ViewModels"
         xmlns:viewModels="clr-namespace:TournamentTool.ViewModels;assembly=TournamentTool.ViewModels"
         xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"

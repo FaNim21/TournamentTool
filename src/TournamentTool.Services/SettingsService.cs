@@ -10,6 +10,7 @@ public class SettingsService : ISettings, ISettingsSaver
 {
     private readonly IWindowService _windowService;
     private readonly IDataProtect _dataProtect;
+    private readonly ITwitchService _twitchService;
 
     public Settings Settings { get; private set; } = new();
     public APIKeys APIKeys { get; private set; } = new();
@@ -22,10 +23,12 @@ public class SettingsService : ISettings, ISettingsSaver
     private string _apiKeysPath;
 
     
-    public SettingsService(IWindowService windowService, IDataProtect dataProtect)
+    public SettingsService(IWindowService windowService, IDataProtect dataProtect, ITwitchService twitchService)
     {
         _windowService = windowService;
         _dataProtect = dataProtect;
+        _twitchService = twitchService;
+
         _settingsPath = Path.Combine(Consts.AppdataPath, _settingsFileName);
         _apiKeysPath = Path.Combine(Consts.AppdataPath, _apiKeysFileName);
         _serializerOptions = new JsonSerializerOptions { WriteIndented = true };
@@ -80,7 +83,10 @@ public class SettingsService : ISettings, ISettingsSaver
     {
         _windowService.SetMainWindowTopMost(Settings.IsAlwaysOnTop);
 
-        //
+        if (Settings is { SaveTwitchToken: true, AutoLoginToTwitch: true } && !string.IsNullOrEmpty(APIKeys.TwitchAccessToken))
+        {
+            _twitchService.ConnectAsync();
+        }
     }
 }
 
