@@ -108,6 +108,7 @@ public class ImportWhitelistCommand : BaseCommand
             await Dispatcher.InvokeAsync(() => { PlayerManager.Add(viewModel); });
         }
         
+        PlayerManager.RefreshFilteredCollectionView();
         logProgress.Report("Loading complete");
         progress.Report(1);
         Logger.Information($"Done loading data from {_fileName} whitelist file");
@@ -157,6 +158,7 @@ public class ImportWhitelistCommand : BaseCommand
             count++;
         }
         
+        PlayerManager.RefreshFilteredCollectionView();
         logProgress.Report("Loading complete");
         progress.Report(1);
         Logger.Information($"Done loading data from {_fileName} file");
@@ -203,6 +205,7 @@ public class ImportWhitelistCommand : BaseCommand
                 await FetchAndAssignUUIDs(playersToComplete, logProgress, cancellationToken);
             }
      
+            PlayerManager.RefreshFilteredCollectionView();
             logProgress.Report("Loading complete");
             progress.Report(1);
             Logger.Information($"Done loading data from {_fileName} ranked file");

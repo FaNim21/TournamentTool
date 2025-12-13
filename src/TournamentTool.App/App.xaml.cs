@@ -112,6 +112,8 @@ public partial class App : Application
         
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
+        
+        services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
@@ -130,18 +132,13 @@ public partial class App : Application
         LogService.Initialize(loggingService);
         
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-        var settingsService = _serviceProvider.GetRequiredService<ISettingsSaver>();
-        settingsService.Load();
         
-        var obsController = _serviceProvider.GetRequiredService<ObsController>();
-        Task.Run(obsController.Connect);
-
+        IApplicationLifetime applicationLifetime = _serviceProvider.GetRequiredService<IApplicationLifetime>();
+        applicationLifetime.OnStartup();
+        
         var navigationService = _serviceProvider.GetRequiredService<INavigationService>();
         var startupSelectable = _serviceProvider.GetRequiredService<PresetManagerViewModel>();
         navigationService.Startup(startupSelectable);
-        
-        IInputController inputController = _serviceProvider.GetRequiredService<IInputController>();
-        inputController.HotkeyPressed += HandleGeneralHotkeys;
         
         mainWindow.Show();
 
@@ -150,39 +147,10 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        IInputController inputController = _serviceProvider.GetRequiredService<IInputController>();
-        inputController.HotkeyPressed -= HandleGeneralHotkeys;
-        
-        var settings = _serviceProvider.GetRequiredService<ISettingsSaver>();
-        settings.Save();
+        IApplicationLifetime applicationLifetime = _serviceProvider.GetRequiredService<IApplicationLifetime>();
+        applicationLifetime.OnExit();
         
         _serviceProvider.Dispose();
         base.OnExit(e);
-    }
-
-    private void HandleGeneralHotkeys(HotkeyActionType actionType)
-    {
-        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-        
-        switch (actionType)
-        {
-            case HotkeyActionType.General_SavePreset: 
-                var presetSaver = _serviceProvider.GetRequiredService<IPresetSaver>();
-                presetSaver.SavePreset();
-                break;
-            case HotkeyActionType.General_RenameElementOnMousePosition: 
-                var textBlock = UIHelper.GetFocusedUIElement<EditableTextBlock>();
-                if (textBlock is { IsEditable: true })
-                {
-                    textBlock.IsInEditMode = true;
-                }
-                break;
-            case HotkeyActionType.General_ToggleDebugWindow:
-                mainViewModel.SwitchDebugWindow();
-                break;
-            case HotkeyActionType.General_ToggleHamburgerMenu: 
-                mainViewModel.IsHamburgerMenuOpen = !mainViewModel.IsHamburgerMenuOpen;
-                break;
-        }
     }
 }

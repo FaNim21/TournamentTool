@@ -20,5 +20,5 @@ public interface ISettings
 public interface ISettingsSaver
 {
     void Save();
-    void Load();
+    bool Load();
 }

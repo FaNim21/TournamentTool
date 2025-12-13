@@ -162,6 +162,14 @@
                         </Grid>
                     </Grid>
 
+                    <TextBlock Visibility="{Binding SceneController.Connected, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                               Text="OBS is not connected"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"
+                               FontSize="36" />
+
                     <Thumb Width="10"
                            Height="10"
                            HorizontalAlignment="Right"

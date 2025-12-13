@@ -28,6 +28,7 @@ public class RemovePlayerCommand : BaseCommand
         if (result != MessageBoxResult.Yes) return;
 
         _playerManager.Remove(player);
+        _playerManager.RefreshFilteredCollectionView();
         _presetSaver.SavePreset();
     }
 }

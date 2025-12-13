@@ -54,7 +54,17 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
             OnPropertyChanged(nameof(PlayerViewRefreshTrigger));
         }
     }
-    public int FilteredCount { get; set; }
+
+    private int _filteredCount;
+    public int FilteredCount
+    {
+        get => _filteredCount;
+        set
+        {
+            _filteredCount = value;
+            InformationCount = $"Found {_filteredCount}/{PlayerRepository.Players.Count}";
+        }
+    }
 
     private PaceManEvent? _chosenEvent = new();
     public PaceManEvent? ChosenEvent
@@ -276,12 +286,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public void Add(IPlayerViewModel playerViewModel)
     {
         PlayerRepository.AddPlayer(playerViewModel);
-        UpdateInformationCountText();
     } 
     public void Remove(PlayerViewModel playerViewModel)
     {
         PlayerRepository.RemovePlayer(playerViewModel);
-        UpdateInformationCountText();
     }
     
     private bool FilterPlayers(object obj)
@@ -314,25 +322,15 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         IsSearchEnabled = false;
         ShowPlayers = false;
 
-        UpdateInformationCountText(string.IsNullOrEmpty(SearchText) ? "Restoring..." : "Filtering...", "?");
         RefreshFilteredCollectionView();
-        UpdateInformationCountText();
         
         IsSearchEnabled = true;
         ShowPlayers = true;
     }
 
-    private void RefreshFilteredCollectionView()
+    public void RefreshFilteredCollectionView()
     {
         PlayerViewRefreshTrigger++;
-    }
-    
-    private void UpdateInformationCountText(string header = "Found", string filteredCount = "")
-    {
-        if (string.IsNullOrEmpty(filteredCount))
-            filteredCount = FilteredCount.ToString();
-        
-        InformationCount = $"{header} {filteredCount}/{PlayerRepository.Players.Count}";
     }
     
     private void AddPlayer()
@@ -399,6 +397,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         if (!success) return false;
 
         Add(newPlayerViewModel);
+        RefreshFilteredCollectionView();
         return true;
     }
     private async Task<bool> UpdatePlayerData(IPlayerViewModel playerViewModel, IPlayerViewModel windowsData, Guid? excludeID = null)
@@ -427,6 +426,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
             }
         });
         
+        RefreshFilteredCollectionView();
         ClearFilters();
     }
     private void RemoveSelectedPlayer()
@@ -439,6 +439,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
             Remove(SelectedPlayers[0]);
         }
 
+        RefreshFilteredCollectionView();
         SelectedPlayers.Clear();
     }
 
