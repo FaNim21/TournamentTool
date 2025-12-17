@@ -20,7 +20,7 @@ using TournamentTool.ViewModels.Selectable.Preset;
 
 namespace TournamentTool.ViewModels.Selectable;
 
-public class PresetManagerViewModel : SelectableViewModel
+public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 {
     public ObservableCollection<TournamentPresetViewModel> Presets { get; set; } = [];
 

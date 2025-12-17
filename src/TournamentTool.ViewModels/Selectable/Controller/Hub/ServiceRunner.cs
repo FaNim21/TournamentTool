@@ -8,7 +8,7 @@ public class ServiceRunner
     private ILoggingService Logger { get; }
     public string Name { get; }
     public IServiceUpdater Service { get; }
-    public Stopwatch Stopwatch { get; } = new();
+    public Stopwatch Stopwatch { get; } = new(); //Mozna po i tak zmianie logiki servicer runnera przywrocic wydajniejsza forme mierzenia czyli datetime
     public TimeSpan Interval { get; }
     public Task? RunningTask { get; set; }
     public CancellationTokenSource CancellationSource { get; set; }  = new();

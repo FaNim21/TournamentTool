@@ -4,6 +4,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities.Input;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Services;
+using TournamentTool.Services.Logging;
 using ModifierKeys = System.Windows.Input.ModifierKeys;
 using ModifierKeysModel = TournamentTool.Domain.Enums.ModifierKeys;
 
@@ -14,6 +15,8 @@ public record AppHotkey(Key key, ModifierKeys modifier);
 public class InputController : IInputController, IDisposable
 {
     private readonly INavigationService _navigationService;
+    private readonly ILoggingService _logger;
+
     //TODO: 5 przekminic wiekszy sens w kwesti duplikowania keybindow w sytuacjach jezeli sa na innym selectable viewmodelu
     private Dictionary<AppHotkey, HotkeyActionType> _hotkeys { get; } = [];
     
@@ -23,9 +26,10 @@ public class InputController : IInputController, IDisposable
     public event Action<HotkeyActionType>? HotkeyPressed;
 
     
-    public InputController(INavigationService navigationService)
+    public InputController(INavigationService navigationService, ILoggingService logger)
     {
         _navigationService = navigationService;
+        _logger = logger;
 
         //TODO: 2 to tymczasowo, do zrobienia hotkey przez settings z zapisywaniem i wczytywaniem
         var renameTextBox = new Hotkey(KeyCode.F2, ModifierKeysModel.None, "Triggers renaming elements for now mainly in preset panel");
@@ -76,6 +80,9 @@ public class InputController : IInputController, IDisposable
 
     private void HandleKeyDown(object sender, KeyEventArgs e)
     {
+        if (_pressedKeys.Contains(e.Key)) return;
+        if (IsModifierKey(e.Key)) return;
+        
         _pressedKeys.Add(e.Key);
         CheckHotkeys();
     }
@@ -86,14 +93,15 @@ public class InputController : IInputController, IDisposable
 
     private void CheckHotkeys()
     {
-        //TODO: 0 problem z tym ze ctrl+s nie przechwyci, bo rejestruje ctrl jako pressed keys i wtedy count jest == 2 z wcisnietym pozniej s
         if (_pressedKeys.Count != 1) return;
 
         Key pressedKey = _pressedKeys.FirstOrDefault();
+        
         ModifierKeys modifiers = Keyboard.Modifiers;
         if (pressedKey == Key.None) return;
         
         AppHotkey pressedHotkey = new AppHotkey(pressedKey, modifiers);
+        _logger.Debug(pressedHotkey);
         if (!_hotkeys.TryGetValue(pressedHotkey, out HotkeyActionType value)) return;
         
         HotkeyPressed?.Invoke(value);
@@ -130,5 +138,13 @@ public class InputController : IInputController, IDisposable
             result |= ModifierKeys.Windows;
 
         return result;
+    }
+    
+    private static bool IsModifierKey(Key key)
+    {
+        return key is Key.LeftCtrl or Key.RightCtrl 
+            or Key.LeftAlt or Key.RightAlt 
+            or Key.LeftShift or Key.RightShift 
+            or Key.LWin or Key.RWin;
     }
 }

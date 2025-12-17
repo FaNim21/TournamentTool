@@ -12,9 +12,9 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
 {
     private readonly ITournamentState _tournamentState;
     private readonly IPresetSaver _presetSaver;
-    private readonly PresetManagerViewModel _presetManager;
     
     private readonly TournamentPreset _data;
+    private readonly IPresetNameValidator _presetNameValidator;
 
     public string Name
     {
@@ -27,11 +27,11 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
     } 
 
 
-    public TournamentPresetViewModel(TournamentPreset data, PresetManagerViewModel presetManager, ITournamentState tournamentState, IDispatcherService dispatcher,
+    public TournamentPresetViewModel(TournamentPreset data, IPresetNameValidator presetNameValidator, ITournamentState tournamentState, IDispatcherService dispatcher,
         IPresetSaver presetSaver) : base(dispatcher)
     {
         _data = data;
-        _presetManager = presetManager;
+        _presetNameValidator = presetNameValidator;
         _tournamentState = tournamentState;
         _presetSaver = presetSaver;
     }
@@ -39,7 +39,7 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
     public string ChangeName(string name)
     {
         if (string.IsNullOrEmpty(name) || Name.Equals(name)) return string.Empty;
-        if (!_presetManager!.IsPresetNameUnique(name))
+        if (!_presetNameValidator.IsPresetNameUnique(name))
         {
             return $"Preset item named '{name}' already exists";
         }
@@ -61,3 +61,4 @@ public class TournamentPresetViewModel : BaseViewModel, IRenameItem, IPreset
         return Path.Combine(Consts.PresetsPath, Name + ".json");
     }
 }
+
