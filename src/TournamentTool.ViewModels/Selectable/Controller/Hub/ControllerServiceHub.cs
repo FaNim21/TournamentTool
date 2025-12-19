@@ -36,11 +36,20 @@ public class ControllerServiceHub
         _uiUpdateTimer.Start();
 
         TwitchUpdaterService twitchUpdater = new(controller, twitch, playerRepository);
-        AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60), false, false);
+        ServiceRunner? twitchService = AddService("Twitch-streams", twitchUpdater, TimeSpan.FromSeconds(60), false);
+        if (twitchService != null)
+        {
+            twitchService.OneTimeImmediately = true;
+        }
 
-        APIUpdaterService apiUpdater = new(controller, logger, obs, tournamentState, leaderboardRepository, playerRepository);
-        AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5), true, true);
         //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
+        APIUpdaterService apiUpdater = new(controller, logger, obs, tournamentState, leaderboardRepository, playerRepository);
+        ServiceRunner? apiService = AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5), true);
+        if (apiService != null)
+        {
+            apiService.RunImmediately = true;
+        }
+        
     }
 
     public void OnEnable()
@@ -64,19 +73,17 @@ public class ControllerServiceHub
         _uiUpdateTimer.Stop();
     }
     
-    public void AddService(string name, IServiceUpdater service, TimeSpan interval, bool runImmediately, bool runFromBeginning)
+    public ServiceRunner? AddService(string name, IServiceUpdater service, TimeSpan interval, bool runFromBeginning)
     {
-        if (_services.ContainsKey(name)) return;
+        if (_services.ContainsKey(name)) return null;
 
-        ServiceRunner runner = new(Logger, name, service, interval)
-        {
-            RunImmediately = runImmediately,
-        };
-        
+        ServiceRunner runner = new(Logger, name, service, interval);
         _services[name] = runner;
 
-        if (!runFromBeginning) return;
+        if (!runFromBeginning) return runner;
+        
         runner.Run();
+        return runner;
     }
     
     private void UpdateTimers(object? sender, ElapsedEventArgs e)

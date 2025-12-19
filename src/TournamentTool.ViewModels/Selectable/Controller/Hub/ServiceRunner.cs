@@ -13,7 +13,8 @@ public class ServiceRunner
     public Task? RunningTask { get; set; }
     public CancellationTokenSource CancellationSource { get; set; }  = new();
 
-    public bool RunImmediately { get; init; }
+    public bool RunImmediately { get; set; } = false;
+    public bool OneTimeImmediately { get; set; } = false;
     public bool UpdateUI { get; set; } = true;
     public bool IsPaused { get; private set; } = true;
 
@@ -49,8 +50,9 @@ public class ServiceRunner
             ResetTimer();
             StartTimer();
 
-            if (RunImmediately)
+            if (RunImmediately || OneTimeImmediately)
             {
+                OneTimeImmediately = false;
                 await Service.UpdateAsync(token);
             }
             

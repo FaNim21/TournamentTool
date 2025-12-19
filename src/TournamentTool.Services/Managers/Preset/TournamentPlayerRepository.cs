@@ -54,21 +54,18 @@ public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposab
     
     private void OnPresetChanged(object? sender, Tournament? tournament)
     {
-        _players.Clear();
-        if (tournament == null) return;
-        
-        UpdatePlayers(tournament.Players);
-        UpdateTeamNamesForPlayers();
-    }
-    private void UpdatePlayers(IReadOnlyList<Player> players)
-    {
         Dispatcher.Invoke(() =>
         {
-            foreach (var player in players)
+            _players.Clear();
+            if (tournament == null) return;
+        
+            foreach (var player in tournament.Players)
             {
                 var viewModel = _playerFactory.Create(player);
                 _players.Add(viewModel);
             }
+            
+            UpdateTeamNamesForPlayers();
         }, CustomDispatcherPriority.Background);
     }
     
