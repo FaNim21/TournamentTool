@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
@@ -30,36 +31,37 @@ public class TwitchService : ITwitchService
 {
     private readonly IDialogService _dialogService;
     public ILoggingService Logger { get; }
-    private ISettings SettingsService { get; }
     
     private readonly TwitchAPI _api;
     private const string ClientID = "1s5wfzaplbnwqtwnhhc29wav44c88y";
 
     public bool IsConnected { get; private set; }
-
     public DateTime? TokenExpiresAt { get; private set; }
 
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+
+    private readonly Settings _settings;
+    private readonly APIKeys _apiKeys;
     
     
-    public TwitchService(ILoggingService logger, ISettings settingsService, IDialogService dialogService)
+    public TwitchService(ILoggingService logger, ISettingsProvider settingsProvider, IDialogService dialogService)
     {
         _dialogService = dialogService;
         Logger = logger;
-        SettingsService = settingsService;
+        
+        _settings = settingsProvider.Get<Settings>();
+        _apiKeys = settingsProvider.Get<APIKeys>();
         
         _api = new TwitchAPI { Settings = { ClientId = ClientID } };
     }
 
     public async Task ConnectAsync(bool silent = false)
     {
-        if (SettingsService.APIKeys == null) return;
+        _api.Settings.ClientId = !string.IsNullOrEmpty(_apiKeys.CustomTwitchClientID) ? _apiKeys.CustomTwitchClientID : ClientID;
         
-        _api.Settings.ClientId = !string.IsNullOrEmpty(SettingsService.APIKeys.CustomTwitchClientID) ? SettingsService.APIKeys.CustomTwitchClientID : ClientID;
-        
-        if (!string.IsNullOrEmpty(SettingsService.APIKeys.TwitchAccessToken))
+        if (!string.IsNullOrEmpty(_apiKeys.TwitchAccessToken))
         {
-            _api.Settings.AccessToken = SettingsService.APIKeys.TwitchAccessToken;
+            _api.Settings.AccessToken = _apiKeys.TwitchAccessToken;
         }
         
         if (!string.IsNullOrEmpty(_api.Settings.AccessToken) && IsConnected) return;
@@ -80,12 +82,12 @@ public class TwitchService : ITwitchService
             catch (TokenExpiredException ex)
             {
                 Logger.Error(ex);
-                SettingsService.APIKeys.TwitchAccessToken = string.Empty;
+                _apiKeys.TwitchAccessToken = string.Empty;
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
-                SettingsService.APIKeys.TwitchAccessToken = string.Empty;
+                _apiKeys.TwitchAccessToken = string.Empty;
             }
         }
         
@@ -129,9 +131,9 @@ public class TwitchService : ITwitchService
             var validateResponse = await _api.Auth.ValidateAccessTokenAsync(authResponse.Code);
             _api.Settings.AccessToken = authResponse.Code;
             
-            if (SettingsService.Settings.SaveTwitchToken)
+            if (_settings.SaveTwitchToken)
             {
-                SettingsService.APIKeys.TwitchAccessToken = authResponse.Code;
+                _apiKeys.TwitchAccessToken = authResponse.Code;
             }
             TokenExpiresAt = DateTime.UtcNow.AddSeconds(validateResponse.ExpiresIn);
             

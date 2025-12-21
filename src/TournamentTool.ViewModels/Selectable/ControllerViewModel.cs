@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
+using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
@@ -27,7 +28,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     public ILoggingService Logger { get; }
-    public ISettings SettingsService { get; }
     
     public SceneControllerViewmodel SceneController { get; }
     public ControllerServiceHub ServiceHub { get; }
@@ -128,19 +128,22 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public ICommand UnSelectItemsCommand { get; set; }
     
+    private readonly Domain.Entities.Settings _settings;
+    
 
     public ControllerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
         ITournamentLeaderboardRepository leaderboardRepository, IBackgroundCoordinator backgroundCoordinator, ObsController obs, ITwitchService twitch, 
-        ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
+        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
     {
         Logger = logger;
-        SettingsService = settingsService;
         _playerRepository = playerRepository;
         _tournamentState = tournamentState;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
         
-        SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsService, dispatcher, windowService);
+        _settings = settingsProvider.Get<Domain.Entities.Settings>();
+        
+        SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsProvider, dispatcher, windowService);
         ServiceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
@@ -280,6 +283,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
         CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
         UnSelectItems();
+    }
+    
+    public string GetHeadURL(string id, int size)
+    {
+        return _settings.HeadAPIType.GetHeadURL(id, size);
     }
 
     public void UnSelectItems(bool ClearAll = false)

@@ -172,7 +172,7 @@ public class APIUpdaterService : IServiceUpdater
 
             var data = rankedManagementData.BestSplitsDatas[0].Datas[i];
 
-            string url = _controller.SettingsService.Settings.HeadAPIType.GetHeadURL(data.PlayerName, 180);
+            string url = _controller.GetHeadURL(data.PlayerName, 180);
             _obs.SetBrowserURL(sourceName, url);
             _savedNames[i] = data.PlayerName;
             await _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
@@ -347,7 +347,7 @@ public class APIUpdaterService : IServiceUpdater
             }
             var entry = _leaderboardRepository.OrderedEntries[number];
 
-            string url = _controller.SettingsService.Settings.HeadAPIType.GetHeadURL(entry.PlayerUUID, 180);
+            string url = _controller.GetHeadURL(entry.PlayerUUID, 180);
             _obs.SetBrowserURL(item.SourceName, url);
         }
     }

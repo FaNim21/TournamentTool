@@ -3,10 +3,9 @@ using TournamentTool.Core.Extensions;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
+using TournamentTool.Services.Configuration;
 using TournamentTool.Services.Controllers;
-using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
-using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
 
@@ -21,16 +20,19 @@ public interface IPointOfViewOBSController
 
 public class PointOfViewOBSController : IPointOfViewOBSController
 {
-    private ISettings SettingsService { get; }
     private readonly ObsController _obs;
     private readonly ITournamentState _tournamentState;
+    
+    private readonly Domain.Entities.Settings _settings;
+    
 
 
-    public PointOfViewOBSController(ObsController obs, ITournamentState tournamentState, ISettings settingsService)
+    public PointOfViewOBSController(ObsController obs, ITournamentState tournamentState, ISettingsProvider settingsProvider)
     {
-        SettingsService = settingsService;
         _obs = obs;
         _tournamentState = tournamentState;
+        
+        _settings = settingsProvider.Get<Domain.Entities.Settings>();
     }
 
     public void UpdatePOVBrowser(PointOfViewOBSData data)
@@ -41,7 +43,7 @@ public class PointOfViewOBSController : IPointOfViewOBSController
     {
         if (!_obs.SetBrowserURL(data.SceneItemName, GetURL(data))) return;
 
-        string headUrl = SettingsService.Settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
+        string headUrl = _settings.HeadAPIType.GetHeadURL(data.HeadViewParametr, 180);
         if (string.IsNullOrEmpty(data.HeadViewParametr) || _tournamentState is { CurrentPreset.SetPovHeadsInBrowser: false })
         {
             headUrl = string.Empty;

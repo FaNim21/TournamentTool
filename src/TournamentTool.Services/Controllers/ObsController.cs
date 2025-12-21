@@ -37,7 +37,6 @@ public class ConnectionStateChangedEventArgs : EventArgs
 public class ObsController : IDisposable
 {
     private readonly ITournamentState _tournamentState;
-    private ISettings SettingsService { get; }
     public ILoggingService Logger { get; }
 
     public ObsClient Client { get; private set; }
@@ -52,16 +51,19 @@ public class ObsController : IDisposable
     public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
     public ConnectionState State { get; private set; }
+    
+    private readonly Settings _settings;
 
     private bool _startedTransition;
     private bool _tryingToConnect;
     
 
-    public ObsController(ITournamentState tournamentState, ISettings settingsService, ILoggingService logger)
+    public ObsController(ITournamentState tournamentState, ISettingsProvider settingsProvider, ILoggingService logger)
     {
         _tournamentState = tournamentState;
-        SettingsService = settingsService;
         Logger = logger;
+        
+        _settings = settingsProvider.Get<Settings>();
 
         _tournamentState.PresetChanged += PresetChanged;
         
@@ -100,7 +102,7 @@ public class ObsController : IDisposable
         
         Client.PropertyChanged += OnPropertyChanged;
         const EventSubscriptions subscription = EventSubscriptions.All;
-        await Client.ConnectAsync(true, SettingsService.Settings.Password, "localhost", SettingsService.Settings.Port, subscription);
+        await Client.ConnectAsync(true, _settings.Password, "localhost", _settings.Port, subscription);
     }
     private async Task OnConnected()
     {

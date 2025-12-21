@@ -16,28 +16,31 @@ public interface IMinecraftDataService
 public class MinecraftDataService : IMinecraftDataService
 {
     private readonly IHttpClientFactory _clientFactory;
-    private readonly ISettings _settingsService;
     private readonly ILoggingService _logger;
+    
+    private readonly Settings _settings;
 
 
-    public MinecraftDataService(IHttpClientFactory clientFactory, ISettings settingsService, ILoggingService logger)
+    public MinecraftDataService(IHttpClientFactory clientFactory, ISettingsProvider settingsProvider, ILoggingService logger)
     {
         _clientFactory = clientFactory;
-        _settingsService = settingsService;
         _logger = logger;
+        
+        _settings = settingsProvider.Get<Settings>();
     }
 
     public async Task<byte[]> GetPlayerHeadAsync(string id, int size)
     {
-        string url = _settingsService.Settings.HeadAPIType.GetHeadURL(id, size);
+        string url = _settings.HeadAPIType.GetHeadURL(id, size);
         try
         {
             var client = _clientFactory.CreateClient();
             HttpResponseMessage response = await client.GetAsync(url);
+            
             if (!response.IsSuccessStatusCode)
             {
                 string errorResult = await response.Content.ReadAsStringAsync();
-                _logger.Error($"{_settingsService.Settings.HeadAPIType.ToString()} api error {response.StatusCode}: {errorResult}");
+                _logger.Error($"{_settings.HeadAPIType.ToString()} api error {response.StatusCode}: {errorResult}");
                 return [];
             }
 

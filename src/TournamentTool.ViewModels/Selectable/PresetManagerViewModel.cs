@@ -26,7 +26,6 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
     private readonly ITournamentState _tournamentState;
     private readonly IDialogService _dialogService;
-    private readonly ISettings _settingsService;
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IUIInteractionService _uiInteractionService;
     public ILoggingService Logger { get; }
@@ -45,7 +44,10 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             bool isEmpty = _currentChosen == null;
             if (!isEmpty)
             {
-                SaveLastOpened(_currentChosen!.Name);
+                if (_settings != null)
+                {
+                    _settings.LastOpenedPresetName = _currentChosen!.Name;
+                }
             }
 
             LoadCurrentPreset(isEmpty ? string.Empty : _currentChosen!.Name);
@@ -68,20 +70,23 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     public ICommand RenameItemCommand { get; set; }
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
+    private readonly Domain.Entities.Settings _settings;
+    
 
     public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
-        IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettings settingsService, ILuaScriptsManager luaScriptsManager, 
+        IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettingsProvider settingsProviderService, ILuaScriptsManager luaScriptsManager, 
         IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) : base(coordinator, dispatcher)
     {
         PresetService = presetService;
         Logger = logger;
         _tournamentState = tournamentState;
         _dialogService = dialogService; 
-        _settingsService = settingsService;
         _luaScriptsManager = luaScriptsManager;
         _uiInteractionService = uiInteractionService;
 
         Tournament = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
+        
+        _settings = settingsProviderService.Get<Domain.Entities.Settings>();
         
         LoadPresetsList();
         
@@ -99,6 +104,7 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         RenameItemCommand = new RelayCommand(EditPresetName);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this, dialogService);
 
+
         LoadStartupPreset();
     }
     public override void Dispose()
@@ -114,6 +120,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     {
         if (!_tournamentState.IsEmpty())
         {
+            if (_tournamentState.CurrentPreset == null) return;
+            
             TournamentPresetViewModel? currentlyOpened = Presets.FirstOrDefault(p => p.Name.Equals(_tournamentState.CurrentPreset.Name));
             _currentChosen = currentlyOpened;
             OnPropertyChanged(nameof(CurrentChosen));
@@ -122,15 +130,14 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             
             return;
         }
-        if (_settingsService.Settings == null) return;
         
-        string lastOpened = _settingsService.Settings.LastOpenedPresetName;
+        string lastOpened = _settings.LastOpenedPresetName;
         if (string.IsNullOrWhiteSpace(lastOpened)) return;
 
         TournamentPresetViewModel? lastOpenedPreset = Presets.FirstOrDefault(p => p.Name.Equals(lastOpened));
         if (lastOpenedPreset == null)
         {
-            //TODO: 2 Tutaj jedna z sytuacji gdzie trzeba uwzglednic odpalany pusty preset
+            //TODO: 2 Tutaj jedna z sytuacji gdzie trzeba uwzglednic odpalany pusty preset jako wprowadznie do aplikacji
             return;
         }
 
@@ -252,12 +259,6 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             UseShellExecute = true,
             Verb = "open"
         });
-    }
-
-    private void SaveLastOpened(string presetName)
-    {
-        if (_settingsService.Settings == null) return;
-        _settingsService.Settings.LastOpenedPresetName = presetName;
     }
 
     private void EditPresetName()

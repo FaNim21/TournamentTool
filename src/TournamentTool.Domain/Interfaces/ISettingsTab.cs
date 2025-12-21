@@ -1,6 +1,4 @@
-﻿using TournamentTool.Domain.Entities;
-
-namespace TournamentTool.Domain.Interfaces;
+﻿namespace TournamentTool.Domain.Interfaces;
 
 public interface ISettingsTab
 {
@@ -11,14 +9,13 @@ public interface ISettingsTab
     void OnClose();
 }
 
-public interface ISettings
+public interface ISettingsProvider
 {
-    public Settings Settings { get; }
-    public APIKeys APIKeys { get; }
+    T Get<T>() where T : class;
 }
 
 public interface ISettingsSaver
 {
     void Save();
-    bool Load();
+    void Load();
 }

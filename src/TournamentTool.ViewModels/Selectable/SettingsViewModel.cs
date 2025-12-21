@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Settings;
@@ -27,15 +28,18 @@ public class SettingsViewModel : SelectableViewModel
     public ICommand ChangeTabCommand { get; private set; }
 
 
-    public SettingsViewModel(ICoordinator coordinator, ISettings settingsService, ISettingsSaver settingsSaver, IDispatcherService dispatcher, IWindowService windowService, IInputController inputController, IDialogService dialogService) : base(coordinator, dispatcher)
+    public SettingsViewModel(ICoordinator coordinator, ISettingsProvider settingsProvider, ISettingsSaver settingsSaver, IDispatcherService dispatcher, IWindowService windowService, IInputController inputController, IDialogService dialogService) : base(coordinator, dispatcher)
     {
         _settingsSaver = settingsSaver;
 
         ChangeTabCommand = new RelayCommand<string>(ChangeTab);
         
-        var general = new GeneralTabViewModel(settingsService.Settings, windowService, dispatcher);
-        var hotkeys = new HotkeysTabViewModel(settingsService.Settings, dispatcher, inputController);
-        var keys = new APIKeysTabViewModel(settingsService.APIKeys, dispatcher, dialogService);
+        Domain.Entities.Settings settings = settingsProvider.Get<Domain.Entities.Settings>();
+        APIKeys apiKeys = settingsProvider.Get<APIKeys>();
+        
+        var general = new GeneralTabViewModel(settings, windowService, dispatcher);
+        var hotkeys = new HotkeysTabViewModel(settings, dispatcher, inputController);
+        var keys = new APIKeysTabViewModel(apiKeys, dispatcher, dialogService);
         
         Tabs.Add(general);
         Tabs.Add(hotkeys);

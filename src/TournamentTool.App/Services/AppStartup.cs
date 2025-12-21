@@ -1,5 +1,6 @@
 ﻿using TournamentTool.App.Components;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
@@ -22,19 +23,19 @@ public class ApplicationLifetime : IApplicationLifetime
     private readonly IPresetSaver _presetSaver;
     private readonly IInputController _inputController;
     private readonly ISettingsSaver _settingsSaver;
-    private readonly ISettings _settingsService;
+    private readonly ISettingsProvider _settingsProvider;
     private readonly IWindowService _windowService;
     private readonly ITwitchService _twitchService;
 
 
     public ApplicationLifetime(MainViewModel mainViewModel, IPresetSaver presetSaver, IInputController inputController, ISettingsSaver settingsSaver, 
-        ISettings settingsService, ObsController obsController, IWindowService windowService, ITwitchService twitchService)
+        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService)
     {
         _mainViewModel = mainViewModel;
         _presetSaver = presetSaver;
         _inputController = inputController;
         _settingsSaver = settingsSaver;
-        _settingsService = settingsService;
+        _settingsProvider = settingsProvider;
         _obsController = obsController;
         _windowService = windowService;
         _twitchService = twitchService;
@@ -45,15 +46,14 @@ public class ApplicationLifetime : IApplicationLifetime
     /// </summary>
     public void OnStartup()
     {
-        bool success = _settingsSaver.Load();
-        if (success)
-        {
-            _windowService.SetMainWindowTopMost(_settingsService.Settings.IsAlwaysOnTop);
+        Settings settings = _settingsProvider.Get<Settings>();
+        APIKeys apiKeys = _settingsProvider.Get<APIKeys>();
+        
+        _windowService.SetMainWindowTopMost(settings.IsAlwaysOnTop);
 
-            if (_settingsService.Settings is { SaveTwitchToken: true, AutoLoginToTwitch: true } && !string.IsNullOrEmpty(_settingsService.APIKeys.TwitchAccessToken))
-            {
-                _twitchService.ConnectAsync();
-            }
+        if (settings is { SaveTwitchToken: true, AutoLoginToTwitch: true } && !string.IsNullOrEmpty(apiKeys.TwitchAccessToken))
+        {
+            _twitchService.ConnectAsync();
         }
         
         _inputController.HotkeyPressed += HandleGeneralHotkeys;

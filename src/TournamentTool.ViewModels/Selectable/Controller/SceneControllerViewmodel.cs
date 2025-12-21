@@ -8,6 +8,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
+using TournamentTool.Services.Configuration;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
@@ -43,7 +44,6 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     
     public ControllerViewModel Controller { get; }
     public ILoggingService Logger { get; }
-    private ISettings SettingsService { get; }
     public ObsController OBS { get; }
 
     public Scene MainScene { get; }
@@ -88,14 +88,6 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     public bool StudioMode => OBS.StudioMode;
     public bool Connected => OBS.IsConnectedToWebSocket;
 
-    public bool BusyWithOBS { get; private set; }
-
-    public ICommand RefreshPOVsCommand { get; set; }
-    public ICommand RefreshOBSCommand { get; set; }
-    public ICommand SwitchStudioModeCommand {  get; set; }
-    public ICommand StudioModeTransitionCommand { get; set; }
-    public ICommand OnSceneResizeCommand { get; set; }
-
     private float _scenePreviewHeight = 240f;
     public float ScenePreviewHeight
     {
@@ -118,17 +110,28 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         }
     }
 
+    public bool BusyWithOBS { get; private set; }
+    
+    public ICommand RefreshPOVsCommand { get; set; }
+    public ICommand RefreshOBSCommand { get; set; }
+    public ICommand SwitchStudioModeCommand {  get; set; }
+    public ICommand StudioModeTransitionCommand { get; set; }
+    public ICommand OnSceneResizeCommand { get; set; }
+
+    private readonly Domain.Entities.Settings _settings;
+    
 
     public SceneControllerViewmodel(ControllerViewModel controller, ObsController obs, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
-        ILoggingService logger, ISettings settingsService, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
+        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
     {
         _playerRepository = playerRepository;
         Controller = controller;
         OBS = obs;
         Logger = logger;
-        SettingsService = settingsService;
 
-        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournamentState, settingsService);
+        _settings = settingsProvider.Get<Domain.Entities.Settings>();
+        
+        IPointOfViewOBSController povController = new PointOfViewOBSController(obs, tournamentState, settingsProvider);
         MainScene = new Scene(SceneType.Main, this, this, povController, windowService, logger, dispatcher);
         PreviewScene = new Scene(SceneType.Preview, this, this, povController, windowService, logger, dispatcher);
         
@@ -492,7 +495,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                         if (CheckForAdditionals(additionals, groupItem)) continue;
 
                         if (groupItem.InputKind!.Equals("browser_source") &&
-                            groupItem.SourceName.StartsWith(SettingsService.Settings.FilterNameAtStartForSceneItems,
+                            groupItem.SourceName.StartsWith(_settings.FilterNameAtStartForSceneItems,
                                 StringComparison.OrdinalIgnoreCase))
                         {
                             povItems.Add((groupItem, item));
@@ -504,7 +507,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                 if (CheckForAdditionals(additionals, item)) continue;
 
                 if (item.InputKind!.Equals("browser_source") &&
-                    item.SourceName.StartsWith(SettingsService.Settings.FilterNameAtStartForSceneItems,
+                    item.SourceName.StartsWith(_settings.FilterNameAtStartForSceneItems,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     povItems.Add((item, null));

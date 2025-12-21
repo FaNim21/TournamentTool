@@ -19,7 +19,6 @@ public class PaceManService : IBackgroundService
     private readonly ITournamentState _tournamentState;
     private readonly ITournamentPlayerRepository _playerRepository;
     private ILeaderboardManager Leaderboard { get; }
-    public ISettings SettingsService { get; }
 
     public int DelayMiliseconds => _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
 
@@ -28,11 +27,14 @@ public class PaceManService : IBackgroundService
 
     private List<Paceman> _paces = [];
     
+    private readonly Settings _settings;
+    
     private bool _blockFirstPacemanRefresh = true;
 
 
-    public PaceManService(ILeaderboardManager leaderboard, IPlayerViewModelFactory playerViewModelFactory, ISettings settingsService, ITwitchService twitchService,
-        IPacemanAPIService pacemanApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
+    public PaceManService(ILeaderboardManager leaderboard, IPlayerViewModelFactory playerViewModelFactory, ISettingsProvider settingsProvider,
+        ITwitchService twitchService, IPacemanAPIService pacemanApiService, IImageService imageService, ITournamentState tournamentState, 
+        ITournamentPlayerRepository playerRepository)
     {
         _playerViewModelFactory = playerViewModelFactory;
         _twitchService = twitchService;
@@ -41,7 +43,8 @@ public class PaceManService : IBackgroundService
         _tournamentState = tournamentState;
         _playerRepository = playerRepository;
         Leaderboard = leaderboard;
-        SettingsService = settingsService;
+        
+        _settings = settingsProvider.Get<Settings>();
     }
 
     public void RegisterData(IBackgroundDataReceiver? receiver)
@@ -121,7 +124,7 @@ public class PaceManService : IBackgroundService
 
         if (paceman.Player == null)
         {
-            string url = SettingsService.Settings.HeadAPIType.GetHeadURL(paceman.UUID, 8);
+            string url = _settings.HeadAPIType.GetHeadURL(paceman.UUID, 8);
             paceman.HeadImageOpacity = 0.35f;
             Task.Run(async () =>
             {

@@ -136,7 +136,7 @@ public class RankedPace
 
         if (Player == null)
         {
-            string url = _service.SettingsService.Settings.HeadAPIType.GetHeadURL(UUID, 8);
+            string url = _service.GetHeadURL(UUID);
             Task.Run(async () =>
             {
                 HeadImage = await _service.ImageService.LoadImageFromUrlAsync(url);

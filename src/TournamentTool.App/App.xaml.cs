@@ -11,6 +11,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
+using TournamentTool.Services.Configuration;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Coordinators;
 using TournamentTool.Services.External;
@@ -86,9 +87,9 @@ public partial class App : Application
         //Rest xd
         services.AddSingleton<ObsController>();
         
-        services.AddSingleton<SettingsService>();
-        services.AddSingleton<ISettings>(s => s.GetRequiredService<SettingsService>());
-        services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsService>());
+        services.AddSingleton<SettingsProviderService>();
+        services.AddSingleton<ISettingsProvider>(s => s.GetRequiredService<SettingsProviderService>());
+        services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProviderService>());
         
         services.AddSingleton<IPresetSaver, PresetService>();
         services.AddSingleton<ITwitchService, TwitchService>();
@@ -127,6 +128,9 @@ public partial class App : Application
         
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.DisableStylusAndTouchSupport", true);
         AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+        
+        ISettingsSaver settingsSaver = _serviceProvider.GetRequiredService<ISettingsSaver>();
+        settingsSaver.Load();
         
         var loggingService = _serviceProvider.GetRequiredService<ILoggingService>();
         LogService.Initialize(loggingService);

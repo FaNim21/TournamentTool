@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Parsers;
 using TournamentTool.Core.Utils;
@@ -37,7 +38,6 @@ public class RankedEvaluateTimelineData
 public class RankedService : IBackgroundService
 {
     private ILoggingService Logger { get; }
-    public ISettings SettingsService { get; }
     public IImageService ImageService { get; }
 
     private readonly IPlayerViewModelFactory _playerViewModelFactory;
@@ -54,6 +54,8 @@ public class RankedService : IBackgroundService
     private IRankedManagementDataReceiver? _rankedManagementDataReceiver;
     private IPlayerAddReceiver? _playerManagerReceiver;
 
+    private readonly Settings _settings;
+
     private Dictionary<RunMilestone, RankedEvaluateTimelineData> _splitDatas = [];
     private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
@@ -66,17 +68,18 @@ public class RankedService : IBackgroundService
     private PrivRoomData? _privRoomData;
     
     
-    public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettings settingsService, IPlayerViewModelFactory playerViewModelFactory, 
+    public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettingsProvider settingsProvider, IPlayerViewModelFactory playerViewModelFactory, 
         IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
-        SettingsService = settingsService;
         ImageService = imageService;
         Leaderboard = leaderboard;
         _playerViewModelFactory = playerViewModelFactory;
         _rankedApiService = rankedApiService;
         _tournamentState = tournamentState;
         _playerRepository = playerRepository;
+        
+        _settings = settingsProvider.Get<Settings>();
 
         _rankedManagementData = (tournamentState.CurrentPreset.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
@@ -331,6 +334,11 @@ public class RankedService : IBackgroundService
         _bestSplits[bestSplit.Type] = bestSplit;
         _rankedManagementData?.BestSplitsDatas.Add(bestSplit);
         return bestSplit;
+    }
+
+    public string GetHeadURL(string id)
+    {
+        return _settings.HeadAPIType.GetHeadURL(id, 8);
     }
     
     private void Clear()
