@@ -74,6 +74,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
     private readonly Domain.Entities.Settings _settings;
     private readonly AppCache _appCache;
+
+    private readonly FileSystemWatcher _fileWatcher;
     
     
     public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
@@ -91,6 +93,17 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         
         _settings = settingsProviderService.Get<Domain.Entities.Settings>();
         _appCache = settingsProviderService.Get<AppCache>();
+        
+        _fileWatcher = new FileSystemWatcher
+        {
+            Path = Path.Combine(Consts.PresetsPath),
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+            Filter = "*.json",
+            InternalBufferSize = 16384
+        };
+        _fileWatcher.Created += OnPresetAddedInFile;
+        _fileWatcher.Deleted += OnPresetRemovedInFile;
+        _fileWatcher.EnableRaisingEvents = true;
         
         LoadPresetsList();
         
@@ -116,6 +129,10 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     public override void Dispose()
     {
         Tournament.Dispose();
+        
+        _fileWatcher.Created -= OnPresetAddedInFile;
+        _fileWatcher.Deleted -= OnPresetRemovedInFile;
+        _fileWatcher.Dispose();
     }
 
     public override bool CanEnable() => true;
@@ -219,6 +236,7 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
         IOrderedEnumerable<TournamentPresetViewModel> sorted = presetList.OrderBy(preset => 
             _appCache.PresetsOrder.GetValueOrDefault(preset.Name, new PresetOrderData()).index);
+        
         foreach (var preset in sorted)
             Presets.Add(preset);
     }
@@ -291,6 +309,45 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         });
     }
 
+    private void OnPresetAddedInFile(object sender, FileSystemEventArgs e)
+    {
+        string fullPath = e.FullPath;
+        string text = File.ReadAllText(fullPath) ?? string.Empty;
+        if (string.IsNullOrEmpty(text)) return;
+        
+        try
+        {
+            TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
+            if (data == null) return;
+            
+            TournamentPresetViewModel presetViewModel = new(data, this, _tournamentState, Dispatcher, PresetService);
+
+            string uniqueName = Helper.GetUniqueName(presetViewModel.Name, presetViewModel.Name, IsPresetNameUnique);
+            presetViewModel.Name = uniqueName;
+            
+            PresetService.SavePreset(presetViewModel);
+
+            Dispatcher.Invoke(()=>
+            {
+                Presets.Add(presetViewModel);
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+    }
+    private void OnPresetRemovedInFile(object sender, FileSystemEventArgs e)
+    {
+        string name = Path.GetFileNameWithoutExtension(e.Name ?? string.Empty);
+        if (string.IsNullOrEmpty(name)) return;
+
+        Dispatcher.Invoke(()=>
+        {
+            RemoveItem(name);
+        });
+    }
+    
     private void EditPresetName()
     {
         PresetService.SavePreset();
