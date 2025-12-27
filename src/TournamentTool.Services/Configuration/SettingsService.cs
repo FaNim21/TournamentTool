@@ -6,7 +6,7 @@ using TournamentTool.Services.Logging;
 
 namespace TournamentTool.Services.Configuration;
 
-public class SettingsProviderService : ISettingsProvider, ISettingsSaver
+public class SettingsProvider : ISettingsProvider, ISettingsSaver
 {
     private readonly IDataProtect _dataProtect;
     private readonly ILoggingService _logger;
@@ -15,12 +15,9 @@ public class SettingsProviderService : ISettingsProvider, ISettingsSaver
     
     private readonly Dictionary<Type, object> _data = [];
     private readonly List<Action> _filesCloseActions = [];
-
-    public Settings Settings { get; private set; } = new();
-    public APIKeys APIKeys { get; private set; } = new();
     
     
-    public SettingsProviderService(IDataProtect dataProtect, ILoggingService logger)
+    public SettingsProvider(IDataProtect dataProtect, ILoggingService logger)
     {
         _dataProtect = dataProtect;
         _logger = logger;
@@ -29,8 +26,10 @@ public class SettingsProviderService : ISettingsProvider, ISettingsSaver
 
     public void Load()
     {
-        Register(new AppSettingsFile(_serializerOptions));
-        Register(new APIKeysFile(_dataProtect));
+        Register(new FileStorage<Settings>("settings.json", _serializerOptions));
+        Register(new FileStorage<AppCache>("app_cache.json", _serializerOptions));
+        
+        Register(new ProtectedFileStorage<APIKeys>("apikeys.dat", _dataProtect));
     }
     public void Save()
     {
@@ -40,12 +39,12 @@ public class SettingsProviderService : ISettingsProvider, ISettingsSaver
         }
     }
     
-    internal void Register<T>(ISettingsFile<T> settingsFile) where T : class, new()
+    internal void Register<T>(IFileStorage<T> fileStorage) where T : class, new()
     {
-        T data = settingsFile.Load();
+        T data = fileStorage.Load();
 
         _data[typeof(T)] = data;
-        _filesCloseActions.Add(() => settingsFile.Save(Get<T>()));
+        _filesCloseActions.Add(() => fileStorage.Save(Get<T>()));
     }
 
     public T Get<T>() where T : class

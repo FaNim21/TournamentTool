@@ -87,9 +87,9 @@ public partial class App : Application
         //Rest xd
         services.AddSingleton<ObsController>();
         
-        services.AddSingleton<SettingsProviderService>();
-        services.AddSingleton<ISettingsProvider>(s => s.GetRequiredService<SettingsProviderService>());
-        services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProviderService>());
+        services.AddSingleton<SettingsProvider>();
+        services.AddSingleton<ISettingsProvider>(s => s.GetRequiredService<SettingsProvider>());
+        services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProvider>());
         
         services.AddSingleton<IPresetSaver, PresetService>();
         services.AddSingleton<ITwitchService, TwitchService>();

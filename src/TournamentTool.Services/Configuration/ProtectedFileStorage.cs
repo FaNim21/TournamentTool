@@ -1,37 +1,34 @@
 ﻿using System.Text.Json;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
-using TournamentTool.Domain.Entities;
 
 namespace TournamentTool.Services.Configuration;
 
-public class APIKeysFile : ISettingsFile<APIKeys>
+public class ProtectedFileStorage<T> : IFileStorage<T> where T : class, new()
 {
     private readonly IDataProtect _dataProtect;
-    
-    public string FileName => "apikeys.dat";
     private readonly string _path;
 
 
-    public APIKeysFile(IDataProtect dataProtect)
+    public ProtectedFileStorage(string fileName, IDataProtect dataProtect)
     {
         _dataProtect = dataProtect;
         
-        _path = Path.Combine(Consts.AppdataPath, FileName);
+        _path = Path.Combine(Consts.AppdataPath, fileName);
     }
     
-    public APIKeys Load()
+    public T Load()
     {
-        if (!File.Exists(_path)) return new APIKeys();
+        if (!File.Exists(_path)) return new T();
 
         byte[] encrypted = File.ReadAllBytes(_path);
         string json = _dataProtect.UnProtect(encrypted);
         
-        APIKeys? apiKeys = JsonSerializer.Deserialize<APIKeys>(json);
-        return apiKeys ?? new APIKeys();
+        T? data = JsonSerializer.Deserialize<T>(json);
+        return data ?? new T();
     }
 
-    public void Save(APIKeys data)
+    public void Save(T data)
     {
         if (data == null) return;
         

@@ -61,13 +61,17 @@ public partial class MainWindow : Window
     private void ExitButtonClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not MainViewModel mainViewModel) return;
+        
         if (!mainViewModel.TournamentState.IsModified)
         {
+            mainViewModel.OnClose();
             Close();
             return;
         }
 
         if (!mainViewModel.OnDisable()) return;
+        
+        mainViewModel.OnClose();
         Close();
     }
 

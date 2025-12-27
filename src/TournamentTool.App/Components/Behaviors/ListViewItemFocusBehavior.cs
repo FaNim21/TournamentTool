@@ -20,7 +20,6 @@ public class ListViewItemFocusBehavior : BehaviorBase<ListView>
         AssociatedObject.PreviewMouseLeftButtonDown += OnItemFocus;
         AssociatedObject.PreviewMouseRightButtonDown += OnItemFocus;
     }
-
     protected override void OnCleanup()
     {
         base.OnCleanup();

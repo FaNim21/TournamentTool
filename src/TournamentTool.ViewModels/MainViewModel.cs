@@ -121,10 +121,13 @@ public class MainViewModel : BaseViewModel
         } 
         else if (option == MessageBoxResult.No) { }
         else return false;
-
-        NavigationService.SelectedView.OnDisable();
         
         return base.OnDisable();
+    }
+
+    public void OnClose()
+    {
+        NavigationService.SelectedView.OnDisable();
     }
 
     public void SelectViewModel(string viewModelName)

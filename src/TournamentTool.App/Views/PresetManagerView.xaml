@@ -526,6 +526,7 @@
                       SelectedItem="{Binding CurrentChosen}">
                 <i:Interaction.Behaviors>
                     <behaviors:ListViewItemFocusBehavior OnItemListClick="{Binding OnItemListClickCommand}" />
+                    <behaviors:ListViewDragAndDropBehavior ItemOrderChangedCommand="{Binding ChangePresetOrderCommand}" />
                 </i:Interaction.Behaviors>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">

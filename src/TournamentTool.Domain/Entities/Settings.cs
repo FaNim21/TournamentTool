@@ -29,3 +29,13 @@ public class APIKeys
     public string MCSRRankedAPI { get; set; } = string.Empty;
     public string PacemanAPI { get; set; } = string.Empty;
 }
+
+public class PresetOrderData
+{
+    public int index { get; set; } = int.MaxValue;
+}
+
+public class AppCache
+{
+    public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
+}

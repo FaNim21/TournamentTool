@@ -60,6 +60,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     public ICommand OpenControllerCommand { get; set; }
     public ICommand OpenLeaderboardCommand { get; set; }
 
+    public ICommand ChangePresetOrderCommand { get; set; }
+
     public ICommand AddNewPresetCommand { get; set; }
     public ICommand SavePresetCommand { get; set; }
     public ICommand OpenPresetFolderCommand { get; set; }
@@ -71,8 +73,9 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
     private readonly Domain.Entities.Settings _settings;
+    private readonly AppCache _appCache;
     
-
+    
     public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
         IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettingsProvider settingsProviderService, ILuaScriptsManager luaScriptsManager, 
         IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) : base(coordinator, dispatcher)
@@ -87,6 +90,7 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         Tournament = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
         
         _settings = settingsProviderService.Get<Domain.Entities.Settings>();
+        _appCache = settingsProviderService.Get<AppCache>();
         
         LoadPresetsList();
         
@@ -94,6 +98,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
         OpenControllerCommand = new RelayCommand(navigationService.NavigateTo<ControllerViewModel>);
         OpenLeaderboardCommand = new RelayCommand(navigationService.NavigateTo<LeaderboardPanelViewModel>);
+
+        ChangePresetOrderCommand = new PresetCollectionOrderChangeCommand(this);
 
         AddNewPresetCommand = new AddNewPresetCommand(this);
         OpenPresetFolderCommand = new RelayCommand(OpenPresetFolder);
@@ -114,7 +120,25 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
     public override bool CanEnable() => true;
     public override void OnEnable(object? parameter) { }
-    public override bool OnDisable() => true;
+    public override bool OnDisable()
+    {
+        _appCache.PresetsOrder.Clear();
+
+        for (var i = 0; i < Presets.Count; i++)
+        {
+            var preset = Presets[i];
+            
+            if (!_appCache.PresetsOrder.TryGetValue(preset.Name, out var data))
+            {
+                _appCache.PresetsOrder.Add(preset.Name, new PresetOrderData() {index = i});
+                continue;
+            }
+
+            data.index = i;
+        }
+        
+        return true;
+    }
 
     private void LoadStartupPreset()
     {
@@ -172,7 +196,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     private void LoadPresetsList()
     {
         var presets = Directory.GetFiles(Consts.PresetsPath, "*.json", SearchOption.TopDirectoryOnly).AsSpan();
-        
+
+        List<TournamentPresetViewModel> presetList = [];
         for (int i = presets.Length - 1; i >= 0; i--)
         {
             string text = File.ReadAllText(presets[i]) ?? string.Empty;
@@ -184,13 +209,18 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
                 if (data == null) continue;
 
                 TournamentPresetViewModel presetViewModel = new(data, this, _tournamentState, Dispatcher, PresetService);
-                Presets.Add(presetViewModel);
+                presetList.Add(presetViewModel);
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
             }
         }
+
+        IOrderedEnumerable<TournamentPresetViewModel> sorted = presetList.OrderBy(preset => 
+            _appCache.PresetsOrder.GetValueOrDefault(preset.Name, new PresetOrderData()).index);
+        foreach (var preset in sorted)
+            Presets.Add(preset);
     }
 
     public bool IsPresetNameUnique(string name)

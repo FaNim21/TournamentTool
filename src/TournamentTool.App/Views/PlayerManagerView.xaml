@@ -340,11 +340,6 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type player:PlayerViewModel}">
                         <StackPanel Width="108">
-                            <StackPanel.InputBindings>
-                                <MouseBinding MouseAction="WheelClick"
-                                              Command="{Binding DataContext.EditPlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                              CommandParameter="{Binding}" />
-                            </StackPanel.InputBindings>
                             <TextBlock Text="{Binding TeamName}"
                                        Foreground="#b3f5c8"
                                        Background="Transparent"

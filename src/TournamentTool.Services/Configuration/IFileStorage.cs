@@ -1,6 +1,6 @@
 ﻿namespace TournamentTool.Services.Configuration;
 
-internal interface ISettingsFile<T>
+internal interface IFileStorage<T> where T : class, new()
 {
     T Load();
     void Save(T data);
