@@ -44,7 +44,6 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         _startPoint = e.GetPosition(null);
         _isMouseDown = true;
     }
-    
     private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         _isMouseDown = false;
@@ -57,7 +56,8 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         Point currentPosition = e.GetPosition(null);
         Vector diff = _startPoint - currentPosition;
 
-        if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance) return;
+        if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance && 
+            Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance) return;
 
         _isMouseDown = false;
         
@@ -69,6 +69,10 @@ public class BorderDragDropBehavior : BehaviorBase<Border>
         if (AssociatedObject.DataContext is IPlayer { IsLive: false }) return;
         var datatype = DragDataType ?? typeof(object);
 
-        DragDrop.DoDragDrop(AssociatedObject, new DataObject(datatype, AssociatedObject.DataContext), DragDropEffects.Move);
+        DataObject data = new DataObject(datatype, AssociatedObject.DataContext); 
+        
+        DragAdornerBehavior.StartDrag(AssociatedObject);
+        DragDrop.DoDragDrop(AssociatedObject, data, DragDropEffects.Move);
+        DragAdornerBehavior.EndDrag(AssociatedObject); 
     }
 }

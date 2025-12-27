@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -6,21 +7,64 @@ namespace TournamentTool.App.Components;
 
 public class DragAdorner : Adorner
 {
-    private readonly Brush renderBrush;
-    private Rect renderRect;
+    private readonly ContentPresenter _contentPresenter;
+    private double _left;
+    private double _top;
+    
+    protected override int VisualChildrenCount => 1;
 
-    public Point CenterOffset;
-
-
-    public DragAdorner(UIElement adornedElement) : base(adornedElement)
+    
+    public DragAdorner(UIElement adornedElement, UIElement dragContent) : base(adornedElement)
     {
-        renderRect = new Rect(adornedElement.RenderSize);
         IsHitTestVisible = false;
-        renderBrush = new SolidColorBrush(Color.FromRgb(150, 150, 50));
-        CenterOffset = new Point(-renderRect.Width / 2, -renderRect.Height / 2);
+        
+        var brush = new VisualBrush(dragContent)
+        {
+            Opacity = 0.7,
+        };
+        
+        _contentPresenter = new ContentPresenter
+        {
+            Content = new Border
+            {
+                Width = dragContent.RenderSize.Width,
+                Height = dragContent.RenderSize.Height,
+                Background = brush
+            },
+            IsHitTestVisible = false
+        };
+
+        AddVisualChild(_contentPresenter);
     }
-    protected override void OnRender(DrawingContext drawingContext)
+
+    public void SetPosition(double left, double top)
     {
-        drawingContext.DrawRectangle(renderBrush, null, renderRect);
+        _left = left;
+        _top = top;
+        
+        InvalidateArrange();
+        InvalidateVisual();
+    }
+
+    protected override Visual GetVisualChild(int index) => _contentPresenter;
+
+    protected override Size MeasureOverride(Size constraint)
+    {
+        _contentPresenter.Measure(constraint);
+        return _contentPresenter.DesiredSize;
+    }
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        _contentPresenter.Arrange(new Rect(finalSize));
+        return finalSize;
+    }
+    
+    public override GeneralTransform GetDesiredTransform(GeneralTransform transform)
+    {
+        var result = new GeneralTransformGroup();
+        result.Children.Add(base.GetDesiredTransform(transform)!);
+        result.Children.Add(new TranslateTransform(_left, _top));
+        return result;
     }
 }
