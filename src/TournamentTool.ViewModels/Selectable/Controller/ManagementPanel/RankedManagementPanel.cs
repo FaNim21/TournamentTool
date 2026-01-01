@@ -126,9 +126,9 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
             TimeStartedText = date.ToString("dd MMM yyyy hh:mm:ss tt", CultureInfo.CurrentCulture);
         }
 
-        //ewentualnie to aktualizowanie zastapic guzikiem refresh
-        if (_data.BestSplitsDatas.Count == 0)
+        if (_data.BestSplitsDatas.Count == 0 || _data.RefreshUI)
         {
+            _data.RefreshUI = false;
             Dispatcher.Invoke(() => { BestSplits.Clear(); });
         }
         for (var i = 0; i < _data.BestSplitsDatas.Count; i++)

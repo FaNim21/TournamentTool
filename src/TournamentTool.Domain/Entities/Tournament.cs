@@ -32,6 +32,7 @@ public class RankedManagementData : ManagementData
     [JsonIgnore] public List<PrivRoomBestSplit> BestSplitsDatas { get; set; } = [];
     [JsonIgnore] public int Players { get; set; }
     [JsonIgnore] public int Completions { get; set; }
+    [JsonIgnore] public bool RefreshUI { get; set; } = false;
 }
 
 public class PacemanManagementData : ManagementData

@@ -351,6 +351,7 @@ public class RankedService : IBackgroundService
             var currentSplit = _rankedManagementData.BestSplitsDatas[i];
             currentSplit.Datas.Clear();
         }
+        _rankedManagementData.RefreshUI = true;
         _rankedManagementData!.BestSplitsDatas.Clear();
         _rankedManagementData.Completions = 0;
         _rankedManagementData.Players = 0;
