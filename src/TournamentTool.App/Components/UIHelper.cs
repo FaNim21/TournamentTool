@@ -75,4 +75,12 @@ public static class UIHelper
 
         return element as TItem;
     }
+    
+    public static IEnumerable<FrameworkElement> GetAllAncestors(this FrameworkElement element)
+    {
+        while ((element = (VisualTreeHelper.GetParent(element) as FrameworkElement)!) != null)
+        {
+            yield return element;
+        }
+    }
 }
