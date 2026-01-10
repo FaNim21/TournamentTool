@@ -10,30 +10,42 @@ namespace TournamentTool.App.Components;
 //drag adorner can cause very small cpu spike that i probably should ignore
 public class DragAdorner : Adorner
 {
+    private const float _IMAGE_SCALE = 0.85f;
+    
+    protected override int VisualChildrenCount => 1;
+    
     private readonly Point _startPoint;
     private Point _currentPoint;
     private readonly UIElement _element;
     private readonly FrameworkElement _container;
 
     private readonly Image _image;
-    
-    protected override int VisualChildrenCount => 1;
+    private Point _centerImageOffset; 
 
     
-    public DragAdorner(FrameworkElement element, FrameworkElement container, Point startPoint) : base(element)
+    public DragAdorner(FrameworkElement element, FrameworkElement container, Point positionInItem, Point startPoint) : base(element)
     {
         _element = element;
         _container = container;
         _startPoint = startPoint;
-        
+
+        ImageSource? source = CreateBitmap(element);
         _image = new Image
         {
-            Source = CreateBitmap(element),
+            Source = source,
             IsHitTestVisible = false,
-            RenderTransform = new ScaleTransform(1.1, 1.1),
-            Effect = new DropShadowEffect { Opacity = 0.5 }
+            RenderTransform = new ScaleTransform(_IMAGE_SCALE, _IMAGE_SCALE),
+            Opacity = 0.4f,
+            Effect = new DropShadowEffect { Opacity = 0.6f }
         };
 
+        if (source == null) return;
+
+        double imageWidth = source.Width * _IMAGE_SCALE;
+        double imageHeight = source.Height * _IMAGE_SCALE;
+        
+        _centerImageOffset = new Point(imageWidth / 2 - positionInItem.X, imageHeight / 2 - positionInItem.Y);
+        
         AddVisualChild(_image);
         
         _container.AllowDrop = true;
@@ -57,7 +69,11 @@ public class DragAdorner : Adorner
     {
         var transformGroup = new GeneralTransformGroup();
         transformGroup.Children.Add(base.GetDesiredTransform(transform)!);
-        transformGroup.Children.Add(new TranslateTransform(_currentPoint.X - _startPoint.X, _currentPoint.Y - _startPoint.Y));
+
+        double offsetX = _currentPoint.X - _startPoint.X - _centerImageOffset.X;
+        double offsetY = _currentPoint.Y - _startPoint.Y - _centerImageOffset.Y;
+        transformGroup.Children.Add(new TranslateTransform(offsetX, offsetY));
+        
         return transformGroup;
     }
 
@@ -77,18 +93,20 @@ public class DragAdorner : Adorner
         _container.Drop -= HandleDrop;
     }
     
-    private static ImageSource CreateBitmap(FrameworkElement element)
+    private static ImageSource? CreateBitmap(FrameworkElement element)
     {
-        if (!element.IsLoaded) throw new InvalidOperationException("Element must be loaded before dragging.");
+        if (!element.IsLoaded) return null;
 
         element.UpdateLayout();
 
         int width = (int)Math.Ceiling(element.ActualWidth);
         int height = (int)Math.Ceiling(element.ActualHeight);
-        if (width <= 0 || height <= 0) throw new InvalidOperationException("Element has no valid size.");
+        
+        if (width <= 0 || height <= 0) return null;
 
-        var targetBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        RenderTargetBitmap targetBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
         targetBitmap.Render(element);
+        targetBitmap.Freeze();
         
         return targetBitmap;
     }

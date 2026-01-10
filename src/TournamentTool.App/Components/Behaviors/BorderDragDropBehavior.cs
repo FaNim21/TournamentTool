@@ -22,56 +22,70 @@ public class BorderDragDropBehavior : BehaviorBase<FrameworkElement>
         set => SetValue(DragDataTypeProperty, value);
     }
     
-    private Point _mouseDownPoint;
-    private bool _dragging;
+    private Point _startPoint;
+    private bool _isMouseDown;
     
 
     protected override void OnAttached()
     {
         base.OnAttached();
-        AssociatedObject.PreviewMouseLeftButtonDown += AssociatedObject_PreviewMouseLeftButtonDown;
-        AssociatedObject.PreviewMouseMove += AssociatedObject_PreviewMouseMove;
+        
+        AssociatedObject.MouseLeftButtonDown += OnMouseLeftButtonDown;
+        AssociatedObject.MouseLeftButtonUp += OnMouseLeftButtonUp;
+        AssociatedObject.MouseMove += OnMouseMove;
     }
-
     protected override void OnCleanup()
     {
         base.OnCleanup();
-        AssociatedObject.PreviewMouseLeftButtonDown -= AssociatedObject_PreviewMouseLeftButtonDown;
-        AssociatedObject.PreviewMouseMove -= AssociatedObject_PreviewMouseMove;
+        
+        AssociatedObject.MouseLeftButtonDown -= OnMouseLeftButtonDown;
+        AssociatedObject.MouseLeftButtonUp -= OnMouseLeftButtonUp;
+        AssociatedObject.MouseMove -= OnMouseMove;
     }
 
-    private void AssociatedObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        _dragging = false;
-        _mouseDownPoint = e.GetPosition(AssociatedObject);
+        _isMouseDown = true;
+        _startPoint = e.GetPosition(AssociatedObject);
+    }
+    private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isMouseDown = false;
     }
 
-    private void AssociatedObject_PreviewMouseMove(object sender, MouseEventArgs e)
+    private void OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (_dragging) return;
-        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (!_isMouseDown || e.LeftButton != MouseButtonState.Pressed) return;
 
         Point currentPoint = e.GetPosition(AssociatedObject);
-        if (!(Math.Abs(currentPoint.X - _mouseDownPoint.X) >= SystemParameters.MinimumHorizontalDragDistance) &&
-            !(Math.Abs(currentPoint.Y - _mouseDownPoint.Y) >= SystemParameters.MinimumVerticalDragDistance)) return;
+        if (!(Math.Abs(currentPoint.X - _startPoint.X) >= SystemParameters.MinimumHorizontalDragDistance) &&
+            !(Math.Abs(currentPoint.Y - _startPoint.Y) >= SystemParameters.MinimumVerticalDragDistance)) return;
         
         StartDragOperation(e);
     }
 
     private void StartDragOperation(MouseEventArgs e)
     {
-        _dragging = true;
-        
         if (AssociatedObject.DataContext is IPlayer { IsLive: false }) return;
 
         Window? window = AssociatedObject.GetAllAncestors().OfType<Window>().FirstOrDefault();
-        if (window != null)
+        DragAdorner? adorner = null;
+        FrameworkElement? container = null;
+
+        if (window is {})
         {
-            var container = window.Content as FrameworkElement;
-            CreateAdorner(container!, e.GetPosition(container));
+            container = window.Content as FrameworkElement;
+            if (container is {})
+            {
+                Point positionInWindow = e.GetPosition(container);
+                Point positionInItem = e.GetPosition(AssociatedObject);
+                
+                adorner = new DragAdorner(AssociatedObject, container, positionInItem, positionInWindow);
+                AdornerLayer.GetAdornerLayer(container)?.Add(adorner);
+            }
         }
-        
-        if (OnCommand != null && OnCommand.CanExecute(null))
+
+        if (OnCommand is {} && OnCommand.CanExecute(null))
         {
             OnCommand.Execute(null);
         }
@@ -79,11 +93,11 @@ public class BorderDragDropBehavior : BehaviorBase<FrameworkElement>
         Type datatype = DragDataType ?? typeof(object);
         DataObject data = new DataObject(datatype, AssociatedObject.DataContext); 
         DragDrop.DoDragDrop(AssociatedObject, data, DragDropEffects.Move);
-    }
 
-    private void CreateAdorner(FrameworkElement container, Point startPoint)
-    {
-        DragAdorner adorner = new DragAdorner(AssociatedObject, container, startPoint);
-        AdornerLayer.GetAdornerLayer(container)?.Add(adorner);
+        if (adorner is {} && container is {})
+        {
+            _isMouseDown = false;
+            AdornerLayer.GetAdornerLayer(container)?.Remove(adorner);
+        }
     }
 }
