@@ -36,6 +36,7 @@ public static class Consts
     
     public const string InfoColor = "#96cdee";
     public const string WarningColor = "#ffde21";
+    public const string DebugColor = "#00a300";
     public const string ErrorColor = "#d43f3f";
 
     public const string GrayColor = "#808080";

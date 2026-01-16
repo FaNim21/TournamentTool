@@ -37,12 +37,15 @@ public class InputController : IInputController, IDisposable
         var toggleStudioMode = new Hotkey(KeyCode.S, ModifierKeysModel.Shift, "Toggle Studio Mode in controller panel");
         var toggleDebugWindow = new Hotkey(KeyCode.F12, ModifierKeysModel.None, "Toggle mode for debug window for specific selected view model");
         var savePreset = new Hotkey(KeyCode.S, ModifierKeysModel.Ctrl, "Saves current preset changes");
+        var toggleConsole = new Hotkey(KeyCode.OemTilde, ModifierKeysModel.None, "Toggle console view");
 
         AddHotkey(renameTextBox, HotkeyActionType.General_RenameElementOnMousePosition);
         AddHotkey(toggleHamburgerMenu, HotkeyActionType.General_ToggleHamburgerMenu);
-        AddHotkey(toggleStudioMode, HotkeyActionType.Controller_ToggleStudioMode);
         AddHotkey(toggleDebugWindow, HotkeyActionType.General_ToggleDebugWindow);
         AddHotkey(savePreset, HotkeyActionType.General_SavePreset);
+        AddHotkey(toggleConsole, HotkeyActionType.General_ToggleConsole);
+        
+        AddHotkey(toggleStudioMode, HotkeyActionType.Controller_ToggleStudioMode);
         
         Application.Current.MainWindow!.KeyDown += HandleKeyDown;
         Application.Current.MainWindow.KeyUp += HandleKeyUp;
@@ -80,14 +83,15 @@ public class InputController : IInputController, IDisposable
 
     private void HandleKeyDown(object sender, KeyEventArgs e)
     {
-        if (_pressedKeys.Contains(e.Key)) return;
-        if (IsModifierKey(e.Key)) return;
-        
-        _pressedKeys.Add(e.Key);
+        if (IsNonSupported(e.Key) || IsModifierKey(e.Key)) return;
+        if (!_pressedKeys.Add(e.Key)) return;
+
+        LogHelper.Debug($"Down: {e.Key}");
         CheckHotkeys();
     }
     private void HandleKeyUp(object sender, KeyEventArgs e)
     {
+        LogHelper.Debug($"Up: {e.Key}");
         _pressedKeys.Remove(e.Key);
     }
 
@@ -101,7 +105,6 @@ public class InputController : IInputController, IDisposable
         if (pressedKey == Key.None) return;
         
         AppHotkey pressedHotkey = new AppHotkey(pressedKey, modifiers);
-        _logger.Debug(pressedHotkey);
         if (!_hotkeys.TryGetValue(pressedHotkey, out HotkeyActionType value)) return;
         
         HotkeyPressed?.Invoke(value);
@@ -140,6 +143,10 @@ public class InputController : IInputController, IDisposable
         return result;
     }
     
+    private static bool IsNonSupported(Key key)
+    {
+        return key is Key.System or Key.DeadCharProcessed or Key.LWin or Key.RWin;
+    }
     private static bool IsModifierKey(Key key)
     {
         return key is Key.LeftCtrl or Key.RightCtrl 

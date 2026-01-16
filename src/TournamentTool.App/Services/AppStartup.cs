@@ -5,6 +5,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Controllers;
+using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.App.Services;
@@ -26,10 +27,11 @@ public class ApplicationLifetime : IApplicationLifetime
     private readonly ISettingsProvider _settingsProvider;
     private readonly IWindowService _windowService;
     private readonly ITwitchService _twitchService;
+    private readonly ILoggingService _logger;
 
 
     public ApplicationLifetime(MainViewModel mainViewModel, IPresetSaver presetSaver, IInputController inputController, ISettingsSaver settingsSaver, 
-        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService)
+        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger)
     {
         _mainViewModel = mainViewModel;
         _presetSaver = presetSaver;
@@ -39,6 +41,7 @@ public class ApplicationLifetime : IApplicationLifetime
         _obsController = obsController;
         _windowService = windowService;
         _twitchService = twitchService;
+        _logger = logger;
     }
     
     /// <summary>
@@ -87,6 +90,9 @@ public class ApplicationLifetime : IApplicationLifetime
                 break;
             case HotkeyActionType.General_ToggleHamburgerMenu: 
                 _mainViewModel.IsHamburgerMenuOpen = !_mainViewModel.IsHamburgerMenuOpen;
+                break;
+            case HotkeyActionType.General_ToggleConsole:
+                _mainViewModel.Console.Toggle();
                 break;
         }
     }

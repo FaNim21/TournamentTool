@@ -84,11 +84,11 @@ public class WindowService : IWindowService
 
         _inputController.InitializeWindow(window);
         
-        Type windowType = window.GetType();
+        Type vmType = viewModel.GetType();
         window.Closed += OnWindowClosed;
         
         WindowEntryData windowEntry = new(window, viewModel, type, () => onClosed?.Invoke(viewModel));
-        _windows.TryAdd(windowType, windowEntry);
+        _windows.TryAdd(vmType, windowEntry);
         
         if (type == WindowType.CustomDialog)
         {
@@ -102,8 +102,8 @@ public class WindowService : IWindowService
     {
         if (sender is not Window window) return;
         
-        Type windowType = window.GetType();
-        if (!_windows.Remove(windowType, out var data)) return;
+        Type vmType = window.DataContext.GetType();
+        if (!_windows.Remove(vmType, out var data)) return;
 
         _inputController.CleanupWindow(data.Window);
         
@@ -178,23 +178,22 @@ public class WindowService : IWindowService
         return window;
     } 
     
-    private WindowEntryData? GetWindowEntry<TWindow>()
+    private WindowEntryData? GetWindowEntry<TViewModel>()
     {
-        Type type = typeof(TWindow);
+        Type type = typeof(TViewModel);
         if (!_windows.TryGetValue(type, out var entry) || entry == null) return null;
         
         return entry;
     }
-    private bool WindowExists<TWindow>()
+    private bool WindowExists<TViewModel>()
     {
-        Type type = typeof(TWindow);
+        Type type = typeof(TViewModel);
         return _windows.ContainsKey(type);
     }
     
     private void PinWindowToOwnerCenter(Window dialog)
     {
-        if (dialog.Owner == null)
-            return;
+        if (dialog.Owner == null) return;
 
         Window owner = dialog.Owner;
 

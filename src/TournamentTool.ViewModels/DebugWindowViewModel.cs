@@ -489,7 +489,7 @@ public class DebugWindowViewModel : BaseWindowViewModel
 
                 if (collection is INotifyCollectionChanged notifyCollection)
                 {
-                    LogService.Log($"Added Collection changed to: {collectionName}");
+                    LogHelper.Log($"Added Collection changed to: {collectionName}");
                     notifyCollection.CollectionChanged += OnCollectionChanged;
                     if (!_viewModelToVariablesMap.ContainsKey(notifyCollection))
                     {
@@ -533,7 +533,7 @@ public class DebugWindowViewModel : BaseWindowViewModel
 
             if (value is INotifyCollectionChanged collection)
             {
-                LogService.Log($"Added Collection changed to: {variableName}");
+                LogHelper.Log($"Added Collection changed to: {variableName}");
                 collection.CollectionChanged += OnCollectionChanged;
             }
 

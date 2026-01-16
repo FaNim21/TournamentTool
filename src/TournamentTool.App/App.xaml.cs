@@ -2,12 +2,10 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
-using TournamentTool.App.Components;
 using TournamentTool.App.Services;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
-using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
@@ -22,6 +20,7 @@ using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities.Player;
+using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Menu;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
@@ -77,6 +76,7 @@ public partial class App : Application
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<LogStore>();
         services.AddSingleton<NotificationPanelViewModel>();
+        services.AddSingleton<ConsoleViewModel>();
         
         //Tournament preset control
         services.AddSingleton<ITournamentState, TournamentState>();
@@ -133,7 +133,7 @@ public partial class App : Application
         settingsSaver.Load();
         
         var loggingService = _serviceProvider.GetRequiredService<ILoggingService>();
-        LogService.Initialize(loggingService);
+        LogHelper.Initialize(loggingService);
         
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         

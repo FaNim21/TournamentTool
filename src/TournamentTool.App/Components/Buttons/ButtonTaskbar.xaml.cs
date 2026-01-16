@@ -2,34 +2,20 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace TournamentTool.App.Components.Buttons
+namespace TournamentTool.App.Components.Buttons;
+
+public partial class ButtonTaskbar : Button
 {
-    public partial class ButtonTaskbar : UserControl
+    public static readonly DependencyProperty ColorBrushProperty = DependencyProperty.Register("ColorBrush", typeof(Brush), typeof(ButtonTaskbar), new PropertyMetadata(new SolidColorBrush(Colors.Black)));
+    public Brush ColorBrush
     {
-        public string ContentText
-        {
-            get => (string)GetValue(ContextTextProperty);
-            set { SetValue(ContextTextProperty, value); }
-        }
-        public static readonly DependencyProperty ContextTextProperty = DependencyProperty.Register("ContentText", typeof(string), typeof(ButtonTaskbar), new PropertyMetadata(""));
+        get => (Brush)GetValue(ColorBrushProperty);
+        set => SetValue(ColorBrushProperty, value);
+    }
 
-        public Brush ColorBrush
-        {
-            get => (Brush)GetValue(ColorBrushProperty);
-            set { SetValue(ColorBrushProperty, value); }
-        }
-        public static readonly DependencyProperty ColorBrushProperty = DependencyProperty.Register("ColorBrush", typeof(Brush), typeof(ButtonTaskbar), new PropertyMetadata(new SolidColorBrush(Colors.Black)));
-
-        public event RoutedEventHandler? Click;
-
-        public ButtonTaskbar()
-        {
-            InitializeComponent();
-        }
-
-        private void buttonClick(object sender, RoutedEventArgs e)
-        {
-            Click?.Invoke(sender, e);
-        }
+        
+    public ButtonTaskbar()
+    {
+        InitializeComponent();
     }
 }

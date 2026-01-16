@@ -11,6 +11,7 @@ using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels.Commands;
+using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
 
@@ -32,6 +33,7 @@ public class MainViewModel : BaseViewModel
     
     public StatusBarViewModel? StatusBar { get; }
     public NotificationPanelViewModel NotificationPanel { get; }
+    public ConsoleViewModel Console { get; }
 
     private bool _isHamburgerMenuOpen;
     public bool IsHamburgerMenuOpen
@@ -79,7 +81,7 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel,
         IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, 
-        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState) : base(dispatcher)
+        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel) : base(dispatcher)
     {
         _updateChecker = updateChecker;
         _applicationState = applicationState;
@@ -89,6 +91,7 @@ public class MainViewModel : BaseViewModel
         StatusBar = statusBar;
         Logger = logger;
         NotificationPanel = notificationPanel;
+        Console = consoleViewModel;
         PresetSaver = presetSaver;
         TournamentState = tournamentState;
 
@@ -109,7 +112,6 @@ public class MainViewModel : BaseViewModel
         _applicationState.WindowBlockedChanged -= OnWindowBlockedChanged;
         NotificationPanel.PanelOpened -= OnNotificationPanelOnPanelOpened;
     }
-
     public override bool OnDisable()
     {
         MessageBoxResult option = _dialogService.Show("You have unsaved changes in preset.\nDo you want to save those changes?", "WARNING",

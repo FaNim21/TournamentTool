@@ -39,7 +39,7 @@
                                        WindowChrome.IsHitTestVisibleInChrome="True"
                                        HorizontalAlignment="Right"
                                        ColorBrush="#ff000f"
-                                       ContentText="X"
+                                       Content="X"
                                        Padding="1"
                                        Click="ExitButtonClick" />
             </Grid>

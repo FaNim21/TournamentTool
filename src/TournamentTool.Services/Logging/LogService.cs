@@ -2,7 +2,7 @@
 
 namespace TournamentTool.Services.Logging;
 
-public static class LogService
+public static class LogHelper
 {
     public static ILoggingService? Logger { get; private set; }
 

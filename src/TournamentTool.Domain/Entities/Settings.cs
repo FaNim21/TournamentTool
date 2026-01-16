@@ -38,4 +38,5 @@ public class PresetOrderData
 public class AppCache
 {
     public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
+    public bool IsConsoleWindowed { get; set; } = false;
 }

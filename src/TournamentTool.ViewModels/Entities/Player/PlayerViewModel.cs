@@ -221,7 +221,7 @@ public class PlayerViewModel : BaseViewModel, IPlayerViewModel, IPlayer
         }
         catch (Exception ex)
         {
-            LogService.Error("ERROR completing data: " + ex.Message + " - " + ex.StackTrace);
+            LogHelper.Error("ERROR completing data: " + ex.Message + " - " + ex.StackTrace);
         }
     }
     

@@ -12,17 +12,19 @@ public class LogEntryViewModel : BaseViewModel
 
     public string Message => _data.Message;
     public LogLevel Level => _data.Level;
-    public string Date => _data.Date.ToString("h:mm:ss tt");
-    public string DateMonth => _data.Date.ToString("M");
+    public string Date => $"[{_data.Date:h:mm:ss tt}]";
+    public string DateMonth => $"[{_data.Date:M}]";
 
-    private string _borderBrushColor = string.Empty;
-    public string BorderBrushColor
+    public string Type { get; private set; } = string.Empty;
+
+    private string _logLevelColor = "#FFFFFF";
+    public string LogLevelColor
     {
-        get => _borderBrushColor;
+        get => _logLevelColor;
         set
         {
-            _borderBrushColor = value;
-            OnPropertyChanged(nameof(BorderBrushColor));
+            _logLevelColor = value;
+            OnPropertyChanged(nameof(LogLevelColor));
         }
     }
 
@@ -38,12 +40,15 @@ public class LogEntryViewModel : BaseViewModel
     {
         _dispatcher.Invoke(delegate 
         {
-            BorderBrushColor = _data.Level switch
+            Type = Level == LogLevel.Normal ? "" : $"[{Level}] ";
+            
+            LogLevelColor = _data.Level switch
             {
                 LogLevel.Info => Consts.InfoColor,
                 LogLevel.Warning => Consts.WarningColor,
+                LogLevel.Debug => Consts.DebugColor,
                 LogLevel.Error => Consts.ErrorColor,
-                _ => BorderBrushColor
+                _ => LogLevelColor
             };
         });
     }

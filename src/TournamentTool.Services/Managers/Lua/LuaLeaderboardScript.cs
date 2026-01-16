@@ -189,7 +189,7 @@ public class LuaLeaderboardScript
             {
                 output.Append(args[i].ToPrintString());
             }
-            LogService.Log(output);
+            LogHelper.Log(output);
             return DynValue.Nil;
         });
 
@@ -200,7 +200,7 @@ public class LuaLeaderboardScript
             {
                 output.Append(args[i].ToPrintString());
             }
-            LogService.Error(output);
+            LogHelper.Error(output);
             return DynValue.Nil;
         });
         

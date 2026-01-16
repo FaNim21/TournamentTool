@@ -144,7 +144,7 @@
                                            WindowChrome.IsHitTestVisibleInChrome="True"
                                            HorizontalAlignment="Right"
                                            ColorBrush="#5a5d65"
-                                           ContentText="-"
+                                           Content="-"
                                            Padding="2"
                                            Click="MinimizeButtonsClick" />
                     <buttons:ButtonTaskbar Width="30"
@@ -153,7 +153,7 @@
                                            WindowChrome.IsHitTestVisibleInChrome="True"
                                            HorizontalAlignment="Right"
                                            ColorBrush="#ff000f"
-                                           ContentText="X"
+                                           Content="X"
                                            Padding="1"
                                            Click="ExitButtonClick" />
                 </StackPanel>
@@ -164,9 +164,15 @@
         <ContentControl Grid.Row="1"
                         Content="{Binding NavigationService.SelectedView}" />
 
+        <!-- CONSOLE -->
+        <ContentControl Grid.Row="1"
+                        Visibility="{Binding Console.IsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+            <views:ConsoleView DataContext="{Binding Console}" />
+        </ContentControl>
+        
         <!-- NOTIFICATION PANEL -->
         <ContentControl Grid.Row="1"
-                        Visibility="{Binding NotificationPanel.IsNotificationPanelOpen, Converter={StaticResource BoolToVisibilityConverter}}">
+                        Visibility="{Binding NotificationPanel.IsOpen, Converter={StaticResource BoolToVisibilityConverter}}">
             <views:NotificationPanelView DataContext="{Binding NotificationPanel}"
                                          OnHideCommand="{Binding HidePanelCommand}" />
         </ContentControl>

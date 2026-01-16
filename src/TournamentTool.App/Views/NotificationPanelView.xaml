@@ -11,7 +11,7 @@
              d:DesignHeight="576"
              d:DesignWidth="1024"
              BorderThickness="0.75"
-             BorderBrush="Black" >
+             BorderBrush="Black">
     <Grid>
         <Border Background="Black"
                 Opacity="0.5"
@@ -53,7 +53,7 @@
 
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type entities:LogEntryViewModel}">
-                            <Border BorderBrush="{Binding BorderBrushColor, Converter={StaticResource StringToBrushConverter}}"
+                            <Border BorderBrush="{Binding LogLevelColor, Converter={StaticResource StringToBrushConverter}}"
                                     Width="280"
                                     BorderThickness="0.5">
                                 <StackPanel Orientation="Vertical"
@@ -64,7 +64,7 @@
                                             <Run Text="{Binding Date, Mode=OneTime}" />
                                             <Run Text=" - " />
                                             <Run Text="{Binding Level, Mode=OneTime}"
-                                                 Foreground="{Binding BorderBrushColor, Converter={StaticResource StringToBrushConverter}}" />
+                                                 Foreground="{Binding LogLevelColor, Converter={StaticResource StringToBrushConverter}}" />
                                         </TextBlock>
                                         <Button FontFamily="Segoe MDL2 Assets"
                                                 Content="&#xE8C8;"

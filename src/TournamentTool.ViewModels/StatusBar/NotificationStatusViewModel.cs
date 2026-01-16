@@ -47,7 +47,7 @@ public class NotificationStatusViewModel : StatusItemViewModel
     {
         var menu = new ContextMenuViewModel(Dispatcher);
 
-        if (!_notificationPanel.IsNotificationPanelOpen)
+        if (!_notificationPanel.IsOpen)
         {
             menu.AddItem("View", new RelayCommand(ShowNotifications));
         }

@@ -20,5 +20,6 @@ public enum KeyCode
 
     Up, Down, Left, Right,
     Enter, Escape, Space, Tab, Backspace, Delete,
-    CapsLock, Insert, Home, End, PageUp, PageDown   
+    CapsLock, Insert, Home, End, PageUp, PageDown,
+    OemTilde 
 }

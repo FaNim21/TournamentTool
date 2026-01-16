@@ -8,7 +8,6 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Modals;
 using ZLinq;
 
 namespace TournamentTool.ViewModels;
@@ -22,25 +21,24 @@ public class NotificationPanelViewModel : BaseViewModel
 
     public event EventHandler? PanelOpened;
 
-    public ObservableCollection<LogEntryViewModel> Notifications { get; private set; } = [];
+    public ObservableCollection<LogEntryViewModel> Notifications { get; } = [];
 
-    private bool _isNotificationPanelOpen;
-    public bool IsNotificationPanelOpen
+    private bool _isOpen;
+    public bool IsOpen
     {
-        get => _isNotificationPanelOpen;
+        get => _isOpen;
         set
         {
-            if (_isNotificationPanelOpen == value) return;
+            if (_isOpen == value) return;
 
-            _isNotificationPanelOpen = value;
-            OnPropertyChanged(nameof(IsNotificationPanelOpen));
+            _isOpen = value;
+            OnPropertyChanged(nameof(IsOpen));
         }
     }
     
     private const int _maxNotifications = 100;
     private const LogLevel _minimumLevel = LogLevel.Info;
     private DateTime _lastClearedTimestamp = DateTime.MinValue;
-    private bool _isOpened;
 
     public event EventHandler<LogEntry>? NotificationReceived;
     
@@ -68,7 +66,7 @@ public class NotificationPanelViewModel : BaseViewModel
 
     public override void OnEnable(object? parameter)
     {
-        _isOpened = true;
+        IsOpen = true;
         
         var logs = _store.Logs.AsValueEnumerable()
             .Where(e => e.Level >= _minimumLevel)
@@ -89,7 +87,8 @@ public class NotificationPanelViewModel : BaseViewModel
     }
     public override bool OnDisable()
     {
-        _isOpened = false;
+        IsOpen = false;
+        
         _dispatcher.Invoke(() =>
         {
             Notifications.Clear();
@@ -100,19 +99,17 @@ public class NotificationPanelViewModel : BaseViewModel
     public void ShowPanel()
     {
         PanelOpened?.Invoke(this, EventArgs.Empty);
-        IsNotificationPanelOpen = true;
         OnEnable(null);
     }
     public void HidePanel()
     {
         OnDisable();
-        IsNotificationPanelOpen = false;
     }
 
     public void OnLiveLogReceived(object? sender, LogEntry log)
     {
         if (log.Level < _minimumLevel) return;
-        if (_isOpened)
+        if (IsOpen)
         {
             _dispatcher.Invoke(() => Notifications.Add(new LogEntryViewModel(log, _dispatcher)));
             return;

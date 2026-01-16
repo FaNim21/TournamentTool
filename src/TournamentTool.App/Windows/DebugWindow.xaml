@@ -63,7 +63,7 @@
                                            WindowChrome.IsHitTestVisibleInChrome="True"
                                            HorizontalAlignment="Right"
                                            ColorBrush="#5a5d65"
-                                           ContentText="-"
+                                           Content="-"
                                            Padding="2"
                                            Click="MinimizeButtonsClick" />
                     <buttons:ButtonTaskbar Width="30"
@@ -72,7 +72,7 @@
                                            WindowChrome.IsHitTestVisibleInChrome="True"
                                            HorizontalAlignment="Right"
                                            ColorBrush="#ff000f"
-                                           ContentText="X"
+                                           Content="X"
                                            Padding="1"
                                            Click="ExitButtonClick" />
                 </StackPanel>
