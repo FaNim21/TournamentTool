@@ -15,6 +15,8 @@ public class RankedAPIService : IRankedAPIService
 {
     private readonly IHttpClientFactory _clientFactory;
     private readonly ILoggingService _logger;
+
+    private string _lastErrorResult = string.Empty;
     
     //API oparte o https://docs.mcsrranked.com/
 
@@ -35,6 +37,9 @@ public class RankedAPIService : IRankedAPIService
         if (!response.IsSuccessStatusCode)
         {
             string errorResult = await response.Content.ReadAsStringAsync();
+            if (_lastErrorResult.Equals(errorResult)) return null;
+            
+            _lastErrorResult = errorResult;
             _logger.Error($"Ranked priv room data api error {response.StatusCode}: {errorResult}");
             return null;
         }

@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:entities="clr-namespace:TournamentTool.ViewModels.Entities;assembly=TournamentTool.ViewModels"
+             xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              Background="Transparent"
              BorderThickness="0"
              ScrollViewer.CanContentScroll="True"
@@ -12,30 +14,41 @@
              VirtualizingPanel.VirtualizationMode="Recycling"
              VirtualizingPanel.ScrollUnit="Pixel"
              SnapsToDevicePixels="True">
+    <i:Interaction.Behaviors>
+        <behaviors:AutoScrollBehavior IsEnabled="True" />
+    </i:Interaction.Behaviors>
     <controls:VirtualizingItemsControl.ItemTemplate>
         <DataTemplate DataType="{x:Type entities:LogEntryViewModel}">
-            <StackPanel Orientation="Horizontal"
-                        Height="18"
-                        Margin="0 -1 0 -1">
+            <Grid Margin="0 0 0 -1">
 
-                <TextBlock Text="{Binding Date, Mode=OneTime}"
-                           Width="75"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Date, Mode=OneTime}"
                            FontSize="12"
                            Foreground="DarkGray"
-                           FontWeight="SemiBold" />
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" />
 
-                <TextBlock Text="{Binding Type, Mode=OneTime}"
-                           Margin="3 0 0 0"
+                <TextBlock Grid.Column="1"
+                           Padding="0"
+                           Text="{Binding Type, Mode=OneTime}"
                            FontSize="12"
                            Foreground="{Binding LogLevelColor, Converter={StaticResource StringToBrushConverter}}"
-                           FontWeight="SemiBold" />
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" />
 
-                <TextBlock Text="{Binding Message, Mode=OneTime}"
+                <TextBlock Grid.Column="2"
+                           Padding="0"
+                           Text="{Binding Message, Mode=OneTime}"
                            TextWrapping="Wrap"
-                           Margin="0 0 0 0"
                            FontSize="12"
                            Foreground="{Binding LogLevelColor, Converter={StaticResource StringToBrushConverter}}" />
-            </StackPanel>
+            </Grid>
         </DataTemplate>
     </controls:VirtualizingItemsControl.ItemTemplate>
 </controls:VirtualizingItemsControl>

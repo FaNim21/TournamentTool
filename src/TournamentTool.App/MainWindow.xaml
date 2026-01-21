@@ -166,7 +166,7 @@
 
         <!-- CONSOLE -->
         <ContentControl Grid.Row="1"
-                        Visibility="{Binding Console.IsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                        Visibility="{Binding Console.IsDockedConsoleVisible, Converter={StaticResource BoolToVisibilityConverter}}">
             <views:ConsoleView DataContext="{Binding Console}" />
         </ContentControl>
         

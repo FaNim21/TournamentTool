@@ -36,24 +36,22 @@ public class ConsoleViewModel : BaseViewModel
         }
     }
 
-    private bool _isVisible;
-    public bool IsVisible
+    private bool _isDockedConsoleVisible;
+    public bool IsDockedConsoleVisible
     {
-        get => _isVisible;
+        get => _isDockedConsoleVisible;
         set
         {
-            _isVisible = value;
-            OnPropertyChanged(nameof(IsVisible));
+            _isDockedConsoleVisible = value;
+            OnPropertyChanged(nameof(IsDockedConsoleVisible));
         }
     }
 
     public ICommand SaveLogsCommand { get; private set; }
     public ICommand ClearLogsCommand { get; private set; }
-    
     public ICommand OpenInNewWindowCommand { get; private set; }
-    public ICommand BackToMainWindowCommand { get; private set; }
 
-    private bool _isWindowed;
+    public bool IsWindowed;
     
     
     public ConsoleViewModel(LogStore store, IDispatcherService dispatcher, IWindowService windowService, IDialogService dialogService,
@@ -69,9 +67,8 @@ public class ConsoleViewModel : BaseViewModel
         ClearLogsCommand = new RelayCommand(()=> { ClearLogs(true); });
         
         OpenInNewWindowCommand = new RelayCommand(OpenInNewWindow);
-        BackToMainWindowCommand = new RelayCommand(BackToMainWindow);
         
-        _isWindowed = _settingsProvider.Get<AppCache>().IsConsoleWindowed;
+        IsWindowed = _settingsProvider.Get<AppCache>().IsConsoleWindowed;
 
         _store.LogReceived += OnLiveLogReceived;
     }
@@ -88,47 +85,36 @@ public class ConsoleViewModel : BaseViewModel
         {
             IsOpen = false;
 
-            if (_isWindowed)
+            if (IsWindowed)
             {
-                CloseWindow();
+                _windowService.Hide<ConsoleWindowViewModel>();
+                _windowService.FocusMainWindow();
             }
             else
             {
-                IsVisible = false;
+                IsDockedConsoleVisible = false;
             }
             return;
         }
 
-        if (_isWindowed)
+        if (IsWindowed)
         {
             OpenWindow();
         }
         else
         {
-            IsVisible = true;
+            IsDockedConsoleVisible = true;
         }
         IsOpen = true;
     }
 
     private void OpenInNewWindow()
     {
-        if (_isWindowed) return;
-
         _settingsProvider.Get<AppCache>().IsConsoleWindowed = true;
         
-        IsVisible = false;
-        _isWindowed = true;
+        IsDockedConsoleVisible = false;
+        IsWindowed = true;
         OpenWindow();
-    }
-    private void BackToMainWindow()
-    {
-        if (!_isWindowed) return;
-        
-        _settingsProvider.Get<AppCache>().IsConsoleWindowed = false;
-        
-        IsVisible = true;
-        _isWindowed = false;
-        CloseWindow();
     }
 
     private void SaveLogs()
@@ -162,12 +148,11 @@ public class ConsoleViewModel : BaseViewModel
         
         //Problemem jest tez nie przechwytywany zawsze trigger do toggle'a
         //czy tez tylda, ktora czasami nie togglue konsoli w trybie przyklejonym tez
-        _windowService.Close<ConsoleWindowViewModel>();
     }
     private void OpenWindow()
     {
-        ConsoleWindowViewModel consoleWindowViewModel = new(this, Dispatcher);
-        _windowService.Show(consoleWindowViewModel, _ => { IsOpen = false; }, "ConsoleWindow");
+        ConsoleWindowViewModel consoleWindowViewModel = new(this, _settingsProvider, _windowService, Dispatcher);
+        _windowService.Show(consoleWindowViewModel, null, "ConsoleWindow");
     }
     
     private void OnLiveLogReceived(object? sender, LogEntry log)

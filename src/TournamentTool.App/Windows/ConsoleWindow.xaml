@@ -12,6 +12,7 @@
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
+        WindowStartupLocation="CenterOwner"
         MinHeight="450"
         MinWidth="800"
         Height="450"
@@ -44,7 +45,7 @@
                                        Height="30"
                                        FontSize="17"
                                        WindowChrome.IsHitTestVisibleInChrome="True"
-                                       Command="{Binding DataContext.Console.BackToMainWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Command="{Binding DataContext.BackToMainWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                        HorizontalAlignment="Right"
                                        ColorBrush="#1a1a1a"
                                        ToolTipService.InitialShowDelay="0"
@@ -57,11 +58,11 @@
                                        Height="30"
                                        FontSize="20"
                                        WindowChrome.IsHitTestVisibleInChrome="True"
+                                       Command="{Binding DataContext.HideWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                        HorizontalAlignment="Right"
                                        ColorBrush="#ff000f"
                                        Content="X"
-                                       Padding="1"
-                                       Click="ExitButtonClick" />
+                                       Padding="1" />
             </StackPanel>
         </Grid>
 

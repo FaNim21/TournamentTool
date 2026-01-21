@@ -6,7 +6,6 @@ using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
-using TournamentTool.ViewModels.Entities;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
 
@@ -325,7 +324,7 @@ public class APIUpdaterService : IServiceUpdater
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            // Logger.Error(ex);
         }
         
         for (int i = 0; i < itemsInHeadsGroup.Length; i++)

@@ -86,12 +86,12 @@ public class InputController : IInputController, IDisposable
         if (IsNonSupported(e.Key) || IsModifierKey(e.Key)) return;
         if (!_pressedKeys.Add(e.Key)) return;
 
-        LogHelper.Debug($"Down: {e.Key}");
+        _logger.Debug(e.Key);
         CheckHotkeys();
     }
     private void HandleKeyUp(object sender, KeyEventArgs e)
     {
-        LogHelper.Debug($"Up: {e.Key}");
+        _logger.Debug(e.Key);
         _pressedKeys.Remove(e.Key);
     }
 
@@ -106,7 +106,8 @@ public class InputController : IInputController, IDisposable
         
         AppHotkey pressedHotkey = new AppHotkey(pressedKey, modifiers);
         if (!_hotkeys.TryGetValue(pressedHotkey, out HotkeyActionType value)) return;
-        
+
+        _pressedKeys.Remove(pressedKey);
         HotkeyPressed?.Invoke(value);
     }
     

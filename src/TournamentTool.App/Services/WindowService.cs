@@ -34,10 +34,22 @@ public class WindowService : IWindowService
 
     public void Show<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
     {
-        if (WindowExists<TViewModel>()) return;
+        WindowEntryData? windowEntry = GetWindowEntry<TViewModel>();
+        if (windowEntry != null)
+        {
+            windowEntry.Window.Visibility = Visibility.Visible;
+            return;
+        }
         
         Window? window = ShowInternal(viewModel, WindowType.Normal, onClosed, windowTypeName);
         window?.Show();
+    }
+    public void Hide<TViewModel>() where TViewModel : BaseViewModel
+    {
+        WindowEntryData? windowEntry = GetWindowEntry<TViewModel>();
+        if (windowEntry == null) return;
+        
+        windowEntry.Window.Visibility = Visibility.Hidden;
     }
     
     public void ShowDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
