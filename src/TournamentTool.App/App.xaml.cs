@@ -74,7 +74,7 @@ public partial class App : Application
 
         //Logging control
         services.AddSingleton<ILoggingService, LoggingService>();
-        services.AddSingleton<LogStore>();
+        services.AddSingleton<ILogStore, LogStore>();
         services.AddSingleton<NotificationPanelViewModel>();
         services.AddSingleton<ConsoleViewModel>();
         
@@ -87,6 +87,7 @@ public partial class App : Application
         //Rest xd
         services.AddSingleton<ObsController>();
         
+        //Settings
         services.AddSingleton<SettingsProvider>();
         services.AddSingleton<ISettingsProvider>(s => s.GetRequiredService<SettingsProvider>());
         services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProvider>());
@@ -103,6 +104,7 @@ public partial class App : Application
         services.AddSingleton<ICoordinator, MainCoordinator>();
         services.AddSingleton<IBackgroundCoordinator, BackgroundCoordinator>();
         
+        //main navigation panels
         services.AddSingleton<ControllerViewModel>();
         services.AddTransient<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>(); //zanim transient to trzeba bedzie zrobic serwis, ktory trzyma info o eventach pacemanowych, bo sa w ctor

@@ -8,8 +8,7 @@ public enum HeadAPIType
 
 public class Settings
 {
-    public string LastOpenedPresetName { get; set; } = string.Empty;
-    
+    // General
     public int Port { get; set; } = 4455;
     public string Password { get; set; } = string.Empty;
     public string FilterNameAtStartForSceneItems { get; set; } = "pov";
@@ -19,6 +18,11 @@ public class Settings
     public bool IsAlwaysOnTop { get; set; } = true;
 
     public HeadAPIType HeadAPIType { get; set; }
+    
+    // Console/logs
+    // nie zrobione ui w settingsach
+    public bool SaveLogsAfterShutdown { get; set; }
+    public bool logscosasdfasef { get; set; }
 }
 
 public class APIKeys
@@ -37,6 +41,8 @@ public class PresetOrderData
 
 public class AppCache
 {
+    public string LastOpenedPresetName { get; set; } = string.Empty;
+    
     public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
     public bool IsConsoleWindowed { get; set; } = false;
 }

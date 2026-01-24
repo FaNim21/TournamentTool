@@ -48,6 +48,7 @@ public partial class MainWindow : Window
         {
             mainViewModel.PresetSaver.SavePreset();
             mainViewModel.ShowUnhandledExceptionLog(e.Exception.Message);
+            Task.Run(async ()=> await mainViewModel.LogStore.SaveToFileAsync());
         }
         
         if (_handledCrash) return;

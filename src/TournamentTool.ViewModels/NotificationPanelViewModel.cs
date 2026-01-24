@@ -14,7 +14,7 @@ namespace TournamentTool.ViewModels;
 
 public class NotificationPanelViewModel : BaseViewModel
 {
-    private readonly LogStore _store;
+    private readonly ILogStore _store;
     private readonly IDialogService _dialogService;
     private readonly IDispatcherService _dispatcher;
     private readonly IClipboardService _clipboard;
@@ -47,7 +47,7 @@ public class NotificationPanelViewModel : BaseViewModel
     public ICommand CopyNotificationToClipboardCommand { get; private set; }
 
 
-    public NotificationPanelViewModel(LogStore store, IDialogService dialogService, IDispatcherService dispatcher, IClipboardService clipboard) : base(dispatcher)
+    public NotificationPanelViewModel(ILogStore store, IDialogService dialogService, IDispatcherService dispatcher, IClipboardService clipboard) : base(dispatcher)
     {
         _store = store;
         _dialogService = dialogService;

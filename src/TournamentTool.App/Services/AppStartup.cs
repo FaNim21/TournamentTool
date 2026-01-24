@@ -28,10 +28,12 @@ public class ApplicationLifetime : IApplicationLifetime
     private readonly IWindowService _windowService;
     private readonly ITwitchService _twitchService;
     private readonly ILoggingService _logger;
+    private readonly ILogStore _logStore;
 
 
     public ApplicationLifetime(MainViewModel mainViewModel, IPresetSaver presetSaver, IInputController inputController, ISettingsSaver settingsSaver, 
-        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger)
+        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger,
+        ILogStore logStore)
     {
         _mainViewModel = mainViewModel;
         _presetSaver = presetSaver;
@@ -42,6 +44,7 @@ public class ApplicationLifetime : IApplicationLifetime
         _windowService = windowService;
         _twitchService = twitchService;
         _logger = logger;
+        _logStore = logStore;
     }
     
     /// <summary>
@@ -67,6 +70,12 @@ public class ApplicationLifetime : IApplicationLifetime
     public void OnExit()
     {
         _inputController.HotkeyPressed -= HandleGeneralHotkeys;
+        
+        Settings settings = _settingsProvider.Get<Settings>();
+        if (settings.SaveLogsAfterShutdown)
+        {
+            Task.Run(async () => { await _logStore.SaveToFileAsync();});
+        }
         
         _settingsSaver.Save();
     }

@@ -4,10 +4,10 @@ namespace TournamentTool.Services.Logging;
 
 public class LoggingService : ILoggingService
 {
-    private readonly LogStore _logStore;
+    private readonly ILogStore _logStore;
     
     
-    public LoggingService(LogStore logStore)
+    public LoggingService(ILogStore logStore)
     {
         _logStore = logStore;
     }

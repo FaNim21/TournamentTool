@@ -15,7 +15,7 @@ public class ConsoleViewModel : BaseViewModel
 {
     private const int _MAX_LOGS = 100;
     
-    private readonly LogStore _store;
+    private readonly ILogStore _store;
     private readonly IDispatcherService _dispatcher;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
@@ -54,7 +54,7 @@ public class ConsoleViewModel : BaseViewModel
     public bool IsWindowed;
     
     
-    public ConsoleViewModel(LogStore store, IDispatcherService dispatcher, IWindowService windowService, IDialogService dialogService,
+    public ConsoleViewModel(ILogStore store, IDispatcherService dispatcher, IWindowService windowService, IDialogService dialogService,
         ISettingsProvider settingsProvider) : base(dispatcher)
     {
         _store = store;
@@ -63,7 +63,7 @@ public class ConsoleViewModel : BaseViewModel
         _dialogService = dialogService;
         _settingsProvider = settingsProvider;
 
-        SaveLogsCommand = new RelayCommand(SaveLogs);
+        SaveLogsCommand = new RelayCommand(async ()=> { await SaveLogsAsync(); });
         ClearLogsCommand = new RelayCommand(()=> { ClearLogs(true); });
         
         OpenInNewWindowCommand = new RelayCommand(OpenInNewWindow);
@@ -71,10 +71,12 @@ public class ConsoleViewModel : BaseViewModel
         IsWindowed = _settingsProvider.Get<AppCache>().IsConsoleWindowed;
 
         _store.LogReceived += OnLiveLogReceived;
+        _store.LogsCleared += OnLogsCleared;
     }
     public override void Dispose()
     {
         _store.LogReceived -= OnLiveLogReceived;
+        _store.LogsCleared -= OnLogsCleared;
         
         ClearLogs();
     }
@@ -117,13 +119,12 @@ public class ConsoleViewModel : BaseViewModel
         OpenWindow();
     }
 
-    private void SaveLogs()
+    private async Task SaveLogsAsync()
     {
-        MessageBoxResult result = _dialogService.Show("Are you sure you want to save all console logs?\nAfter saving all logs will be removed from console", "Saving all console logs", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        MessageBoxResult result = _dialogService.Show("Are you sure you want to save all console logs?\nAfter saving all logs will be removed from console", "Saving all console logs", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
         
-        //trzeba wywolac zewnetrzna metoda do zapisywania logow i tam tez od razu zrobic czyszczenie zeby zbierac logi na nowo po zapisaniu
-        //TODO: 0 Zrobic system zapisywania logow, od razu tez przy wylaczaniu aplikacji, zgodnie z ustawieniami PAMIETAC
+        await _store.SaveToFileAsync();
     }
     private void ClearLogs(bool confirm = false)
     {
@@ -139,16 +140,6 @@ public class ConsoleViewModel : BaseViewModel
         });
     }
 
-    private void CloseWindow()
-    {
-        //TODO: 0 Chyba jednak lepiej bedzie zrobic kontrolowane okno bez niszczenia, jako zmiane visibility dla okna
-        // tez to rozwiazanie bedzie wydajniejsze
-        // znaczy mozna na guzikach do dokowania i wyciagania zrobic zeby okno sie tworzylo i niszczylo, ale na toggle trzeba dac zmiane visibility
-        // wtedy tez x bedzie odpowiadal za visiblity, a nie za niszczenie
-        
-        //Problemem jest tez nie przechwytywany zawsze trigger do toggle'a
-        //czy tez tylda, ktora czasami nie togglue konsoli w trybie przyklejonym tez
-    }
     private void OpenWindow()
     {
         ConsoleWindowViewModel consoleWindowViewModel = new(this, _settingsProvider, _windowService, Dispatcher);
@@ -172,4 +163,5 @@ public class ConsoleViewModel : BaseViewModel
         
         _dispatcher.Invoke(() => Logs.Add(new LogEntryViewModel(log, _dispatcher)));
     }
+    private void OnLogsCleared(object? sender, EventArgs e) => ClearLogs();
 }

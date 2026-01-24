@@ -44,9 +44,9 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             bool isEmpty = _currentChosen == null;
             if (!isEmpty)
             {
-                if (_settings != null)
+                if (_appCache != null)
                 {
-                    _settings.LastOpenedPresetName = _currentChosen!.Name;
+                    _appCache.LastOpenedPresetName = _currentChosen!.Name;
                 }
             }
 
@@ -72,7 +72,6 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     public ICommand RenameItemCommand { get; set; }
     public ICommand RemoveCurrentPresetCommand { get; set; }
 
-    private readonly Domain.Entities.Settings _settings;
     private readonly AppCache _appCache;
 
     private readonly FileSystemWatcher _fileWatcher;
@@ -91,7 +90,6 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
         Tournament = new TournamentViewModel(playerRepository, tournamentState, backgroundCoordinator, dispatcher);
         
-        _settings = settingsProviderService.Get<Domain.Entities.Settings>();
         _appCache = settingsProviderService.Get<AppCache>();
         
         _fileWatcher = new FileSystemWatcher
@@ -172,7 +170,7 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             return;
         }
         
-        string lastOpened = _settings.LastOpenedPresetName;
+        string lastOpened = _appCache.LastOpenedPresetName;
         if (string.IsNullOrWhiteSpace(lastOpened)) return;
 
         TournamentPresetViewModel? lastOpenedPreset = Presets.FirstOrDefault(p => p.Name.Equals(lastOpened));

@@ -29,6 +29,21 @@ public static class Helper
         File.WriteAllText(Consts.LogsPath + "\\" + fileName, output);
     }
 
+    public static string GetUniqueDateTimeFileName()
+    {
+        string date = DateTimeOffset.Now.ToString("yyyy-MM-dd_HH.mm");
+        string fileName = date;
+
+        int count = 1;
+        while (File.Exists(Consts.LogsPath + "\\" + fileName))
+        {
+            fileName = $"{date} [{count}]";
+            count++;
+        }
+
+        return fileName;
+    }
+
     public static string CaptalizeAll(this string text)
     {
         string[] words = text.Split(' ');

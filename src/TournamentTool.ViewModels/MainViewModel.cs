@@ -7,7 +7,6 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels.Commands;
@@ -19,6 +18,7 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
+    public ILogStore LogStore { get; }
     public ILoggingService Logger { get; }
     public IPresetSaver PresetSaver { get; }
     public ITournamentState TournamentState { get; }
@@ -81,12 +81,14 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel,
         IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, 
-        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel) : base(dispatcher)
+        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel, ILogStore logStore) 
+        : base(dispatcher)
     {
         _updateChecker = updateChecker;
         _applicationState = applicationState;
         _windowService = windowService;
         _dialogService = dialogService;
+        LogStore = logStore;
         NavigationService = navigationService;
         StatusBar = statusBar;
         Logger = logger;
