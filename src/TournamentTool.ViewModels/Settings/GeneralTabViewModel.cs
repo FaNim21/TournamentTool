@@ -85,6 +85,25 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         }
     }
 
+    public bool SaveLogsAfterShutdown
+    {
+        get => _settings.SaveLogsAfterShutdown;
+        set
+        {
+            _settings.SaveLogsAfterShutdown = value;
+            OnPropertyChanged(nameof(SaveLogsAfterShutdown));
+        }
+    }
+    public int ConsoleLogsLimit
+    {
+        get => _settings.ConsoleLogsLimit;
+        set
+        {
+            int clampedValue = Math.Clamp(value, 50, 500);
+            _settings.ConsoleLogsLimit = clampedValue;
+            OnPropertyChanged(nameof(ConsoleLogsLimit));
+        }
+    }
     
     public GeneralTabViewModel(Domain.Entities.Settings settings, IWindowService windowService, IDispatcherService dispatcher) : base(dispatcher)
     {

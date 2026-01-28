@@ -13,14 +13,15 @@ namespace TournamentTool.ViewModels.Logging;
 
 public class ConsoleViewModel : BaseViewModel
 {
-    private const int _MAX_LOGS = 100;
-    
     private readonly ILogStore _store;
     private readonly IDispatcherService _dispatcher;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
     private readonly ISettingsProvider _settingsProvider;
 
+    private readonly AppCache _appCache;
+    private readonly Domain.Entities.Settings _settings;
+    
     public ObservableCollection<LogEntryViewModel> Logs { get; } = [];
     
     private bool _isOpen;
@@ -67,8 +68,11 @@ public class ConsoleViewModel : BaseViewModel
         ClearLogsCommand = new RelayCommand(()=> { ClearLogs(true); });
         
         OpenInNewWindowCommand = new RelayCommand(OpenInNewWindow);
-        
-        IsWindowed = _settingsProvider.Get<AppCache>().IsConsoleWindowed;
+
+        _appCache = _settingsProvider.Get<AppCache>();
+        _settings = _settingsProvider.Get<Domain.Entities.Settings>();
+
+        IsWindowed = _appCache.IsConsoleWindowed;
 
         _store.LogReceived += OnLiveLogReceived;
         _store.LogsCleared += OnLogsCleared;
@@ -112,7 +116,7 @@ public class ConsoleViewModel : BaseViewModel
 
     private void OpenInNewWindow()
     {
-        _settingsProvider.Get<AppCache>().IsConsoleWindowed = true;
+        _appCache.IsConsoleWindowed = true;
         
         IsDockedConsoleVisible = false;
         IsWindowed = true;
@@ -148,9 +152,9 @@ public class ConsoleViewModel : BaseViewModel
     
     private void OnLiveLogReceived(object? sender, LogEntry log)
     {
-        if (Logs.Count >= _MAX_LOGS)
+        if (Logs.Count >= _settings.ConsoleLogsLimit)
         {
-            int amountToRemove = Logs.Count - _MAX_LOGS;
+            int amountToRemove = Logs.Count - _settings.ConsoleLogsLimit;
             
             _dispatcher.Invoke(() =>
             {

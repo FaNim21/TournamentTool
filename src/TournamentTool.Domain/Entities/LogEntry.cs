@@ -15,6 +15,6 @@ public record LogEntry(string Message, LogLevel Level, DateTime Date)
     {
         string type = Level == LogLevel.Normal ? "" : $"[{Level}] ";
         
-        return $"[{Date:h:mm:ss tt}] {type}{Message}";
+        return $"[{Date:h:mm:ss}] {type}{Message}";
     }
 }

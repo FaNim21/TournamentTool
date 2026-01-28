@@ -12,7 +12,7 @@ public class LogEntryViewModel : BaseViewModel
 
     public string Message => _data.Message;
     public LogLevel Level => _data.Level;
-    public string Date => $"[{_data.Date:h:mm:ss tt}]";
+    public string Date => $"[{_data.Date:h:mm:ss}]";
     public string DateMonth => $"[{_data.Date:M}]";
 
     public string Type { get; private set; } = string.Empty;

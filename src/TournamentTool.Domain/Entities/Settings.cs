@@ -20,9 +20,8 @@ public class Settings
     public HeadAPIType HeadAPIType { get; set; }
     
     // Console/logs
-    // nie zrobione ui w settingsach
     public bool SaveLogsAfterShutdown { get; set; }
-    public bool logscosasdfasef { get; set; }
+    public int ConsoleLogsLimit { get; set; } = 200;
 }
 
 public class APIKeys
