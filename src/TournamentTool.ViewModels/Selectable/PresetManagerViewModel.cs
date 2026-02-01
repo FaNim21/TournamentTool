@@ -79,7 +79,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     
     public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
         IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettingsProvider settingsProviderService, ILuaScriptsManager luaScriptsManager, 
-        IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) : base(coordinator, dispatcher)
+        IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) 
+        : base(coordinator, dispatcher)
     {
         PresetService = presetService;
         Logger = logger;
@@ -255,12 +256,16 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         
         TournamentPreset item = new(preset.Name);
         TournamentPresetViewModel itemViewModel = new(item, this, _tournamentState, Dispatcher, PresetService);
+        
         Presets.Add(itemViewModel);
     }
     public TournamentPresetViewModel AddNewItem(TournamentPreset preset)
     {
         TournamentPresetViewModel itemViewModel = new(preset, this, _tournamentState, Dispatcher, PresetService);
+        
+        SwitchFileWatcher(false);
         PresetService.SavePreset(itemViewModel);
+        SwitchFileWatcher(true);
         
         Presets.Add(itemViewModel);
         return itemViewModel;
@@ -295,6 +300,11 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
 
         Tournament.Clear();
         _tournamentState.MarkAsModified();
+    }
+
+    public void SwitchFileWatcher(bool enabled)
+    {
+        _fileWatcher.EnableRaisingEvents = enabled;
     }
 
     private void OpenPresetFolder()

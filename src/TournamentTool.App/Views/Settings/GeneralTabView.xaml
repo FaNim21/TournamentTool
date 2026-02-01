@@ -135,6 +135,13 @@
                       ToolTipService.ShowDuration="60000"
                       ToolTip="Enabled logins to twitch api on application startup"
                       Margin="0 0 0 5" />
+
+        <ToggleButton IsChecked="{Binding SaveRankedPrivRoomDataOnSeedFinish}"
+                      Content="Save ranked priv room data on seed finish"
+                      ToolTipService.InitialShowDelay="0"
+                      ToolTipService.ShowDuration="60000"
+                      ToolTip="Enabled saves ranked priv room data to %appdata%\tournamenttool"
+                      Margin="0 0 0 5" />
         
         <StackPanel Orientation="Horizontal">
             <ComboBox Style="{StaticResource ComboBoxTest2}"
@@ -156,7 +163,7 @@
                        ToolTip="Sets which api will be used to retrieve skin heads"
                        Margin="5 0 0 3" />
         </StackPanel>
-        
+
         <ToggleButton IsChecked="{Binding SaveLogsAfterShutdown}"
                       Content="Save logs on app closing"
                       ToolTipService.InitialShowDelay="0"

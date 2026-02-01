@@ -74,6 +74,15 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
             OnPropertyChanged(nameof(AutoLoginToTwitch));
         }
     }
+    public bool SaveRankedPrivRoomDataOnSeedFinish
+    {
+        get => _settings.SaveRankedPrivRoomDataOnSeedFinish;
+        set
+        {
+            _settings.SaveRankedPrivRoomDataOnSeedFinish = value;
+            OnPropertyChanged(nameof(SaveRankedPrivRoomDataOnSeedFinish));
+        }
+    }
     
     public HeadAPIType HeadAPIType
     {

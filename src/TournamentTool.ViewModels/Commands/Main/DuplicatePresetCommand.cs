@@ -28,7 +28,10 @@ public class DuplicatePresetCommand : BaseCommand
 
         string duplicatePath = Path.Combine(Consts.PresetsPath, $"{name}.json");
         string originalPath = tournament.GetPath();
+        
+        PresetManager.SwitchFileWatcher(false);
         File.Copy(originalPath, duplicatePath);
+        PresetManager.SwitchFileWatcher(true);
         
         string text = File.ReadAllText(duplicatePath) ?? string.Empty;
         

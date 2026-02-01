@@ -86,12 +86,10 @@ public class InputController : IInputController, IDisposable
         if (IsNonSupported(e.Key) || IsModifierKey(e.Key)) return;
         if (!_pressedKeys.Add(e.Key)) return;
 
-        _logger.Debug(e.Key);
         CheckHotkeys();
     }
     private void HandleKeyUp(object sender, KeyEventArgs e)
     {
-        _logger.Debug(e.Key);
         _pressedKeys.Remove(e.Key);
     }
 

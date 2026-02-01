@@ -16,6 +16,7 @@ public class Settings
     public bool SaveTwitchToken { get; set; } = true;
     public bool AutoLoginToTwitch { get; set; } = true;
     public bool IsAlwaysOnTop { get; set; } = true;
+    public bool SaveRankedPrivRoomDataOnSeedFinish { get; set; } = true;
 
     public HeadAPIType HeadAPIType { get; set; }
     

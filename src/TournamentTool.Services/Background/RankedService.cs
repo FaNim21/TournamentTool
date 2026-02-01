@@ -287,6 +287,11 @@ public class RankedService : IBackgroundService
     {
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
+
+        if (_settings.SaveRankedPrivRoomDataOnSeedFinish)
+        {
+            SavePrivRoomFinishedData();
+        }
         
         for (int i = 0; i < data.Completions.Length; i++)
         {
