@@ -206,6 +206,7 @@
                                           Height="25"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
+                                          IsEnabled="{Binding IsSaving, Converter={StaticResource BooleanInverterConverter}}"
                                           OnCommand="{Binding SaveCommand}" />
                 </Grid>
             </Grid>

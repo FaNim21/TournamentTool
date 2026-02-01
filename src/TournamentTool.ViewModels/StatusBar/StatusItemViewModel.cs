@@ -13,7 +13,7 @@ public abstract class StatusItemViewModel : BaseViewModel, IContextMenuBuilder
     
     protected abstract string Name { get; }
 
-    protected readonly Dictionary<string, object> StateImages = new();
+    protected readonly Dictionary<string, object?> StateImages = new();
 
     private object? _currentImage;
     public object? CurrentImage
@@ -23,6 +23,17 @@ public abstract class StatusItemViewModel : BaseViewModel, IContextMenuBuilder
         {
             _currentImage = value;
             OnPropertyChanged(nameof(CurrentImage));
+        }
+    }
+
+    private bool _haveProblems;
+    public bool HaveProblems
+    {
+        get => _haveProblems;
+        set
+        {
+            _haveProblems = value;
+            OnPropertyChanged(nameof(HaveProblems));
         }
     }
 
@@ -100,10 +111,17 @@ public abstract class StatusItemViewModel : BaseViewModel, IContextMenuBuilder
         OnPropertyChanged(nameof(ToolTip));
     }
    
-    protected void AddStateImage(string state, string imagePath)
+    protected void AddStateImage(string state, string? imagePath)
     {
+        if (imagePath == null)
+        {
+            StateImages[state] = null;
+            return;
+        }
+        
         var image = ImageService.LoadImageFromResources(imagePath);
         if (image == null) return;
+        
         StateImages[state] = image;
     }
     protected void SetState(string state)

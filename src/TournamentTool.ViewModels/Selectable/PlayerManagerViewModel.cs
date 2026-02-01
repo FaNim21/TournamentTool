@@ -173,6 +173,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private string _lastFilterSearch = "filter";
     private PlayerSortingType _lastSortingType;
 
+    private bool _isWhitelistWindowOpened = false;
+
 
     public PlayerManagerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, 
         IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IPlayerViewModelFactory playerViewModelFactory, 
@@ -339,6 +341,9 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     }
     public void AddPlayer(Player? player)
     {
+        if (_isWhitelistWindowOpened) return;
+        _isWhitelistWindowOpened = true;
+        
         PlayerViewModel? playerViewModel = null;
         if (player != null)
         {
@@ -347,7 +352,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         }
         
         WhitelistPlayerWindowViewModel viewModel = new(PlayerViewModelFactory, this, playerViewModel, Dispatcher);
-        _windowService.ShowCustomDialog(viewModel, null, "WhitelistPlayerWindow");
+        _windowService.ShowCustomDialog(viewModel, _ => { _isWhitelistWindowOpened = false;}, "WhitelistPlayerWindow");
     }
 
     public async Task<bool> SavePlayer(PlayerViewModel playerViewModel, bool isEditing)

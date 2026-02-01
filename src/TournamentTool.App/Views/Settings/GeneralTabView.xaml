@@ -125,7 +125,7 @@
                       Content="Save twitch session"
                       ToolTipService.InitialShowDelay="0"
                       ToolTipService.ShowDuration="60000"
-                      ToolTip="Enabled saves logged in twitch access token session for ~60 days"
+                      ToolTip="Enabled saves logged in twitch access token session for ~60 days. &#x0a;You can check when it expires when you hover over twitch icon when its green so it means that you are connected"
                       Margin="0 0 0 5" />
 
         <ToggleButton IsChecked="{Binding AutoLoginToTwitch}"
@@ -142,7 +142,7 @@
                       ToolTipService.ShowDuration="60000"
                       ToolTip="Enabled saves ranked priv room data to %appdata%\tournamenttool"
                       Margin="0 0 0 5" />
-        
+
         <StackPanel Orientation="Horizontal">
             <ComboBox Style="{StaticResource ComboBoxTest2}"
                       DisplayMemberPath="DisplayName"

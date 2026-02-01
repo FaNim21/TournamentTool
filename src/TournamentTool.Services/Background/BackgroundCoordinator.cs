@@ -113,10 +113,10 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
 
     private void ClearService()
     {
+        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, false));
+        
         if (Service == null) return;
         Logger.Debug($"Service {Service!.GetType()} just stopped");
         Service = null;
-        
-        ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, false));
     }
 }

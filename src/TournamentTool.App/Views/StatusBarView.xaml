@@ -155,6 +155,11 @@
                                        Width="16"
                                        Height="16" />
 
+                                <Image Visibility="{Binding HaveProblems, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       Source="pack://application:,,,/Resources/none-icon.png"
+                                       Width="16"
+                                       Height="16" />
+                                
                                 <Border Visibility="{Binding BadgeVisibility, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Width="13"
                                         Height="13"

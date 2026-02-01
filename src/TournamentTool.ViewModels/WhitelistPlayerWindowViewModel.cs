@@ -33,6 +33,17 @@ public class WhitelistPlayerWindowViewModel : BaseWindowViewModel
         }
     }
 
+    private bool _isSaving;
+    public bool IsSaving
+    {
+        get => _isSaving;
+        set
+        {
+            _isSaving = value;
+            OnPropertyChanged(nameof(IsSaving));
+        }
+    }
+
     public ICommand SaveCommand { get; set; }
 
 
@@ -58,8 +69,14 @@ public class WhitelistPlayerWindowViewModel : BaseWindowViewModel
 
     private async Task Save()
     {
+        IsSaving = true;
         bool success = await _playerManager.SavePlayer(PlayerViewModel, IsEditing);
-        if (!success) return;
+        if (!success)
+        {
+            IsSaving = false;
+            return;
+        }
         RequestClose?.Invoke();
+        IsSaving = false;
     }
 }

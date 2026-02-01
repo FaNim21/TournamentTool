@@ -14,7 +14,7 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
     protected override string Name => "Background Service";
     
     private ControllerMode _mode = ControllerMode.None;
-    private bool _isWorking = false;
+    private bool _isWorking;
     
     
     public BackgroundServiceStatusViewModel(IBackgroundCoordinator coordinator, IBackgroundServiceRegistry registry, IDispatcherService dispatcher, 
@@ -32,7 +32,7 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
 
     protected override void InitializeImages()
     {
-        AddStateImage("none", "none-icon.png");
+        AddStateImage("none", null);
         AddStateImage("ranked", "StatusBarIcons/ranked-icon.png");
         AddStateImage("paceman", "StatusBarIcons/paceman-icon.png");
     }
@@ -46,6 +46,7 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
     {
         _mode = e.Mode;
         _isWorking = e.IsWorking;
+        HaveProblems = !_isWorking;
 
         SetState(_mode.ToString().ToLower());
         if (_mode == ControllerMode.None)
@@ -56,11 +57,6 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
         {
             string state = _isWorking ? "activated" : "deactivated";
             SetToolTip($"{_mode} mode {state}");
-            
-            if (!_isWorking)
-            {
-                SetState("none");
-            }
         }
     }
     
