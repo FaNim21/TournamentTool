@@ -14,6 +14,7 @@ public partial class PlayerManagerView : UserControl
 
     private void InPlayerItemMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
+        if (e.LeftButton != MouseButtonState.Pressed) return; 
         if (sender is not ListBoxItem item) return;
         if (item.DataContext is not PlayerViewModel player) return;
         if (DataContext is not PlayerManagerViewModel vm) return;

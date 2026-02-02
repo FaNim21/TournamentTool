@@ -7,7 +7,7 @@ public class SceneManagementViewModel : SelectableViewModel
 {
     //
     
-    public SceneManagementViewModel(ICoordinator coordinator, IDispatcherService dispatcher) : base(coordinator, dispatcher)
+    public SceneManagementViewModel(IDispatcherService dispatcher) : base(dispatcher)
     {
     }
 }

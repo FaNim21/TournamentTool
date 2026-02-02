@@ -28,7 +28,8 @@ public class SettingsViewModel : SelectableViewModel
     public ICommand ChangeTabCommand { get; private set; }
 
 
-    public SettingsViewModel(ICoordinator coordinator, ISettingsProvider settingsProvider, ISettingsSaver settingsSaver, IDispatcherService dispatcher, IWindowService windowService, IInputController inputController, IDialogService dialogService) : base(coordinator, dispatcher)
+    public SettingsViewModel(ISettingsProvider settingsProvider, ISettingsSaver settingsSaver, IDispatcherService dispatcher, IWindowService windowService, 
+        IInputController inputController, IDialogService dialogService) : base(dispatcher)
     {
         _settingsSaver = settingsSaver;
 

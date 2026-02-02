@@ -77,10 +77,10 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     private readonly FileSystemWatcher _fileWatcher;
     
     
-    public PresetManagerViewModel(ICoordinator coordinator, IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
+    public PresetManagerViewModel(IPresetSaver presetService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
         IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, ISettingsProvider settingsProviderService, ILuaScriptsManager luaScriptsManager, 
         IDispatcherService dispatcher, INavigationService navigationService, IDialogService dialogService, IUIInteractionService uiInteractionService) 
-        : base(coordinator, dispatcher)
+        : base(dispatcher)
     {
         PresetService = presetService;
         Logger = logger;

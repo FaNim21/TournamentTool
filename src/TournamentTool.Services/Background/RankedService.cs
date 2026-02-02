@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using TournamentTool.Core.Exceptions;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Parsers;
@@ -117,28 +118,20 @@ public class RankedService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
-        if (string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiKey) ||
-            string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiPlayerName)) return;
+        if (string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiKey))
+            throw new BackgroundServiceException("Ranked API key is empty");
+
+        if (string.IsNullOrWhiteSpace(_tournamentState.CurrentPreset.RankedApiPlayerName))
+            throw new BackgroundServiceException("Player name for API is empty");
         
         await LoadJsonFileAsync();
     }
     
     private async Task LoadJsonFileAsync()
     {
-
-        //api huge potrzebuje chodzenia po timeline'ach w normalnej kolejnosci, bo to stare api
-        /*string path = Path.Combine(Consts.AppdataPath, "PrivRoomAPIHUGE.json");
         try
         {
-            await using FileStream stream = File.OpenRead(path);
-            PrivRoomAPIResult? rankedAPIResult = await JsonSerializer.DeserializeAsync<PrivRoomAPIResult>(stream, _options);
-            if (rankedAPIResult == null) return;
-            _privRoomData = rankedAPIResult.Data;
-        }*/
-        try
-        {
-            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(
-                _tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
+            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
             _privRoomData = rankedAPIResult?.Data;
         }
         catch (Exception ex)
@@ -147,7 +140,7 @@ public class RankedService : IBackgroundService
         }
 
         if (_privRoomData == null)
-            throw new OperationCanceledException();
+            throw new BackgroundServiceException("Problem with data requested from api (check notification panel in status bar (bell) or console for more informations)");
 
         FilterJSON(_privRoomData);
         _rankedDataReceiver?.Update();

@@ -1,4 +1,6 @@
-﻿using TournamentTool.Domain.Enums;
+﻿using TournamentTool.Core.Exceptions;
+using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
@@ -8,6 +10,7 @@ namespace TournamentTool.Services.Background;
 public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
 {
     private readonly ITournamentState _tournamentState;
+    private readonly IDialogService _dialogService;
     private ILoggingService Logger { get; }
     
     private readonly BackgroundServiceFactory _backgroundServiceFactory;
@@ -21,9 +24,10 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
     private CancellationTokenSource? _cancellationTokenSource;
 
     
-    public BackgroundCoordinator(ITournamentState tournamentState, ILoggingService logger, IServiceProvider serviceProvider)
+    public BackgroundCoordinator(ITournamentState tournamentState, ILoggingService logger, IDialogService dialogService, IServiceProvider serviceProvider)
     {
         _tournamentState = tournamentState;
+        _dialogService = dialogService;
         Logger = logger;
         
         _backgroundServiceFactory = new BackgroundServiceFactory(serviceProvider);
@@ -92,6 +96,11 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
                 if (activeService.DelayMiliseconds <= 1000) break;
                 await Task.Delay(TimeSpan.FromMilliseconds(activeService.DelayMiliseconds), token);
             }
+        }
+        catch (BackgroundServiceException ex)
+        {
+            _dialogService.Show($"({Service?.GetType().Name}) - {ex.Message}", "Background service error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error(ex);
         }
         catch (OperationCanceledException)
         {

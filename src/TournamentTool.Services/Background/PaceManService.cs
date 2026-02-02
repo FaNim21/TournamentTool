@@ -1,4 +1,5 @@
-﻿using TournamentTool.Core.Extensions;
+﻿using TournamentTool.Core.Exceptions;
+using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
@@ -67,7 +68,10 @@ public class PaceManService : IBackgroundService
 
     public async Task Update(CancellationToken token)
     {
-        var paceManData = await _pacemanApiService.GetPacemanLiveData(); 
+        PaceManData[]? paceManData = await _pacemanApiService.GetPacemanLiveData(); 
+        if (paceManData == null)
+            throw new BackgroundServiceException("Problem with data requested from api (check notification panel in status bar (bell) or console for more informations)");
+        
         List<Paceman> currentPaces = new(_paces);
 
         foreach (var pace in paceManData)

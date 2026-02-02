@@ -8,7 +8,7 @@ namespace TournamentTool.ViewModels.StatusBar;
 
 public class BackgroundServiceStatusViewModel : StatusItemViewModel
 {
-    private readonly IBackgroundCoordinator _coordinator;
+    private readonly IBackgroundCoordinator _backgroundCoordinator;
     private readonly IBackgroundServiceRegistry _registry;
 
     protected override string Name => "Background Service";
@@ -17,10 +17,10 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
     private bool _isWorking;
     
     
-    public BackgroundServiceStatusViewModel(IBackgroundCoordinator coordinator, IBackgroundServiceRegistry registry, IDispatcherService dispatcher, 
+    public BackgroundServiceStatusViewModel(IBackgroundCoordinator backgroundCoordinator, IBackgroundServiceRegistry registry, IDispatcherService dispatcher, 
         IImageService imageService, IMenuService menuService) : base(dispatcher, imageService, menuService)
     {
-        _coordinator = coordinator;
+        _backgroundCoordinator = backgroundCoordinator;
         _registry = registry;
         
         _registry.ServiceChanged += RegistryOnServiceChanged;
@@ -74,6 +74,6 @@ public class BackgroundServiceStatusViewModel : StatusItemViewModel
 
     private void RetryDeactivatedService()
     {
-        _coordinator.Initialize(_mode, true);
+        _backgroundCoordinator.Initialize(_mode, true);
     }
 }

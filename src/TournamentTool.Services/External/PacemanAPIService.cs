@@ -8,7 +8,7 @@ namespace TournamentTool.Services.External;
 public interface IPacemanAPIService
 {
     Task<PaceManEvent[]> GetPacemanEvents();
-    Task<PaceManData[]> GetPacemanLiveData();
+    Task<PaceManData[]?> GetPacemanLiveData();
 }
 
 public class PacemanAPIService : IPacemanAPIService
@@ -40,7 +40,7 @@ public class PacemanAPIService : IPacemanAPIService
         return JsonSerializer.Deserialize<PaceManEvent[]>(result) ?? [];
     }
 
-    public async Task<PaceManData[]> GetPacemanLiveData()
+    public async Task<PaceManData[]?> GetPacemanLiveData()
     {
         var client = _clientFactory.CreateClient();
         HttpResponseMessage response = await client.GetAsync(Consts.PacemanAPI);
@@ -48,7 +48,7 @@ public class PacemanAPIService : IPacemanAPIService
         {
             string errorResult = await response.Content.ReadAsStringAsync();
             _logger.Error($"Paceman live data api error: {response.StatusCode}: {errorResult}");
-            return [];
+            return null;
         }
             
         Stream result = await response.Content.ReadAsStreamAsync();

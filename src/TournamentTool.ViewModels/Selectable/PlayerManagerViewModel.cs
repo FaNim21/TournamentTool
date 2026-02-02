@@ -176,10 +176,10 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private bool _isWhitelistWindowOpened = false;
 
 
-    public PlayerManagerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, 
+    public PlayerManagerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, 
         IPresetSaver presetService, IBackgroundCoordinator backgroundCoordinator, ILoggingService logger, IPlayerViewModelFactory playerViewModelFactory, 
         IPacemanAPIService pacemanApiService, IWindowService windowService, IDispatcherService dispatcher, IClipboardService clipboard, 
-        IDialogService dialogService) : base(coordinator, dispatcher)
+        IDialogService dialogService) : base(dispatcher)
     {
         PlayerRepository = playerRepository;
         PresetService = presetService;

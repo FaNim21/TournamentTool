@@ -11,7 +11,6 @@ using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Configuration;
 using TournamentTool.Services.Controllers;
-using TournamentTool.Services.Coordinators;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
@@ -101,7 +100,6 @@ public partial class App : Application
         services.AddSingleton<StatusBarViewModel>();
         
         services.AddSingleton<MainViewModel>();
-        services.AddSingleton<ICoordinator, MainCoordinator>();
         services.AddSingleton<IBackgroundCoordinator, BackgroundCoordinator>();
         
         //main navigation panels

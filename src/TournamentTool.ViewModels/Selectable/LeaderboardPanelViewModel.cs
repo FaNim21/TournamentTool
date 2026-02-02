@@ -58,9 +58,9 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand MoveRuleItemCommand { get; set; }
 
 
-    public LeaderboardPanelViewModel(ICoordinator coordinator, ITournamentLeaderboardRepository leaderboardRepository, ITournamentState tournamentState,
+    public LeaderboardPanelViewModel(ITournamentLeaderboardRepository leaderboardRepository, ITournamentState tournamentState,
         ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, IDispatcherService dispatcher, 
-        IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(coordinator, dispatcher)
+        IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(dispatcher)
     {
         LeaderboardManager = leaderboardManager;
         _leaderboardRepository = leaderboardRepository;

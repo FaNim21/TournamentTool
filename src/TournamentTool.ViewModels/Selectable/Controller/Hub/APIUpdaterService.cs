@@ -124,7 +124,7 @@ public class APIUpdaterService : IServiceUpdater
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            // Logger.Error(ex);
         }
 
         for (int i = 0; i < itemsInHeadsGroup.Length; i++)

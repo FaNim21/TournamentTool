@@ -131,9 +131,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly Domain.Entities.Settings _settings;
     
 
-    public ControllerViewModel(ICoordinator coordinator, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
+    public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
         ITournamentLeaderboardRepository leaderboardRepository, IBackgroundCoordinator backgroundCoordinator, ObsController obs, ITwitchService twitch, 
-        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(coordinator, dispatcher)
+        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
     {
         Logger = logger;
         _playerRepository = playerRepository;

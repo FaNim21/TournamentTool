@@ -112,8 +112,8 @@ public class UpdatesViewModel : SelectableViewModel
     private bool canDownloadUpdate;
 
 
-    public UpdatesViewModel(ICoordinator coordinator, ILoggingService logger, IDispatcherService dispatcher, IWindowService windowService, 
-        IUpdateCheckerService updateChecker, IDialogService dialogService) : base(coordinator, dispatcher)
+    public UpdatesViewModel(ILoggingService logger, IDispatcherService dispatcher, IWindowService windowService, 
+        IUpdateCheckerService updateChecker, IDialogService dialogService) : base(dispatcher)
     {
         _windowService = windowService;
         _updateChecker = updateChecker;

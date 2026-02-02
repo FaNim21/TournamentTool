@@ -20,7 +20,6 @@ public class PresetManagerViewModelTests
     private readonly PresetManagerViewModel _presetManager;
 
     private readonly IPresetSaver _presetService;
-    private readonly ICoordinator _coordinator;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     private readonly ISettingsProvider _settingsProviderService;
     private readonly ILuaScriptsManager _luaScriptManager;
@@ -38,7 +37,6 @@ public class PresetManagerViewModelTests
         Directory.CreateDirectory(Consts.PresetsPath);
         
         _presetService = Substitute.For<IPresetSaver>();
-        _coordinator = Substitute.For<ICoordinator>();
         _backgroundCoordinator = Substitute.For<IBackgroundCoordinator>();
         _settingsProviderService = Substitute.For<ISettingsProvider>();
         _luaScriptManager = Substitute.For<ILuaScriptsManager>();
@@ -49,7 +47,7 @@ public class PresetManagerViewModelTests
         _tournamentState = Substitute.For<ITournamentState>();
         _playerRepository = Substitute.For<ITournamentPlayerRepository>();
 
-        _presetManager = new PresetManagerViewModel(_coordinator, _presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
+        _presetManager = new PresetManagerViewModel(_presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
             Substitute.For<ILoggingService>(), _settingsProviderService, _luaScriptManager, dispatcher, _navigationService, _dialogService, _uiInteraction);
         
         _presetManager.Presets.Clear();
@@ -209,7 +207,6 @@ public class PresetManagerViewModelTests
         private readonly PresetManagerViewModel _presetManager;
    
         private readonly IPresetSaver _presetService;
-        private readonly ICoordinator _coordinator;
         private readonly IBackgroundCoordinator _backgroundCoordinator;
         private readonly ISettingsProvider _settingsProviderService;
         private readonly ILuaScriptsManager _luaScriptManager;
@@ -227,7 +224,6 @@ public class PresetManagerViewModelTests
             Directory.CreateDirectory(Consts.PresetsPath);
             
             _presetService = Substitute.For<IPresetSaver>();
-            _coordinator = Substitute.For<ICoordinator>();
             _backgroundCoordinator = Substitute.For<IBackgroundCoordinator>();
             _settingsProviderService = Substitute.For<ISettingsProvider>();
             _luaScriptManager = Substitute.For<ILuaScriptsManager>();
@@ -238,7 +234,7 @@ public class PresetManagerViewModelTests
             _tournamentState = Substitute.For<ITournamentState>();
             _playerRepository = Substitute.For<ITournamentPlayerRepository>();
 
-            _presetManager = new PresetManagerViewModel(_coordinator, _presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
+            _presetManager = new PresetManagerViewModel(_presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
                 Substitute.For<ILoggingService>(), _settingsProviderService, _luaScriptManager, dispatcher, _navigationService, _dialogService, _uiInteraction);
             
             _presetManager.Presets.Clear();

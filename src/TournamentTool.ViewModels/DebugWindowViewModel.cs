@@ -209,7 +209,7 @@ public class DebugWindowViewModel : BaseWindowViewModel
 
     private INotifyPropertyChanged? _notifyingSelectedViewModel;
 
-    private SelectableViewModel _selectedViewModel = new(null!, null!);
+    private SelectableViewModel _selectedViewModel = new(null!);
     public SelectableViewModel SelectedViewModel
     {
         get => _selectedViewModel;

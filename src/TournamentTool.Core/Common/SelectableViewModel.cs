@@ -4,13 +4,7 @@ namespace TournamentTool.Core.Common;
 
 public class SelectableViewModel : BaseViewModel
 {
-    protected ICoordinator Coordinator { get; }
-
-
-    public SelectableViewModel(ICoordinator coordinator, IDispatcherService dispatcher) : base(dispatcher)
-    {
-        Coordinator = coordinator;
-    }
+    public SelectableViewModel(IDispatcherService dispatcher) : base(dispatcher) { }
 
     public virtual bool CanEnable() => true;
 }

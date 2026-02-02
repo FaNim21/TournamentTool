@@ -528,6 +528,13 @@
                     <behaviors:ListViewItemFocusBehavior OnItemListClick="{Binding OnItemListClickCommand}" />
                     <behaviors:ListViewDragAndDropBehavior ItemOrderChangedCommand="{Binding ChangePresetOrderCommand}" />
                 </i:Interaction.Behaviors>
+
+                <ListView.InputBindings>
+                    <KeyBinding Key="Delete"
+                                Command="{Binding RemoveCurrentPresetCommand}"
+                                CommandParameter="{Binding CurrentChosen}"/>
+                </ListView.InputBindings>
+                
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="ContextMenu"

@@ -30,8 +30,11 @@ public class DialogService : IDialogService
             Icon = icon,
             Result = MessageBoxResult.None,
         };
-        
-        _windowService.ShowDialog(model, null, "DialogBoxWindow");
+
+        Dispatcher.Invoke(() =>
+        {
+            _windowService.ShowDialog(model, null, "DialogBoxWindow");
+        });
 
         return model.Result;
     }
