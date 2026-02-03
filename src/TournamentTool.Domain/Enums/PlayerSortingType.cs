@@ -2,8 +2,10 @@
 
 public enum PlayerSortingType
 {
+    All,
     Name,
     InGameName,
     TeamName,
-    Stream
+    Stream,
+    uuid
 }

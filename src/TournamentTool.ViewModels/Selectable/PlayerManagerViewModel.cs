@@ -3,6 +3,7 @@ using System.Windows.Input;
 using MethodTimer;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
@@ -83,14 +84,17 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         get => _searchText;
         set
         {
+            if (value.Equals(_searchText)) return;
+            
             _searchText = value;
             OnPropertyChanged(nameof(SearchText));
+            _debounceFilteringWhitelist();
 
             IsSearchEmpty = string.IsNullOrEmpty(SearchText);
         }
     }
     
-    private PlayerSortingType _sortingType = PlayerSortingType.Name;
+    private PlayerSortingType _sortingType = PlayerSortingType.All;
     public PlayerSortingType SortingType
     {
         get => _sortingType;
@@ -169,11 +173,13 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public ICommand SubmitSearchCommand { get; set; }
     public ICommand ClearSearchFieldCommand { get; set; }
 
+    private Action _debounceFilteringWhitelist;
+    
     private const StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
     private string _lastFilterSearch = "filter";
     private PlayerSortingType _lastSortingType;
 
-    private bool _isWhitelistWindowOpened = false;
+    private bool _isWhitelistWindowOpened;
 
 
     public PlayerManagerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, 
@@ -190,6 +196,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         _windowService = windowService;
         _dialogService = dialogService;
 
+        _debounceFilteringWhitelist = ((Action)FilterWhitelist).Debounce();
+        
         AddPlayerCommand = new RelayCommand(AddPlayer);
         ValidatePlayersCommand = new RelayCommand(() => { windowService.ShowLoading(ValidateAllPlayers); });
 
@@ -213,7 +221,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
         RemoveAllPlayerCommand = new RelayCommand(RemoveAllPlayers);
         FixPlayersHeadsCommand = new RelayCommand( () => { windowService.ShowLoading(FixPlayersHeads); });
 
-        SubmitSearchCommand = new RelayCommand(()=> { FilterWhitelist(); });
+        SubmitSearchCommand = new RelayCommand(FilterWhitelist);
         ClearSearchFieldCommand = new RelayCommand(ClearFilters);
 
         Dispatcher.Invoke(async () =>
@@ -301,6 +309,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
         return SortingType switch
         {
+            PlayerSortingType.All => MatchesAny(player),
             PlayerSortingType.Name => player.Name?.Trim().Contains(SearchText, _comparison) ?? false,
             PlayerSortingType.InGameName => player.InGameName?.Trim().Contains(SearchText, _comparison) ?? false,
             PlayerSortingType.TeamName => player.TeamName?.Trim().Contains(SearchText, _comparison) ?? false,
@@ -308,10 +317,26 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
                 (player.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
                 (player.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false) ||
                 (player.StreamData.Other?.Trim().Contains(SearchText, _comparison) ?? false),
+            PlayerSortingType.uuid => player.UUID.Contains(SearchText, _comparison),
             _ => false
         };
     }
-    
+    private bool MatchesAny(PlayerViewModel player)
+    {
+        return 
+            (player.Name?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            (player.InGameName?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            (player.TeamName?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            (player.StreamData.Main?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            (player.StreamData.Alt?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            (player.StreamData.Other?.Trim().Contains(SearchText, _comparison) ?? false) ||
+            player.UUID.Contains(SearchText, _comparison);
+    }
+
+    public void FilterWhitelist()
+    {
+        FilterWhitelist(false);
+    }
     public void FilterWhitelist(bool forceFilter = false)
     {
         if (!IsSearchEnabled) return;
@@ -470,7 +495,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     private void ClearFilters()
     {
         SearchText = string.Empty;
-        SortingType = PlayerSortingType.Name;
+        SortingType = PlayerSortingType.All;
         FilterWhitelist(true);
     }
 }
