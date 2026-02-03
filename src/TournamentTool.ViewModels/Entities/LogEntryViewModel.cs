@@ -28,7 +28,18 @@ public class LogEntryViewModel : BaseViewModel
         }
     }
 
-    
+    private int _amount = 1;
+    public int Amount
+    {
+        get => _amount;
+        set
+        {
+            _amount = value;
+            OnPropertyChanged(nameof(Amount));
+        }
+    }
+
+
     public LogEntryViewModel(LogEntry data, IDispatcherService dispatcher) : base(dispatcher)
     {
         _data = data;

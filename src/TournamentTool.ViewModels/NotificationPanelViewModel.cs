@@ -22,7 +22,8 @@ public class NotificationPanelViewModel : BaseViewModel
     public event EventHandler? PanelOpened;
 
     public ObservableCollection<LogEntryViewModel> Notifications { get; } = [];
-
+    private readonly Dictionary<(LogLevel level, string message), LogEntryViewModel> _notificationsLookup = [];
+    
     private bool _isOpen;
     public bool IsOpen
     {
@@ -36,7 +37,8 @@ public class NotificationPanelViewModel : BaseViewModel
         }
     }
     
-    private const int _maxNotifications = 100;
+    private const int _maxNotifications = 40;
+    private const int _maxEvaluatedLogs = 100;
     private const LogLevel _minimumLevel = LogLevel.Info;
     private DateTime _lastClearedTimestamp = DateTime.MinValue;
 
@@ -71,8 +73,8 @@ public class NotificationPanelViewModel : BaseViewModel
         var logs = _store.Logs.AsValueEnumerable()
             .Where(e => e.Level >= _minimumLevel)
             .Where(e => e.Date > _lastClearedTimestamp)
-            .TakeLast(_maxNotifications)
-            .Select(e => new LogEntryViewModel(e, _dispatcher)).ToList();
+            .TakeLast(_maxEvaluatedLogs)
+            .ToList();
         
         foreach (var logsChunk in logs.Batch(10))
         {
@@ -80,7 +82,7 @@ public class NotificationPanelViewModel : BaseViewModel
             {
                 foreach (var log in logsChunk)
                 {
-                    Notifications.Add(log);
+                    AddOrUpdate(log);
                 }
             }, CustomDispatcherPriority.Background);
         }
@@ -92,6 +94,7 @@ public class NotificationPanelViewModel : BaseViewModel
         _dispatcher.Invoke(() =>
         {
             Notifications.Clear();
+            _notificationsLookup.Clear();
         });
         return true;
     }
@@ -106,12 +109,35 @@ public class NotificationPanelViewModel : BaseViewModel
         OnDisable();
     }
 
+    private void AddOrUpdate(LogEntry entry)
+    {
+        var key = (entry.Level, entry.Message);
+
+        if (_notificationsLookup.TryGetValue(key, out LogEntryViewModel? existing))
+        {
+            existing.Amount++;
+            return;
+        }
+
+        if (Notifications.Count >= _maxNotifications)
+        {
+            LogEntryViewModel oldestLog = Notifications[0];
+            _notificationsLookup.Remove((oldestLog.Level, oldestLog.Message));
+            Notifications.RemoveAt(0);
+        }
+
+        LogEntryViewModel log = new(entry, _dispatcher);
+
+        _notificationsLookup[key] = log;
+        Notifications.Insert(0, log);
+    }
+    
     public void OnLiveLogReceived(object? sender, LogEntry log)
     {
         if (log.Level < _minimumLevel) return;
         if (IsOpen)
         {
-            _dispatcher.Invoke(() => Notifications.Add(new LogEntryViewModel(log, _dispatcher)));
+            _dispatcher.Invoke(() => { AddOrUpdate(log); });
             return;
         }
 
@@ -129,6 +155,10 @@ public class NotificationPanelViewModel : BaseViewModel
         if (option != MessageBoxResult.Yes) return;
         
         _lastClearedTimestamp = DateTime.Now;
-        _dispatcher.Invoke(() => Notifications.Clear());
+        _dispatcher.Invoke(() =>
+        {
+            Notifications.Clear();
+            _notificationsLookup.Clear();
+        });
     }
 }

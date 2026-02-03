@@ -22,19 +22,26 @@
               Width="300">
             <Grid Background="#2a2a2a"
                   Height="30">
-                <TextBlock Text="Notifications - Errors, Warnings, Info"
+                <TextBlock Text="Errors, Warnings, Info"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
-                           Foreground="Wheat" 
+                           Foreground="Wheat"
                            FontWeight="SemiBold"
-                           Margin="5 0 0 0"/>
+                           Margin="5 0 0 0" />
 
                 <buttons:ButtonNormal ContentText="Clear"
                                       OnCommand="{Binding ClearPanelCommand}"
                                       HorizontalAlignment="Right"
                                       Width="50"
                                       Height="25"
-                                      Margin="0 0 3 0"/>
+                                      Margin="0 0 63 0"/>
+
+                <buttons:ButtonNormal ContentText="Hide"
+                                      OnCommand="{Binding HidePanelCommand}"
+                                      HorizontalAlignment="Right"
+                                      Width="50"
+                                      Height="25"
+                                      Margin="0 0 3 0" />
             </Grid>
 
             <Grid>
@@ -63,9 +70,11 @@
                                             <Run Text="{Binding DateMonth, Mode=OneTime}" />
                                             <Run Text="{Binding Date, Mode=OneTime}" />
                                             <Run Text=" - " />
+                                            <Run Text="{Binding Amount}" />
                                             <Run Text="{Binding Level, Mode=OneTime}"
                                                  Foreground="{Binding LogLevelColor, Converter={StaticResource StringToBrushConverter}}" />
                                         </TextBlock>
+                                        
                                         <Button FontFamily="Segoe MDL2 Assets"
                                                 Content="&#xE8C8;"
                                                 HorizontalAlignment="Right"
@@ -113,6 +122,7 @@
                                             </Button.Style>
                                         </Button>
                                     </Grid>
+                                    
                                     <TextBlock Text="{Binding Message, Mode=OneTime}"
                                                TextWrapping="Wrap"
                                                MaxHeight="48"

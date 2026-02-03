@@ -129,15 +129,8 @@ public class RankedService : IBackgroundService
     
     private async Task LoadJsonFileAsync()
     {
-        try
-        {
-            PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
-            _privRoomData = rankedAPIResult?.Data;
-        }
-        catch (Exception ex)
-        {
-             Logger.Error(ex);
-        }
+        PrivRoomAPIResult? rankedAPIResult = await _rankedApiService.GetRankedPrivateRoomLiveData(_tournamentState.CurrentPreset.RankedApiPlayerName, _tournamentState.CurrentPreset.RankedApiKey);
+        _privRoomData = rankedAPIResult?.Data;
 
         if (_privRoomData == null)
             throw new BackgroundServiceException("Problem with data requested from api (check notification panel in status bar (bell) or console for more informations)");
