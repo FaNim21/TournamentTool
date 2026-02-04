@@ -114,6 +114,7 @@ public class ObsController : IDisposable
 
             Client.StudioModeStateChanged += OnStudioModeStateChanged;
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
+            Client.CurrentSceneCollectionChanged += OnSceneCollectionChanged;
             Client.SceneItemCreated += OnSceneItemCreated;
             Client.SceneItemRemoved += OnSceneItemRemoved;
             Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
@@ -136,6 +137,7 @@ public class ObsController : IDisposable
 
         Client.StudioModeStateChanged -= OnStudioModeStateChanged;
         Client.SceneItemListReindexed -= OnSceneItemListReindexed;
+        Client.CurrentSceneCollectionChanged -= OnSceneCollectionChanged;
         Client.SceneItemCreated -= OnSceneItemCreated;
         Client.SceneItemRemoved -= OnSceneItemRemoved;
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
@@ -336,6 +338,22 @@ public class ObsController : IDisposable
         catch
         {
             // ignored
+        }
+    }
+
+    private async void OnSceneCollectionChanged(object? sender, SceneCollectionNameEventArgs e)
+    {
+        try
+        {
+            string scene = await Client.GetCurrentProgramScene();
+            CurrentProgramSceneChanged?.Invoke(this, new SceneNameEventArgs(scene));
+            CurrentPreviewSceneChanged?.Invoke(this, new SceneNameEventArgs(" "));
+            //tu jest bardzo prosty trik z poprawnym wczytywaniem studio mode zeby w kodzie dalej lapac przy zmianie scene collection wczytywanie scen pod preview
+            //jest to tymczasowe rozwiazanie z racji reworku komunikacji z obsem
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
         }
     }
 

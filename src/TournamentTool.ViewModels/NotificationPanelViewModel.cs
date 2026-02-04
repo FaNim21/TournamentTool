@@ -116,6 +116,9 @@ public class NotificationPanelViewModel : BaseViewModel
         if (_notificationsLookup.TryGetValue(key, out LogEntryViewModel? existing))
         {
             existing.Amount++;
+            
+            int index = Notifications.IndexOf(existing);
+            Notifications.Move(index, 0);
             return;
         }
 

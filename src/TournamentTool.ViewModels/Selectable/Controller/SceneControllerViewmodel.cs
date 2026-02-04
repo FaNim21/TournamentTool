@@ -473,6 +473,8 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     {
         List<SceneItem> additionals = [];
         List<(SceneItem, SceneItem?)> povItems = [];
+
+        if (string.IsNullOrWhiteSpace(scene.Trim())) return (povItems, additionals);
         
         try
         {

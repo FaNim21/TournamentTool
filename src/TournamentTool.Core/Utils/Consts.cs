@@ -2,7 +2,7 @@
 
 public static class Consts
 {
-    public const string Version = "v1.0.0-PREVIEW11";
+    public const string Version = "v1.0.0-PREVIEW13";
     
     public static bool IsTesting { get; set; }
 

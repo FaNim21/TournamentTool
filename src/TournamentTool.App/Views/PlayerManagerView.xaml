@@ -248,12 +248,7 @@
                                  Height="20"
                                  Background="#9E9E9E"
                                  HorizontalAlignment="Center"
-                                 Margin="0 0 0 0">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter"
-                                            Command="{Binding SubmitSearchCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
+                                 Margin="0 0 0 0" />
                         <TextBlock Visibility="{Binding IsSearchEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                    Foreground="Black"
                                    Opacity="0.4"
