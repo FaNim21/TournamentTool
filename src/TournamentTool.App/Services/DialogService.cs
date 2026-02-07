@@ -33,7 +33,7 @@ public class DialogService : IDialogService
 
         Dispatcher.Invoke(() =>
         {
-            _windowService.ShowDialog(model, null, "DialogBoxWindow");
+            _windowService.ShowDialog(model);
         });
 
         return model.Result;

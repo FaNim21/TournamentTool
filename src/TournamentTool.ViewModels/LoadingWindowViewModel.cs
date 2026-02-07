@@ -67,7 +67,7 @@ public class LoadingWindowViewModel : BaseWindowViewModel
         }
         finally
         {
-            RequestClose?.Invoke();
+            Close();
         }
     }
 

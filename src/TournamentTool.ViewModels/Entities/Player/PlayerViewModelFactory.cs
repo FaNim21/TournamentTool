@@ -1,4 +1,5 @@
-﻿using TournamentTool.Core.Interfaces;
+﻿using TournamentTool.Core.Factories;
+using TournamentTool.Core.Interfaces;
 using TournamentTool.Services.External;
 
 namespace TournamentTool.ViewModels.Entities.Player;

@@ -13,7 +13,7 @@ using TournamentTool.ViewModels.Selectable;
 
 namespace TournamentTool.ViewModels.Ranking;
 
-public class LeaderboardEntryEditWindowViewModel : BaseViewModel
+public class LeaderboardEntryEditWindowViewModel : BaseWindowViewModel
 {
     private readonly LeaderboardPanelViewModel _leaderboardPanelViewModel;
     private readonly LeaderboardEntry _originalEntry;

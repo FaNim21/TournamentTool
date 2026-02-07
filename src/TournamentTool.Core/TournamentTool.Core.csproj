@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Factories\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\TournamentTool.Domain\TournamentTool.Domain.csproj" />
     </ItemGroup>
 

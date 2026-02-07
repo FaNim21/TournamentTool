@@ -5,7 +5,7 @@ using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels;
 
-public class POVInformationViewModel : BaseViewModel
+public class POVInformationViewModel : BaseWindowViewModel
 {
     private readonly Scene _scene;
     

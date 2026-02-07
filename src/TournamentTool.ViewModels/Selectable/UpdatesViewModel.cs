@@ -95,6 +95,17 @@ public class UpdatesViewModel : SelectableViewModel
             OnPropertyChanged(nameof(ProgressValue));
         }
     }
+    
+    private bool _canDownloadUpdate;
+    public bool CanDownloadUpdate
+    {
+        get => _canDownloadUpdate;
+        set
+        {
+            _canDownloadUpdate = value;
+            OnPropertyChanged(nameof(CanDownloadUpdate));
+        }
+    }
 
     public List<MarkdownElement> Elements { get; private set; } = [];
 
@@ -109,7 +120,6 @@ public class UpdatesViewModel : SelectableViewModel
     private long size;
 
     public bool startedDownloading;
-    private bool canDownloadUpdate;
 
 
     public UpdatesViewModel(ILoggingService logger, IDispatcherService dispatcher, IWindowService windowService, 
@@ -121,12 +131,7 @@ public class UpdatesViewModel : SelectableViewModel
         
         downloadPath = Path.Combine(Consts.AppdataPath, "Downloaded.zip");
 
-        DownloadCommand = new RelayCommand(() =>
-        {
-            if (!canDownloadUpdate) return;
-
-            Task.Factory.StartNew(Download);
-        });
+        DownloadCommand = new RelayCommand(() => { Task.Factory.StartNew(Download); });
         OpenVersionSite = new RelayCommand(() =>
         {
             if (dialogService.Show($"Do you want to open TournamentTool site to check for new updates or patch notes?",
@@ -158,7 +163,7 @@ public class UpdatesViewModel : SelectableViewModel
             return;
         }
 
-        canDownloadUpdate = true;
+        CanDownloadUpdate = true;
         try
         {
             using var httpClient = new HttpClient();
@@ -168,7 +173,7 @@ public class UpdatesViewModel : SelectableViewModel
             if (!releasesResponse.IsSuccessStatusCode)
             {
                 Logger.Error("Error while searching for update: " + releasesResponse.StatusCode);
-                canDownloadUpdate = false;
+                CanDownloadUpdate = false;
                 return;
             }
 
@@ -189,13 +194,13 @@ public class UpdatesViewModel : SelectableViewModel
             else
             {
                 Logger.Log("No releases found in the repository.");
-                canDownloadUpdate = false;
+                CanDownloadUpdate = false;
             }
         }
         catch (Exception ex)
         {
             Logger.Error($"Error: {ex}");
-            canDownloadUpdate = false;
+            CanDownloadUpdate = false;
         }
         finally
         {
@@ -205,7 +210,7 @@ public class UpdatesViewModel : SelectableViewModel
 
     private async Task Download()
     {
-        if (!canDownloadUpdate) return;
+        if (!CanDownloadUpdate) return;
 
         await Dispatcher.InvokeAsync(delegate
         {

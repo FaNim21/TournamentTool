@@ -72,7 +72,7 @@ public class EntryMilestonePacemanDataViewModel : EntryMilestoneDataViewModel<En
     }
 }
 
-public class LeaderboardEntryViewModel : BaseViewModel
+public class LeaderboardEntryViewModel : BaseWindowViewModel
 {
     public LeaderboardEntry Data { get; }
 

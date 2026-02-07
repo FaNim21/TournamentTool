@@ -4,14 +4,15 @@ namespace TournamentTool.Core.Interfaces;
 
 public interface IWindowService
 {
-    void Show<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel;
-    void Hide<TViewModel>() where TViewModel : BaseViewModel;
+    void ShowAtMouse<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null);
+    void Show<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null);
     
-    void ShowDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel;
-    void ShowCustomDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel;
+    void ShowDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null) where TViewModel : BaseWindowViewModel;
+    void ShowCustomDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseWindowViewModel;
     
-    void Close<TViewModel>() where TViewModel : BaseViewModel;
-    bool IsOpen<TViewModel>() where TViewModel : BaseViewModel;
+    void Hide(Guid guid);
+    void Close(Guid guid);
+    bool IsOpen(Guid guid);
 
     void FocusMainWindow();
 

@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using TournamentTool.ViewModels;
 
 namespace TournamentTool.App.Windows;
 public partial class WhitelistPlayerWindow : Window

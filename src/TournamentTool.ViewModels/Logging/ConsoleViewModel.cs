@@ -53,6 +53,7 @@ public class ConsoleViewModel : BaseViewModel
     public ICommand OpenInNewWindowCommand { get; private set; }
 
     public bool IsWindowed;
+    private Guid _windowGuid;
     
     
     public ConsoleViewModel(ILogStore store, IDispatcherService dispatcher, IWindowService windowService, IDialogService dialogService,
@@ -93,7 +94,7 @@ public class ConsoleViewModel : BaseViewModel
 
             if (IsWindowed)
             {
-                _windowService.Hide<ConsoleWindowViewModel>();
+                _windowService.Hide(_windowGuid);
                 _windowService.FocusMainWindow();
             }
             else
@@ -147,6 +148,8 @@ public class ConsoleViewModel : BaseViewModel
     private void OpenWindow()
     {
         ConsoleWindowViewModel consoleWindowViewModel = new(this, _settingsProvider, _windowService, Dispatcher);
+        _windowGuid = consoleWindowViewModel.Guid;
+        
         _windowService.Show(consoleWindowViewModel, null, "ConsoleWindow");
     }
     

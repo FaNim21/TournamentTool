@@ -11,7 +11,7 @@
              mc:Ignorable="d"
              d:DesignWidth="1024"
              d:DesignHeight="605"
-             Background="#1E1E1E" >
+             Background="#1E1E1E">
     <Grid>
         
         <ScrollViewer VerticalScrollBarVisibility="Visible">
@@ -49,6 +49,7 @@
         </ScrollViewer>
 
         <buttons:ButtonNormal ContentText="Download"
+                              Visibility="{Binding CanDownloadUpdate, Converter={StaticResource BoolToVisibilityConverter}}"
                               Width="140"
                               Height="30"
                               VerticalAlignment="Bottom"

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using TournamentTool.App.Services;
 using TournamentTool.Core.Common;
+using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Interfaces;
@@ -19,8 +20,10 @@ using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities.Player;
+using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Menu;
+using TournamentTool.ViewModels.Modals;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
 
@@ -63,6 +66,7 @@ public partial class App : Application
         
         //View model factories
         services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
+        services.AddSingleton<IPopupViewModelFactory, PopupViewModelFactory>();
         
         //Http access services
         services.AddSingleton<IMinecraftDataService, MinecraftDataService>();
@@ -83,13 +87,15 @@ public partial class App : Application
         services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentLeaderboardRepository, TournamentLeaderboardRepository>();
         
-        //Rest xd
-        services.AddSingleton<ObsController>();
-        
         //Settings
         services.AddSingleton<SettingsProvider>();
         services.AddSingleton<ISettingsProvider>(s => s.GetRequiredService<SettingsProvider>());
         services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProvider>());
+        
+        //Rest xd
+        services.AddSingleton<ObsController>();
+
+        services.AddSingleton<IPopupNotificationService, PopupNotificationService>();
         
         services.AddSingleton<IPresetSaver, PresetService>();
         services.AddSingleton<ITwitchService, TwitchService>();

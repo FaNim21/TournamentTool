@@ -44,8 +44,4 @@ public class DialogBaseViewModel : BaseWindowViewModel
 
 
     protected DialogBaseViewModel(IDispatcherService dispatcher) : base(dispatcher) { }
-    public void Close()
-    {
-        RequestClose?.Invoke();
-    }
 }

@@ -35,7 +35,7 @@ public class LuaLeaderboardScriptViewModel : BaseViewModel
     }
 }
 
-public class LeaderboardRuleEditWindowViewModel : BaseViewModel
+public class LeaderboardRuleEditWindowViewModel : BaseWindowViewModel
 {
     private readonly INotifyPresetModification _notifyPresetModification;
     private readonly IDialogService _dialogService;

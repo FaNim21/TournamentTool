@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Core.Common;
+using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
@@ -76,7 +77,8 @@ public class WhitelistPlayerWindowViewModel : BaseWindowViewModel
             IsSaving = false;
             return;
         }
-        RequestClose?.Invoke();
+
+        Close();
         IsSaving = false;
     }
 }

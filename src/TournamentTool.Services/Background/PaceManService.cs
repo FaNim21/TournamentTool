@@ -1,5 +1,6 @@
 ﻿using TournamentTool.Core.Exceptions;
 using TournamentTool.Core.Extensions;
+using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Services.State;
@@ -21,7 +22,7 @@ public class WindowService : IWindowService
     private readonly IInputController _inputController;
     private IDispatcherService Dispatcher { get; }
     
-    private readonly Dictionary<Type, WindowEntryData> _windows = new();
+    private readonly Dictionary<Guid, WindowEntryData> _windows = new();
     private WindowEntryData? _lastCustomWindow;
     
     
@@ -32,27 +33,26 @@ public class WindowService : IWindowService
         Dispatcher = dispatcher;
     }
 
-    public void Show<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
+    public void ShowAtMouse<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null)
     {
-        WindowEntryData? windowEntry = GetWindowEntry<TViewModel>();
-        if (windowEntry != null)
-        {
-            windowEntry.Window.Visibility = Visibility.Visible;
-            return;
-        }
+        Point mousePosition = Mouse.GetPosition(Application.Current.MainWindow);
+        Point screenPosition = Application.Current.MainWindow!.PointToScreen(mousePosition);;
         
-        Window? window = ShowInternal(viewModel, WindowType.Normal, onClosed, windowTypeName);
+        Window? window = ShowInternal(viewModel, onClosed, windowTypeName);
+        if (window == null) return;
+        
+        window.Left = screenPosition.X;
+        window.Top = screenPosition.Y;
+        window.Show();
+    }
+    public void Show<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null)
+    {
+        Window? window = ShowInternal(viewModel, onClosed, windowTypeName);
         window?.Show();
     }
-    public void Hide<TViewModel>() where TViewModel : BaseViewModel
-    {
-        WindowEntryData? windowEntry = GetWindowEntry<TViewModel>();
-        if (windowEntry == null) return;
-        
-        windowEntry.Window.Visibility = Visibility.Hidden;
-    }
     
-    public void ShowDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
+    public void ShowDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null) 
+        where TViewModel : BaseWindowViewModel
     {
         Window? window = ShowInternal(viewModel, WindowType.Dialog, onClosed, "DialogBoxWindow");
         if (window == null) return;
@@ -64,9 +64,10 @@ public class WindowService : IWindowService
         
         window.ShowDialog();
     }
-    public void ShowCustomDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
+    public void ShowCustomDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) 
+        where TViewModel : BaseWindowViewModel
     {
-        if (WindowExists<TViewModel>()) return;
+        if (WindowExists(viewModel.Guid)) return;
         
         Window? window = ShowInternal(viewModel, WindowType.CustomDialog, onClosed, windowTypeName);
         if (window == null) return;
@@ -89,18 +90,31 @@ public class WindowService : IWindowService
         ShowCustomDialog(viewModel, null, "LoadingWindow");
     }
 
-    private Window? ShowInternal<TViewModel>(TViewModel viewModel, WindowType type, Action<TViewModel>? onClosed = null, string? windowTypeName = null) where TViewModel : BaseViewModel
+    private Window? ShowInternal<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null)
+    {
+        if (viewModel is not BaseWindowViewModel baseViewModel) return null;
+
+        WindowEntryData? windowEntry = GetWindowEntry(baseViewModel.Guid);
+        if (windowEntry != null)
+        {
+            windowEntry.Window.Visibility = Visibility.Visible;
+            return null;
+        }
+
+        return ShowInternal(baseViewModel, WindowType.Normal, _ => onClosed?.Invoke(viewModel), windowTypeName);
+    }
+    private Window? ShowInternal<TViewModel>(TViewModel viewModel, WindowType type, Action<TViewModel>? onClosed = null, string? windowTypeName = null) 
+        where TViewModel : BaseWindowViewModel
     {
         Window? window = CreateWindowForViewModel(viewModel, windowTypeName);
         if (window == null) return null;
 
         _inputController.InitializeWindow(window);
         
-        Type vmType = viewModel.GetType();
         window.Closed += OnWindowClosed;
         
         WindowEntryData windowEntry = new(window, viewModel, type, () => onClosed?.Invoke(viewModel));
-        _windows.TryAdd(vmType, windowEntry);
+        _windows.TryAdd(viewModel.Guid, windowEntry);
         
         if (type == WindowType.CustomDialog)
         {
@@ -113,9 +127,8 @@ public class WindowService : IWindowService
     private void OnWindowClosed(object? sender, EventArgs e)
     {
         if (sender is not Window window) return;
-        
-        Type vmType = window.DataContext.GetType();
-        if (!_windows.Remove(vmType, out var data)) return;
+        if (window.DataContext is not BaseWindowViewModel windowViewModel) return;
+        if (!_windows.Remove(windowViewModel.Guid, out var data)) return;
 
         _inputController.CleanupWindow(data.Window);
         
@@ -138,25 +151,29 @@ public class WindowService : IWindowService
         
         data.Window.Closed -= OnWindowClosed;
         data.Window.DataContext = null;
-            
-        if (data.ViewModel is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-
         data.CloseAction.Invoke();
+        
+        data.ViewModel.Dispose();
     }
     
-    public void Close<TViewModel>() where TViewModel : BaseViewModel
+    public void Hide(Guid guid)
     {
-        var vmType = typeof(TViewModel);
-        if (!_windows.TryGetValue(vmType, out var data)) return;
+        WindowEntryData? windowEntry = GetWindowEntry(guid);
+        if (windowEntry == null) return;
         
+        windowEntry.Window.Visibility = Visibility.Hidden;
+    }
+    
+    public void Close(Guid guid)
+    {
+        if (!_windows.TryGetValue(guid, out var data)) return;
+        
+        //TODO: 0 to zweryfikowac z onwindowclose, bo nie potrzebny duplikat kodu
         data.Window.Close();
-        _windows.Remove(vmType);
+        _windows.Remove(guid);
         StopBlockingWindow();
     }
-    public bool IsOpen<TViewModel>() where TViewModel : BaseViewModel => _windows.ContainsKey(typeof(TViewModel));
+    public bool IsOpen(Guid guid) => _windows.ContainsKey(guid);
     
     public void FocusMainWindow()
     {
@@ -190,19 +207,14 @@ public class WindowService : IWindowService
         return window;
     } 
     
-    private WindowEntryData? GetWindowEntry<TViewModel>()
+    private WindowEntryData? GetWindowEntry(Guid guid)
     {
-        Type type = typeof(TViewModel);
-        if (!_windows.TryGetValue(type, out var entry) || entry == null) return null;
+        if (!_windows.TryGetValue(guid, out var entry) || entry == null) return null;
         
         return entry;
     }
-    private bool WindowExists<TViewModel>()
-    {
-        Type type = typeof(TViewModel);
-        return _windows.ContainsKey(type);
-    }
-    
+    private bool WindowExists(Guid guid) => _windows.ContainsKey(guid);
+
     private void PinWindowToOwnerCenter(Window dialog)
     {
         if (dialog.Owner == null) return;

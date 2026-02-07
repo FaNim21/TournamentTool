@@ -11,7 +11,7 @@ using TournamentTool.ViewModels.Modals;
 
 namespace TournamentTool.ViewModels;
 
-public class ViewWhitelistPlayerViewModel : BaseViewModel
+public class ViewWhitelistPlayerViewModel : BaseWindowViewModel
 {
     private readonly IClipboardService _clipboard;
     private readonly IDialogService _dialogService;

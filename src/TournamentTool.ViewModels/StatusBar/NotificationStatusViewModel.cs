@@ -49,13 +49,12 @@ public class NotificationStatusViewModel : StatusItemViewModel
 
         if (!_notificationPanel.IsOpen)
         {
-            menu.AddItem("View", new RelayCommand(ShowNotifications));
+            ShowNotifications();
         }
         else
         {
-            menu.AddItem("Close", new RelayCommand(_notificationPanel.HidePanel));
+            _notificationPanel.HidePanel();
         }
-        menu.AddItem("Mark as read", new RelayCommand(Clear));
         
         return menu;
     }

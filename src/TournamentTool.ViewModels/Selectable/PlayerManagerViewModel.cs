@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using MethodTimer;
 using TournamentTool.Core.Common;
+using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
@@ -10,11 +10,9 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.PlayerManager;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
 
 namespace TournamentTool.ViewModels.Selectable;

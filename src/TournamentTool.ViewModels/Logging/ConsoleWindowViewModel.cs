@@ -34,14 +34,14 @@ public class ConsoleWindowViewModel : BaseWindowViewModel
         
         Console.IsDockedConsoleVisible = true;
         Console.IsWindowed = false;
-        _windowService.Close<ConsoleWindowViewModel>();
+        _windowService.Close(Guid);
     }
 
     private void HideWindow()
     {
         Console.IsOpen = false;
         
-        _windowService.Hide<ConsoleWindowViewModel>();
+        _windowService.Hide(Guid);
         _windowService.FocusMainWindow();
     }
 }

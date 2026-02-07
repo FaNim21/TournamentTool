@@ -200,7 +200,7 @@ public class MainViewModel : BaseViewModel
         }
         else
         {
-            DebugWindowViewModel?.RequestClose?.Invoke();
+            DebugWindowViewModel?.Close();
         }
     }
 
