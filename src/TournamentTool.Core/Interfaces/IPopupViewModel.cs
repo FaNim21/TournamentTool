@@ -2,5 +2,5 @@
 
 public interface IPopupViewModel
 {
-    void Initialize();
+    
 }

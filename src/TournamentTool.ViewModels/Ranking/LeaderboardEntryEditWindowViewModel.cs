@@ -197,16 +197,16 @@ public class LeaderboardEntryEditWindowViewModel : BaseWindowViewModel
     }
     public override bool OnDisable()
     {
-        if (!_isSaved) return false;
+        if (!_isSaved)
+        {
+            MessageBoxResult result = _dialogService.Show($"You have unsaved changes in entry.\nAre you sure you want to leave?", "Leaving entry", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return false;
+        }
         if (_madeChanges)
         {
             _notifyPresetModification.MarkAsModified();
         }
         _leaderboardPanelViewModel.RecalculateAllEntries();
-        
-        //TODO: 0 sprawdzic czy sie logika zgadza ze wzgledu na wywalenie tego z exitbuttonclick
-        MessageBoxResult result = _dialogService.Show($"You have unsaved changes in entry.\nAre you sure you want to leave?", "Leaving entry", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return false;
         
         return true;
     }

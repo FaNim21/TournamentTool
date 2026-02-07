@@ -296,6 +296,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         _backgroundCoordinator = backgroundCoordinator;
 
         _tournamentState.PresetChanged += OnPresetChanged;
+        RefreshUI();
     }
     public override void Dispose()
     {

@@ -4,6 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:modals="clr-namespace:TournamentTool.ViewModels.Modals;assembly=TournamentTool.ViewModels"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=modals:PopupWindowViewModel}"
         Width="120"
@@ -15,10 +17,17 @@
         BorderBrush="Black"
         AllowsTransparency="True"
         WindowStyle="None">
-    <Grid>
-        <TextBlock Text="{Binding Text, Mode=OneTime}"
-                   TextWrapping="Wrap"
-                   Foreground="Black"
-                   FontSize="12" />
-    </Grid>
+    <TextBlock Text="{Binding Text, Mode=OneTime}"
+               TextWrapping="Wrap"
+               Foreground="Black"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               FontWeight="SemiBold"
+               FontSize="12"
+               Margin="10">
+        <b:Interaction.Behaviors>
+            <behaviors:TextBlockSizeBehavior ParentMaxWidth="220"
+                                             ParentMaxHeight="80" />
+        </b:Interaction.Behaviors>
+    </TextBlock>
 </Window>

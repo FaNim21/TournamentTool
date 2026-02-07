@@ -122,7 +122,6 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         RenameItemCommand = new RelayCommand(EditPresetName);
         RemoveCurrentPresetCommand = new RemovePresetCommand(this, dialogService);
 
-
         LoadStartupPreset();
     }
     public override void Dispose()

@@ -21,7 +21,7 @@ public class ClipboardService : IClipboardService
     public void SetText(string text)
     {
         Clipboard.SetText(text);
-        _popupNotificationService.ShowPopupOnMouse("Copied to clipboard", TimeSpan.FromMilliseconds(1000));
+        _popupNotificationService.ShowPopupOnMouse("Copied to clipboard", TimeSpan.FromMilliseconds(700));
     }
 
     public void Clear()

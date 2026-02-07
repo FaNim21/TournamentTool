@@ -145,7 +145,9 @@ public class WindowService : IWindowService
                 if (_lastCustomWindow == null)
                 {
                     StopBlockingWindow();
+                    FocusMainWindow();
                 }
+                
                 break;
         }
         
