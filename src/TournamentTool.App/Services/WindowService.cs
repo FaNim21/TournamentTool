@@ -16,7 +16,7 @@ public class WindowService : IWindowService
         CustomDialog,
     }
     
-    private record WindowEntryData(Window Window, BaseViewModel ViewModel, WindowType Type, Action CloseAction);
+    private record WindowEntryData(Window Window, BaseWindowViewModel ViewModel, WindowType Type, Action CloseAction);
     
     private readonly IApplicationState _applicationState;
     private readonly IInputController _inputController;
@@ -63,6 +63,7 @@ public class WindowService : IWindowService
         StartBlockingWindow();
         
         window.ShowDialog();
+        window.Activate();
     }
     public void ShowCustomDialog<TViewModel>(TViewModel viewModel, Action<TViewModel>? onClosed = null, string? windowTypeName = null) 
         where TViewModel : BaseWindowViewModel
@@ -81,6 +82,7 @@ public class WindowService : IWindowService
         PinWindowToOwnerCenter(window);
         
         window.Show();
+        window.Activate();
     }
     
     public void ShowLoading(Func<IProgress<float>, IProgress<string>, CancellationToken, Task> loading)
@@ -148,6 +150,8 @@ public class WindowService : IWindowService
                     FocusMainWindow();
                 }
                 
+                //TODO: 0 zrobic czyszczenie eventu
+                // data.ViewModel.Close();
                 break;
         }
         

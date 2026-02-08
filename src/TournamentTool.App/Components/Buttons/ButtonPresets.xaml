@@ -25,10 +25,15 @@
                 <Setter Property="Foreground"
                         Value="White" />
                 <Style.Triggers>
+                    <Trigger Property="IsKeyboardFocused"
+                             Value="True">
+                        <Setter Property="Background"
+                                Value="#2b2c2e" />
+                    </Trigger>
                     <Trigger Property="IsMouseOver"
                              Value="True">
                         <Setter Property="Background"
-                                Value="#1b1d1f" />
+                                Value="#2b2c2e" />
                     </Trigger>
                     <Trigger Property="IsPressed"
                              Value="True">

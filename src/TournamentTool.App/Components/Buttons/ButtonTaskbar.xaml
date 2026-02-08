@@ -16,6 +16,11 @@
             <Setter Property="Cursor"
                     Value="Hand" />
             <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="{Binding ColorBrush}" />
+                </Trigger>
                 <Trigger Property="IsMouseOver"
                          Value="True">
                     <Setter Property="Background"

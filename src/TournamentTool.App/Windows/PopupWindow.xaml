@@ -17,6 +17,26 @@
         BorderBrush="Black"
         AllowsTransparency="True"
         WindowStyle="None">
+    
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard Name="FadeInStoryboard">
+                <Storyboard>
+                    <DoubleAnimation
+                        Storyboard.TargetProperty="Opacity"
+                        From="0"
+                        To="1"
+                        Duration="0:0:0.1"
+                        FillBehavior="Stop"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+
+        <EventTrigger RoutedEvent="Window.Unloaded">
+            <StopStoryboard BeginStoryboardName="FadeInStoryboard"/>
+        </EventTrigger>
+    </Window.Triggers>
+    
     <TextBlock Text="{Binding Text, Mode=OneTime}"
                TextWrapping="Wrap"
                Foreground="Black"

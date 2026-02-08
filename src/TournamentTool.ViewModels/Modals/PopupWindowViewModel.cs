@@ -18,6 +18,11 @@ public class PopupWindowViewModel : BaseWindowViewModel, IPopupViewModel
 
     private TimeSpan _duration;
     
+    //TODO: 9 Pomsyly na przyszlosc odnosnie popup'ow
+    //- Dac opcje klikniecia na nie zeby je zamknac
+    //- Zrobic prosta animacje przy zamykaniu, wykorzystujaca metode close do zamykania i tak,
+    //wiec mozna tu spokojnie ze strony kodu zrobic animacje zmieniajaca opacity
+    
     
     public PopupWindowViewModel(string text, TimeSpan duration, IDispatcherService dispatcher) : base(dispatcher)
     {

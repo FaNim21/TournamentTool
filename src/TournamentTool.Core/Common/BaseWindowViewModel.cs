@@ -2,7 +2,7 @@
 
 namespace TournamentTool.Core.Common;
 
-public class BaseWindowViewModel : BaseViewModel, ICloseRequest
+public abstract class BaseWindowViewModel : BaseViewModel, ICloseRequest
 {
     public Guid Guid { get; }
     public Action? RequestClose { get; set; }
@@ -17,7 +17,7 @@ public class BaseWindowViewModel : BaseViewModel, ICloseRequest
         base.Dispose();
     }
 
-    public void Close()
+    public virtual void Close()
     {
         Dispatcher.Invoke(() =>
         {
