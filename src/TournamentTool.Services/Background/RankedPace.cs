@@ -18,7 +18,7 @@ public class RankedPace
 
     public string UUID { get; }
     public string InGameName { get; }
-    public int EloRate { get; }
+    // public int EloRate { get; }
     public List<RankedPaceTimeline> Timelines { get; set; } = [];
     public List<RankedPaceSplit> Splits { get; set; } = [];
     public object? HeadImage { get; set; }
@@ -31,13 +31,13 @@ public class RankedPace
     public long DifferenceSplitTimeMiliseconds { get; set; }
 
 
-    public RankedPace(RankedService service, PrivRoomPlayer privRoomPlayer, Player? player)
+    public RankedPace(RankedService service, string uuid, string inGameName, Player? player)
     {
         _service = service;
         
-        UUID = privRoomPlayer.UUID;
-        InGameName = privRoomPlayer.InGameName;
-        EloRate = privRoomPlayer.EloRate ?? -1;
+        UUID = uuid;
+        InGameName = inGameName;
+        // EloRate = privRoomPlayer.EloRate ?? -1;
         Player = player ?? new Player();
     }
     public void Initialize()

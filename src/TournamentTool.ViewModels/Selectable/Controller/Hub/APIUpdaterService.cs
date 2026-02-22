@@ -66,9 +66,11 @@ public class APIUpdaterService : IServiceUpdater
 
     public async Task UpdateAsync(CancellationToken token)
     {
-        if (_controller.ManagementPanel == null) return;
+        if (_controller.ManagementPanel != null)
+        {
+            await _controller.ManagementPanel.UpdateAPI(_api);
+        }
         
-        await _controller.ManagementPanel.UpdateAPI(_api);
         try
         {
             await UpdateLeaderboardTopAPI();
@@ -76,7 +78,7 @@ public class APIUpdaterService : IServiceUpdater
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.Error(ex);
         }
     }
 

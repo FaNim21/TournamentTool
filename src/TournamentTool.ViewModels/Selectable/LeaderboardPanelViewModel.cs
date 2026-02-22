@@ -1,11 +1,15 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Exceptions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Background;
+using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
@@ -23,8 +27,10 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     private readonly ILuaScriptsManager _luaScriptsManager;
     private readonly IDialogService _dialogService;
     private readonly ITournamentPlayerRepository _playerRepository;
+    private readonly ILoggingService _logger;
     private ILeaderboardManager LeaderboardManager { get; }
 
+    private readonly BackgroundServiceFactory _backgroundServiceFactory;
 
     public ObservableCollection<LeaderboardEntryViewModel> Entries { get; } = [];
     private int _entriesViewRefreshTrigger = 0;
@@ -51,6 +57,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
     public ICommand RemoveEntryCommand { get; set; }
     public ICommand RemoveAllEntriesCommand { get; set; }
 
+    public ICommand EvaluateExternalJsonCommand { get; private set; }
     public ICommand OpenScriptingDocsCommand { get; private set; }
     public ICommand RefreshScriptsCommand { get; set; }
     public ICommand OpenScriptsFolderCommand { get; set; }
@@ -60,7 +67,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     public LeaderboardPanelViewModel(ITournamentLeaderboardRepository leaderboardRepository, ITournamentState tournamentState,
         ILeaderboardManager leaderboardManager, ILuaScriptsManager luaScriptsManager, IWindowService windowService, IDispatcherService dispatcher, 
-        IDialogService dialogService, ITournamentPlayerRepository playerRepository) : base(dispatcher)
+        IDialogService dialogService, ITournamentPlayerRepository playerRepository, ILoggingService logger, IServiceProvider serviceProvider) : base(dispatcher)
     {
         LeaderboardManager = leaderboardManager;
         _leaderboardRepository = leaderboardRepository;
@@ -68,6 +75,9 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         _luaScriptsManager = luaScriptsManager;
         _dialogService = dialogService;
         _playerRepository = playerRepository;
+        _logger = logger;
+        
+        _backgroundServiceFactory = new BackgroundServiceFactory(serviceProvider);
 
         AddRuleCommand = new RelayCommand(() => AddRule(new LeaderboardRule()));
         AddFromWhitelistCommand = new RelayCommand(() => { windowService.ShowLoading(AddFromWhitelist); });
@@ -80,6 +90,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         RemoveEntryCommand = new RemoveEntryCommand(this, dialogService);
         RemoveAllEntriesCommand = new RelayCommand(RemoveAllEntries);
 
+        EvaluateExternalJsonCommand = new RelayCommand(EvaluateExternalJson);
         OpenScriptingDocsCommand = new RelayCommand(() =>
         {
             var result = _dialogService.Show("A browser will open in tournament tool Github Wiki for leaderboard scripting.\nDo you want to continue?", "Redirecting for docs", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -135,14 +146,6 @@ public class LeaderboardPanelViewModel : SelectableViewModel
             if (Rules.Count > 1)
                 Rules[0].IsFocused = true;
         });
-        
-        /*var collectionViewSource = CollectionViewSource.GetDefaultView(Entries);
-        using (collectionViewSource.DeferRefresh())
-        {
-            collectionViewSource.Filter = null;
-            collectionViewSource.SortDescriptions.Clear();
-            collectionViewSource.SortDescriptions.Add(new SortDescription(nameof(LeaderboardEntryViewModel.Position), ListSortDirection.Ascending));
-        }*/
         
         RefreshAllEntries();
     }
@@ -308,9 +311,51 @@ public class LeaderboardPanelViewModel : SelectableViewModel
         if (_dialogService.Show($"Are you sure you want to remove all entries in leaderboard?",
                 "Removing all leaderboard entries", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         
-        foreach (var entry in Entries.ToList())
+        _leaderboardRepository.ClearAll();
+        Dispatcher.Invoke(() =>
         {
-            RemoveLeaderboardEntry(entry);
+            Entries.Clear();
+            _tournamentState.MarkAsModified();
+        });
+    }
+
+    private void EvaluateExternalJson()
+    {
+        string path = _dialogService.ShowOpenFile("JSON files (*.json)|*.json");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        
+        string text = File.ReadAllText(path) ?? string.Empty;
+        if (string.IsNullOrEmpty(text))
+        {
+            _dialogService.Show("File is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        if (_tournamentState.CurrentPreset.ControllerMode == ControllerMode.Ranked)
+        {
+            PrivRoomData? privRoomData = JsonSerializer.Deserialize<PrivRoomData>(text);
+            if (privRoomData == null)
+            {
+                _dialogService.Show("Could not deserialize data from file in mode RANKED", "Incorrect data", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            RankedService service = (RankedService)_backgroundServiceFactory.Create(ControllerMode.Ranked)!;
+            service.blockSavingPrivRoomData = true;
+            service.ReadySeed(privRoomData);
+            service.FilterJSON(privRoomData);
+        }
+        else if (_tournamentState.CurrentPreset.ControllerMode == ControllerMode.Paceman)
+        {
+            PaceManData[]? APIResult = JsonSerializer.Deserialize<PaceManData[]>(text);
+            if (APIResult == null)
+            {
+                _dialogService.Show("Could not deserialize data from file in mode RANKED", "Incorrect data", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            PaceManService service = (PaceManService)_backgroundServiceFactory.Create(ControllerMode.Paceman)!;
+            service.FilterJSON(APIResult);
         }
     }
 

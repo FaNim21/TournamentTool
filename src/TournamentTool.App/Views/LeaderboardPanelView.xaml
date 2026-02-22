@@ -72,12 +72,18 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Bottom">
+                    <buttons:ButtonNormal ContentText="Evaluate JSON"
+                                          FontSize="15"
+                                          Width="150"
+                                          Height="30"
+                                          OnCommand="{Binding EvaluateExternalJsonCommand}"
+                                          Margin="0 0 0 10" />
                     <buttons:ButtonNormal ContentText="Scripting Docs"
-                                             FontSize="15"
-                                             Width="150"
-                                             Height="30"
-                                             OnCommand="{Binding OpenScriptingDocsCommand}"
-                                             Margin="0 0 0 10" />
+                                          FontSize="15"
+                                          Width="150"
+                                          Height="30"
+                                          OnCommand="{Binding OpenScriptingDocsCommand}"
+                                          Margin="0 0 0 10" />
                     <buttons:ButtonNormal ContentText="Refresh Scripts"
                                              FontSize="15"
                                              Width="150"

@@ -21,6 +21,8 @@ public interface ITournamentLeaderboardRepository
     LeaderboardEntry? GetEntry(string uuid);
 
     void MoveRule(int oldIndex, int newIndex);
+
+    void ClearAll();
 }
 
 public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository, IDisposable
@@ -170,5 +172,12 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
         var item = Rules[oldIndex];
         Leaderboard.Rules.RemoveAt(oldIndex);
         Leaderboard.Rules.Insert(newIndex, item);
+    }
+
+    public void ClearAll()
+    {
+        Leaderboard.OrderedEntries.Clear();
+        _lookupEntries.Clear();
+        //TODO: 0 zrobic normalne clearowanie wszystkich graczy
     }
 }

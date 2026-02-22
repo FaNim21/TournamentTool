@@ -27,4 +27,8 @@
         <Using Include="Xunit" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\TournamentTool.Services\TournamentTool.Services.csproj" />
+    </ItemGroup>
+
 </Project>

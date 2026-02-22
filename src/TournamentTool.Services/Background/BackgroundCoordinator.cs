@@ -2,7 +2,6 @@
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;

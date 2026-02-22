@@ -12,7 +12,6 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Logging.Profiling;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
 
@@ -49,7 +48,8 @@ public class RankedService : IBackgroundService
     private readonly RankedManagementData _rankedManagementData;
     
     private ILeaderboardManager Leaderboard { get; }
-    
+
+    public bool blockSavingPrivRoomData = false;
     public int DelayMiliseconds => 1500;
 
     private IRankedDataReceiver? _rankedDataReceiver;
@@ -144,13 +144,14 @@ public class RankedService : IBackgroundService
         _rankedManagementDataReceiver?.Update();
     }
     
-    private void FilterJSON(PrivRoomData privRoomData)
+    public void FilterJSON(PrivRoomData privRoomData)
     {
         if (privRoomData.Status == _lastStatus && privRoomData.Status != MatchStatus.running) return;
         
         if(privRoomData.Status == MatchStatus.done)
         {
             _lastStatus = privRoomData.Status;
+            UpdateTimelineInPaces(privRoomData.Timelines);
             EvaluateResults(privRoomData);
             return;
         }
@@ -166,21 +167,33 @@ public class RankedService : IBackgroundService
             ReadySeed(privRoomData);
         }
         
-        if (privRoomData.Timelines.Length == 0) return;
+        UpdateTimelineInPaces(privRoomData.Timelines);
+        UpdatePlayersInventory();
+    }
+
+    private void UpdateTimelineInPaces(PrivRoomTimeline[] timelines)
+    {
+        if (timelines.Length == 0) return;
         
-        for (int i = privRoomData.Timelines.Length - 1; i >= 0; i--)
+        for (int i = timelines.Length - 1; i >= 0; i--)
         {
-            var timeline = privRoomData.Timelines[i];
+            var timeline = timelines[i];
             if (timeline.Type.EndsWith("root")) continue;
             
             RunMilestoneData parsedTimeline = RunMilestoneParser.Parse(timeline.Type);
             var time = timeline.Time;
             var paceTimeline = new RankedPaceTimeline(parsedTimeline.Name, parsedTimeline.Milestone, time);
-            
-            if (!_paces.TryGetValue(timeline.UUID, out var pace)) continue;
+
+            if (!_paces.TryGetValue(timeline.UUID, out var pace))
+            {
+                pace = AddPace(timeline.UUID);
+                //TODO: 1 trzeba byc z tym ostroznym, poniewaz nie wiem jak tu sie zachowa priv rooma bez graczy w whiteliscie
+            }
             pace.AddTimeline(paceTimeline);
         }
-
+    }
+    private void UpdatePlayersInventory()
+    {
         foreach (var pace in _paces)
         {
             //TODO: 5 TUTAJ INVENTORY JAK DODADZA DO API
@@ -188,10 +201,16 @@ public class RankedService : IBackgroundService
         }
     }
 
-    private void AddPace(PrivRoomPlayer player)
+    private void AddPace(PrivRoomPlayer player) => AddPace(player.UUID, player.InGameName);
+    private RankedPace AddPace(string UUID, string ign = "")
     {
-        RankedPace pace = new RankedPace(this, player, _playerRepository.GetPlayerByIGN(player.InGameName)?.Data);
-        _paces[player.UUID] = pace;
+        //TODO: 0 tu jest blad logiczny z tym, ze w rankedpace jest null check, player data nigdy nie jest null,
+        // a po tym jest sprawdzane czy wliczac go do leaderboard'a
+        Player? data = _playerRepository.GetPlayerByUUID(UUID)?.Data;
+        string inGameName = data != null ? data.InGameName ?? ign : ign;
+        
+        RankedPace pace = new RankedPace(this, UUID, inGameName, data);
+        _paces[UUID] = pace;
         
         pace.Initialize();
         if (pace.Player == null && _tournamentState.CurrentPreset.AddUnknownRankedPlayersToWhitelist)
@@ -200,6 +219,7 @@ public class RankedService : IBackgroundService
         }
         
         _rankedDataReceiver?.AddPace(pace);
+        return pace;
     }
     private void AddRankedPlayerToWhitelist(RankedPace pace)
     {
@@ -254,12 +274,12 @@ public class RankedService : IBackgroundService
 
             string logName = $"PrivRoomData({_privRoomData.Completions.Length})";
             string date = DateTimeOffset.Now.ToString("yyyy-MM-dd_HH.mm");
-            string fileName = $"{logName} {date}.txt";
+            string fileName = $"{logName} {date}.json";
 
             int count = 1;
-            while (File.Exists(Consts.LogsPath + "\\" + fileName))
+            while (File.Exists(Consts.AppdataPath + "\\" + fileName))
             {
-                fileName = $"{logName} {date} [{count}].txt";
+                fileName = $"{logName} {date} [{count}].json";
                 count++;
             }
 
@@ -275,7 +295,7 @@ public class RankedService : IBackgroundService
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
 
-        if (_settings.SaveRankedPrivRoomDataOnSeedFinish)
+        if (_settings.SaveRankedPrivRoomDataOnSeedFinish && !blockSavingPrivRoomData)
         {
             SavePrivRoomFinishedData();
         }
@@ -285,6 +305,7 @@ public class RankedService : IBackgroundService
             var completion = data.Completions[i];
 
             if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
+            string name = paceData.InGameName;
             if (paceData.GetLastSplit().Split == RankedSplitType.complete) continue;
 
             var paceTimeline = new RankedPaceTimeline(display.ShortName!, RunMilestone.ProjectEloComplete, completion.Time);
@@ -302,7 +323,7 @@ public class RankedService : IBackgroundService
         _rankedManagementData.StartTime = DateTimeOffset.Now.Millisecond;
         Clear();
     }
-    private void ReadySeed(PrivRoomData privRoomData)
+    public void ReadySeed(PrivRoomData privRoomData)
     {
         if (_rankedManagementData!.BestSplitsDatas.Count != 0)
         {

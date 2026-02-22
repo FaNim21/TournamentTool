@@ -73,6 +73,14 @@ public class PaceManService : IBackgroundService
         if (paceManData == null)
             throw new BackgroundServiceException("Problem with data requested from api (check notification panel in status bar (bell) or console for more informations)");
         
+        FilterJSON(paceManData);
+
+        _pacemanSidePanelReceiver?.Update();
+        _blockFirstPacemanRefresh = false;
+    }
+
+    public void FilterJSON(PaceManData[] paceManData)
+    {
         List<Paceman> currentPaces = new(_paces);
 
         foreach (var pace in paceManData)
@@ -118,9 +126,6 @@ public class PaceManService : IBackgroundService
 
         for (int i = 0; i < currentPaces.Count; i++)
             RemovePaceMan(currentPaces[i]);
-
-        _pacemanSidePanelReceiver?.Update();
-        _blockFirstPacemanRefresh = false;
     }
     
     private void UpdateHeadImage(Paceman paceman)

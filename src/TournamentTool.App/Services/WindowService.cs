@@ -149,9 +149,6 @@ public class WindowService : IWindowService
                     StopBlockingWindow();
                     FocusMainWindow();
                 }
-                
-                //TODO: 0 zrobic czyszczenie eventu
-                // data.ViewModel.Close();
                 break;
         }
         
