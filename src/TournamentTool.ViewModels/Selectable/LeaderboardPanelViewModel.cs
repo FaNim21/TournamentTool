@@ -321,6 +321,7 @@ public class LeaderboardPanelViewModel : SelectableViewModel
 
     private void EvaluateExternalJson()
     {
+        //TODO: 0 Make this and in general scriprting management too separate service
         string path = _dialogService.ShowOpenFile("JSON files (*.json)|*.json");
         if (string.IsNullOrWhiteSpace(path)) return;
         

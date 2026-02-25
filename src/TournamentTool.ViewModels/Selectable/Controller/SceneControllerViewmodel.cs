@@ -8,13 +8,11 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
-using TournamentTool.Services.Configuration;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Entities.Player;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;

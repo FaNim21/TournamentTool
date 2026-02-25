@@ -68,6 +68,8 @@ public class RankedService : IBackgroundService
     private readonly Dictionary<string, RankedPace> _paces = [];
 
     private PrivRoomData? _privRoomData;
+
+    private int _lastEvaluatedRoomID = -1;
     
     
     public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettingsProvider settingsProvider, IPlayerViewModelFactory playerViewModelFactory, 
@@ -187,7 +189,6 @@ public class RankedService : IBackgroundService
             if (!_paces.TryGetValue(timeline.UUID, out var pace))
             {
                 pace = AddPace(timeline.UUID);
-                //TODO: 1 trzeba byc z tym ostroznym, poniewaz nie wiem jak tu sie zachowa priv rooma bez graczy w whiteliscie
             }
             pace.AddTimeline(paceTimeline);
         }
@@ -292,6 +293,10 @@ public class RankedService : IBackgroundService
     }
     private void EvaluateResults(PrivRoomData data)
     {
+        int dataLastID = data.LastID ?? 1;
+        if (_lastEvaluatedRoomID == dataLastID) return;
+        _lastEvaluatedRoomID = dataLastID;
+        
         int completions = data.Completions.Length;
         var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
 
@@ -305,7 +310,6 @@ public class RankedService : IBackgroundService
             var completion = data.Completions[i];
 
             if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
-            string name = paceData.InGameName;
             if (paceData.GetLastSplit().Split == RankedSplitType.complete) continue;
 
             var paceTimeline = new RankedPaceTimeline(display.ShortName!, RunMilestone.ProjectEloComplete, completion.Time);
@@ -321,6 +325,7 @@ public class RankedService : IBackgroundService
     {
         //Seed change | New match
         _rankedManagementData.StartTime = DateTimeOffset.Now.Millisecond;
+        _lastEvaluatedRoomID = -1;
         Clear();
     }
     public void ReadySeed(PrivRoomData privRoomData)

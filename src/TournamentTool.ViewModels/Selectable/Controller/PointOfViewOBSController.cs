@@ -26,7 +26,6 @@ public class PointOfViewOBSController : IPointOfViewOBSController
     private readonly Domain.Entities.Settings _settings;
     
 
-
     public PointOfViewOBSController(ObsController obs, ITournamentState tournamentState, ISettingsProvider settingsProvider)
     {
         _obs = obs;
