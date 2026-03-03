@@ -3,6 +3,7 @@ using System.Windows.Input;
 using OBSStudioClient.Classes;
 using OBSStudioClient.Enums;
 using OBSStudioClient.Events;
+using OBSStudioClient.Responses;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
@@ -29,7 +30,7 @@ public interface ISceneController
 
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName);
-    Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene);
+    Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string sceneName, Guid sceneUuid);
 }
 
 /// <summary>
@@ -187,8 +188,8 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         MainScene.CalculateProportionsRatio(settings.BaseWidth);
         PreviewScene.CalculateProportionsRatio(settings.BaseWidth);
         
-        string mainScene = await OBS.GetCurrentProgramScene();
-        await MainScene.SetSceneItems(mainScene, true);
+        CurrentProgramSceneNameResponse mainScene = await OBS.GetCurrentProgramScene();
+        await MainScene.SetSceneItems(mainScene.SceneName, mainScene.SceneUuid, true);
         await StudioModeChanged();
     }
 
@@ -238,7 +239,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     {
         try
         {
-            await UpdateSceneItems(e.SceneName);
+            await UpdateSceneItems(e.SceneName, e.SceneUuid);
         }
         catch (Exception ex)
         {
@@ -249,7 +250,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     {
         try
         {
-            await CurrentMainSceneChanged(e.SceneName);
+            await CurrentMainSceneChanged(e.SceneName, e.SceneUuid);
         }
         catch (Exception ex)
         {
@@ -260,7 +261,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     {
         try
         {
-            await CurrentPreviewSceneChanged(e.SceneName);
+            await CurrentPreviewSceneChanged(e.SceneName, e.SceneUuid);
         }
         catch (Exception ex)
         {
@@ -306,38 +307,38 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         }
     }
     
-    private async Task CurrentMainSceneChanged(string scene)
+    private async Task CurrentMainSceneChanged(string sceneName, Guid sceneUuid)
     {
-        bool isDuplicate = scene.Equals(MainScene.SceneName);
-        Logger.Log($"Program scene: {scene}, duplicate: {isDuplicate}");
+        bool isDuplicate = sceneUuid.Equals(MainScene.SceneUuid);
+        Logger.Log($"Program scene: {sceneName}, duplicate: {isDuplicate}");
         if (isDuplicate) return;
 
-        await MainScene.SetSceneItems(scene);
+        await MainScene.SetSceneItems(sceneName, sceneUuid);
     }
-    private async Task CurrentPreviewSceneChanged(string scene)
+    private async Task CurrentPreviewSceneChanged(string sceneName, Guid sceneUuid)
     {
-        if (scene.Equals(PreviewScene.SceneName)) return;
-        if (scene.Equals(MainScene.SceneName))
+        if (sceneName.Equals(PreviewScene.SceneName)) return;
+        if (sceneName.Equals(MainScene.SceneName))
         {
             PreviewScene.Clear();
             return;
         }
-        Logger.Log("Loading Preview scene: " + scene);
+        Logger.Log("Loading Preview scene: " + sceneName);
         
         await LoadScenesForStudioMode(false);
-        await PreviewScene.SetSceneItems(scene);
-        await LoadPreviewScene(scene, true);
+        await PreviewScene.SetSceneItems(sceneName, sceneUuid);
+        await LoadPreviewScene(sceneName, true);
     }
     
-    private async Task UpdateSceneItems(string scene)
+    private async Task UpdateSceneItems(string sceneName, Guid sceneUuid)
     {
-        if (scene.Equals(MainScene.SceneName))
+        if (sceneName.Equals(MainScene.SceneName))
         {
-            await MainScene.SetSceneItems(scene, true);
+            await MainScene.SetSceneItems(sceneName, sceneUuid, true);
             return;
         }
 
-        await PreviewScene.SetSceneItems(scene, true);
+        await PreviewScene.SetSceneItems(sceneName, sceneUuid, true);
     }
 
     private void UpdateSelectedScene(string sceneName)
@@ -467,17 +468,17 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => _playerRepository.GetPlayerByStreamName(name, type);
     public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName) => await OBS.GetBrowserURLStreamInfo(sceneItemName);
-    public async Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string scene)
+    public async Task<(List<(SceneItem, SceneItem?)>, List<SceneItem>)> GetSceneItems(string sceneName, Guid sceneUuid)
     {
         List<SceneItem> additionals = [];
         List<(SceneItem, SceneItem?)> povItems = [];
 
-        if (string.IsNullOrWhiteSpace(scene.Trim())) return (povItems, additionals);
+        if (sceneUuid.Equals(Guid.Empty)) return (povItems, additionals);
         
         try
         {
             //TODO: 1 TEMP z racji i tak reorganizacji kodu OBS do update 0.13
-            SceneItem[] sceneItems = await OBS.GetSceneItemList(scene);
+            SceneItem[] sceneItems = await OBS.GetSceneItemList(sceneUuid);
 
             foreach (var item in sceneItems)
             {

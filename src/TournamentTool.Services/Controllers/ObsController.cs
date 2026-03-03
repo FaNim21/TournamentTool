@@ -112,6 +112,7 @@ public class ObsController : IDisposable
             bool studioMode = await Client.GetStudioModeEnabled();
             ChangeStudioMode(studioMode);
 
+            Client.ConnectionClosed += OnConnectionClosed;
             Client.StudioModeStateChanged += OnStudioModeStateChanged;
             Client.SceneItemListReindexed += OnSceneItemListReindexed;
             Client.CurrentSceneCollectionChanged += OnSceneCollectionChanged;
@@ -135,6 +136,7 @@ public class ObsController : IDisposable
     {
         Client.PropertyChanged -= OnPropertyChanged;
 
+        Client.ConnectionClosed -= OnConnectionClosed;
         Client.StudioModeStateChanged -= OnStudioModeStateChanged;
         Client.SceneItemListReindexed -= OnSceneItemListReindexed;
         Client.CurrentSceneCollectionChanged -= OnSceneCollectionChanged;
@@ -239,6 +241,11 @@ public class ObsController : IDisposable
         //await Client.CreateSceneItem(CurrentSceneName, sceneName);
     }
 
+    private void OnConnectionClosed(object? sender, ConnectionClosedEventArgs e)
+    {
+        
+    }
+    
     private async void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         try
@@ -274,7 +281,7 @@ public class ObsController : IDisposable
         //TODO: 7 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
         // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
-        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+        SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName, e.SceneUuid));
     }
     private async void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
     {
@@ -300,7 +307,7 @@ public class ObsController : IDisposable
             }
             
             Logger.Log(e.SceneName + " - " + e.SourceName);
-            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName, e.SceneUuid));
         }
         catch
         {
@@ -333,7 +340,7 @@ public class ObsController : IDisposable
             */
             
             Logger.Log(e.SceneName + " - " + e.SourceName);
-            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName));
+            SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName, e.SceneUuid));
         }
         catch
         {
@@ -345,9 +352,9 @@ public class ObsController : IDisposable
     {
         try
         {
-            string scene = await Client.GetCurrentProgramScene();
-            CurrentProgramSceneChanged?.Invoke(this, new SceneNameEventArgs(scene));
-            CurrentPreviewSceneChanged?.Invoke(this, new SceneNameEventArgs(" "));
+            var programScene = await Client.GetCurrentProgramScene();
+            CurrentProgramSceneChanged?.Invoke(this, new SceneNameEventArgs(programScene.SceneName, programScene.SceneUuid));
+            CurrentPreviewSceneChanged?.Invoke(this, new SceneNameEventArgs(" ", Guid.Empty));
             //tu jest bardzo prosty trik z poprawnym wczytywaniem studio mode zeby w kodzie dalej lapac przy zmianie scene collection wczytywanie scen pod preview
             //jest to tymczasowe rozwiazanie z racji reworku komunikacji z obsem
         }
@@ -394,13 +401,17 @@ public class ObsController : IDisposable
     {
         return await Client.GetVideoSettings();
     }
-    public async Task<string> GetCurrentProgramScene()
+    public async Task<CurrentProgramSceneNameResponse> GetCurrentProgramScene()
     {
         return await Client.GetCurrentProgramScene();
     }
     public async Task<SceneItem[]> GetSceneItemList(string scene)
     {
         return await Client.GetSceneItemList(scene);
+    }
+    public async Task<SceneItem[]> GetSceneItemList(Guid uuid)
+    {
+        return await Client.GetSceneItemList(uuid);
     }
     public async Task<SceneItem[]> GetGroupSceneItemList(string group)
     {

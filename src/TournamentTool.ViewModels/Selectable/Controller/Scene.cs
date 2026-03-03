@@ -51,6 +51,17 @@ public class Scene : BaseViewModel
             OnPropertyChanged(nameof(SceneName));
         }
     }
+    
+    private Guid _sceneUuid = Guid.Empty;
+    public Guid SceneUuid
+    {
+        get => _sceneUuid;
+        set
+        {
+            _sceneUuid = value;
+            OnPropertyChanged(nameof(SceneUuid));
+        }
+    }
 
     private float _canvasWidth;
     public float CanvasWidth
@@ -146,15 +157,16 @@ public class Scene : BaseViewModel
         UpdatePovsProportions();
     } 
 
-    public async Task SetSceneItems(string scene, bool force = false, bool updatePlayersInPov = true)
+    public async Task SetSceneItems(string sceneName, Guid sceneUuid, bool force = false, bool updatePlayersInPov = true)
     {
-        if (string.IsNullOrEmpty(scene)) return;
-        if (scene.Equals(SceneName) && !force) return;
+        if (string.IsNullOrEmpty(sceneName) && sceneUuid.Equals(Guid.Empty)) return;
+        if (sceneName.Equals(SceneName) && sceneUuid.Equals(SceneUuid) && !force) return;
 
-        SceneName = scene;
+        SceneName = sceneName;
+        SceneUuid = sceneUuid;
         ClearPovs();
 
-        (List<(SceneItem, SceneItem?)> povItems, List<SceneItem> additionals) = await SceneController.GetSceneItems(scene);
+        (List<(SceneItem, SceneItem?)> povItems, List<SceneItem> additionals) = await SceneController.GetSceneItems(sceneName, sceneUuid);
 
         if (updatePlayersInPov) SceneController.ClearPlayersFromPovs();
 
@@ -214,17 +226,26 @@ public class Scene : BaseViewModel
             }
         }
         AddPov(pov);
+
+        (string? currentName, int volume, StreamType type) data = (string.Empty, 0, StreamType.twitch);
+        try
+        {
+            data = await SceneController.GetBrowserURLStreamInfo(pov.Data.SceneItemName);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
         
-        (string? currentName, int volume, StreamType type) = await SceneController.GetBrowserURLStreamInfo(pov.Data.SceneItemName);
-        if (string.IsNullOrEmpty(currentName) || IsPlayerInPov(currentName, type))
+        if (string.IsNullOrEmpty(data.currentName) || IsPlayerInPov(data.currentName, data.type))
         {
             pov.Clear(true);
             return;
         }
         
-        IPlayerViewModel? player = SceneController.GetPlayerByStreamName(currentName, type);
+        IPlayerViewModel? player = SceneController.GetPlayerByStreamName(data.currentName, data.type);
         
-        pov.ChangeVolume(volume);
+        pov.ChangeVolume(data.volume);
         
         if (player != null)
         {
@@ -235,8 +256,8 @@ public class Scene : BaseViewModel
         }
         else
         {
-            pov.CustomStreamType = type;
-            pov.CustomStreamName = currentName;
+            pov.CustomStreamType = data.type;
+            pov.CustomStreamName = data.currentName;
             pov.SetCustomPOV();
         }
     }
@@ -250,7 +271,7 @@ public class Scene : BaseViewModel
     }
     public async Task Refresh()
     {
-        await SetSceneItems(SceneName!, true, false);
+        await SetSceneItems(SceneName!, SceneUuid, true, false);
     }
     public async Task RefreshPovs() 
     {
