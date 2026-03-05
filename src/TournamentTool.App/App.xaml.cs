@@ -1,7 +1,11 @@
 ﻿using System.IO;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
+using ObsWebSocket.Core;
+using ObsWebSocket.Core.Serialization;
 using TournamentTool.App.Services;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Factories;
@@ -121,6 +125,10 @@ public partial class App : Application
         services.AddSingleton<Func<Type, SelectableViewModel>>(serviceProvider => viewModelType => (SelectableViewModel)serviceProvider.GetRequiredService(viewModelType));
         
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
+        
+        //OBS web socket client things
+        services.TryAddSingleton<JsonMessageSerializer>();
+        services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
 
         _serviceProvider = services.BuildServiceProvider();
     }

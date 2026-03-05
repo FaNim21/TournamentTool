@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using OBSStudioClient.Classes;
+using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
@@ -52,8 +52,8 @@ public class Scene : BaseViewModel
         }
     }
     
-    private Guid _sceneUuid = Guid.Empty;
-    public Guid SceneUuid
+    private string _sceneUuid = string.Empty;
+    public string SceneUuid
     {
         get => _sceneUuid;
         set
@@ -157,49 +157,51 @@ public class Scene : BaseViewModel
         UpdatePovsProportions();
     } 
 
-    public async Task SetSceneItems(string sceneName, Guid sceneUuid, bool force = false, bool updatePlayersInPov = true)
+    public async Task SetSceneItems(string sceneName, string sceneUuid, bool force = false, bool updatePlayersInPov = true)
     {
-        if (string.IsNullOrEmpty(sceneName) && sceneUuid.Equals(Guid.Empty)) return;
+        if (string.IsNullOrEmpty(sceneName) && string.IsNullOrEmpty(sceneUuid)) return;
         if (sceneName.Equals(SceneName) && sceneUuid.Equals(SceneUuid) && !force) return;
 
         SceneName = sceneName;
         SceneUuid = sceneUuid;
         ClearPovs();
 
-        (List<(SceneItem, SceneItem?)> povItems, List<SceneItem> additionals) = await SceneController.GetSceneItems(sceneName, sceneUuid);
+        (List<(SceneItemStub, SceneItemStub?)> povItems, List<SceneItemStub> additionals) = await SceneController.GetSceneItems(sceneName, sceneUuid);
 
         if (updatePlayersInPov) SceneController.ClearPlayersFromPovs();
 
         for (int i = povItems.Count - 1; i >= 0; i--)
         {
-            (SceneItem, SceneItem?) current = povItems[i];
+            (SceneItemStub, SceneItemStub?) current = povItems[i];
             await SetupPovFromSceneItem(additionals, current.Item1, current.Item2);
         }
     }
-    private async Task SetupPovFromSceneItem(List<SceneItem> additionals, SceneItem item, SceneItem? group = null)
+    private async Task SetupPovFromSceneItem(List<SceneItemStub> additionals, SceneItemStub item, SceneItemStub? group = null)
     {
-        float positionX = item.SceneItemTransform.PositionX;
-        float positionY = item.SceneItemTransform.PositionY;
+        if (item.SceneItemTransform == null) return;
+        
+        double positionX = item.SceneItemTransform.PositionX ?? 0d;
+        double positionY = item.SceneItemTransform.PositionY ?? 0d;
 
-        float width = item.SceneItemTransform.Width;
-        float height = item.SceneItemTransform.Height;
+        double width = item.SceneItemTransform.Width ?? 0d;
+        double height = item.SceneItemTransform.Height ?? 0d;
 
         string groupName = string.Empty;
-        if (group != null)
+        if (group != null && group.SceneItemTransform != null)
         {
-            groupName = group.SourceName;
+            groupName = group.SourceName ?? string.Empty;
 
-            positionX *= group.SceneItemTransform.ScaleX;
-            positionY *= group.SceneItemTransform.ScaleY;
+            positionX *= group.SceneItemTransform.ScaleX ?? 0d;
+            positionY *= group.SceneItemTransform.ScaleY! ?? 0d;
 
-            positionX += group.SceneItemTransform.PositionX;
-            positionY += group.SceneItemTransform.PositionY;
+            positionX += group.SceneItemTransform.PositionX ?? 0d;
+            positionY += group.SceneItemTransform.PositionY ?? 0d;
 
-            width *= group.SceneItemTransform.ScaleX;
-            height *= group.SceneItemTransform.ScaleY;
+            width *= group.SceneItemTransform.ScaleX ?? 0d;
+            height *= group.SceneItemTransform.ScaleY ?? 0d;
         }
 
-        PointOfViewOBSData povData = new(item.SceneItemId, groupName, SceneName, item.SourceName);
+        PointOfViewOBSData povData = new(item.SceneItemId ?? 0d, groupName, SceneName, item.SourceName!);
         PointOfView pov = new(_povController, povData, Dispatcher, Type)
         {
             OriginX = (int)positionX,
@@ -212,7 +214,7 @@ public class Scene : BaseViewModel
 
         foreach (var additional in additionals)
         {
-            if (additional.SourceName.StartsWith(pov.Data.SceneItemName, StringComparison.CurrentCultureIgnoreCase))
+            if (additional.SourceName!.StartsWith(pov.Data.SceneItemName, StringComparison.CurrentCultureIgnoreCase))
             {
                 pov.Data.TextFieldItemName = additional.SourceName;
             }

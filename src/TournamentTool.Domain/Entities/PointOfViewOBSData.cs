@@ -4,7 +4,7 @@ namespace TournamentTool.Domain.Entities;
 
 public class PointOfViewOBSData
 {
-    public int ID { get; init; }
+    public double ID { get; init; }
     public string GroupName { get; init; }
     public string SceneName { get; init; }
     public string SceneItemName { get; init; }
@@ -23,7 +23,7 @@ public class PointOfViewOBSData
     public bool IsMuted { get; set; } = true;
     
     
-    public PointOfViewOBSData(int id, string groupName, string sceneName, string sceneItemName)
+    public PointOfViewOBSData(double id, string groupName, string sceneName, string sceneItemName)
     {
         ID = id;
         GroupName = groupName;

@@ -69,7 +69,7 @@ public class PointOfViewOBSController : IPointOfViewOBSController
     public void SetTextField(string itemName, string data)
     {
         if (string.IsNullOrEmpty(itemName)) return;
-        _obs.SetTextField(itemName, data);
+        _obs.SetTextFieldAsync(itemName, data);
     } 
     
     private string GetURL(PointOfViewOBSData data)

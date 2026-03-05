@@ -1,4 +1,4 @@
-﻿using OBSStudioClient.Classes;
+﻿using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
@@ -117,7 +117,7 @@ public class APIUpdaterService : IServiceUpdater
             await _api.UpdateFileContent(_rankedNames[i], string.Empty);
         }
         
-        SceneItem[] itemsInHeadsGroup = [];
+        List<SceneItemStub> itemsInHeadsGroup = [];
         List<string> sourceNames = [];
 
         try
@@ -129,10 +129,10 @@ public class APIUpdaterService : IServiceUpdater
             // Logger.Error(ex);
         }
 
-        for (int i = 0; i < itemsInHeadsGroup.Length; i++)
+        for (int i = 0; i < itemsInHeadsGroup.Count; i++)
         {
             var item = itemsInHeadsGroup[i];
-            var sourceName = item.SourceName.ToLower();
+            var sourceName = item.SourceName!.ToLower();
             if (!sourceName.StartsWith("split_head")) continue;
 
             string numberLetters = sourceName[^2..];
@@ -179,9 +179,9 @@ public class APIUpdaterService : IServiceUpdater
             await _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
         }
         
-        UpdateTwoPlayersSplitsData(rankedManagementData);
+        await UpdateTwoPlayersSplitsData(rankedManagementData);
     }
-    private void UpdateTwoPlayersSplitsData(RankedManagementData rankedManagementData)
+    private async Task UpdateTwoPlayersSplitsData(RankedManagementData rankedManagementData)
     {
         List<List<long>> playersTimes = [];
         
@@ -208,7 +208,7 @@ public class APIUpdaterService : IServiceUpdater
                     if (!data.PlayerName.Equals(_savedNames[i])) continue;
                     
                     var formattedTime = TimeSpan.FromMilliseconds(data.Time).ToFormattedTime();
-                    _api.UpdateFileContent(_splitsAPINames[i][j].Time, formattedTime);
+                    await _api.UpdateFileContent(_splitsAPINames[i][j].Time, formattedTime);
                     
                     playersTimes[i].Add(data.Time);
                     foundData = true;
@@ -217,8 +217,8 @@ public class APIUpdaterService : IServiceUpdater
 
                 if (foundData) continue;
                 playersTimes[i].Add(0);
-                _api.UpdateFileContent(_splitsAPINames[i][j].Time, string.Empty);
-                _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
+                await _api.UpdateFileContent(_splitsAPINames[i][j].Time, string.Empty);
+                await _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
             }
         }
         
@@ -228,7 +228,7 @@ public class APIUpdaterService : IServiceUpdater
             {
                 if (j >= playersTimes[i].Count || playersTimes[i][j] == 0)
                 {
-                    _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
+                    await _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
                     continue;
                 }
 
@@ -247,7 +247,7 @@ public class APIUpdaterService : IServiceUpdater
 
                 if (fastestPlayerIndex == -1 || fastestPlayerIndex == i)
                 {
-                    _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
+                    await _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, string.Empty);
                     continue;
                 }
 
@@ -263,7 +263,7 @@ public class APIUpdaterService : IServiceUpdater
                     formattedTime = "-" + formattedTime;
                 }
 
-                _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, formattedTime);
+                await _api.UpdateFileContent(_splitsAPINames[i][j].TimeDifference, formattedTime);
             }
         }
     }
@@ -319,7 +319,7 @@ public class APIUpdaterService : IServiceUpdater
     }
     private async Task UpdatePlayerHeads()
     {
-        SceneItem[] itemsInHeadsGroup = [];
+        List<SceneItemStub> itemsInHeadsGroup = [];
         try
         {
             itemsInHeadsGroup = await _obs.GetGroupSceneItemList("leaderboard_heads");
@@ -329,10 +329,10 @@ public class APIUpdaterService : IServiceUpdater
             // Logger.Error(ex);
         }
         
-        for (int i = 0; i < itemsInHeadsGroup.Length; i++)
+        for (int i = 0; i < itemsInHeadsGroup.Count; i++)
         {
             var item = itemsInHeadsGroup[i];
-            var sourceName = item.SourceName.ToLower();
+            var sourceName = item.SourceName!.ToLower();
             if (!sourceName.StartsWith("head")) continue;
 
             string numberLetters = sourceName[^2..];

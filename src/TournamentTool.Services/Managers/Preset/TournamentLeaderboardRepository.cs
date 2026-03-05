@@ -178,6 +178,5 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
     {
         Leaderboard.OrderedEntries.Clear();
         _lookupEntries.Clear();
-        //TODO: 0 zrobic normalne clearowanie wszystkich graczy
     }
 }
