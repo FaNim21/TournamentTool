@@ -51,7 +51,7 @@
 2. Configure initial settings for OBS, such as scene items and WebSocket connections, and add players to the whitelist.  
 3. Select the desired preset and start your tournament!
 
-For support or inquiries, feel free to reach out via Discord: [FaNim#fanim](https://discord.com/users/297749409385676801)
+For support or inquiries, feel free to reach out via Discord: [FaNim](https://discord.com/users/297749409385676801)
 
 ## Thanks to:
 - Automatt for ideas and motivation
