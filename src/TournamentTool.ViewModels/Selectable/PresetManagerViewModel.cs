@@ -169,6 +169,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             
             return;
         }
+
+        if (_appCache == null) return;
         
         string lastOpened = _appCache.LastOpenedPresetName;
         if (string.IsNullOrWhiteSpace(lastOpened)) return;
@@ -232,9 +234,16 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
             }
         }
 
+        if (_appCache == null)
+        {
+            foreach (var preset in presetList)
+                Presets.Add(preset);
+            return;
+        }
+        
         IOrderedEnumerable<TournamentPresetViewModel> sorted = presetList.OrderBy(preset => 
             _appCache.PresetsOrder.GetValueOrDefault(preset.Name, new PresetOrderData()).index);
-        
+
         foreach (var preset in sorted)
             Presets.Add(preset);
     }

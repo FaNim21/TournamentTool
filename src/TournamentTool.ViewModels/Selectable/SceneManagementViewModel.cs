@@ -1,10 +1,13 @@
 ﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Services.Obs;
 
 namespace TournamentTool.ViewModels.Selectable;
 
 public class SceneManagementViewModel : SelectableViewModel
 {
+    private readonly IObsCommunicationProvider _obsCommunicationProvider;
+
     /// <summary>
     /// ViewModel nie moze byc glownym miejscem technicznej komunikacji, tylko rzeczywistym posrednikiem miedzy logika a UI
     /// Takze jak bedzie wygladac design komunikacji:
@@ -31,8 +34,8 @@ public class SceneManagementViewModel : SelectableViewModel
     /// - 
     ///     
     /// </summary>
-    public SceneManagementViewModel(IDispatcherService dispatcher) : base(dispatcher)
+    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider) : base(dispatcher)
     {
-        
+        _obsCommunicationProvider = obsCommunicationProvider;
     }
 }

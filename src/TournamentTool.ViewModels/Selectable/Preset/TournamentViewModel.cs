@@ -368,6 +368,8 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
     }
     private void UpdateGoodPacesTexts()
     {
+        if (_tournamentState.IsEmpty()) return;
+        
         var time = TimeSpan.FromMilliseconds(Structure2GoodPaceMiliseconds).ToString(@"mm\:ss");
         Structure2ToText = $"Structure 2 (sub {time})";
     

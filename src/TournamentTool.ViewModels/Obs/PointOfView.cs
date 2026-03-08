@@ -1,92 +1,37 @@
-﻿using System.Windows.Input;
-using TournamentTool.Core.Common;
+﻿using System.Globalization;
+using System.Windows.Input;
+using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Selectable.Controller;
 
-namespace TournamentTool.ViewModels.Entities;
+namespace TournamentTool.ViewModels.Obs;
 
-public class PointOfView : BaseViewModel
+public class PointOfView : BrowserItemViewModel
 {
-    private readonly IPointOfViewOBSController _controller;
-
     public SceneType Type { get; }
-    public PointOfViewOBSData Data { get; }
-    
-    public int OriginWidth { get; init; }
-    public int Width { get; private set; }
-    public int OriginHeight { get; init; }
-    public int Height { get; private set; }
 
-    public int OriginX { get; init; }
-    public int X { get; private set; }
-    public int OriginY { get; init; }
-    public int Y { get; private set; }
+    public override int ZIndex { get; protected set; } = 0;
 
-    public string TextFieldItemName
-    {
-        get => Data.TextFieldItemName;
-        set
-        {
-            Data.TextFieldItemName = value;
-            OnPropertyChanged(nameof(TextFieldItemName));
-        }
-    }
-    public string HeadItemName
-    {
-        get => Data.HeadItemName;
-        set
-        {
-            Data.HeadItemName = value;
-            OnPropertyChanged(nameof(HeadItemName));
-        }
-    }
-    public string PersonalBestItemName
-    {
-        get => Data.PersonalBestItemName;
-        set
-        {
-            Data.PersonalBestItemName = value;
-            OnPropertyChanged(nameof(PersonalBestItemName));
-        }
-    }
+    public bool IsFromWhiteList { get; private set; }
 
-    public bool IsFromWhiteList
-    {
-        get => Data.IsFromWhiteList;
-        set => Data.IsFromWhiteList = value;
-    }
+    private string _displayedPlayer = string.Empty;
     public string DisplayedPlayer
     {
-        get => Data.DisplayedPlayer;
+        get => _displayedPlayer;
         set
         {
-            Data.DisplayedPlayer = value;
+            _displayedPlayer = value;
             OnPropertyChanged(nameof(DisplayedPlayer));
         }
     }
-    public string PersonalBest
-    {
-        get => Data.PersonalBest;
-        set => Data.PersonalBest = value;
-    }
-    public string HeadViewParametr
-    {
-        get => Data.HeadViewParametr;
-        set => Data.HeadViewParametr = value;
-    }
-    public StreamDisplayInfo StreamDisplayInfo
-    {
-        get => Data.StreamDisplayInfo;
-        set => Data.StreamDisplayInfo = value;
-    }
 
-    public bool IsFocused { get; private set; }
-    public string? BackgroundColor { get; set; }
+    public StreamDisplayInfo StreamDisplayInfo { get; private set; } = new(string.Empty, StreamType.twitch);
 
     public bool IsPlayerUsed
     {
@@ -114,7 +59,6 @@ public class PointOfView : BaseViewModel
         }
     }
     public bool IsEmpty => player == null;
-    
 
     public IPlayer? player;
 
@@ -143,28 +87,29 @@ public class PointOfView : BaseViewModel
     public string CurrentCustomStreamName { get; private set; } = string.Empty;
     public StreamType CurrentCustomStreamType { get; private set; } = StreamType.twitch;
 
-    public string TextVolume => $"{NewVolume}%";
-
+    private int _volume;
     public int Volume
     {
-        get => Data.Volume;
+        get => _volume;
         set
         {
-            Data.Volume = value;
+            _volume = value;
             OnPropertyChanged(nameof(Volume));
         }
     }
 
+    private bool _isMuted = true;
     public bool IsMuted
     {
-        get => Data.IsMuted;
+        get => _isMuted;
         set
         {
-            Data.IsMuted = value;  
+            _isMuted = value;  
             OnPropertyChanged(nameof(IsMuted));
         } 
     }
     
+    public string TextVolume => $"{NewVolume}%";
     private int _newVolume;
     public int NewVolume
     {
@@ -181,74 +126,101 @@ public class PointOfView : BaseViewModel
     public ICommand RefreshCommand { get; set; }
 
 
-    public PointOfView(IPointOfViewOBSController controller, PointOfViewOBSData data, IDispatcherService dispatcher, SceneType type = SceneType.Main) : base(dispatcher)
+    public PointOfView(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger, SceneType type = SceneType.Main) 
+        : base(controller, dispatcher, logger)
     {
-        Data = data;
         Type = type;
-        _controller = controller;
+        
+        BackgroundColor = Consts.UnFocusedPovColor;
 
-        UnFocus();
-
-        ApplyVolumeCommand = new RelayCommand(ApplyVolume);
-        RefreshCommand = new RelayCommand(async () => { await Refresh(); });
+        ApplyVolumeCommand = new RelayCommand(async () => await ApplyVolume());
+        RefreshCommand = new RelayCommand(async () => await RefreshAsync());
     }
 
-    public void UpdateTransform(float proportion)
+    public override async Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
     {
-        X = (int)(OriginX / proportion);
-        Y = (int)(OriginY / proportion);
+        await base.InitializeAsync(scene, item, group);
+        
+        (string? currentName, int volume, StreamType type) data = (string.Empty, 0, StreamType.twitch);
+        try
+        {
+            data = await Controller.GetBrowserURLStreamInfo(SourceUUID);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
 
-        Width = (int)(OriginWidth / proportion);
-        Height = (int)(OriginHeight / proportion);
+        bool specificPovExists = scene.ExistInItems<PointOfView>(p => 
+            p.StreamDisplayInfo.Name.Equals(data.currentName, StringComparison.OrdinalIgnoreCase)
+            && p.StreamDisplayInfo.Type.Equals(data.type));
+        
+        if (string.IsNullOrEmpty(data.currentName) || specificPovExists)
+        {
+            await ClearAsync(true);
+            return;
+        }
 
-        OnPropertyChanged(nameof(X));
-        OnPropertyChanged(nameof(Y));
+        IPlayerViewModel? foundPlayer = Controller.GetPlayerByStreamName(data.currentName, data.type);
 
-        OnPropertyChanged(nameof(Width));
-        OnPropertyChanged(nameof(Height));
+        ChangeVolume(data.volume);
+
+        if (foundPlayer != null)
+        {
+            if (foundPlayer is PlayerViewModel playerViewModel)
+            {
+                await SetPOVAsync(playerViewModel);
+            }
+        }
+        else
+        {
+            CustomStreamType = data.type;
+            CustomStreamName = data.currentName;
+            await SetCustomPOVAsync();
+        }
     }
 
-    public void SetCustomPOV(IPovUsage? other = null)
+    public async Task SetCustomPOVAsync(IPovUsage? other = null)
     {
         if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(CurrentCustomStreamName))
         {
             CurrentCustomStreamName = string.Empty;
-            Clear();
+            await ClearAsync();
             return;
         }
         if (CustomStreamName.Equals(CurrentCustomStreamName) && CustomStreamType == CurrentCustomStreamType) return;
         
-        if (player != null) Clear();
+        if (player != null) await ClearAsync();
         CurrentCustomStreamName = CustomStreamName;
         CurrentCustomStreamType = CustomStreamType;
 
         CustomPlayer customPlayer = new(new StreamDisplayInfo(CustomStreamName, _customStreamType), "Unk", string.Empty);
         CustomPlayerViewModel playerViewModel = new(customPlayer, other);
         
-        SetPlayerToPOV(playerViewModel);
+        await SetPlayerToPOV(playerViewModel);
     }
 
-    public void SetPOV(IPlayer? povInfo)
+    public async Task SetPOVAsync(IPlayer? povInfo)
     {
         if (povInfo is null)
         {
-            Clear();
+            await ClearAsync();
             return;
         }
 
         if (povInfo.IsFromWhitelist)
         {
-            SetPlayerToPOV(povInfo);
+            await SetPlayerToPOV(povInfo);
             ClearCustomData();
         }
         else
         {
             CustomStreamName = povInfo.StreamDisplayInfo.Name;
             CustomStreamType = povInfo.StreamDisplayInfo.Type;
-            SetCustomPOV(povInfo);
+            await SetCustomPOVAsync(povInfo);
         }
     }
-    private void SetPlayerToPOV(IPlayer? povInfo)
+    private async Task SetPlayerToPOV(IPlayer? povInfo)
     {
         var oldPlayer = player;
         player = povInfo;
@@ -270,28 +242,27 @@ public class PointOfView : BaseViewModel
             }
         }
         
-        UpdatePOVInfo();
+        await UpdatePOVInfoAsync();
     }
     
-    private void UpdatePOVInfo()
+    private async Task UpdatePOVInfoAsync()
     {
         if (player == null)
         {
-            Clear();
+            await ClearAsync();
             return;
         }
 
         DisplayedPlayer = player.DisplayName;
         StreamDisplayInfo = player.StreamDisplayInfo;
-        HeadViewParametr = player.HeadViewParameter;
-        PersonalBest = player.GetPersonalBest ?? "Unk";
         IsFromWhiteList = player.IsFromWhitelist;
         IsPlayerUsed = true;
 
-        _controller.SendOBSInformations(Data);
+        Url = GetURL();
+        await UpdateAsync();
     }
     
-    public bool Swap(PointOfView? pov)
+    public async Task<bool> SwapAsync(PointOfView? pov)
     {
         if (pov is null) return false;
         if (Type != pov.Type) return false;
@@ -304,30 +275,19 @@ public class PointOfView : BaseViewModel
         (pov.CurrentCustomStreamType, CurrentCustomStreamType) = (CurrentCustomStreamType, pov.CurrentCustomStreamType);
 
         pov.player = player;
-        pov.UpdatePOVInfo();
+        await pov.UpdatePOVInfoAsync();
         player = povPlayer;
-        UpdatePOVInfo();
+        await UpdatePOVInfoAsync();
         return true;
     }
 
-    public async Task Refresh()
+    public override async Task RefreshAsync()
     {
-        _controller.SetBrowserURL(Data.SceneItemName, string.Empty);
+        Url = string.Empty;
+        await UpdateAsync();
+        
         await Task.Delay(25);
-        UpdatePOVInfo();
-    }
-
-    public void Focus()
-    {
-        IsFocused = true;
-        BackgroundColor = Consts.FocusedPovColor;
-        OnPropertyChanged(nameof(BackgroundColor));
-    }
-    public void UnFocus()
-    {
-        IsFocused = false;
-        BackgroundColor = Consts.UnFocusedPovColor;
-        OnPropertyChanged(nameof(BackgroundColor));
+        await UpdatePOVInfoAsync();
     }
 
     public void ChangeVolume(int volume)
@@ -338,21 +298,19 @@ public class PointOfView : BaseViewModel
         NewVolume = Volume;
         IsMuted = Volume == 0;
     }
-    public void ApplyVolume()
+    public async Task ApplyVolume()
     {
         Volume = NewVolume;
         IsMuted = Volume == 0;
 
-        _controller.UpdatePOVBrowser(Data);
+        await UpdateAsync();
     }
 
-    public void Clear(bool fullClear = false)
+    public override async Task ClearAsync(bool fullClear = false)
     {
         DisplayedPlayer = string.Empty;
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
         Volume = 0;
-        HeadViewParametr = string.Empty;
-        PersonalBest = string.Empty;
 
         if (fullClear)
         {
@@ -364,7 +322,7 @@ public class PointOfView : BaseViewModel
             player = null;
         }
 
-        _controller.Clear(Data);
+        await base.ClearAsync(fullClear);
     }
 
     private void ClearCustomData()
@@ -373,5 +331,21 @@ public class PointOfView : BaseViewModel
         CurrentCustomStreamType = StreamType.twitch;
         CustomStreamName = string.Empty;
         CustomStreamType = StreamType.twitch;
+    }
+    
+    private string GetURL()
+    {
+        if (string.IsNullOrEmpty(StreamDisplayInfo.Name)) return string.Empty;
+
+        int muted = IsMuted ? 1 : 0;
+        string url = StreamDisplayInfo.Type switch
+        {
+            StreamType.twitch => $"https://player.twitch.tv/?channel={StreamDisplayInfo.Name}&enableExtensions=true&muted=false&parent=twitch.tv&player=popout&quality=chunked&volume={(Volume / 100f).ToString(CultureInfo.InvariantCulture)}",
+            StreamType.kick => $"https://player.kick.com/{StreamDisplayInfo.Name}?muted={IsMuted.ToString().ToLower()}&allowfullscreen=true",
+            StreamType.youtube => $"https://www.youtube.com/embed/{StreamDisplayInfo.Name}?autoplay=1&controls=0&mute={muted}",
+            _ => string.Empty
+        };
+
+        return url;
     }
 }

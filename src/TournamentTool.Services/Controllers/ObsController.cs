@@ -38,14 +38,32 @@ public class ConnectionStateChangedEventArgs : EventArgs
     }
 }
 
-public class ObsController : IDisposable
+public interface IObsItemController
+{
+    //TODO: 0 rozbic odpowiedzialnosc tak zeby byl oddzielny serwis dla z obsem pod zarzadzanie itemami, wteyd scena moze posiadac 
+    // jego abstracke i to spowoduje, ze bedzie czytelniejsze zastosowanie tego
+}
+
+public interface IObsController
+{
+    event EventHandler<SceneItemListReindexedPayload>? SceneItemUpdateRequested;
+    event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+    event EventHandler<CurrentProgramSceneChangedPayload>? CurrentProgramSceneChanged;
+    event EventHandler<CurrentPreviewSceneChangedPayload>? CurrentPreviewSceneChanged;
+    event EventHandler? SceneTransitionStarted;
+    event EventHandler? StudioModeChanged;
+    
+    bool IsConnectedToWebSocket { get; }
+    bool StudioMode { get; }
+}
+
+public class ObsController : IObsController, IDisposable
 {
     private readonly ITournamentState _tournamentState;
     private readonly IWebSocketMessageSerializer _webSocketMessageSerializer;
     public ILoggingService Logger { get; }
 
-    public ObsWebSocketClientOptions ClientOptions { get; } = new() { ServerUri = new Uri("ws://127.0.0.1:4455/"), 
-        EventSubscriptions = (uint)EventSubscription.All };
+    public ObsWebSocketClientOptions ClientOptions { get; } = new();
     public ObsWebSocketClient Client { get; private set; }
  
     public event EventHandler<SceneItemListReindexedPayload>? SceneItemUpdateRequested;
@@ -57,6 +75,7 @@ public class ObsController : IDisposable
 
     public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
+
     public ConnectionState State { get; private set; }
     
     private readonly Settings _settings;
@@ -129,7 +148,6 @@ public class ObsController : IDisposable
         Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
         Client.SceneTransitionStarted += OnSceneTransitionStarted;
     }
-
     private void ClearClient()
     {
         Client.Connected -= OnConnected;
@@ -151,10 +169,12 @@ public class ObsController : IDisposable
     {
         if (_tryingToConnect) return;
         _tryingToConnect = true;
+
+        ClientOptions.EventSubscriptions = (uint)EventSubscription.All;
+        ClientOptions.ServerUri = new Uri($"ws://localhost:{_settings.Port}/");
+        ClientOptions.Password = _settings.Password;
         
         await Client.ConnectAsync();
-        //TODO: 0 nie da sie polaczyc z ustawien w tournament toolu i też chyba nie wszystkie feature'y są wlaczone
-        // await Client.ConnectAsync(true, _settings.Password, "localhost", _settings.Port, subscription);
     }
     private async void OnConnected(object? sender, EventArgs eventArgs)
     {
@@ -169,8 +189,6 @@ public class ObsController : IDisposable
             }
             
             IsConnectedToWebSocket = true;
-            // connected dziala, ale jest za szybkie wiec status bar nie przechwytuje eventu xd
-            // jednak nie wiem kompletnie dlaczego to nie dziala xd
             ChangeConnectionState(ConnectionState.Connected);
         }
         catch (Exception ex)
@@ -229,31 +247,19 @@ public class ObsController : IDisposable
     
     public async Task Disconnect() => await Client.DisconnectAsync();
 
-    public bool SetBrowserURL(string sceneItemName, string path)
+    public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
     {
-        if (!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return false;
-
-        Dictionary<string, object> input = new() { { "url", path }, };
+        if (string.IsNullOrWhiteSpace(sourceUuid)) return;
+        
         JsonElement element = JsonSerializer.SerializeToElement(input);
-        //TODO: 0 chyba trzeba zrobic wszystko async :/ plus tez jakis helper do tego trzeba zrobic, zeby nie serializowac caly czas tego 
-        // czy nawet nie helper, a metode, ktora po prostu przymnie samo dictionary xd
-        Task.Run(async () => { await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, sceneItemName)); });
-        return true;
+        await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
     }
-    public void SetTextFieldAsync(string sceneItemName, string text)
-    {
-        if (!IsConnectedToWebSocket || string.IsNullOrEmpty(sceneItemName)) return;
-
-        Dictionary<string, object> input = new() { { "text", text }, };
-        JsonElement element = JsonSerializer.SerializeToElement(input);
-        Task.Run(async () => { await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, sceneItemName)); });
-    }
-
-    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sceneItemName)
+    
+    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid)
     {
         if (!IsConnectedToWebSocket) return (string.Empty, 0, StreamType.twitch);
 
-        GetInputSettingsResponseData? settingsResponse = await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(sceneItemName));
+        GetInputSettingsResponseData? settingsResponse = await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(null, sourceUuid));
         if (settingsResponse == null ||
             !settingsResponse.InputSettings.HasValue ||
             !settingsResponse.InputSettings.Value.TryGetProperty("url", out JsonElement urlElement)) 
@@ -410,9 +416,11 @@ public class ObsController : IDisposable
     {
         return await Client.GetCurrentProgramSceneAsync();
     }
-    public async Task<GetSceneItemListResponseData?> GetSceneItemList(string? sceneName = null, string? sceneUuid = null)
+    public async Task<List<SceneItemStub>> GetSceneItemList(string? sceneName = null, string? sceneUuid = null)
     {
-        return await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(sceneName, sceneUuid));
+        GetSceneItemListResponseData? response = await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(sceneName, sceneUuid));
+        if (response == null) return [];
+        return response.SceneItems ?? [];
     }
     public async Task<List<SceneItemStub>> GetGroupSceneItemList(string group)
     {

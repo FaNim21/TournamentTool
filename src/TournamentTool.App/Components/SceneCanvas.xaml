@@ -7,21 +7,24 @@
              xmlns:controller="clr-namespace:TournamentTool.ViewModels.Selectable.Controller;assembly=TournamentTool.ViewModels"
              xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
              xmlns:entities="clr-namespace:TournamentTool.ViewModels.Entities;assembly=TournamentTool.ViewModels"
+             xmlns:obs1="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=controller:Scene}"
-             mc:Ignorable="d"
-             Unloaded="UserControl_Unloaded">
+             mc:Ignorable="d">
     <UserControl.Resources>
         <ContextMenu x:Key="POVContextMenu">
             <MenuItem Header="Info"
-                      Command="{Binding ShowInfoWindowCommand}" />
+                      Command="{Binding DataContext.ShowInfoWindowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      CommandParameter="{Binding .}"/>
             <MenuItem Header="Refresh"
-                      Command="{Binding RefreshPOVCommand}" />
+                      Command="{Binding DataContext.RefreshPOVCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      CommandParameter="{Binding .}"/>
             <MenuItem Header="Clear"
-                      Command="{Binding ClearPOVCommand}" 
-                      ToolTip="Ctrl + right mouse on pov"
-                      ToolTipService.InitialShowDelay="500"/>
+                      Command="{Binding DataContext.ClearPOVCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding .}"
+                      InputGestureText="Ctrl + RMB" />
         </ContextMenu>
     </UserControl.Resources>
+    
     <Border Background="Transparent"
             BorderBrush="Black"
             BorderThickness="1">
@@ -29,43 +32,49 @@
             <Canvas Background="#2C2C2C"
                     Width="{Binding CanvasWidth, Mode=OneWay}"
                     Height="{Binding CanvasHeight, Mode=OneWay}"
-                    SizeChanged="Canvas_SizeChanged"
                     AllowDrop="True"
                     ClipToBounds="True"
                     Focusable="True">
-                <ItemsControl ItemsSource="{Binding POVs}">
+                <ItemsControl ItemsSource="{Binding SceneItems}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
+                    
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
+                            <Setter Property="ContextMenu" Value="{StaticResource POVContextMenu}"/>
                             <Setter Property="Canvas.Left"
-                                    Value="{Binding X, Mode=OneWay}" />
+                                    Value="{Binding Transform.X, Mode=OneWay}" />
                             <Setter Property="Canvas.Top"
-                                    Value="{Binding Y, Mode=OneWay}" />
+                                    Value="{Binding Transform.Y, Mode=OneWay}" />
                             <Setter Property="Width"
-                                    Value="{Binding Width, Mode=OneWay}" />
+                                    Value="{Binding Transform.Width, Mode=OneWay}" />
                             <Setter Property="Height"
-                                    Value="{Binding Height, Mode=OneWay}" />
+                                    Value="{Binding Transform.Height, Mode=OneWay}" />
+                            
+                            <Setter Property="Panel.ZIndex"
+                                    Value="{Binding ZIndex, Mode=OneWay}" />
                         </Style>
                     </ItemsControl.ItemContainerStyle>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
+                    
+                    <ItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type obs1:PointOfView}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
-                                    Width="{Binding Width, Mode=OneWay}"
-                                    Height="{Binding Height, Mode=OneWay}"
+                                    Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                    Width="{Binding Transform.Width, Mode=OneWay}"
+                                    Height="{Binding Transform.Height, Mode=OneWay}"
                                     BorderBrush="#1E90FF"
                                     BorderThickness="0.8"
                                     CornerRadius="5"
                                     Drop="PointOfView_Drop"
                                     PreviewMouseLeftButtonDown="PointOfView_PreviewMouseLeftButtonDown"
-                                    PreviewMouseRightButtonDown="PointOfView_PreviewMouseRightButtonDown"
                                     MouseEnter="PointOfView_MouseEnter"
-                                    MouseLeave="PointOfView_MouseLeave">
+                                    MouseLeave="PointOfView_MouseLeave"
+                                    ContextMenuOpening="Border_ContextMenuOpening">
                                 <i:Interaction.Behaviors>
-                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type entities:PointOfView}"/>
+                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type obs1:PointOfView}"/>
                                 </i:Interaction.Behaviors>
                                 <Grid IsHitTestVisible="False">
                                     <TextBlock Text="{Binding SceneItemName, Mode=OneWay}"
@@ -76,7 +85,7 @@
                                     <TextBlock Text="{Binding DisplayedPlayer, Mode=OneWay}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               FontSize="{Binding Width, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FontSizeConverter}}"
+                                               FontSize="{Binding Transform.Width, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FontSizeConverter}}"
                                                FontWeight="Bold"
                                                Foreground="#373737" />
 
@@ -110,7 +119,19 @@
                                 </Grid>
                             </Border>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+                        
+                        <DataTemplate DataType="{x:Type obs1:SceneItemViewModel}">
+                            <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
+                                    Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                    Width="{Binding Transform.Width, Mode=OneWay}"
+                                    Height="{Binding Transform.Height, Mode=OneWay}"
+                                    IsHitTestVisible="False"
+                                    Opacity="0.5"
+                                    BorderBrush="#1873cc"
+                                    BorderThickness="0.8" />
+                        </DataTemplate>
+                        
+                    </ItemsControl.Resources>
                 </ItemsControl>
             </Canvas>
         </Grid>

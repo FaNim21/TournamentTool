@@ -1,4 +1,5 @@
 ﻿using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Obs;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
 

@@ -47,6 +47,8 @@ public class PresetManagerViewModelTests
         _tournamentState = Substitute.For<ITournamentState>();
         _playerRepository = Substitute.For<ITournamentPlayerRepository>();
 
+        _tournamentState.IsEmpty().Returns(true);
+        
         _presetManager = new PresetManagerViewModel(_presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
             Substitute.For<ILoggingService>(), _settingsProviderService, _luaScriptManager, dispatcher, _navigationService, _dialogService, _uiInteraction);
         
@@ -233,6 +235,8 @@ public class PresetManagerViewModelTests
             _uiInteraction = Substitute.For<IUIInteractionService>();
             _tournamentState = Substitute.For<ITournamentState>();
             _playerRepository = Substitute.For<ITournamentPlayerRepository>();
+            
+            _tournamentState.IsEmpty().Returns(true);
 
             _presetManager = new PresetManagerViewModel(_presetService, _tournamentState, _playerRepository, _backgroundCoordinator,
                 Substitute.For<ILoggingService>(), _settingsProviderService, _luaScriptManager, dispatcher, _navigationService, _dialogService, _uiInteraction);

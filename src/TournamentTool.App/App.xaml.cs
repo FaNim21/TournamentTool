@@ -21,6 +21,7 @@ using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
+using TournamentTool.Services.Obs;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities.Player;
@@ -126,9 +127,11 @@ public partial class App : Application
         
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
         
-        //OBS web socket client things
+        //OBS
         services.TryAddSingleton<JsonMessageSerializer>();
         services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
+
+        services.AddSingleton<IObsCommunicationProvider, ObsCommunicationProvider>();
 
         _serviceProvider = services.BuildServiceProvider();
     }

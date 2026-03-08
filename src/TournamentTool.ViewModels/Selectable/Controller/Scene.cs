@@ -5,11 +5,13 @@ using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.Controller;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
+using TournamentTool.ViewModels.Obs;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
 
@@ -19,9 +21,17 @@ public enum SceneType
     Preview
 }
 
-public class Scene : BaseViewModel
+public interface IScene
 {
-    private readonly IPointOfViewOBSController _povController;
+    string SceneName { get; }
+    string SceneUuid { get; }
+
+    bool ExistInItems<T>(Func<T, bool> condition) where T : SceneItemViewModel;
+    T? GetItem<T>(Func<T, bool> condition) where T : SceneItemViewModel;
+}
+
+public class Scene : BaseViewModel, IScene
+{
     private readonly Lock _lock = new();
     protected SceneType Type { get; set; }
 
@@ -30,14 +40,14 @@ public class Scene : BaseViewModel
     
     protected ILoggingService Logger { get; }
 
-    private ObservableCollection<PointOfView> _povs = [];
-    public ObservableCollection<PointOfView> POVs
+    private ObservableCollection<SceneItemViewModel> _sceneItems = [];
+    public ObservableCollection<SceneItemViewModel> SceneItems
     {
-        get => _povs; 
+        get => _sceneItems; 
         set
         { 
-            _povs = value;
-            OnPropertyChanged(nameof(POVs));
+            _sceneItems = value;
+            OnPropertyChanged(nameof(SceneItems));
         }
     }
 
@@ -108,32 +118,31 @@ public class Scene : BaseViewModel
     private const float _studioFactor = 2.05f;
 
 
-    public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IPointOfViewOBSController povController, IWindowService windowService, ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
+    public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IWindowService windowService, ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
     {
         Interactable = interactable;
         SceneController = sceneController;
         Logger = logger;
-        _povController = povController;
 
         Type = type;
 
-        ClearPOVCommand = new RelayCommand<PointOfView>(pov => { pov.Clear(true); });
+        ClearPOVCommand = new RelayCommand<PointOfView>(async pov => { await pov.ClearAsync(true); });
         RefreshPOVCommand = new RelayCommand<PointOfView>(pov => { pov.RefreshCommand.Execute(null); });
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(windowService, this, dispatcher);
     }
 
     public void Swap(Scene other)
     {
-        var povs = other.POVs;
+        var povs = other.SceneItems;
         float baseWidth = other.BaseWidth;
         string sceneName = other.SceneName;
 
         other.SceneName = SceneName;
-        other.POVs = POVs;
+        other.SceneItems = SceneItems;
         other.BaseWidth = BaseWidth;
 
         SceneName = sceneName;
-        POVs = povs;
+        SceneItems = povs;
         BaseWidth = baseWidth;
     }
 
@@ -154,192 +163,97 @@ public class Scene : BaseViewModel
         
         OnPropertyChanged(nameof(CanvasWidth));
         OnPropertyChanged(nameof(CanvasHeight));
-        UpdatePovsProportions();
+        UpdateItemsProportions();
     } 
 
-    public async Task SetSceneItems(string sceneName, string sceneUuid, bool force = false, bool updatePlayersInPov = true)
+    public async Task SetSceneItemsAsync(string sceneName, string sceneUuid, bool force = false, bool updatePlayersInPov = true)
     {
         if (string.IsNullOrEmpty(sceneName) && string.IsNullOrEmpty(sceneUuid)) return;
         if (sceneName.Equals(SceneName) && sceneUuid.Equals(SceneUuid) && !force) return;
 
         SceneName = sceneName;
         SceneUuid = sceneUuid;
-        ClearPovs();
+        
+        ClearSceneItems();
 
-        (List<(SceneItemStub, SceneItemStub?)> povItems, List<SceneItemStub> additionals) = await SceneController.GetSceneItems(sceneName, sceneUuid);
+        List<(SceneItemStub, SceneItemStub?)> items = await SceneController.GetSceneItemsAsync(sceneName, sceneUuid);
 
+        //TODO: 0 czemu to tu?????
         if (updatePlayersInPov) SceneController.ClearPlayersFromPovs();
 
-        for (int i = povItems.Count - 1; i >= 0; i--)
+        for (int i = items.Count - 1; i >= 0; i--)
         {
-            (SceneItemStub, SceneItemStub?) current = povItems[i];
-            await SetupPovFromSceneItem(additionals, current.Item1, current.Item2);
+            (SceneItemStub item, SceneItemStub? group) current = items[i];
+            await SetupSceneItems(current.item, current.group);
         }
     }
-    private async Task SetupPovFromSceneItem(List<SceneItemStub> additionals, SceneItemStub item, SceneItemStub? group = null)
+    private async Task SetupSceneItems(SceneItemStub item, SceneItemStub? group = null)
     {
         if (item.SceneItemTransform == null) return;
-        
-        double positionX = item.SceneItemTransform.PositionX ?? 0d;
-        double positionY = item.SceneItemTransform.PositionY ?? 0d;
 
-        double width = item.SceneItemTransform.Width ?? 0d;
-        double height = item.SceneItemTransform.Height ?? 0d;
+        string inputKind = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
 
-        string groupName = string.Empty;
-        if (group != null && group.SceneItemTransform != null)
+        //TODO: 0 Zrobic factory?
+        //TODO: 0 Problem jest taki, ze tu trzeba tylko bazowe typy odpalac, a w scene management trzeba zdefiniowac wtedy zmiane browser na pov
+        // czyli trzeba ustalic wszystkie typy i mozliwosc ich zamiany, czyli point of view jest od klasy browser
+        SceneItemViewModel? sceneItem = inputKind switch
         {
-            groupName = group.SourceName ?? string.Empty;
-
-            positionX *= group.SceneItemTransform.ScaleX ?? 0d;
-            positionY *= group.SceneItemTransform.ScaleY! ?? 0d;
-
-            positionX += group.SceneItemTransform.PositionX ?? 0d;
-            positionY += group.SceneItemTransform.PositionY ?? 0d;
-
-            width *= group.SceneItemTransform.ScaleX ?? 0d;
-            height *= group.SceneItemTransform.ScaleY ?? 0d;
-        }
-
-        PointOfViewOBSData povData = new(item.SceneItemId ?? 0d, groupName, SceneName, item.SourceName!);
-        PointOfView pov = new(_povController, povData, Dispatcher, Type)
-        {
-            OriginX = (int)positionX,
-            OriginY = (int)positionY,
-
-            OriginWidth = (int)width,
-            OriginHeight = (int)height,
+            nameof(InputKind.browser_source) => new PointOfView(SceneController, Dispatcher, Logger, Type),
+            // nameof(InputKind.browser_source) => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
+            nameof(InputKind.text_gdiplus_v2) => new TextItemViewModel(SceneController, Dispatcher, Logger),
+            _ => null
         };
-        pov.UpdateTransform(ProportionsRatio);
 
-        foreach (var additional in additionals)
-        {
-            if (additional.SourceName!.StartsWith(pov.Data.SceneItemName, StringComparison.CurrentCultureIgnoreCase))
-            {
-                pov.Data.TextFieldItemName = additional.SourceName;
-            }
-            else if (additional.SourceName.StartsWith("head" + pov.Data.SceneItemName, StringComparison.OrdinalIgnoreCase))
-            {
-                pov.Data.HeadItemName = additional.SourceName;
-            }
-            else if (additional.SourceName.StartsWith("personalbest" + pov.Data.SceneItemName, StringComparison.OrdinalIgnoreCase))
-            {
-                pov.Data.PersonalBestItemName = additional.SourceName;
-            }
-        }
-        AddPov(pov);
+        if (sceneItem == null) return;
 
-        (string? currentName, int volume, StreamType type) data = (string.Empty, 0, StreamType.twitch);
-        try
-        {
-            data = await SceneController.GetBrowserURLStreamInfo(pov.Data.SceneItemName);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
-        
-        if (string.IsNullOrEmpty(data.currentName) || IsPlayerInPov(data.currentName, data.type))
-        {
-            pov.Clear(true);
-            return;
-        }
-        
-        IPlayerViewModel? player = SceneController.GetPlayerByStreamName(data.currentName, data.type);
-        
-        pov.ChangeVolume(data.volume);
-        
-        if (player != null)
-        {
-            if (player is PlayerViewModel playerViewModel)
-            {
-                pov.SetPOV(playerViewModel);
-            }
-        }
-        else
-        {
-            pov.CustomStreamType = data.type;
-            pov.CustomStreamName = data.currentName;
-            pov.SetCustomPOV();
-        }
+        await sceneItem.InitializeAsync(this, item, group);
+        sceneItem.Transform.UpdateProportions(ProportionsRatio);
+
+        AddSceneItem(sceneItem);
     }
 
-    public void RefreshItems()
-    {
-        for (int i = 0; i < POVs.Count; i++)
-        {
-            POVs[i].UpdateTransform(ProportionsRatio);
-        }
-    }
     public async Task Refresh()
     {
-        await SetSceneItems(SceneName!, SceneUuid, true, false);
+        await SetSceneItemsAsync(SceneName!, SceneUuid, true, false);
     }
-    public async Task RefreshPovs() 
+    public async Task RefreshItems() 
     {
-        for (int i = 0; i < POVs.Count; i++)
+        for (int i = 0; i < SceneItems.Count; i++)
         {
-            await POVs[i].Refresh();
+            await SceneItems[i].RefreshAsync();
         }
     }
 
-    public void AddPov(PointOfView pov)
+    public void AddSceneItem(SceneItemViewModel item)
     {
         Dispatcher.Invoke(delegate
         {
             lock (_lock)
             {
-                POVs.Add(pov);
+                SceneItems.Add(item);
             }
         });
     }
-    public void RemovePov(PointOfView pov)
+    public void RemoveSceneItem(SceneItemViewModel item)
     {
         Dispatcher.BeginInvoke(() =>
         {
             lock (_lock)
             {
-                POVs.Remove(pov);
+                SceneItems.Remove(item);
             }
         });
     }
-    public void ClearPovs()
+    public void ClearSceneItems()
     {
-        Dispatcher.Invoke(POVs.Clear);
+        Dispatcher.Invoke(SceneItems.Clear);
     }
 
-    public bool IsPlayerInPov(StreamDisplayInfo streamInfo)
-    {
-        return IsPlayerInPov(streamInfo.Name, streamInfo.Type);
-    }
-    public bool IsPlayerInPov(string streamName, StreamType streamType)
-    {
-        if (string.IsNullOrEmpty(streamName)) return false;
+    public bool ExistInItems<T>(Func<T, bool> condition) where T : SceneItemViewModel 
+        => SceneItems.OfType<T>().Any(condition);
 
-        for (int i = 0; i < POVs.Count; i++)
-        {
-            var current = POVs[i];
-            if (current.StreamDisplayInfo.Name.Equals(streamName, StringComparison.OrdinalIgnoreCase) &&
-                current.StreamDisplayInfo.Type == streamType)
-                return true;
-        }
-        return false;
-    }
-
-    public PointOfView? GetPlayerPov(string streamName, StreamType streamType)
-    {
-        if (string.IsNullOrEmpty(streamName)) return null;
-        
-        for (int i = 0; i < POVs.Count; i++)
-        {
-            var current = POVs[i];
-            if (current.StreamDisplayInfo.Name.Equals(streamName, StringComparison.OrdinalIgnoreCase) &&
-                current.StreamDisplayInfo.Type == streamType)
-                return current;
-        }
-
-        return null;
-    }
+    public T? GetItem<T>(Func<T, bool> condition) where T : SceneItemViewModel 
+        => SceneItems.OfType<T>().FirstOrDefault(condition);
 
     public void CalculateProportionsRatio(float baseWidth)
     {
@@ -359,21 +273,23 @@ public class Scene : BaseViewModel
             CanvasHeight = newHeight;
         }
         
-        UpdatePovsProportions();
+        UpdateItemsProportions();
     }
 
-    private void UpdatePovsProportions()
+    public void UpdateItemsProportions()
     {
-        for (int i = 0; i < POVs.Count; i++)
+        for (int i = 0; i < SceneItems.Count; i++)
         {
-            var pov = POVs[i];
-            pov.UpdateTransform(ProportionsRatio);
+            var pov = SceneItems[i];
+            pov.Transform.UpdateProportions(ProportionsRatio);
         }
     }
 
     public void Clear()
     {
         SceneName = string.Empty;
-        ClearPovs();
+        SceneUuid = string.Empty;
+        
+        ClearSceneItems();
     }
 }

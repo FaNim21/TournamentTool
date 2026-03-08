@@ -14,6 +14,7 @@ using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
+using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable.Controller;
 using TournamentTool.ViewModels.Selectable.Controller.Hub;
 using TournamentTool.ViewModels.Selectable.Controller.ManagementPanel;
@@ -266,22 +267,24 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         CurrentChosenPlayer = chosenPlayer;
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
-        bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main ?
-            SceneController.MainScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo) :
-            SceneController.PreviewScene.IsPlayerInPov(CurrentChosenPlayer.StreamDisplayInfo);
+        bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main
+            ? SceneController.MainScene.ExistInItems<PointOfView>(p =>
+                p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo))
+            : SceneController.PreviewScene.ExistInItems<PointOfView>(p =>
+                p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
         if (isPlayerInPOV)
         {
-            var pov = CurrentChosenPOV.Type == SceneType.Main
-                ? SceneController.MainScene.GetPlayerPov(CurrentChosenPlayer.StreamDisplayInfo.Name, CurrentChosenPlayer.StreamDisplayInfo.Type)
-                : SceneController.PreviewScene.GetPlayerPov(CurrentChosenPlayer.StreamDisplayInfo.Name, CurrentChosenPlayer.StreamDisplayInfo.Type);
+            PointOfView? pov = CurrentChosenPOV.Type == SceneType.Main 
+                ? SceneController.MainScene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo)) 
+                : SceneController.PreviewScene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
             if (pov == null) return;
             
-            CurrentChosenPOV!.Swap(pov);
+            CurrentChosenPOV!.SwapAsync(pov);
             UnSelectItems();
             return;
         }
 
-        CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
+        CurrentChosenPOV.SetPOVAsync(CurrentChosenPlayer);
         UnSelectItems();
     }
     

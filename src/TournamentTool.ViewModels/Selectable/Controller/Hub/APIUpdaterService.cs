@@ -147,7 +147,7 @@ public class APIUpdaterService : IServiceUpdater
         for (var i = 0; i < sourceNames.Count; i++)
         {
             var sourceName = sourceNames[i];
-            _obs.SetBrowserURL(sourceName, string.Empty);
+            // _obs.SetBrowserURL(sourceName, string.Empty);
             _savedNames[i] = string.Empty;
         }
 
@@ -158,14 +158,14 @@ public class APIUpdaterService : IServiceUpdater
             if (rankedManagementData.BestSplitsDatas.Count == 0) return;
             if (i >= rankedManagementData.BestSplitsDatas[0].Datas.Count)
             {
-                _obs.SetBrowserURL(sourceName, string.Empty);
+                // _obs.SetBrowserURL(sourceName, string.Empty);
                 _savedNames[i] = string.Empty;
                 continue;
             }
 
             if (i >= rankedManagementData.BestSplitsDatas[0].Datas.Count)
             {
-                _obs.SetBrowserURL(sourceName, string.Empty);
+                // _obs.SetBrowserURL(sourceName, string.Empty);
                 _savedNames[i] = string.Empty;
                 await _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
                 continue;
@@ -174,7 +174,7 @@ public class APIUpdaterService : IServiceUpdater
             var data = rankedManagementData.BestSplitsDatas[0].Datas[i];
 
             string url = _controller.GetHeadURL(data.PlayerName, 180);
-            _obs.SetBrowserURL(sourceName, url);
+            // _obs.SetBrowserURL(sourceName, url);
             _savedNames[i] = data.PlayerName;
             await _api.UpdateFileContent(_rankedNames[i], _savedNames[i]);
         }
@@ -343,13 +343,13 @@ public class APIUpdaterService : IServiceUpdater
             if (number is < 0 or > 19) continue;
             if (number >= _leaderboardRepository.OrderedEntries.Count)
             {
-                _obs.SetBrowserURL(item.SourceName, string.Empty);
+                // _obs.SetBrowserURL(item.SourceName, string.Empty);
                 continue;
             }
             var entry = _leaderboardRepository.OrderedEntries[number];
 
             string url = _controller.GetHeadURL(entry.PlayerUUID, 180);
-            _obs.SetBrowserURL(item.SourceName, url);
+            // _obs.SetBrowserURL(item.SourceName, url);
         }
     }
 }

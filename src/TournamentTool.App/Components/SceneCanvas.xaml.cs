@@ -2,15 +2,14 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Domain.Entities;
-using TournamentTool.ViewModels.Entities;
+using TournamentTool.Services.Logging;
+using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.App.Components;
 
 public partial class SceneCanvas : UserControl
 {
-    private readonly List<Border> _subscribedBorders = [];
-
     //TODO: 1 TO CALE GOWNO DAC DO BEHAVIORS
 
     public SceneCanvas()
@@ -18,94 +17,78 @@ public partial class SceneCanvas : UserControl
         InitializeComponent();
     }
 
-    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+    private async void PointOfView_Drop(object sender, DragEventArgs e)
     {
-        foreach (var border in _subscribedBorders)
+        try
         {
-            border.ContextMenuOpening -= Border_ContextMenuOpening;
-        }
-        _subscribedBorders.Clear();
-    }
+            if (sender is not Border droppedBorder) return;
+            if (DataContext is not Scene scene) return;
+            if (droppedBorder.DataContext is not PointOfView pov) return;
 
-    private void PointOfView_Drop(object sender, DragEventArgs e)
-    {
-        if (sender is not Border droppedBorder) return;
-        if (DataContext is not Scene scene) return;
-        if (droppedBorder.DataContext is not PointOfView pov) return;
-
-        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
-        {
-            if (!scene.IsPlayerInPov(info.StreamDisplayInfo))
+            if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
             {
-                pov.SetPOV(info);
+                if (!scene.ExistInItems<PointOfView>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo)))
+                {
+                    await pov.SetPOVAsync(info);
+                }
+                else
+                {
+                    PointOfView? foundPov =
+                        scene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
+                    if (foundPov == null) return;
+
+                    await foundPov.SwapAsync(pov);
+                }
             }
-            else
+            else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
             {
-                var foundPov = scene.GetPlayerPov(info.StreamDisplayInfo.Name, info.StreamDisplayInfo.Type);
-                foundPov?.Swap(pov);
+                await dragPov.SwapAsync(pov);
             }
+
+            scene.Interactable.UnSelectItems(true);
         }
-        else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
+        catch (Exception ex)
         {
-            dragPov.Swap(pov);
-        }
-
-        scene.Interactable.UnSelectItems(true);
-    }
-
-    private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        if (DataContext is not Scene viewModel) return;
-        //viewModel.ResizeCanvas();
-    }
-
-    private void PointOfView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (DataContext is not Scene scene) return;
-        if (sender is not Border clickedBorder) return;
-        if (clickedBorder!.DataContext is not PointOfView pov) return;
-
-        scene.Interactable.OnPOVClick(scene, pov);
-    }
-    private void PointOfView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is not Border border) return;
-
-        var contextMenu = (ContextMenu)FindResource("POVContextMenu");
-        contextMenu.DataContext ??= DataContext;
-
-        var currentItem = border.DataContext;
-        foreach (var item in contextMenu.Items)
-            if (item is MenuItem menuItem)
-                menuItem.CommandParameter = currentItem;
-
-        border.ContextMenu ??= contextMenu;
-
-        if (!_subscribedBorders.Contains(border))
-        {
-            border.ContextMenuOpening += Border_ContextMenuOpening;
-            _subscribedBorders.Add(border);
+            LogHelper.Error(ex);
         }
     }
 
-    private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    private async void PointOfView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not Border border) return;
-
-        if (Keyboard.Modifiers == ModifierKeys.Control)
+        try
         {
+            if (DataContext is not Scene scene) return;
+            if (sender is not Border clickedBorder) return;
+            if (clickedBorder!.DataContext is not PointOfView pov) return;
+
+            await scene.Interactable.OnPOVClickAsync(scene, pov);
+        }
+        catch (Exception ex)
+        {
+            LogHelper.Error(ex);
+        }
+    }
+
+    private async void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        try
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
+
+            if (sender is not Border border) return;
             if (border.DataContext is not PointOfView pov) return;
-            pov.Clear(true);
+
+            await pov.ClearAsync(true);
             e.Handled = true;
         }
+        catch (Exception ex)
+        {
+            LogHelper.Error(ex);
+        }
     }
 
-    private void PointOfView_MouseEnter(object sender, MouseEventArgs e)
-    {
-        Mouse.OverrideCursor = Cursors.Hand;
-    }
-    private void PointOfView_MouseLeave(object sender, MouseEventArgs e)
-    {
-        Mouse.OverrideCursor = null;
-    }
+    private void PointOfView_MouseEnter(object sender, MouseEventArgs e) 
+        => Mouse.OverrideCursor = Cursors.Hand;
+    private void PointOfView_MouseLeave(object sender, MouseEventArgs e) 
+        => Mouse.OverrideCursor = null;
 }

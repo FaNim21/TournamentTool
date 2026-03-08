@@ -81,30 +81,6 @@
                              FontWeight="SemiBold" />
                     </TextBlock>
                     <TextBlock>
-                        <Run Text="Text Item: "
-                             FontSize="12"
-                             Foreground="White" />
-                        <Run Text="{Binding PointOfView.TextFieldItemName}"
-                             Foreground="White"
-                             FontWeight="SemiBold" />
-                    </TextBlock>
-                    <TextBlock>
-                        <Run Text="PB Item: "
-                             FontSize="12"
-                             Foreground="White" />
-                        <Run Text="{Binding PointOfView.PersonalBestItemName}"
-                             Foreground="White"
-                             FontWeight="SemiBold" />
-                    </TextBlock>
-                    <TextBlock>
-                        <Run Text="Head Item: "
-                             FontSize="12"
-                             Foreground="White" />
-                        <Run Text="{Binding PointOfView.HeadItemName}"
-                             Foreground="White"
-                             FontWeight="SemiBold" />
-                    </TextBlock>
-                    <TextBlock>
                         <Run Text="Player: "
                              FontSize="12"
                              Foreground="White" />

@@ -6,6 +6,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Obs;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.SidePanel;
 

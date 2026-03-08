@@ -5,12 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable;assembly=TournamentTool.ViewModels"
+             xmlns:components="clr-namespace:TournamentTool.App.Components"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
              d:DesignWidth="1082"
              Background="#1E1E1E">
     <Grid>
-        
+        <components:SceneCanvas DataContext="{Binding }" />
     </Grid>
 </UserControl>

@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.ViewModels.Entities;
+using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels;
@@ -20,7 +21,10 @@ public class POVInformationViewModel : BaseWindowViewModel
 
     public override void Dispose()
     {
-        if (_scene.IsPlayerInPov(PointOfView.CustomStreamName, PointOfView.CustomStreamType)) return;
-        PointOfView.SetCustomPOV();
+        bool exists = _scene.ExistInItems<PointOfView>(p => p.StreamDisplayInfo.Name.Equals(PointOfView.CustomStreamName) 
+                                                            && p.StreamDisplayInfo.Type.Equals(PointOfView.CustomStreamType));
+        if (exists) return;
+        
+        Task.Run(async () => await PointOfView.SetCustomPOVAsync());
     }
 }
