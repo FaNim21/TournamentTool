@@ -24,7 +24,7 @@ public abstract class SceneItemViewModel : BaseViewModel
     public bool IsDisplayed { get; protected set; } = true;
     public bool IsFocused { get; protected set; }
 
-    protected string SourceName { get; set; } = string.Empty;
+    public string SourceName { get; protected set; } = string.Empty;
     protected string SourceUUID { get; set; } = string.Empty;
 
     protected Dictionary<string, object> Inputs { get; } = [];
@@ -46,6 +46,8 @@ public abstract class SceneItemViewModel : BaseViewModel
         UnFocus();
     }
 
+    public virtual void OnDestroy() { }
+
     public virtual Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
     {
         Scene = scene;
@@ -58,10 +60,7 @@ public abstract class SceneItemViewModel : BaseViewModel
         return Task.CompletedTask;
     }
 
-    public virtual async Task UpdateAsync()
-    {
-        await Controller.SetItemInputSettingsAsync(SourceUUID, Inputs);
-    }
+    public virtual async Task UpdateAsync() => await Controller.SetItemInputSettingsAsync(SourceUUID, Inputs);
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
 

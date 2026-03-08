@@ -3,14 +3,10 @@ using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.Domain.Entities;
-using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.Controller;
-using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Obs;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
@@ -118,7 +114,8 @@ public class Scene : BaseViewModel, IScene
     private const float _studioFactor = 2.05f;
 
 
-    public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IWindowService windowService, ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
+    public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IWindowService windowService, 
+        ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
     {
         Interactable = interactable;
         SceneController = sceneController;
@@ -166,7 +163,7 @@ public class Scene : BaseViewModel, IScene
         UpdateItemsProportions();
     } 
 
-    public async Task SetSceneItemsAsync(string sceneName, string sceneUuid, bool force = false, bool updatePlayersInPov = true)
+    public async Task SetSceneItemsAsync(string sceneName, string sceneUuid, bool force = false)
     {
         if (string.IsNullOrEmpty(sceneName) && string.IsNullOrEmpty(sceneUuid)) return;
         if (sceneName.Equals(SceneName) && sceneUuid.Equals(SceneUuid) && !force) return;
@@ -177,9 +174,6 @@ public class Scene : BaseViewModel, IScene
         ClearSceneItems();
 
         List<(SceneItemStub, SceneItemStub?)> items = await SceneController.GetSceneItemsAsync(sceneName, sceneUuid);
-
-        //TODO: 0 czemu to tu?????
-        if (updatePlayersInPov) SceneController.ClearPlayersFromPovs();
 
         for (int i = items.Count - 1; i >= 0; i--)
         {
@@ -214,7 +208,7 @@ public class Scene : BaseViewModel, IScene
 
     public async Task Refresh()
     {
-        await SetSceneItemsAsync(SceneName!, SceneUuid, true, false);
+        await SetSceneItemsAsync(SceneName!, SceneUuid, true);
     }
     public async Task RefreshItems() 
     {
@@ -240,12 +234,18 @@ public class Scene : BaseViewModel, IScene
         {
             lock (_lock)
             {
+                item.OnDestroy();
                 SceneItems.Remove(item);
             }
         });
     }
     public void ClearSceneItems()
     {
+        foreach (SceneItemViewModel item in SceneItems)
+        {
+            item.OnDestroy();
+        }
+        
         Dispatcher.Invoke(SceneItems.Clear);
     }
 

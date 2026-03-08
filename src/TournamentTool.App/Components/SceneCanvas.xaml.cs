@@ -78,8 +78,8 @@ public partial class SceneCanvas : UserControl
             if (sender is not Border border) return;
             if (border.DataContext is not PointOfView pov) return;
 
-            await pov.ClearAsync(true);
             e.Handled = true;
+            await pov.ClearAsync(true);
         }
         catch (Exception ex)
         {

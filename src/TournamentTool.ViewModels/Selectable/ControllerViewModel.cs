@@ -55,6 +55,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         get => _currentChosenPlayer;
         set
         {
+            SceneController.CurrentChosenPlayer = value;
             _currentChosenPlayer = value;
             OnPropertyChanged(nameof(CurrentChosenPlayer));
         }
@@ -142,9 +143,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
         
+        _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
+        
         _settings = settingsProvider.Get<Domain.Entities.Settings>();
         
-        SceneController = new SceneControllerViewmodel(this, obs, playerRepository, tournamentState, logger, settingsProvider, dispatcher, windowService);
+        SceneController = new SceneControllerViewmodel(obs, playerRepository, logger, settingsProvider, dispatcher, windowService);
         ServiceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
@@ -156,7 +159,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
-        _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
+        SceneController.UnSelectTriggered += OnUnSelectTriggered;
         
         switch(_tournamentState.CurrentPreset.ControllerMode)
         {
@@ -202,8 +205,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     }
     public override bool OnDisable()
     {
-        //TODO: 0 POKI CONTROLLER JEST SINGLETONEM TO BEZ CZYSZCZENIA
-        // _twitch.ConnectionStateChanged -= OnTwitchConnectionChanged;
+        SceneController.UnSelectTriggered -= OnUnSelectTriggered;
         
         _backgroundCoordinator.Unregister(SidePanel);
         _backgroundCoordinator.Unregister(this);
@@ -224,11 +226,11 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         return true;
     }
 
-    private void OnTwitchConnectionChanged(object? sender, ConnectionStateChangedEventArgs e)
-    {
-        UpdateTwitchConnectionData(e.NewState == ConnectionState.Connected);
-    }
-
+    private void OnUnSelectTriggered(object? sender, UnSelectTriggeredEventArgs e) 
+        => UnSelectItems(e.ClearAll);
+    private void OnTwitchConnectionChanged(object? sender, ConnectionStateChangedEventArgs e) 
+        => UpdateTwitchConnectionData(e.NewState == ConnectionState.Connected);
+    
     public void OnHotkey(HotkeyActionType actionType)
     {
         switch (actionType)
@@ -301,7 +303,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
         if (ClearAll) CurrentChosenPOV = null;
     }
-
+    
     public void ClearSelectedWhitelistPlayer()
     {
         _selectedWhitelistPlayer = null;

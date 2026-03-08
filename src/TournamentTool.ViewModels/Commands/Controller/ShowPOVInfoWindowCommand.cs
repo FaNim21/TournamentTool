@@ -12,6 +12,7 @@ public class ShowPOVInfoWindowCommand : BaseCommand
     private readonly IDispatcherService _dispatcher;
 
 
+    //TODO: 1 Rewrite this to not contain this things in scene and just make in in scene controller or something like that
     public ShowPOVInfoWindowCommand(IWindowService windowService, Scene scene, IDispatcherService dispatcher)
     {
         _windowService = windowService;

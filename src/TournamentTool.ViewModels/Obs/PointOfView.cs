@@ -1,7 +1,10 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
+using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Core.Parsers;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
@@ -137,19 +140,19 @@ public class PointOfView : BrowserItemViewModel
         RefreshCommand = new RelayCommand(async () => await RefreshAsync());
     }
 
+    public override void OnDestroy()
+    {
+        if (player == null) return;
+        
+        player.IsUsedInPov = false;
+        player.IsUsedInPreview = false;
+    }
+
     public override async Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
     {
         await base.InitializeAsync(scene, item, group);
         
-        (string? currentName, int volume, StreamType type) data = (string.Empty, 0, StreamType.twitch);
-        try
-        {
-            data = await Controller.GetBrowserURLStreamInfo(SourceUUID);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
+        (string? currentName, int volume, StreamType type) data = await GetBrowserURLStreamInfo(SourceUUID);
 
         bool specificPovExists = scene.ExistInItems<PointOfView>(p => 
             p.StreamDisplayInfo.Name.Equals(data.currentName, StringComparison.OrdinalIgnoreCase)
@@ -165,19 +168,16 @@ public class PointOfView : BrowserItemViewModel
 
         ChangeVolume(data.volume);
 
-        if (foundPlayer != null)
-        {
-            if (foundPlayer is PlayerViewModel playerViewModel)
-            {
-                await SetPOVAsync(playerViewModel);
-            }
-        }
-        else
+        if (foundPlayer == null)
         {
             CustomStreamType = data.type;
             CustomStreamName = data.currentName;
             await SetCustomPOVAsync();
+            return;
         }
+
+        if (foundPlayer is not PlayerViewModel playerViewModel) return;
+        await SetPOVAsync(playerViewModel);
     }
 
     public async Task SetCustomPOVAsync(IPovUsage? other = null)
@@ -347,5 +347,28 @@ public class PointOfView : BrowserItemViewModel
         };
 
         return url;
+    }
+    
+    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid)
+    {
+        GetInputSettingsResponseData? settingsResponse = await Controller.GetItemInputSettingsAsync(sourceUuid);
+        if (settingsResponse == null ||
+            !settingsResponse.InputSettings.HasValue ||
+            !settingsResponse.InputSettings.Value.TryGetProperty("url", out JsonElement urlElement)) 
+            return (string.Empty, 0, StreamType.twitch);
+
+        string url = urlElement.ToString();
+        if (string.IsNullOrEmpty(url))return (string.Empty, 0, StreamType.twitch); 
+
+        try
+        {
+            return StreamUrlParser.Parse(url);
+        } 
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+        
+        return (string.Empty, 0, StreamType.twitch);
     }
 }

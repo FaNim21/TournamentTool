@@ -255,31 +255,6 @@ public class ObsController : IObsController, IDisposable
         await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
     }
     
-    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid)
-    {
-        if (!IsConnectedToWebSocket) return (string.Empty, 0, StreamType.twitch);
-
-        GetInputSettingsResponseData? settingsResponse = await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(null, sourceUuid));
-        if (settingsResponse == null ||
-            !settingsResponse.InputSettings.HasValue ||
-            !settingsResponse.InputSettings.Value.TryGetProperty("url", out JsonElement urlElement)) 
-            return (string.Empty, 0, StreamType.twitch);
-
-        string url = urlElement.ToString();
-        if (string.IsNullOrEmpty(url))return (string.Empty, 0, StreamType.twitch); 
-
-        try
-        {
-            return StreamUrlParser.Parse(url);
-        } 
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
-        
-        return (string.Empty, 0, StreamType.twitch);
-    }
-
     /*private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
     {
         if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
@@ -319,6 +294,7 @@ public class ObsController : IObsController, IDisposable
 
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {
+        // nie pamietam sensu tego, ale wydaje mi sie za kompletnie zbedny event w mojej sytuacji
         //TODO: 7 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
         // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
 
@@ -408,14 +384,18 @@ public class ObsController : IObsController, IDisposable
         SceneTransitionStarted?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<GetVideoSettingsResponseData?> GetVideoSettings()
-    {
-        return await Client.GetVideoSettingsAsync();
-    }
-    public async Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramScene()
-    {
-        return await Client.GetCurrentProgramSceneAsync();
-    }
+    public async Task<GetInputSettingsResponseData?> GetInputSettingsAsync(string sourceUuid) 
+        => await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(null, sourceUuid));
+    public async Task<GetVideoSettingsResponseData?> GetVideoSettings() 
+        => await Client.GetVideoSettingsAsync();
+    public async Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramScene() 
+        => await Client.GetCurrentProgramSceneAsync();
+    public async Task<GetSceneListResponseData?> GetSceneList() 
+        => await Client.GetSceneListAsync();
+    
+    public async Task SetCurrentPreviewScene(string scene) 
+        => await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
+
     public async Task<List<SceneItemStub>> GetSceneItemList(string? sceneName = null, string? sceneUuid = null)
     {
         GetSceneItemListResponseData? response = await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(sceneName, sceneUuid));
@@ -427,15 +407,6 @@ public class ObsController : IObsController, IDisposable
         GetGroupSceneItemListResponseData? response = await Client.GetGroupSceneItemListAsync(new GetGroupSceneItemListRequestData(group));
         if (response == null) return [];
         return response.SceneItems ?? [];
-    }
-    public async Task<GetSceneListResponseData?> GetSceneList()
-    {
-        return await Client.GetSceneListAsync();
-    }
-
-    public async Task SetCurrentPreviewScene(string scene)
-    {
-        await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
     }
 
     public void SetStartedTransition(bool option)

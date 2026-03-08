@@ -13,11 +13,15 @@ using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Obs;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
+
+public class UnSelectTriggeredEventArgs(bool cleaAll) : EventArgs
+{
+    public bool ClearAll { get; } = cleaAll;
+}
 
 public interface IScenePovInteractable
 {
@@ -27,29 +31,25 @@ public interface IScenePovInteractable
 
 public interface ISceneController
 {
-    void ClearPlayersFromPovs();
-
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
+    Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid);
     
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
-    Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid);
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 }
 
-/// <summary>
-/// TODO: 1 MAKE IT SOLID for 0.13 update
-/// </summary>
 public class SceneControllerViewmodel : BaseViewModel, ISceneController, IScenePovInteractable
 {
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly Lock _lock = new();
     
-    public ControllerViewModel Controller { get; }
     public ILoggingService Logger { get; }
     public ObsController OBS { get; }
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
+
+    public IPlayer? CurrentChosenPlayer { get; set; }
 
     private PointOfView? _currentChosenPOV;
     public PointOfView? CurrentChosenPOV
@@ -113,6 +113,8 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     }
 
     public bool BusyWithOBS { get; private set; }
+
+    public event EventHandler<UnSelectTriggeredEventArgs>? UnSelectTriggered;
     
     public ICommand RefreshPOVsCommand { get; set; }
     public ICommand RefreshOBSCommand { get; set; }
@@ -120,18 +122,18 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     public ICommand StudioModeTransitionCommand { get; set; }
     public ICommand OnSceneResizeCommand { get; set; }
 
-    private readonly Domain.Entities.Settings _settings;
+    private readonly AppCache _appCache;
     
 
-    public SceneControllerViewmodel(ControllerViewModel controller, ObsController obs, ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
-        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
+    public SceneControllerViewmodel(ObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, 
+        ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
     {
         _playerRepository = playerRepository;
-        Controller = controller;
         OBS = obs;
         Logger = logger;
 
-        _settings = settingsProvider.Get<Domain.Entities.Settings>();
+        _appCache = settingsProvider.Get<AppCache>();
+        //TODO: 0 w appcache beda zapisywane dane, wiec w kontrolerze tutaj bedzie sie go uzywac do inicjalizacji konfiguracji rodzicow dla wszystkich itemow
         
         MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher);
         PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher);
@@ -298,7 +300,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     private async Task StudioModeChanged()
     {
         OnPropertyChanged(nameof(StudioMode));
-        var option = OBS.StudioMode;
+        bool option = OBS.StudioMode;
         
         MainScene.SetStudioMode(option);
         PreviewScene.SetStudioMode(option);
@@ -377,6 +379,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     {
         if (BusyWithOBS) return;
         BusyWithOBS = true;
+        
         await MainScene.RefreshItems();
         await PreviewScene.RefreshItems();
         BusyWithOBS = false;
@@ -403,6 +406,8 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
     public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
         => await OBS.SetItemInputSettingsAsync(sourceUuid, input);
+    public async Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid)
+        => await OBS.GetInputSettingsAsync(sourceUuid);
 
     private async Task LoadScenesForStudioMode(bool force = true)
     {
@@ -438,7 +443,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         PointOfView? previousPOV = CurrentChosenPOV;
         CurrentChosenPOV = clickedPov;
         
-        if (Controller.CurrentChosenPlayer == null)
+        if (CurrentChosenPlayer == null)
         {
             if (previousPOV is { IsEmpty: true } && CurrentChosenPOV!.IsEmpty)
             {
@@ -453,32 +458,26 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
             return;
         }
 
-        if (!scene.ExistInItems<PointOfView>(p => p.StreamDisplayInfo.Equals(Controller.CurrentChosenPlayer.StreamDisplayInfo)))
+        PointOfView? pov = scene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
+        if (pov != null)
         {
-            await clickedPov.SetPOVAsync(Controller.CurrentChosenPlayer);
+            await CurrentChosenPOV!.SwapAsync(pov);
+            UnSelectItems();
+            return;
         }
-        else
-        {
-            
-            PointOfView? pov = scene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(Controller.CurrentChosenPlayer.StreamDisplayInfo));
-            if (pov != null)
-            {
-                await CurrentChosenPOV!.SwapAsync(pov);
-                UnSelectItems();
-                return;
-            }
-        }
+
+        await clickedPov.SetPOVAsync(CurrentChosenPlayer);
 
         CurrentChosenPOV.UnFocus();
         UnSelectItems(true);
     }
-    public void UnSelectItems(bool clearAll = false)
-    {
-        Controller.UnSelectItems(clearAll);
-    }
+    
+    public void UnSelectItems(bool clearAll = false) 
+        => UnSelectTriggered?.Invoke(this, new UnSelectTriggeredEventArgs(clearAll));
 
-    public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => _playerRepository.GetPlayerByStreamName(name, type);
-    public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid) => await OBS.GetBrowserURLStreamInfo(sourceUuid);
+    public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
+        => _playerRepository.GetPlayerByStreamName(name, type);
+
     public async Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid)
     {
         List<(SceneItemStub, SceneItemStub?)> items = [];

@@ -6,7 +6,6 @@
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:controller="clr-namespace:TournamentTool.ViewModels.Selectable.Controller;assembly=TournamentTool.ViewModels"
              xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
-             xmlns:entities="clr-namespace:TournamentTool.ViewModels.Entities;assembly=TournamentTool.ViewModels"
              xmlns:obs1="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=controller:Scene}"
              mc:Ignorable="d">

@@ -10,6 +10,7 @@ public class TextItemViewModel : SceneItemViewModel
     public override int ZIndex { get; protected set; } = 10;
 
     protected string Text { get; set; } = string.Empty;
+    
 
     public TextItemViewModel(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger) : base(controller, dispatcher, logger)
     {

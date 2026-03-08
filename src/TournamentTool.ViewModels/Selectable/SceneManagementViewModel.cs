@@ -38,4 +38,6 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         _obsCommunicationProvider = obsCommunicationProvider;
     }
+    
+    //TODO: 0 TERAZ mozna zrobic scene controller tutaj tez drugi i wyswietlac scene w scene configu w celu pobrania itemow i przypisania relacji itp itd
 }

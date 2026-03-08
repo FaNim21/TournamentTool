@@ -76,7 +76,7 @@
                         <Run Text="Item: "
                              FontSize="12"
                              Foreground="White" />
-                        <Run Text="{Binding PointOfView.SceneItemName}"
+                        <Run Text="{Binding PointOfView.SourceName, Mode=OneWay}"
                              Foreground="White"
                              FontWeight="SemiBold" />
                     </TextBlock>
