@@ -15,7 +15,9 @@ public enum SourceType
 
 public enum InputKind
 {
+    unsupported,
     browser_source,
     text_gdiplus_v2,
+    tt_point_of_view,
     
 }

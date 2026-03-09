@@ -110,6 +110,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
     }
     public override async Task UpdateAPI(APIDataSaver api)
     {
+        //TODO: 0 to zamiast do pliku to bedzie podpiete do aktualizacji itemow w obsie, czyli podpiete scene itemy do tych rzeczy z managementu beda aktualizowaly wartosc
         await api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
         await api.UpdateFileContent(_rankedPlayerCountFileName, Players);
 

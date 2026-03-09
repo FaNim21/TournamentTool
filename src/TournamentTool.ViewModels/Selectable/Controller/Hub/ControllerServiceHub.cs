@@ -25,8 +25,7 @@ public class ControllerServiceHub
     private System.Timers.Timer _uiUpdateTimer;
     
     
-    public ControllerServiceHub(ControllerViewModel controller, ITwitchService twitch, ILoggingService logger, ObsController obs, 
-        ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ITournamentPlayerRepository playerRepository)
+    public ControllerServiceHub(ControllerViewModel controller, ITwitchService twitch, ILoggingService logger, ITournamentPlayerRepository playerRepository)
     {
         Logger = logger;
         
@@ -42,9 +41,8 @@ public class ControllerServiceHub
             twitchService.OneTimeImmediately = true;
         }
 
-        //TODO: 0 Tymczasowo zmieniony czas na 5 sekund z racji wypisywania leaderboard api do plikow pod obsa
-        APIUpdaterService apiUpdater = new(controller, logger, obs, tournamentState, leaderboardRepository, playerRepository);
-        ServiceRunner? apiService = AddService("API-data", apiUpdater, TimeSpan.FromSeconds(5), true);
+        APIUpdaterService apiUpdater = new(controller, logger);
+        ServiceRunner? apiService = AddService("API-data", apiUpdater, TimeSpan.FromSeconds(2), true);
         if (apiService != null)
         {
             apiService.RunImmediately = true;

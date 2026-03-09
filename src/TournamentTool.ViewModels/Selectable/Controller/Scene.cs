@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
@@ -185,16 +186,18 @@ public class Scene : BaseViewModel, IScene
     {
         if (item.SceneItemTransform == null) return;
 
-        string inputKind = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+        string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+        if (string.IsNullOrEmpty(inputKindText)) return;
+        
+        InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
+        if (inputKind == InputKind.unsupported) return;
 
         //TODO: 0 Zrobic factory?
-        //TODO: 0 Problem jest taki, ze tu trzeba tylko bazowe typy odpalac, a w scene management trzeba zdefiniowac wtedy zmiane browser na pov
-        // czyli trzeba ustalic wszystkie typy i mozliwosc ich zamiany, czyli point of view jest od klasy browser
         SceneItemViewModel? sceneItem = inputKind switch
         {
-            nameof(InputKind.browser_source) => new PointOfView(SceneController, Dispatcher, Logger, Type),
-            // nameof(InputKind.browser_source) => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
-            nameof(InputKind.text_gdiplus_v2) => new TextItemViewModel(SceneController, Dispatcher, Logger),
+            InputKind.tt_point_of_view => new PointOfView(SceneController, Dispatcher, Logger, Type),
+            InputKind.browser_source => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
+            InputKind.text_gdiplus_v2 => new TextItemViewModel(SceneController, Dispatcher, Logger),
             _ => null
         };
 

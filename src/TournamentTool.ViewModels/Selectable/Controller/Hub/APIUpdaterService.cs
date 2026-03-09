@@ -14,10 +14,6 @@ public class APIUpdaterService : IServiceUpdater
     private ILoggingService Logger { get; }
     
     private readonly ControllerViewModel _controller;
-    private readonly ObsController _obs;
-    private readonly ITournamentState _tournamentState;
-    private readonly ITournamentLeaderboardRepository _leaderboardRepository;
-    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly APIDataSaver _api;
 
     private record LeaderboardPlayerAPINames(string IGN, string PreviousRoundPoints, string OverallPoints);
@@ -33,27 +29,13 @@ public class APIUpdaterService : IServiceUpdater
     private string[] _savedNames = new string[3];
     
     
-    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger, ObsController obs, ITournamentState tournamentState, 
-        ITournamentLeaderboardRepository leaderboardRepository, ITournamentPlayerRepository playerRepository)
+    //TODO: 0 Zostawiam na razie jakos przyklad jak to dzialalo, ale to trzeba i tak szybko usunac wszystko
+    public APIUpdaterService(ControllerViewModel controller, ILoggingService logger)
     {
         Logger = logger;
         _controller = controller;
-        _obs = obs;
-        _tournamentState = tournamentState;
-        _leaderboardRepository = leaderboardRepository;
-        _playerRepository = playerRepository;
 
         _api = new APIDataSaver();
-        
-        try
-        {
-            LeaderboardAPICheck();
-            UpdateTwoPlayersAPICheck();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
     }
     public void OnEnable()
     {
@@ -66,25 +48,12 @@ public class APIUpdaterService : IServiceUpdater
 
     public async Task UpdateAsync(CancellationToken token)
     {
-        if (_controller.ManagementPanel != null)
-        {
-            await _controller.ManagementPanel.UpdateAPI(_api);
-        }
+        if (_controller.ManagementPanel == null) return;
         
-        try
-        {
-            await UpdateLeaderboardTopAPI();
-            await UpdateTwoPlayersSplits();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
+        await _controller.ManagementPanel.UpdateAPI(_api);
     }
 
-    /// <summary>
-    /// HARD CODED Rozwiazanie tymczasowe na potrzebe KOSTU polskiej ligi
-    /// </summary>
+    /*
     private void UpdateTwoPlayersAPICheck()
     {
         _splitsAPINames = new List<SplitsTwoPlayersAPINames>[3];
@@ -352,4 +321,5 @@ public class APIUpdaterService : IServiceUpdater
             // _obs.SetBrowserURL(item.SourceName, url);
         }
     }
+*/
 }

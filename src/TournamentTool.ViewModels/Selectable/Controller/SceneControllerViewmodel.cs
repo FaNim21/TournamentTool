@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Responses;
@@ -15,6 +16,7 @@ using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Obs;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TournamentTool.ViewModels.Selectable.Controller;
 
@@ -113,14 +115,15 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     }
 
     public bool BusyWithOBS { get; private set; }
+    public bool IsStudioModeSupported { get; set; } = true;
 
     public event EventHandler<UnSelectTriggeredEventArgs>? UnSelectTriggered;
-    
-    public ICommand RefreshPOVsCommand { get; set; }
-    public ICommand RefreshOBSCommand { get; set; }
-    public ICommand SwitchStudioModeCommand {  get; set; }
-    public ICommand StudioModeTransitionCommand { get; set; }
-    public ICommand OnSceneResizeCommand { get; set; }
+
+    public ICommand RefreshPOVsCommand { get; private set; }
+    public ICommand RefreshOBSCommand { get; private set; }
+    public ICommand SwitchStudioModeCommand {  get; private set; }
+    public ICommand StudioModeTransitionCommand { get; private set; }
+    public ICommand OnSceneResizeCommand { get; private set; }
 
     private readonly AppCache _appCache;
     
@@ -137,7 +140,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         
         MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher);
         PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher);
-        
+
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
         SwitchStudioModeCommand = new RelayCommand(OBS.SwitchStudioMode);
@@ -206,6 +209,10 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         if (Math.Abs(ScenePreviewWidth - dimension.Width) < 1f &&
             Math.Abs(ScenePreviewHeight - dimension.Height) < 1f) return;
 
+        ResizeScene(dimension);
+    }
+    public void ResizeScene(Dimension dimension)
+    {
         ScenePreviewWidth = dimension.Width;
         ScenePreviewHeight = dimension.Height;
         
@@ -300,7 +307,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     private async Task StudioModeChanged()
     {
         OnPropertyChanged(nameof(StudioMode));
-        bool option = OBS.StudioMode;
+        bool option = IsStudioModeSupported && OBS.StudioMode;
         
         MainScene.SetStudioMode(option);
         PreviewScene.SetStudioMode(option);
@@ -490,8 +497,12 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
             foreach (SceneItemStub item in sceneItems)
             {
-                string sourceType = item.ExtensionData?[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
-                string inputKind = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+                if (item.ExtensionData == null) continue;
+                
+                SetCustomInputKind(item);
+                
+                string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
+                string inputKind = item.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
                 
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
                 {
@@ -503,7 +514,11 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                     
                     foreach (SceneItemStub groupItem in groupItems)
                     {
-                        string groupItemInputKind = groupItem.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+                        if (groupItem.ExtensionData == null) continue;
+                        
+                        SetCustomInputKind(item);
+                        
+                        string groupItemInputKind = groupItem.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
                         if (string.IsNullOrEmpty(groupItemInputKind)) continue;
 
                         items.Add((groupItem, item));
@@ -521,6 +536,17 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         }
 
         return items;
+    }
+
+    private void SetCustomInputKind(SceneItemStub sceneItem)
+    {
+        if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;
+        
+        //TODO: 0 ustalac customowe input kind dla uuid pobranych z appcache dla dictionary<string, object>
+        // gdzie object to bedzie klasa trzymajace dane z konfiguratora
+        if (!_appCache.SceneItemsConfig.TryGetValue(sceneItem.SourceUuid, out var config)) return;
+
+        // sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement("");
     }
 
     private void ClearScenes()

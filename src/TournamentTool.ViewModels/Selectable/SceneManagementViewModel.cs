@@ -1,12 +1,84 @@
-﻿using TournamentTool.Core.Common;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
+using ObsWebSocket.Core.Protocol.Common;
+using ObsWebSocket.Core.Protocol.Responses;
+using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
+using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Obs;
+using TournamentTool.ViewModels.Commands;
+using TournamentTool.ViewModels.Factories;
+using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels.Selectable;
 
 public class SceneManagementViewModel : SelectableViewModel
 {
     private readonly IObsCommunicationProvider _obsCommunicationProvider;
+    private readonly ObsController _obs;
+
+    public SceneControllerViewmodel SceneController { get; }
+
+    public ObservableCollection<SceneStub> Scenes { get; set; } = [];
+
+    private SceneStub? _selectedScene;
+    public SceneStub? SelectedScene
+    {
+        get => _selectedScene;
+        set
+        {
+            _selectedScene = value;
+            OnPropertyChanged(nameof(SelectedScene));
+        }
+    }
+    
+    private SceneItemViewModel? _selectedSceneItem;
+    public SceneItemViewModel? SelectedSceneItem
+    {
+        get => _selectedSceneItem;
+        set
+        {
+            _selectedSceneItem = value;
+            OnPropertyChanged(nameof(SelectedSceneItem));
+        }
+    }
+
+    private Dimension _sceneDimension = new(-1, -1);
+    public Dimension SceneDimension
+    {
+        get => _sceneDimension;
+        set
+        {
+            _sceneDimension = value;
+            SceneController.ResizeScene(value);
+        }
+    }
+
+    private int _sceneRefreshTrigger = 0;
+    public int SceneRefreshTrigger
+    {
+        get => _sceneRefreshTrigger;
+        set
+        {
+            _sceneRefreshTrigger = value;
+            OnPropertyChanged(nameof(SceneRefreshTrigger));
+        }
+    }
+    
+    private int _sceneItemsRefreshTrigger = 0;
+    public int SceneItemsRefreshTrigger
+    {
+        get => _sceneItemsRefreshTrigger;
+        set
+        {
+            _sceneItemsRefreshTrigger = value;
+            OnPropertyChanged(nameof(SceneItemsRefreshTrigger));
+        }
+    }
+    
+    public ICommand EditSceneItemCommand { get; private set; }
 
     /// <summary>
     /// ViewModel nie moze byc glownym miejscem technicznej komunikacji, tylko rzeczywistym posrednikiem miedzy logika a UI
@@ -34,10 +106,43 @@ public class SceneManagementViewModel : SelectableViewModel
     /// - 
     ///     
     /// </summary>
-    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider) : base(dispatcher)
+    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider, 
+        ISceneControllerViewModelFactory sceneControllerFactory, ObsController obs) : base(dispatcher)
     {
         _obsCommunicationProvider = obsCommunicationProvider;
+        _obs = obs;
+
+        SceneController = sceneControllerFactory.Create();
+        SceneController.IsStudioModeSupported = false;
+
+        EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
     }
-    
-    //TODO: 0 TERAZ mozna zrobic scene controller tutaj tez drugi i wyswietlac scene w scene configu w celu pobrania itemow i przypisania relacji itp itd
+    public override void OnEnable(object? parameter)
+    {
+        SceneController.OnEnable(null);
+
+        Task.Run(async () =>
+        {
+            GetSceneListResponseData? sceneResponse = await _obs.GetSceneList();
+            if (sceneResponse == null) return;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                Scenes = new ObservableCollection<SceneStub>(sceneResponse.Scenes ?? []);
+                OnPropertyChanged(nameof(Scenes));
+            });
+        });
+        
+    }
+    public override bool OnDisable()
+    {
+        SceneController.OnDisable();
+        
+        return true;
+    }
+
+    private void EditSceneItem(SceneItemViewModel sceneItem)
+    {
+        //TODO: 0 Odpalac okno edycji scene item
+    }
 }

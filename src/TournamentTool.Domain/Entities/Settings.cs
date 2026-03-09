@@ -45,4 +45,6 @@ public class AppCache
     
     public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
     public bool IsConsoleWindowed { get; set; } = false;
+
+    public Dictionary<string, object> SceneItemsConfig { get; init; } = [];
 }

@@ -6,12 +6,137 @@
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
              xmlns:selectable="clr-namespace:TournamentTool.ViewModels.Selectable;assembly=TournamentTool.ViewModels"
              xmlns:components="clr-namespace:TournamentTool.App.Components"
+             xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
+             xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+             xmlns:obs="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
+             xmlns:common="clr-namespace:ObsWebSocket.Core.Protocol.Common;assembly=ObsWebSocket.Core"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
              d:DesignWidth="1082"
              Background="#1E1E1E">
+    <UserControl.Resources>
+        <ContextMenu x:Key="SceneItemsContextMenu">
+            <MenuItem Header="Edit"
+                      Command="{Binding DataContext.EditSceneItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding .}" />
+        </ContextMenu>
+    </UserControl.Resources>
     <Grid>
-        <components:SceneCanvas DataContext="{Binding }" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <i:Interaction.Behaviors>
+                    <behaviors:ActualSizeBehavior Dimension="{Binding SceneDimension, Mode=OneWayToSource, BindsDirectlyToSource=True}" />
+                </i:Interaction.Behaviors>
+                
+                <components:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <!-- TUTAJ JAKIES GUZIKI? -->
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <!-- TUTAJ SCENY DO ZMIANY -->
+                    
+                <ListBox Background="Transparent"
+                         VerticalAlignment="Top"
+                         HorizontalContentAlignment="Stretch"
+                         SelectedItem="{Binding SelectedScene, Mode=TwoWay}"
+                         ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         VirtualizingStackPanel.ScrollUnit="Pixel">
+                    <i:Interaction.Behaviors>
+                        <behaviors:CollectionViewBehavior Source="{Binding Scenes}"
+                                                          RefreshTrigger="{Binding SceneRefreshTrigger}" />
+                    </i:Interaction.Behaviors>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type common:SceneStub}">
+                            <Border BorderBrush="Transparent"
+                                    BorderThickness="1">
+                                <TextBlock Text="{Binding SceneName}"
+                                           Foreground="White"
+                                           FontSize="20"
+                                           HorizontalAlignment="Left"
+                                           Padding="5 0 0 0"
+                                           TextAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <!-- TUTAJ JESZCZE NIE WIEM -->
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Column="1"
+                  Background="Transparent">
+                <!-- TUTAJ SCENE ITEMS ZE SCENY -->
+
+                <ListBox Background="Transparent"
+                         VerticalAlignment="Top"
+                         HorizontalContentAlignment="Stretch"
+                         SelectedItem="{Binding SelectedSceneItem, Mode=TwoWay}"
+                         ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         VirtualizingStackPanel.ScrollUnit="Pixel">
+                    <i:Interaction.Behaviors>
+                        <behaviors:CollectionViewBehavior Source="{Binding SceneController.MainScene.SceneItems}"
+                                                          RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
+                    </i:Interaction.Behaviors>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type obs:SceneItemViewModel}">
+                            <Border BorderBrush="Gray"
+                                    BorderThickness="1">
+                                <TextBlock Text="{Binding SourceName}"
+                                           Foreground="White"
+                                           FontSize="20"
+                                           HorizontalAlignment="Left"
+                                           Padding="5 0 0 0"
+                                           TextAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource SceneItemsContextMenu}" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
+        </Grid>
+
     </Grid>
 </UserControl>

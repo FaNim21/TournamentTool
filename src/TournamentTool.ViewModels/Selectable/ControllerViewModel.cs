@@ -12,8 +12,8 @@ using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Entities.Player;
+using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable.Controller;
 using TournamentTool.ViewModels.Selectable.Controller.Hub;
@@ -133,9 +133,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly Domain.Entities.Settings _settings;
     
 
-    public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState,
-        ITournamentLeaderboardRepository leaderboardRepository, IBackgroundCoordinator backgroundCoordinator, ObsController obs, ITwitchService twitch, 
-        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
+    public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IBackgroundCoordinator backgroundCoordinator,
+        ITwitchService twitch, ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, 
+        ISceneControllerViewModelFactory sceneControllerFactory) : base(dispatcher)
     {
         Logger = logger;
         _playerRepository = playerRepository;
@@ -146,9 +146,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
         
         _settings = settingsProvider.Get<Domain.Entities.Settings>();
-        
-        SceneController = new SceneControllerViewmodel(obs, playerRepository, logger, settingsProvider, dispatcher, windowService);
-        ServiceHub = new ControllerServiceHub(this, twitch, logger, obs, tournamentState, leaderboardRepository, playerRepository);
+
+        SceneController = sceneControllerFactory.Create();
+        ServiceHub = new ControllerServiceHub(this, twitch, logger, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
     }

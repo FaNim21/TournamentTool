@@ -25,7 +25,6 @@ public class AutoScrollBehavior : Behavior<ItemsControl>
         
         AssociatedObject.Loaded += OnLoaded;
     }
-
     protected override void OnDetaching()
     {
         base.OnDetaching();

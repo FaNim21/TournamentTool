@@ -24,12 +24,12 @@ public abstract class SceneItemViewModel : BaseViewModel
     public bool IsDisplayed { get; protected set; } = true;
     public bool IsFocused { get; protected set; }
 
+    public string GroupName { get; protected set; } = string.Empty;
+    
     public string SourceName { get; protected set; } = string.Empty;
     protected string SourceUUID { get; set; } = string.Empty;
 
     protected Dictionary<string, object> Inputs { get; } = [];
-
-    public string GroupName { get; protected set; } = string.Empty;
 
     public string? BackgroundColor { get; set; }
 
