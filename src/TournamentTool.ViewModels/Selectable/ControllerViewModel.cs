@@ -15,6 +15,7 @@ using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 using TournamentTool.ViewModels.Selectable.Controller;
 using TournamentTool.ViewModels.Selectable.Controller.Hub;
 using TournamentTool.ViewModels.Selectable.Controller.ManagementPanel;
@@ -30,7 +31,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     public ILoggingService Logger { get; }
     
-    public SceneControllerViewmodel SceneController { get; }
+    public SceneControllerViewModel SceneController { get; }
     public ControllerServiceHub ServiceHub { get; }
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;

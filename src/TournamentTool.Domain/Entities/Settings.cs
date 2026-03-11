@@ -1,4 +1,6 @@
-﻿namespace TournamentTool.Domain.Entities;
+﻿using TournamentTool.Domain.Obs;
+
+namespace TournamentTool.Domain.Entities;
 
 public enum HeadAPIType
 {
@@ -34,17 +36,22 @@ public class APIKeys
     public string PacemanAPI { get; set; } = string.Empty;
 }
 
-public class PresetOrderData
-{
-    public int index { get; set; } = int.MaxValue;
-}
-
-public class AppCache
+public sealed class AppCache
 {
     public string LastOpenedPresetName { get; set; } = string.Empty;
     
     public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
     public bool IsConsoleWindowed { get; set; } = false;
 
-    public Dictionary<string, object> SceneItemsConfig { get; init; } = [];
+    public Dictionary<string, SceneItemConfiguration> SceneItemConfigs { get; init; } = [];
+}
+
+public sealed class PresetOrderData
+{
+    public int index { get; set; } = int.MaxValue;
+}
+
+public sealed class SceneItemConfiguration
+{
+    public InputKind InputKind { get; set; }
 }

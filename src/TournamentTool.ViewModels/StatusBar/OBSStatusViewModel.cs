@@ -7,14 +7,14 @@ namespace TournamentTool.ViewModels.StatusBar;
 
 public class OBSStatusViewModel : StatusItemViewModel
 {
-    private readonly ObsController _obsController;
+    private readonly IObsController _obsController;
 
     protected override string Name => "OBS";
      
     private ConnectionState _currentState;
  
     
-    public OBSStatusViewModel(ObsController obsController, IDispatcherService dispatcher, IImageService imageService, IMenuService menuService) : base(dispatcher, imageService, menuService)
+    public OBSStatusViewModel(IObsController obsController, IDispatcherService dispatcher, IImageService imageService, IMenuService menuService) : base(dispatcher, imageService, menuService)
     {
         _obsController = obsController;
         _obsController.ConnectionStateChanged += OnConnectionStateChanged;

@@ -1,20 +1,20 @@
 ﻿using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Services.Logging;
-using TournamentTool.ViewModels.Selectable.Controller;
 
-namespace TournamentTool.ViewModels.Obs;
+namespace TournamentTool.ViewModels.Obs.Items;
 
 public class TextItemViewModel : SceneItemViewModel
 {
     public override int ZIndex { get; protected set; } = 10;
+    public override string BaseItemType => "Text";
 
     protected string Text { get; set; } = string.Empty;
     
 
     public TextItemViewModel(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger) : base(controller, dispatcher, logger)
     {
-        BackgroundColor = Consts.TextSourceColor;
+        DefaultColor = Consts.TextSourceColor;
     }
 
     public override async Task UpdateAsync()

@@ -10,6 +10,7 @@
              xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:obs="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              xmlns:common="clr-namespace:ObsWebSocket.Core.Protocol.Common;assembly=ObsWebSocket.Core"
+             xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -38,7 +39,7 @@
                 <i:Interaction.Behaviors>
                     <behaviors:ActualSizeBehavior Dimension="{Binding SceneDimension, Mode=OneWayToSource, BindsDirectlyToSource=True}" />
                 </i:Interaction.Behaviors>
-                
+
                 <components:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
             </Grid>
 
@@ -59,52 +60,59 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
+                <Border Grid.Row="0"
+                        BorderBrush="#000D14"
+                        BorderThickness="0 0 0 3"
+                        Background="Transparent">
                     <!-- TUTAJ SCENY DO ZMIANY -->
-                    
-                <ListBox Background="Transparent"
-                         VerticalAlignment="Top"
-                         HorizontalContentAlignment="Stretch"
-                         SelectedItem="{Binding SelectedScene, Mode=TwoWay}"
-                         ScrollViewer.CanContentScroll="True"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         VirtualizingStackPanel.IsVirtualizing="True"
-                         VirtualizingStackPanel.VirtualizationMode="Recycling"
-                         VirtualizingStackPanel.ScrollUnit="Pixel">
-                    <i:Interaction.Behaviors>
-                        <behaviors:CollectionViewBehavior Source="{Binding Scenes}"
-                                                          RefreshTrigger="{Binding SceneRefreshTrigger}" />
-                    </i:Interaction.Behaviors>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type common:SceneStub}">
-                            <Border BorderBrush="Transparent"
-                                    BorderThickness="1">
-                                <TextBlock Text="{Binding SceneName}"
-                                           Foreground="White"
-                                           FontSize="20"
-                                           HorizontalAlignment="Left"
-                                           Padding="5 0 0 0"
-                                           TextAlignment="Center" />
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                </Grid>
+
+                    <ListBox Background="Transparent"
+                             VerticalAlignment="Top"
+                             HorizontalContentAlignment="Stretch"
+                             SelectedItem="{Binding SelectedScene, Mode=TwoWay}"
+                             BorderThickness="0"
+                             ScrollViewer.CanContentScroll="True"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingStackPanel.IsVirtualizing="True"
+                             VirtualizingStackPanel.VirtualizationMode="Recycling"
+                             VirtualizingStackPanel.ScrollUnit="Pixel">
+                        <i:Interaction.Behaviors>
+                            <behaviors:CollectionViewBehavior Source="{Binding Scenes}"
+                                                              RefreshTrigger="{Binding SceneRefreshTrigger}" />
+                        </i:Interaction.Behaviors>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type common:SceneStub}">
+                                <Border BorderBrush="Transparent"
+                                        BorderThickness="1">
+                                    <TextBlock Text="{Binding SceneName}"
+                                               Foreground="White"
+                                               FontSize="20"
+                                               HorizontalAlignment="Left"
+                                               Padding="5 0 0 0"
+                                               TextAlignment="Center" />
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
 
                 <Grid Grid.Row="1">
                     <!-- TUTAJ JESZCZE NIE WIEM -->
                 </Grid>
             </Grid>
 
-            <Grid Grid.Column="1"
-                  Background="Transparent">
+            <Border Grid.Column="1"
+                    BorderBrush="#000D14"
+                    BorderThickness="3 0 0 0"
+                    Background="Transparent">
                 <!-- TUTAJ SCENE ITEMS ZE SCENY -->
 
                 <ListBox Background="Transparent"
                          VerticalAlignment="Top"
                          HorizontalContentAlignment="Stretch"
                          SelectedItem="{Binding SelectedSceneItem, Mode=TwoWay}"
+                         BorderThickness="0"
                          ScrollViewer.CanContentScroll="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -116,7 +124,7 @@
                                                           RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type obs:SceneItemViewModel}">
+                        <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
                             <Border BorderBrush="Gray"
                                     BorderThickness="1">
                                 <TextBlock Text="{Binding SourceName}"
@@ -135,7 +143,7 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
-            </Grid>
+            </Border>
         </Grid>
 
     </Grid>

@@ -28,14 +28,14 @@
             <Grid Grid.Row="0"
                   Background="#000D14">
                 <buttons:ButtonTaskbar Width="30"
-                                          Height="30"
-                                          FontSize="20"
-                                          WindowChrome.IsHitTestVisibleInChrome="True"
-                                          HorizontalAlignment="Right"
-                                          ColorBrush="#ff000f"
-                                          Content="X"
-                                          Padding="1"
-                                          Click="ExitButtonClick" />
+                                       Height="30"
+                                       FontSize="20"
+                                       WindowChrome.IsHitTestVisibleInChrome="True"
+                                       HorizontalAlignment="Right"
+                                       ColorBrush="#ff000f"
+                                       Content="X"
+                                       Padding="1"
+                                       Click="ExitButtonClick" />
             </Grid>
 
             <Grid Grid.Row="1">
@@ -73,9 +73,10 @@
                                           Command="{Binding CopyDataCommand}"
                                           CommandParameter="{Binding PlayerViewModel.UUID}" />
                         </TextBlock.InputBindings>
-                        
+
                         <Run Text="UUID: " />
-                        <Run Text="{Binding PlayerViewModel.UUID}" Foreground="Wheat" />
+                        <Run Text="{Binding PlayerViewModel.UUID}"
+                             Foreground="Wheat" />
 
                         <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
@@ -110,7 +111,7 @@
                                           Command="{Binding CopyDataCommand}"
                                           CommandParameter="{Binding PlayerViewModel.InGameName}" />
                         </TextBlock.InputBindings>
-                        
+
                         <Run Text="In Game Name: " />
                         <Run Text="{Binding PlayerViewModel.InGameName}"
                              Foreground="Wheat" />
@@ -195,7 +196,7 @@
                         <Run Text="{Binding PlayerViewModel.StreamData.Alt}"
                              Foreground="Wheat" />
                     </TextBlock>
-                    
+
                     <TextBlock FontSize="12"
                                TextAlignment="Left"
                                VerticalAlignment="Center"
@@ -222,13 +223,14 @@
 
                 <StackPanel Background="#3b3b3b"
                             Height="50"
-                            VerticalAlignment="Bottom" Orientation="Horizontal">
+                            VerticalAlignment="Bottom"
+                            Orientation="Horizontal">
                     <Grid>
                         <buttons:ButtonNormal ContentText="Correct UUID"
-                                                 Width="100"
-                                                 Height="30"
-                                                 Margin="5 0 0 0"
-                                                 OnCommand="{Binding CorrectPlayerUUIDCommand}" />
+                                              Width="100"
+                                              Height="30"
+                                              Margin="5 0 0 0"
+                                              OnCommand="{Binding CorrectPlayerUUIDCommand}" />
                         <Border Visibility="{Binding PlayerViewModel.IsUUIDEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Background="Red"
                                 IsHitTestVisible="False"
@@ -248,20 +250,20 @@
                         </Border>
                     </Grid>
                     <buttons:ButtonNormal ContentText="NameMC"
-                                             Width="80"
-                                             Height="30"
-                                             Margin="5 0 0 0"
-                                             OnCommand="{Binding OpenNameMCCommand}" />
+                                          Width="80"
+                                          Height="30"
+                                          Margin="5 0 0 0"
+                                          OnCommand="{Binding OpenNameMCCommand}" />
                     <buttons:ButtonNormal ContentText="Ranked"
-                                             Width="80"
-                                             Height="30"
-                                             Margin="5 0 0 0"
-                                             OnCommand="{Binding OpenRankedStatsCommand}" />
+                                          Width="80"
+                                          Height="30"
+                                          Margin="5 0 0 0"
+                                          OnCommand="{Binding OpenRankedStatsCommand}" />
                     <buttons:ButtonNormal ContentText="Paceman"
-                                             Width="80"
-                                             Height="30"
-                                             Margin="5 0 0 0"
-                                             OnCommand="{Binding OpenPacemanStatsCommand}" />
+                                          Width="80"
+                                          Height="30"
+                                          Margin="5 0 0 0"
+                                          OnCommand="{Binding OpenPacemanStatsCommand}" />
                 </StackPanel>
             </Grid >
         </Grid>

@@ -2,10 +2,10 @@
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
-using TournamentTool.ViewModels.Selectable.Controller;
 
-namespace TournamentTool.ViewModels.Obs;
+namespace TournamentTool.ViewModels.Obs.Items;
 
 public abstract class SceneItemViewModel : BaseViewModel
 {
@@ -20,6 +20,8 @@ public abstract class SceneItemViewModel : BaseViewModel
     public TransformViewModel Transform { get; init; }
 
     public virtual int ZIndex { get; protected set; }
+    public abstract string BaseItemType { get; }
+    public InputKind InputKind { get; protected set; }
 
     public bool IsDisplayed { get; protected set; } = true;
     public bool IsFocused { get; protected set; }
@@ -27,11 +29,12 @@ public abstract class SceneItemViewModel : BaseViewModel
     public string GroupName { get; protected set; } = string.Empty;
     
     public string SourceName { get; protected set; } = string.Empty;
-    protected string SourceUUID { get; set; } = string.Empty;
+    public string SourceUUID { get; private set; } = string.Empty;
 
     protected Dictionary<string, object> Inputs { get; } = [];
 
     public string? BackgroundColor { get; set; }
+    protected string? DefaultColor { get; init; }
 
     private int _rememberedZIndex;
 
@@ -45,11 +48,12 @@ public abstract class SceneItemViewModel : BaseViewModel
         _rememberedZIndex = ZIndex;
         UnFocus();
     }
-
     public virtual void OnDestroy() { }
 
     public virtual Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
     {
+        BackgroundColor = DefaultColor;
+        
         Scene = scene;
         SourceName = item.SourceName ?? string.Empty;
         SourceUUID = item.SourceUuid ?? string.Empty;
@@ -57,6 +61,12 @@ public abstract class SceneItemViewModel : BaseViewModel
         
         Transform.Initialize(item.SceneItemTransform!, group?.SceneItemTransform);
         
+        string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+        if (string.IsNullOrEmpty(inputKindText)) return Task.CompletedTask;
+        
+        InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
+        InputKind = inputKind;
+
         return Task.CompletedTask;
     }
 
@@ -78,7 +88,7 @@ public abstract class SceneItemViewModel : BaseViewModel
     public void UnFocus()
     {
         IsFocused = false;
-        BackgroundColor = Consts.UnFocusedPovColor;
+        BackgroundColor = DefaultColor ?? Consts.UnFocusedPovColor;
         OnPropertyChanged(nameof(BackgroundColor));
         
         ZIndex = _rememberedZIndex;

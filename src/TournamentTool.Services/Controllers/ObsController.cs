@@ -38,12 +38,6 @@ public class ConnectionStateChangedEventArgs : EventArgs
     }
 }
 
-public interface IObsItemController
-{
-    //TODO: 0 rozbic odpowiedzialnosc tak zeby byl oddzielny serwis dla z obsem pod zarzadzanie itemami, wteyd scena moze posiadac 
-    // jego abstracke i to spowoduje, ze bedzie czytelniejsze zastosowanie tego
-}
-
 public interface IObsController
 {
     event EventHandler<SceneItemListReindexedPayload>? SceneItemUpdateRequested;
@@ -55,6 +49,25 @@ public interface IObsController
     
     bool IsConnectedToWebSocket { get; }
     bool StudioMode { get; }
+
+    Task Connect();
+    Task Disconnect();
+
+    Task SwitchStudioMode();
+    Task TransitionStudioModeAsync();
+
+    Task<GetInputSettingsResponseData?> GetInputSettingsAsync(string sourceUuid);
+    Task<GetVideoSettingsResponseData?> GetVideoSettings();
+    Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramScene();
+    Task<GetSceneListResponseData?> GetSceneList();
+
+    Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
+    Task SetCurrentPreviewScene(string scene);
+
+    Task<List<SceneItemStub>> GetSceneItemList(string? sceneName = null, string? sceneUuid = null);
+    Task<List<SceneItemStub>> GetGroupSceneItemList(string group);
+
+    void SetStartedTransition(bool option);
 }
 
 public class ObsController : IObsController, IDisposable
@@ -63,8 +76,8 @@ public class ObsController : IObsController, IDisposable
     private readonly IWebSocketMessageSerializer _webSocketMessageSerializer;
     public ILoggingService Logger { get; }
 
-    public ObsWebSocketClientOptions ClientOptions { get; } = new();
-    public ObsWebSocketClient Client { get; private set; }
+    private ObsWebSocketClientOptions ClientOptions { get; } = new();
+    private ObsWebSocketClient Client { get; set; }
  
     public event EventHandler<SceneItemListReindexedPayload>? SceneItemUpdateRequested;
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
@@ -119,10 +132,10 @@ public class ObsController : IObsController, IDisposable
         }
     }
     
-    public void SwitchStudioMode()
+    public async Task SwitchStudioMode()
     {
         if (!IsConnectedToWebSocket) return;
-        Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
+        await Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
     }
     public async Task TransitionStudioModeAsync()
     {
@@ -247,51 +260,6 @@ public class ObsController : IObsController, IDisposable
     
     public async Task Disconnect() => await Client.DisconnectAsync();
 
-    public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
-    {
-        if (string.IsNullOrWhiteSpace(sourceUuid)) return;
-        
-        JsonElement element = JsonSerializer.SerializeToElement(input);
-        await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
-    }
-    
-    /*private async Task CreateNewSceneItem(string sceneName, string newSceneItemName, string inputKind)
-    {
-        if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
-
-        try
-        {
-            var existingItem = await Client.GetSceneItemId(sceneName, newSceneItemName);
-            if (existingItem > 0)
-            {
-                Logger.Warning($"Scene item '{newSceneItemName}' already exists in scene '{sceneName}'.");
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
-
-        Input input = new(inputKind, newSceneItemName, inputKind);
-        await Client.CreateInput(sceneName, newSceneItemName, inputKind, input);
-    }*/
-    /*public async Task CreateNestedSceneItem(string sceneName)
-    {
-        if (Client.ConnectionState == OBSStudioClient.Enums.ConnectionState.Disconnected) return;
-
-        await Client.CreateScene(sceneName);
-
-        await CreateNewSceneItem(sceneName, "item1", "browser_source");
-        await CreateNewSceneItem(sceneName, "item2", "browser_source");
-
-        int sceneItem1 = await Client.GetSceneItemId(sceneName, "item1");
-        int sceneItem2 = await Client.GetSceneItemId(sceneName, "item2");
-
-        //Client.setscene
-        //await Client.CreateSceneItem(CurrentSceneName, sceneName);
-    }*/
-
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {
         // nie pamietam sensu tego, ale wydaje mi sie za kompletnie zbedny event w mojej sytuacji
@@ -393,6 +361,13 @@ public class ObsController : IObsController, IDisposable
     public async Task<GetSceneListResponseData?> GetSceneList() 
         => await Client.GetSceneListAsync();
     
+    public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
+    {
+        if (string.IsNullOrWhiteSpace(sourceUuid)) return;
+        
+        JsonElement element = JsonSerializer.SerializeToElement(input);
+        await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
+    }
     public async Task SetCurrentPreviewScene(string scene) 
         => await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
 

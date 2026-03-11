@@ -43,7 +43,7 @@ public class StatusBarViewModel : BaseViewModel
     public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
 
     
-    public StatusBarViewModel(ObsController obs, ITwitchService twitch, IBackgroundCoordinator backgroundCoordinator, IDispatcherService dispatcher, 
+    public StatusBarViewModel(IObsController obs, ITwitchService twitch, IBackgroundCoordinator backgroundCoordinator, IDispatcherService dispatcher, 
         ITournamentState tournamentState, NotificationPanelViewModel notificationPanelViewModel, IImageService imageService, IMenuService menuService) : base(dispatcher)
     {
         _tournamentState = tournamentState;

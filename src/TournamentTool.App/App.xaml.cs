@@ -99,7 +99,7 @@ public partial class App : Application
         services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProvider>());
         
         //Rest xd
-        services.AddSingleton<ObsController>();
+        services.AddSingleton<IObsController, ObsController>();
 
         services.AddSingleton<IPopupNotificationService, PopupNotificationService>();
         

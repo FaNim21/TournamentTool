@@ -7,7 +7,8 @@
              xmlns:controller="clr-namespace:TournamentTool.ViewModels.Selectable.Controller;assembly=TournamentTool.ViewModels"
              xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
              xmlns:obs1="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
-             d:DataContext="{d:DesignInstance Type=controller:Scene}"
+             xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
+             d:DataContext="{d:DesignInstance Type=obs1:Scene}"
              mc:Ignorable="d">
     <UserControl.Resources>
         <ContextMenu x:Key="POVContextMenu">
@@ -59,7 +60,7 @@
                     </ItemsControl.ItemContainerStyle>
                     
                     <ItemsControl.Resources>
-                        <DataTemplate DataType="{x:Type obs1:PointOfView}">
+                        <DataTemplate DataType="{x:Type items:PointOfView}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
                                     Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     Width="{Binding Transform.Width, Mode=OneWay}"
@@ -73,7 +74,7 @@
                                     MouseLeave="PointOfView_MouseLeave"
                                     ContextMenuOpening="Border_ContextMenuOpening">
                                 <i:Interaction.Behaviors>
-                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type obs1:PointOfView}"/>
+                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type items:PointOfView}"/>
                                 </i:Interaction.Behaviors>
                                 <Grid IsHitTestVisible="False">
                                     <TextBlock Text="{Binding SceneItemName, Mode=OneWay}"
@@ -119,7 +120,7 @@
                             </Border>
                         </DataTemplate>
                         
-                        <DataTemplate DataType="{x:Type obs1:SceneItemViewModel}">
+                        <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
                                     Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     Width="{Binding Transform.Width, Mode=OneWay}"

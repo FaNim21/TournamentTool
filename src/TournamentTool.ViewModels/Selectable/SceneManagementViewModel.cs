@@ -5,11 +5,13 @@ using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels.Selectable;
@@ -17,9 +19,10 @@ namespace TournamentTool.ViewModels.Selectable;
 public class SceneManagementViewModel : SelectableViewModel
 {
     private readonly IObsCommunicationProvider _obsCommunicationProvider;
-    private readonly ObsController _obs;
+    private readonly IObsController _obs;
+    private readonly IWindowService _windowService;
 
-    public SceneControllerViewmodel SceneController { get; }
+    public SceneControllerViewModel SceneController { get; }
 
     public ObservableCollection<SceneStub> Scenes { get; set; } = [];
 
@@ -31,6 +34,14 @@ public class SceneManagementViewModel : SelectableViewModel
         {
             _selectedScene = value;
             OnPropertyChanged(nameof(SelectedScene));
+
+            if (_selectedScene == null) return;
+            
+            //TODO: Przemyslec miejsce tego na nowo przy okazji robienia detekcji zmiany sceny z poziomu obs
+            Task.Run(async ()=>
+            {
+                await SceneController.MainScene.SetSceneItemsAsync(_selectedScene.SceneName ?? string.Empty, _selectedScene.SceneUuid ?? string.Empty);
+            });
         }
     }
     
@@ -40,8 +51,12 @@ public class SceneManagementViewModel : SelectableViewModel
         get => _selectedSceneItem;
         set
         {
+            _selectedSceneItem?.UnFocus();
+            
             _selectedSceneItem = value;
             OnPropertyChanged(nameof(SelectedSceneItem));
+            
+            _selectedSceneItem?.Focus();
         }
     }
 
@@ -80,22 +95,18 @@ public class SceneManagementViewModel : SelectableViewModel
     
     public ICommand EditSceneItemCommand { get; private set; }
 
+    private AppCache _appCache;
+
+
     /// <summary>
     /// ViewModel nie moze byc glownym miejscem technicznej komunikacji, tylko rzeczywistym posrednikiem miedzy logika a UI
     /// Takze jak bedzie wygladac design komunikacji:
-    /// - trzeba sie porozumiewac z itemami po ID, gdzie kluczem bedzie nazwa itemu z racji czytelnosci dla uzytkownika, ale trzeba od razu wyciagac z tego id
-    ///   chyba ze okaze sie to jednak nie oplacalne z racji komunikacji ze skryptami to wtedy zostaje przy nazwie itemu
-    /// -
-    /// -
+    /// - Trzeba uzywac uuid do przechwytywania danych o scene itemie w app cache
     ///
-    /// Jak powinno byc rozbite UI (POWINNO BYC PROSTE I NIE OBCIAZAJACE W ZAWARTOSC):
+    /// Jak powinno byc rozbite UI (POWINNO BYC PROSTE I NIE OBCIAZAJACE W ZAWARTOSC Dla uzytkownika, czyli bez dodawania/usuwania elementow):
     /// - Ogolnie cale UI scene managementtu powinno sie opierac o jak najwiecej potrzebnych kontrolek w celu obslugi OBS'a ze strony TT,
-    /// - SCENA — powinna byc oddzielna kontrolka do tego zeby wyswietlac wszystkie wspierane elementy sceny
-    ///     — powinno wyswietlac wszystkie itemy, gdzie text fieldy powinny miec przezroczystosc i tak samo browsery zaleznie od typu (nie wiem jeszcze jak to rozroznic)
-    ///     — zaznaczenie itemu z listy w scene managerze powinno zaznaczac ten element w scenie i wylaczac mu przezroczystosc
-    ///     —
     /// - lista z itemami na scenie powinna byc filtrowana na typ i nazwe,
-    /// - lista ze scenami (jakos schowana poniewaz nie jest ciagle potrzebna)
+    /// - lista ze scenami,
     /// - lista z scene collection (jakos schowana poniewaz nie jest ciagle potrzebna)
     /// - panel do listy ze skryptami, czyli dodawanie/usuwanie/edycja
     ///     — w panelu jest opcja do podpięcia się pod istniejacy item?
@@ -103,17 +114,20 @@ public class SceneManagementViewModel : SelectableViewModel
     ///       w celu wyboru itemu? wtedy z poziomu skryptu ustala sie tym customowej zmiennej miedzy typem scene itemu (enum)
     ///     — zaprojektowac trzeba API LUA, czyli jakie eventy beda dostepne do przechwytywania, jak OnTextChanged dla textfieldo,
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
-    /// - 
-    ///     
     /// </summary>
-    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider, 
-        ISceneControllerViewModelFactory sceneControllerFactory, ObsController obs) : base(dispatcher)
+    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider, ISettingsProvider settingsProvider,
+        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService) : base(dispatcher)
     {
         _obsCommunicationProvider = obsCommunicationProvider;
         _obs = obs;
+        _windowService = windowService;
+
+        _appCache = settingsProvider.Get<AppCache>();
 
         SceneController = sceneControllerFactory.Create();
         SceneController.IsStudioModeSupported = false;
+        
+        //TODO: 0 Przechwytywac eventy z OBS'a
 
         EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
     }
@@ -130,9 +144,11 @@ public class SceneManagementViewModel : SelectableViewModel
             {
                 Scenes = new ObservableCollection<SceneStub>(sceneResponse.Scenes ?? []);
                 OnPropertyChanged(nameof(Scenes));
+
+                _selectedScene = Scenes.FirstOrDefault(s => s.SceneUuid!.Equals(sceneResponse.CurrentProgramSceneUuid));
+                OnPropertyChanged(nameof(SelectedScene));
             });
         });
-        
     }
     public override bool OnDisable()
     {
@@ -143,6 +159,23 @@ public class SceneManagementViewModel : SelectableViewModel
 
     private void EditSceneItem(SceneItemViewModel sceneItem)
     {
-        //TODO: 0 Odpalac okno edycji scene item
+        SceneItemEditWindowViewModel viewModel = new(sceneItem, _obsCommunicationProvider, _appCache, Dispatcher);
+        _windowService.ShowCustomDialog(viewModel, async edit => await OnEditSceneItemClosed(edit), "SceneItemEditWindow");
+    }
+
+    private async Task OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
+    {
+        //TODO: 0 tutaj zapisanie wszystkich rzeczy do appcache
+        SceneItemConfiguration config = new()
+        {
+            InputKind = editWindowViewModel.InputKind,
+        };
+        
+        _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
+        
+        string sceneName = SceneController.MainScene.SceneName;
+        string sceneUuid = SceneController.MainScene.SceneUuid;
+        
+        await SceneController.MainScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
     }
 }

@@ -2,6 +2,7 @@
 using TournamentTool.Core.Interfaces;
 using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels;

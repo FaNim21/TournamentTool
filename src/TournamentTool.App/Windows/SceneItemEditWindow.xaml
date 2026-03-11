@@ -1,0 +1,153 @@
+﻿<Window x:Class="TournamentTool.App.Windows.SceneItemEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:TournamentTool.App.Windows"
+        xmlns:obs="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
+        xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
+        xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
+        xmlns:obsDomain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
+        xmlns:converters="clr-namespace:TournamentTool.App.Converters"
+        d:DataContext="{d:DesignInstance Type=obs:SceneItemEditWindowViewModel}"
+        mc:Ignorable="d"
+        Title="Scene item edit window"
+        Height="450"
+        Width="800"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Topmost="True"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E1E"
+        WindowStyle="None">
+    <Window.Resources>
+
+        <DataTemplate DataType="{x:Type items:PointOfView}">
+            <StackPanel>
+                <TextBlock Text="Point of view" />
+                <!-- TODO: TU TRZEBA USTALIC caly config dla pov'a, chyba w sumie tu nic nie bedzie xd-->
+
+                <ComboBox Style="{StaticResource ComboBoxTest2}"
+                          Width="200"
+                          Margin="10 0 0 0"
+                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
+                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            </StackPanel>
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type items:BrowserItemViewModel}">
+            <StackPanel>
+                <TextBlock Text="Browser type"/>
+                <!-- TODO: 0 TU TRZEBA USTALIC caly config dla browser z opcja aktualizowania danych-->
+                <!-- TODO: 0 dla browser i text item bedzie konfiguracja komunikacji z zewnetrznymi czesciami lub danymi z pova (opcja wyboru z posrod aktywnych) -->
+
+                <ComboBox Style="{StaticResource ComboBoxTest2}"
+                          Width="200"
+                          Margin="10 0 0 0"
+                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
+                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type items:TextItemViewModel}">
+            <StackPanel>
+                <TextBlock Text="Text type"/>
+            </StackPanel>
+        </DataTemplate>
+
+    </Window.Resources> 
+    
+    <Border BorderThickness="1"
+            BorderBrush="Black">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="29" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Background="#000D14">
+                <buttons:ButtonTaskbar Width="30"
+                                       Height="30"
+                                       FontSize="20"
+                                       WindowChrome.IsHitTestVisibleInChrome="True"
+                                       HorizontalAlignment="Right"
+                                       ColorBrush="#ff000f"
+                                       Content="X"
+                                       Padding="1"
+                                       Click="ExitButtonClick" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0"
+                            Margin="5">
+                    <TextBlock FontSize="12"
+                               TextAlignment="Left"
+                               VerticalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
+                               Padding="0">
+
+                        <Run Text="Scene item name: " />
+                        <Run Text="{Binding SceneItem.SourceName, Mode=OneWay}"
+                             Foreground="Wheat" />
+                    </TextBlock>
+                    
+                    <TextBlock FontSize="12"
+                               TextAlignment="Left"
+                               VerticalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
+                               Padding="0">
+
+                        <Run Text="Group name: " />
+                        <Run Text="{Binding SceneItem.GroupName, Mode=OneWay}"
+                             Foreground="Wheat" />
+                    </TextBlock>
+
+                    <TextBlock FontSize="12"
+                               TextAlignment="Left"
+                               VerticalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
+                               Padding="0">
+
+                        <Run Text="Base type: " />
+                        <Run Text="{Binding SceneItem.BaseItemType, Mode=OneWay}"
+                             Foreground="Wheat" />
+                    </TextBlock>
+                    
+                    <TextBlock FontSize="12"
+                               TextAlignment="Left"
+                               VerticalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Cursor="Hand"
+                               Padding="0">
+
+                        <Run Text="Custom type: " />
+                        <Run Text="{Binding SceneItem.InputKind, Mode=OneWay}"
+                             Foreground="Wheat" />
+                    </TextBlock>
+                </StackPanel>
+
+                <Grid Grid.Column="1">
+                    <ContentControl Content="{Binding SceneItem}" />
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

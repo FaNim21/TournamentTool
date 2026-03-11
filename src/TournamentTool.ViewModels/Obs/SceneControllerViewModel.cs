@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Windows.Input;
-using Newtonsoft.Json;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Responses;
@@ -14,11 +14,10 @@ using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.ViewModels.Commands;
-using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace TournamentTool.ViewModels.Selectable.Controller;
+namespace TournamentTool.ViewModels.Obs;
 
 public class UnSelectTriggeredEventArgs(bool cleaAll) : EventArgs
 {
@@ -40,13 +39,13 @@ public interface ISceneController
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 }
 
-public class SceneControllerViewmodel : BaseViewModel, ISceneController, IScenePovInteractable
+public class SceneControllerViewModel : BaseViewModel, ISceneController, IScenePovInteractable
 {
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly Lock _lock = new();
     
     public ILoggingService Logger { get; }
-    public ObsController OBS { get; }
+    public IObsController OBS { get; }
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
@@ -128,7 +127,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
     private readonly AppCache _appCache;
     
 
-    public SceneControllerViewmodel(ObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, 
+    public SceneControllerViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, 
         ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
     {
         _playerRepository = playerRepository;
@@ -143,7 +142,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
-        SwitchStudioModeCommand = new RelayCommand(OBS.SwitchStudioMode);
+        SwitchStudioModeCommand = new RelayCommand(async () => { await OBS.SwitchStudioMode(); });
         StudioModeTransitionCommand = new RelayCommand(async () =>
         {
             if (MainScene.SceneName!.Equals(PreviewScene.SceneName) ||
@@ -516,7 +515,7 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
                     {
                         if (groupItem.ExtensionData == null) continue;
                         
-                        SetCustomInputKind(item);
+                        SetCustomInputKind(groupItem);
                         
                         string groupItemInputKind = groupItem.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
                         if (string.IsNullOrEmpty(groupItemInputKind)) continue;
@@ -543,10 +542,10 @@ public class SceneControllerViewmodel : BaseViewModel, ISceneController, ISceneP
         if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;
         
         //TODO: 0 ustalac customowe input kind dla uuid pobranych z appcache dla dictionary<string, object>
-        // gdzie object to bedzie klasa trzymajace dane z konfiguratora
-        if (!_appCache.SceneItemsConfig.TryGetValue(sceneItem.SourceUuid, out var config)) return;
+        if (!_appCache.SceneItemConfigs.TryGetValue(sceneItem.SourceUuid, out SceneItemConfiguration? config)) return;
+        if (config == null) return;
 
-        // sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement("");
+        sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(config.InputKind);
     }
 
     private void ClearScenes()

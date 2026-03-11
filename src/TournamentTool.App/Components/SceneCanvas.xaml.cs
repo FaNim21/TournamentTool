@@ -4,6 +4,7 @@ using System.Windows.Input;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.App.Components;

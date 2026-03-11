@@ -8,12 +8,12 @@ using TournamentTool.Core.Parsers;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
-using TournamentTool.ViewModels.Selectable.Controller;
 
-namespace TournamentTool.ViewModels.Obs;
+namespace TournamentTool.ViewModels.Obs.Items;
 
 public class PointOfView : BrowserItemViewModel
 {
@@ -134,7 +134,8 @@ public class PointOfView : BrowserItemViewModel
     {
         Type = type;
         
-        BackgroundColor = Consts.UnFocusedPovColor;
+        DefaultColor = Consts.UnFocusedPovColor;
+        InputKind = InputKind.tt_point_of_view;
 
         ApplyVolumeCommand = new RelayCommand(async () => await ApplyVolume());
         RefreshCommand = new RelayCommand(async () => await RefreshAsync());

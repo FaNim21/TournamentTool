@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text.Json;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
@@ -8,9 +7,9 @@ using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Commands.Controller;
-using TournamentTool.ViewModels.Obs;
+using TournamentTool.ViewModels.Obs.Items;
 
-namespace TournamentTool.ViewModels.Selectable.Controller;
+namespace TournamentTool.ViewModels.Obs;
 
 public enum SceneType
 {
@@ -192,12 +191,11 @@ public class Scene : BaseViewModel, IScene
         InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
         if (inputKind == InputKind.unsupported) return;
 
-        //TODO: 0 Zrobic factory?
         SceneItemViewModel? sceneItem = inputKind switch
         {
             InputKind.tt_point_of_view => new PointOfView(SceneController, Dispatcher, Logger, Type),
             InputKind.browser_source => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
-            InputKind.text_gdiplus_v2 => new TextItemViewModel(SceneController, Dispatcher, Logger),
+            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItemViewModel(SceneController, Dispatcher, Logger),
             _ => null
         };
 

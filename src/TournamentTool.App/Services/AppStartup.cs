@@ -19,7 +19,7 @@ public interface IApplicationLifetime
 public class ApplicationLifetime : IApplicationLifetime
 {
     private readonly MainViewModel _mainViewModel;
-    private readonly ObsController _obsController;
+    private readonly IObsController _obsController;
     
     private readonly IPresetSaver _presetSaver;
     private readonly IInputController _inputController;
@@ -32,7 +32,7 @@ public class ApplicationLifetime : IApplicationLifetime
 
 
     public ApplicationLifetime(MainViewModel mainViewModel, IPresetSaver presetSaver, IInputController inputController, ISettingsSaver settingsSaver, 
-        ISettingsProvider settingsProvider, ObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger,
+        ISettingsProvider settingsProvider, IObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger,
         ILogStore logStore)
     {
         _mainViewModel = mainViewModel;
