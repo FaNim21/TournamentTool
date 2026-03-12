@@ -41,7 +41,7 @@ public class PointOfViewTests
         }
         
         var pov = new PointOfView(_controller, _dispatcher, _logger, type);
-        await pov.InitializeAsync(_scene, item, group);
+        await pov.InitializeAsync(_scene, false, item, group);
 
         return pov;
     }

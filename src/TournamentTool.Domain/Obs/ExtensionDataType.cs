@@ -9,6 +9,7 @@ public enum ExtensionDataType
 public enum SourceType
 {
     OBS_SOURCE_TYPE_SCENE,
+    OBS_SOURCE_TYPE_INPUT,
 }
 
 public enum InputKind

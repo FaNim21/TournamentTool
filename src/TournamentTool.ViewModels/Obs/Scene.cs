@@ -201,7 +201,7 @@ public class Scene : BaseViewModel, IScene
 
         if (sceneItem == null) return;
 
-        await sceneItem.InitializeAsync(this, item, group);
+        await sceneItem.InitializeAsync(this, SceneController.InEditMode, item, group);
         sceneItem.Transform.UpdateProportions(ProportionsRatio);
 
         AddSceneItem(sceneItem);

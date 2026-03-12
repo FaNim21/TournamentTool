@@ -148,7 +148,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         
         _settings = settingsProvider.Get<Domain.Entities.Settings>();
 
-        SceneController = sceneControllerFactory.Create();
+        SceneController = sceneControllerFactory.Create(false);
         ServiceHub = new ControllerServiceHub(this, twitch, logger, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });

@@ -1,4 +1,24 @@
-﻿namespace TournamentTool.Services.Obs;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+
+namespace TournamentTool.Services.Obs;
+
+public sealed class ObsSourceBinding
+{
+    public string SourceName { get; set; }
+    public List<>
+}
+
+public sealed class ObsPropertyBinding
+{
+    public string ObsField { get; set; }
+    public PropertyInfo CommunicationProperty { get; set; }
+}
+
+public interface IObsCommunicationSettings
+{
+    
+}
 
 public interface IObsCommunicationProvider
 {

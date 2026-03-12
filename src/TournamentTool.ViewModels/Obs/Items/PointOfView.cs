@@ -149,9 +149,9 @@ public class PointOfView : BrowserItemViewModel
         player.IsUsedInPreview = false;
     }
 
-    public override async Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
+    public override async Task InitializeAsync(IScene scene, bool inEditMode, SceneItemStub item, SceneItemStub? group = null)
     {
-        await base.InitializeAsync(scene, item, group);
+        await base.InitializeAsync(scene, inEditMode, item, group);
         
         (string? currentName, int volume, StreamType type) data = await GetBrowserURLStreamInfo(SourceUUID);
 

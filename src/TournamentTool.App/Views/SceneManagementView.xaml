@@ -125,21 +125,29 @@
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
-                            <Border BorderBrush="Gray"
-                                    BorderThickness="1">
+                            <Grid>
+                                <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
+                                        Opacity="0.5" />
                                 <TextBlock Text="{Binding SourceName}"
                                            Foreground="White"
                                            FontSize="20"
                                            HorizontalAlignment="Left"
-                                           Padding="5 0 0 0"
-                                           TextAlignment="Center" />
-                            </Border>
+                                           Padding="5 0 0 2" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="ContextMenu"
                                     Value="{StaticResource SceneItemsContextMenu}" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="Margin"
+                                    Value=" 0 0 0 2" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>

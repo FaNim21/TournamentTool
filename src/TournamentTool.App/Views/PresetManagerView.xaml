@@ -516,12 +516,12 @@
                 <RowDefinition Height="40" />
             </Grid.RowDefinitions>
 
-            <ListView ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            <ListView Grid.Row="0"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       Background="Transparent"
                       BorderThickness="0"
                       SelectionMode="Single"
                       AllowDrop="True"
-                      Grid.Row="0"
                       ItemsSource="{Binding Presets}"
                       SelectedItem="{Binding CurrentChosen}">
                 <i:Interaction.Behaviors>

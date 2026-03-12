@@ -19,11 +19,12 @@ public abstract class SceneItemViewModel : BaseViewModel
 
     public TransformViewModel Transform { get; init; }
 
+    public float Opacity { get; protected set; } = 1f;
     public virtual int ZIndex { get; protected set; }
     public abstract string BaseItemType { get; }
     public InputKind InputKind { get; protected set; }
 
-    public bool IsDisplayed { get; protected set; } = true;
+    public bool InEditMode { get; protected set; }
     public bool IsFocused { get; protected set; }
 
     public string GroupName { get; protected set; } = string.Empty;
@@ -50,9 +51,12 @@ public abstract class SceneItemViewModel : BaseViewModel
     }
     public virtual void OnDestroy() { }
 
-    public virtual Task InitializeAsync(IScene scene, SceneItemStub item, SceneItemStub? group = null)
+    public virtual Task InitializeAsync(IScene scene, bool inEditMode, SceneItemStub item, SceneItemStub? group = null)
     {
         BackgroundColor = DefaultColor;
+        
+        Opacity = inEditMode ? 0.5f : 1f;
+        InEditMode = inEditMode;
         
         Scene = scene;
         SourceName = item.SourceName ?? string.Empty;

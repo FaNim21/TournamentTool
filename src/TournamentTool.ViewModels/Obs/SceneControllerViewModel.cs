@@ -32,6 +32,8 @@ public interface IScenePovInteractable
 
 public interface ISceneController
 {
+    public bool InEditMode { get; }
+    
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
     Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid);
     
@@ -115,6 +117,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
 
     public bool BusyWithOBS { get; private set; }
     public bool IsStudioModeSupported { get; set; } = true;
+    public bool InEditMode { get; }
 
     public event EventHandler<UnSelectTriggeredEventArgs>? UnSelectTriggered;
 
@@ -128,14 +131,14 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
     
 
     public SceneControllerViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, 
-        ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService) : base(dispatcher)
+        ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService, bool inEditMode = true) : base(dispatcher)
     {
         _playerRepository = playerRepository;
         OBS = obs;
         Logger = logger;
-
+        InEditMode = inEditMode;
+        
         _appCache = settingsProvider.Get<AppCache>();
-        //TODO: 0 w appcache beda zapisywane dane, wiec w kontrolerze tutaj bedzie sie go uzywac do inicjalizacji konfiguracji rodzicow dla wszystkich itemow
         
         MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher);
         PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher);
@@ -501,30 +504,22 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
                 SetCustomInputKind(item);
                 
                 string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
-                string inputKind = item.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-                
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
                 {
-                    List<SceneItemStub> groupItems;
-                    if (item.IsGroup == true)
-                        groupItems = await OBS.GetGroupSceneItemList(item.SourceName!);
-                    else
-                        groupItems = await OBS.GetSceneItemList(item.SourceName);
-                    
+                    List<SceneItemStub> groupItems = item.IsGroup == true ? await OBS.GetGroupSceneItemList(item.SourceName!) : [];
                     foreach (SceneItemStub groupItem in groupItems)
                     {
                         if (groupItem.ExtensionData == null) continue;
                         
                         SetCustomInputKind(groupItem);
                         
-                        string groupItemInputKind = groupItem.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-                        if (string.IsNullOrEmpty(groupItemInputKind)) continue;
+                        if (!IsInputKindCorrect(groupItem)) continue;
 
                         items.Add((groupItem, item));
                     }
                 }
                 
-                if (string.IsNullOrEmpty(inputKind)) continue;
+                if (!IsInputKindCorrect(item)) continue;
 
                 items.Add((item, null));
             }
@@ -536,6 +531,13 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
 
         return items;
     }
+    private bool IsInputKindCorrect(SceneItemStub sceneItem)
+    {
+        string groupItemInputKind = sceneItem.ExtensionData![nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+        if (string.IsNullOrEmpty(groupItemInputKind) || (!InEditMode && !groupItemInputKind.Equals(nameof(InputKind.tt_point_of_view)))) return false;
+        
+        return true;
+    }
 
     private void SetCustomInputKind(SceneItemStub sceneItem)
     {
@@ -545,7 +547,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
         if (!_appCache.SceneItemConfigs.TryGetValue(sceneItem.SourceUuid, out SceneItemConfiguration? config)) return;
         if (config == null) return;
 
-        sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(config.InputKind);
+        sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(config.InputKind.ToString());
     }
 
     private void ClearScenes()

@@ -10,7 +10,7 @@ namespace TournamentTool.ViewModels.Factories;
 
 public interface ISceneControllerViewModelFactory
 {
-    SceneControllerViewModel Create();
+    SceneControllerViewModel Create(bool inEditMode = true);
 }
 
 public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
@@ -34,8 +34,8 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
         _windowService = windowService;
     }
 
-    public SceneControllerViewModel Create()
+    public SceneControllerViewModel Create(bool inEditMode = true)
     {
-        return new SceneControllerViewModel(_obs, _playerRepository, _logger, _settingsProvider, _dispatcher, _windowService);
+        return new SceneControllerViewModel(_obs, _playerRepository, _logger, _settingsProvider, _dispatcher, _windowService, inEditMode);
     }
 }
