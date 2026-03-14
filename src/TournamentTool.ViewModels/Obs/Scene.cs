@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Commands;
@@ -28,6 +30,7 @@ public interface IScene
 
 public class Scene : BaseViewModel, IScene
 {
+    private readonly AppCache _appCache;
     private readonly Lock _lock = new();
     protected SceneType Type { get; set; }
 
@@ -115,11 +118,12 @@ public class Scene : BaseViewModel, IScene
 
 
     public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IWindowService windowService, 
-        ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
+        ILoggingService logger, IDispatcherService dispatcher, AppCache appCache) : base(dispatcher)
     {
         Interactable = interactable;
         SceneController = sceneController;
         Logger = logger;
+        _appCache = appCache;
 
         Type = type;
 
@@ -171,40 +175,35 @@ public class Scene : BaseViewModel, IScene
         SceneName = sceneName;
         SceneUuid = sceneUuid;
         
-        ClearSceneItems();
+        foreach (var sceneItem in SceneItems)
+        {
+            sceneItem.OnDestroy();
+        }
 
         List<(SceneItemStub, SceneItemStub?)> items = await SceneController.GetSceneItemsAsync(sceneName, sceneUuid);
-
+        List<SceneItemViewModel> createdSceneItems = [];
+        
         for (int i = items.Count - 1; i >= 0; i--)
         {
             (SceneItemStub item, SceneItemStub? group) current = items[i];
-            await SetupSceneItems(current.item, current.group);
+            
+            SceneItemViewModel? sceneItem = await CreateSceneItem(current.item, current.group);
+            if (sceneItem == null) continue;
+            
+            createdSceneItems.Add(sceneItem);
         }
-    }
-    private async Task SetupSceneItems(SceneItemStub item, SceneItemStub? group = null)
-    {
-        if (item.SceneItemTransform == null) return;
 
-        string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-        if (string.IsNullOrEmpty(inputKindText)) return;
-        
-        InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
-        if (inputKind == InputKind.unsupported) return;
-
-        SceneItemViewModel? sceneItem = inputKind switch
+        await Dispatcher.InvokeAsync(delegate
         {
-            InputKind.tt_point_of_view => new PointOfView(SceneController, Dispatcher, Logger, Type),
-            InputKind.browser_source => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
-            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItemViewModel(SceneController, Dispatcher, Logger),
-            _ => null
-        };
-
-        if (sceneItem == null) return;
-
-        await sceneItem.InitializeAsync(this, SceneController.InEditMode, item, group);
-        sceneItem.Transform.UpdateProportions(ProportionsRatio);
-
-        AddSceneItem(sceneItem);
+            lock (_lock)
+            {
+                SceneItems.Clear();
+                foreach (var item in createdSceneItems)
+                {
+                    SceneItems.Add(item);
+                }
+            }
+        }, CustomDispatcherPriority.Background);
     }
 
     public async Task Refresh()
@@ -219,16 +218,51 @@ public class Scene : BaseViewModel, IScene
         }
     }
 
-    public void AddSceneItem(SceneItemViewModel item)
+    private async Task<SceneItemViewModel?> CreateSceneItem(SceneItemStub item, SceneItemStub? group = null)
     {
-        Dispatcher.Invoke(delegate
+        if (item.SceneItemTransform == null) return null;
+
+        _appCache.SceneItemConfigs.TryGetValue(item.SourceUuid ?? string.Empty, out SceneItemConfiguration? config);
+        SetCustomInputKind(item, config);
+        
+        string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+        if (!IsInputKindCorrect(inputKindText)) return null;
+        
+        InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
+        if (inputKind == InputKind.unsupported) return null;
+
+        SceneItemViewModel? sceneItem = inputKind switch
+        {
+            InputKind.tt_point_of_view => new PointOfView(SceneController, Dispatcher, Logger, Type),
+            InputKind.browser_source => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
+            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItemViewModel(SceneController, Dispatcher, Logger),
+            _ => null
+        };
+
+        if (sceneItem == null) return null;
+
+        await sceneItem.InitializeAsync(this, SceneController.InEditMode, item, group);
+        sceneItem.Transform.UpdateProportions(ProportionsRatio);
+
+        SceneController.SetupBindings(sceneItem);
+        SetupConfiguration(sceneItem, config);
+
+        return sceneItem;
+    }
+    public async Task AddSceneItem(SceneItemStub item, SceneItemStub? group = null)
+    {
+        SceneItemViewModel? sceneItem = await CreateSceneItem(item, group);
+        if (sceneItem == null) return;
+        
+        await Dispatcher.InvokeAsync(delegate
         {
             lock (_lock)
             {
-                SceneItems.Add(item);
+                SceneItems.Add(sceneItem);
             }
         });
     }
+    
     public void RemoveSceneItem(SceneItemViewModel item)
     {
         Dispatcher.BeginInvoke(() =>
@@ -286,6 +320,30 @@ public class Scene : BaseViewModel, IScene
         }
     }
 
+    private void SetCustomInputKind(SceneItemStub sceneItem, SceneItemConfiguration? configuration)
+    {
+        if (configuration == null) return;
+        if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;
+
+        sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(configuration.InputKind.ToString());
+    }
+    private void SetupConfiguration(SceneItemViewModel sceneItem, SceneItemConfiguration? configuration)
+    {
+        if (string.IsNullOrEmpty(sceneItem.SourceUUID)) return;
+        if (configuration == null) return;
+
+        sceneItem.BindingPath = configuration.BindingPath ?? string.Empty;
+        sceneItem.InputKind = configuration.InputKind;
+    }
+    
+    private bool IsInputKindCorrect(string itemInputKind)
+    {
+        if (string.IsNullOrEmpty(itemInputKind) ||
+            (!SceneController.InEditMode && !itemInputKind.Equals(nameof(InputKind.tt_point_of_view)))) return false;
+        
+        return true;
+    }
+    
     public void Clear()
     {
         SceneName = string.Empty;

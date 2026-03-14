@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using MessagePack.Resolvers;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
@@ -166,10 +167,8 @@ public class SceneManagementViewModel : SelectableViewModel
     private async Task OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
     {
         //TODO: 0 tutaj zapisanie wszystkich rzeczy do appcache
-        SceneItemConfiguration config = new()
-        {
-            InputKind = editWindowViewModel.InputKind,
-        };
+        SceneItemConfiguration config = new(editWindowViewModel.InputKind, string.Empty);
+        // TODO: 0 nie wpiety binding path na razie, bo nie ma configuratora
         
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
         

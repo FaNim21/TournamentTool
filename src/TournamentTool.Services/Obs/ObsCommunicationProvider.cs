@@ -3,23 +3,6 @@ using System.Reflection;
 
 namespace TournamentTool.Services.Obs;
 
-public sealed class ObsSourceBinding
-{
-    public string SourceName { get; set; }
-    public List<>
-}
-
-public sealed class ObsPropertyBinding
-{
-    public string ObsField { get; set; }
-    public PropertyInfo CommunicationProperty { get; set; }
-}
-
-public interface IObsCommunicationSettings
-{
-    
-}
-
 public interface IObsCommunicationProvider
 {
     
@@ -31,9 +14,30 @@ public interface IObsCommunicationProvider
 /// </summary>
 public class ObsCommunicationProvider : IObsCommunicationProvider
 {
+    // private readonly Dictionary<string, List<IBoundItem>> _bindings = new();
 
     public ObsCommunicationProvider()
     {
         
     }
+
+    /*public void Register(string key, IBoundItem item)
+    {
+        if (!_bindings.TryGetValue(key, out List<IBoundItem>? value))
+        {
+            value = [];
+            _bindings[key] = value;
+        }
+
+        value.Add(item);
+    }
+
+    public async Task Publish(string key, object value)
+    {
+        if (!_bindings.TryGetValue(key, out var items))
+            return;
+
+        foreach (var item in items)
+            item.Update(value);
+    }*/
 }

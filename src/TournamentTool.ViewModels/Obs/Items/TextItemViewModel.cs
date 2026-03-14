@@ -17,7 +17,14 @@ public class TextItemViewModel : SceneItemViewModel
         DefaultColor = Consts.TextSourceColor;
     }
 
-    public override async Task UpdateAsync()
+    public override async Task ApplyBindingValueAsync(object? value)
+    {
+        Text = value?.ToString() ?? string.Empty;
+        
+        await UpdateAsync();
+    }
+    
+    protected override async Task UpdateAsync()
     {
         Inputs["text"] = Text;
         

@@ -147,6 +147,7 @@ public class PointOfView : BrowserItemViewModel
         
         player.IsUsedInPov = false;
         player.IsUsedInPreview = false;
+        StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
     public override async Task InitializeAsync(IScene scene, bool inEditMode, SceneItemStub item, SceneItemStub? group = null)

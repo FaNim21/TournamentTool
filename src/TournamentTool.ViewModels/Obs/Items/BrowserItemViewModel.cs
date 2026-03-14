@@ -17,7 +17,14 @@ public class BrowserItemViewModel : SceneItemViewModel
         DefaultColor = Consts.BrowserSourceColor;
     }
 
-    public override async Task UpdateAsync()
+    public override async Task ApplyBindingValueAsync(object? value)
+    {
+        Url = value?.ToString() ?? string.Empty;
+        
+        await UpdateAsync();
+    }
+
+    protected override async Task UpdateAsync()
     {
         Inputs["url"] = Url;
         

@@ -4,10 +4,11 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs;
 
 namespace TournamentTool.ViewModels.Obs.Items;
 
-public abstract class SceneItemViewModel : BaseViewModel
+public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
 {
     //TODO: 0 Parent od relacji i mogą to być: SceneItem, Leaderboard (entries, rules), SidePanel, ManagementPanel
     //TODO: 0 lista dzieci, ktore sa aktualizowane przez rodzica, bo aktualizacji informacji
@@ -19,10 +20,12 @@ public abstract class SceneItemViewModel : BaseViewModel
 
     public TransformViewModel Transform { get; init; }
 
+    public string BindingPath { get; set; } = string.Empty;
+
     public float Opacity { get; protected set; } = 1f;
     public virtual int ZIndex { get; protected set; }
     public abstract string BaseItemType { get; }
-    public InputKind InputKind { get; protected set; }
+    public InputKind InputKind { get; set; }
 
     public bool InEditMode { get; protected set; }
     public bool IsFocused { get; protected set; }
@@ -66,17 +69,19 @@ public abstract class SceneItemViewModel : BaseViewModel
         Transform.Initialize(item.SceneItemTransform!, group?.SceneItemTransform);
         
         string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-        if (string.IsNullOrEmpty(inputKindText)) return Task.CompletedTask;
-        
-        InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
-        InputKind = inputKind;
+        if (!string.IsNullOrEmpty(inputKindText))
+        {
+            InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
+            InputKind = inputKind;
+        }
 
         return Task.CompletedTask;
     }
 
-    public virtual async Task UpdateAsync() => await Controller.SetItemInputSettingsAsync(SourceUUID, Inputs);
+    protected virtual async Task UpdateAsync() => await Controller.SetItemInputSettingsAsync(SourceUUID, Inputs);
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
+    public virtual Task ApplyBindingValueAsync(object? value) => Task.CompletedTask;
 
     public void Focus()
     {

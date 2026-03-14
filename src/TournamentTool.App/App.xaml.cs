@@ -115,7 +115,7 @@ public partial class App : Application
         services.AddSingleton<IBackgroundCoordinator, BackgroundCoordinator>();
         
         //main navigation panels
-        services.AddSingleton<ControllerViewModel>();
+        services.AddSingleton<ControllerViewModel>();    //To powinno zostac singletonem, ale lepiej i tak trzeba przekminic zastosowanie tego
         services.AddTransient<PresetManagerViewModel>();
         services.AddSingleton<PlayerManagerViewModel>(); //zanim transient to trzeba bedzie zrobic serwis, ktory trzyma info o eventach pacemanowych, bo sa w ctor
         services.AddTransient<LeaderboardPanelViewModel>();
@@ -129,6 +129,8 @@ public partial class App : Application
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
         
         //OBS
+        services.AddSingleton<IBindingEngine, BindingEngine>();
+        
         services.TryAddSingleton<JsonMessageSerializer>();
         services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
 

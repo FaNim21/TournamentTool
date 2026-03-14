@@ -51,8 +51,4 @@ public sealed class PresetOrderData
     public int index { get; set; } = int.MaxValue;
 }
 
-// mozliwe ze lepiej jednak bedzie zrobic record, bo i tak za kazda edycja, wczytuje to danego uuid nowy config, tak mysle ze bedzie to prostsze
-public sealed class SceneItemConfiguration
-{
-    public InputKind InputKind { get; set; }
-}
+public record SceneItemConfiguration(InputKind InputKind, string BindingPath);

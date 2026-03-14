@@ -13,6 +13,7 @@ using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
+using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Obs.Items;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
@@ -39,11 +40,14 @@ public interface ISceneController
     
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
+
+    void SetupBindings(SceneItemViewModel sceneItem);
 }
 
 public class SceneControllerViewModel : BaseViewModel, ISceneController, IScenePovInteractable
 {
     private readonly ITournamentPlayerRepository _playerRepository;
+    private readonly IBindingEngine _bindingEngine;
     private readonly Lock _lock = new();
     
     public ILoggingService Logger { get; }
@@ -126,22 +130,20 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
     public ICommand SwitchStudioModeCommand {  get; private set; }
     public ICommand StudioModeTransitionCommand { get; private set; }
     public ICommand OnSceneResizeCommand { get; private set; }
-
-    private readonly AppCache _appCache;
     
 
-    public SceneControllerViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, 
+    public SceneControllerViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, IBindingEngine bindingEngine,
         ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService, bool inEditMode = true) : base(dispatcher)
     {
         _playerRepository = playerRepository;
+        _bindingEngine = bindingEngine;
         OBS = obs;
         Logger = logger;
         InEditMode = inEditMode;
         
-        _appCache = settingsProvider.Get<AppCache>();
-        
-        MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher);
-        PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher);
+        AppCache appCache = settingsProvider.Get<AppCache>();
+        MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher, appCache);
+        PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher, appCache);
 
         RefreshPOVsCommand = new RelayCommand(async () => { await RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(async () => { await RefreshScenes(); });
@@ -487,6 +489,13 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
         => _playerRepository.GetPlayerByStreamName(name, type);
 
+    public void SetupBindings(SceneItemViewModel sceneItem)
+    {
+        if (string.IsNullOrEmpty(sceneItem.BindingPath)) return;
+        
+        _bindingEngine.Register(sceneItem.BindingPath, sceneItem);
+    }
+    
     public async Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid)
     {
         List<(SceneItemStub, SceneItemStub?)> items = [];
@@ -501,7 +510,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
             {
                 if (item.ExtensionData == null) continue;
                 
-                SetCustomInputKind(item);
+                string itemInputKind = item.ExtensionData![nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
                 
                 string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
@@ -511,15 +520,14 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
                     {
                         if (groupItem.ExtensionData == null) continue;
                         
-                        SetCustomInputKind(groupItem);
-                        
-                        if (!IsInputKindCorrect(groupItem)) continue;
+                        string groupItemKind = groupItem.ExtensionData![nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
+                        if (string.IsNullOrEmpty(groupItemKind)) continue;
 
                         items.Add((groupItem, item));
                     }
                 }
                 
-                if (!IsInputKindCorrect(item)) continue;
+                if (string.IsNullOrEmpty(itemInputKind)) continue;
 
                 items.Add((item, null));
             }
@@ -531,25 +539,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
 
         return items;
     }
-    private bool IsInputKindCorrect(SceneItemStub sceneItem)
-    {
-        string groupItemInputKind = sceneItem.ExtensionData![nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-        if (string.IsNullOrEmpty(groupItemInputKind) || (!InEditMode && !groupItemInputKind.Equals(nameof(InputKind.tt_point_of_view)))) return false;
-        
-        return true;
-    }
-
-    private void SetCustomInputKind(SceneItemStub sceneItem)
-    {
-        if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;
-        
-        //TODO: 0 ustalac customowe input kind dla uuid pobranych z appcache dla dictionary<string, object>
-        if (!_appCache.SceneItemConfigs.TryGetValue(sceneItem.SourceUuid, out SceneItemConfiguration? config)) return;
-        if (config == null) return;
-
-        sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(config.InputKind.ToString());
-    }
-
+    
     private void ClearScenes()
     {
         MainScene.ClearSceneItems();
