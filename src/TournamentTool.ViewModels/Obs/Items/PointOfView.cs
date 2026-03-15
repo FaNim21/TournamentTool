@@ -139,6 +139,15 @@ public class PointOfView : BrowserItemViewModel
 
         ApplyVolumeCommand = new RelayCommand(async () => await ApplyVolume());
         RefreshCommand = new RelayCommand(async () => await RefreshAsync());
+        
+        Controller.RegisterSchema(BindingSchema.New("POV", "head", true));
+        Controller.RegisterSchema(BindingSchema.New("POV", "head", true));
+        Controller.RegisterSchema(BindingSchema.New("POV", "display_name", true));
+        // Controller.RegisterSchema(BindingSchema.New("POV", "ign"));
+        Controller.RegisterSchema(BindingSchema.New("POV", "pb", true));
+        // Controller.RegisterSchema(BindingSchema.New("POV", "team_name"));
+        Controller.RegisterSchema(BindingSchema.New("POV", "stream_name", true));
+        Controller.RegisterSchema(BindingSchema.New("POV", "stream_type", true));
     }
 
     public override void OnDestroy()
@@ -150,9 +159,9 @@ public class PointOfView : BrowserItemViewModel
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
-    public override async Task InitializeAsync(IScene scene, bool inEditMode, SceneItemStub item, SceneItemStub? group = null)
+    public override async Task InitializeAsync(IScene scene, bool inEditMode, bool isDisplaed, SceneItemStub item, SceneItemStub? group = null)
     {
-        await base.InitializeAsync(scene, inEditMode, item, group);
+        await base.InitializeAsync(scene, inEditMode, isDisplaed, item, group);
         
         (string? currentName, int volume, StreamType type) data = await GetBrowserURLStreamInfo(SourceUUID);
 
@@ -262,6 +271,12 @@ public class PointOfView : BrowserItemViewModel
 
         Url = GetURL();
         await UpdateAsync();
+
+        await Controller.PublishAsync(BindingKey.New("POV", "head", SourceName), player.HeadViewParameter);
+        await Controller.PublishAsync(BindingKey.New("POV", "display_name", SourceName), DisplayedPlayer);
+        await Controller.PublishAsync(BindingKey.New("POV", "pb", SourceName), player.GetPersonalBest);
+        await Controller.PublishAsync(BindingKey.New("POV", "stream_name", SourceName), player.StreamDisplayInfo.Name);
+        await Controller.PublishAsync(BindingKey.New("POV", "stream_type", SourceName), player.StreamDisplayInfo.Type);
     }
     
     public async Task<bool> SwapAsync(PointOfView? pov)

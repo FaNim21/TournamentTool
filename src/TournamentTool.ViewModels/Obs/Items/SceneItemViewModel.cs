@@ -20,8 +20,9 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
 
     public TransformViewModel Transform { get; init; }
 
-    public string BindingPath { get; set; } = string.Empty;
+    public BindingKey BindingKey { get; set; } = BindingKey.CreateEmpty();
 
+    public bool IsDisplayed { get; protected set; } = true;
     public float Opacity { get; protected set; } = 1f;
     public virtual int ZIndex { get; protected set; }
     public abstract string BaseItemType { get; }
@@ -54,11 +55,12 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
     }
     public virtual void OnDestroy() { }
 
-    public virtual Task InitializeAsync(IScene scene, bool inEditMode, SceneItemStub item, SceneItemStub? group = null)
+    public virtual Task InitializeAsync(IScene scene, bool inEditMode, bool isDisplayed, SceneItemStub item, SceneItemStub? group = null)
     {
         BackgroundColor = DefaultColor;
         
         Opacity = inEditMode ? 0.5f : 1f;
+        IsDisplayed = isDisplayed;
         InEditMode = inEditMode;
         
         Scene = scene;

@@ -226,7 +226,7 @@ public class Scene : BaseViewModel, IScene
         SetCustomInputKind(item, config);
         
         string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-        if (!IsInputKindCorrect(inputKindText)) return null;
+        if (string.IsNullOrEmpty(inputKindText)) return null;
         
         InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
         if (inputKind == InputKind.unsupported) return null;
@@ -241,11 +241,16 @@ public class Scene : BaseViewModel, IScene
 
         if (sceneItem == null) return null;
 
-        await sceneItem.InitializeAsync(this, SceneController.InEditMode, item, group);
+        bool isDisplayed = !(!SceneController.InEditMode && inputKind != InputKind.tt_point_of_view);
+        
+        await sceneItem.InitializeAsync(this, SceneController.InEditMode, isDisplayed, item, group);
         sceneItem.Transform.UpdateProportions(ProportionsRatio);
 
-        SceneController.SetupBindings(sceneItem);
         SetupConfiguration(sceneItem, config);
+        if (!SceneController.InEditMode)
+        {
+            SceneController.RegisterBinding(sceneItem);
+        }
 
         return sceneItem;
     }
@@ -332,7 +337,7 @@ public class Scene : BaseViewModel, IScene
         if (string.IsNullOrEmpty(sceneItem.SourceUUID)) return;
         if (configuration == null) return;
 
-        sceneItem.BindingPath = configuration.BindingPath ?? string.Empty;
+        sceneItem.BindingKey = configuration.BindingKey;
         sceneItem.InputKind = configuration.InputKind;
     }
     

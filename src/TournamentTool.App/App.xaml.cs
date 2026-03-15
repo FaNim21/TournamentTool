@@ -134,8 +134,6 @@ public partial class App : Application
         services.TryAddSingleton<JsonMessageSerializer>();
         services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
 
-        services.AddSingleton<IObsCommunicationProvider, ObsCommunicationProvider>();
-
         _serviceProvider = services.BuildServiceProvider();
     }
 

@@ -51,4 +51,4 @@ public sealed class PresetOrderData
     public int index { get; set; } = int.MaxValue;
 }
 
-public record SceneItemConfiguration(InputKind InputKind, string BindingPath);
+public record SceneItemConfiguration(InputKind InputKind, BindingKey BindingKey);

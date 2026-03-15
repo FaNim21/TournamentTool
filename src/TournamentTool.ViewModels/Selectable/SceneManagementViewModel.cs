@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using MessagePack.Resolvers;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
@@ -13,13 +12,12 @@ using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
-using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels.Selectable;
 
 public class SceneManagementViewModel : SelectableViewModel
 {
-    private readonly IObsCommunicationProvider _obsCommunicationProvider;
+    private readonly IBindingEngine _bindingEngine;
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
 
@@ -116,10 +114,10 @@ public class SceneManagementViewModel : SelectableViewModel
     ///     — zaprojektowac trzeba API LUA, czyli jakie eventy beda dostepne do przechwytywania, jak OnTextChanged dla textfieldo,
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
     /// </summary>
-    public SceneManagementViewModel(IDispatcherService dispatcher, IObsCommunicationProvider obsCommunicationProvider, ISettingsProvider settingsProvider,
+    public SceneManagementViewModel(IDispatcherService dispatcher, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
         ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService) : base(dispatcher)
     {
-        _obsCommunicationProvider = obsCommunicationProvider;
+        _bindingEngine = bindingEngine;
         _obs = obs;
         _windowService = windowService;
 
@@ -160,15 +158,13 @@ public class SceneManagementViewModel : SelectableViewModel
 
     private void EditSceneItem(SceneItemViewModel sceneItem)
     {
-        SceneItemEditWindowViewModel viewModel = new(sceneItem, _obsCommunicationProvider, _appCache, Dispatcher);
+        SceneItemEditWindowViewModel viewModel = new(sceneItem, _bindingEngine, _appCache, Dispatcher);
         _windowService.ShowCustomDialog(viewModel, async edit => await OnEditSceneItemClosed(edit), "SceneItemEditWindow");
     }
 
     private async Task OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
     {
-        //TODO: 0 tutaj zapisanie wszystkich rzeczy do appcache
-        SceneItemConfiguration config = new(editWindowViewModel.InputKind, string.Empty);
-        // TODO: 0 nie wpiety binding path na razie, bo nie ma configuratora
+        SceneItemConfiguration config = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
         
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
         

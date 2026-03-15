@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
-             xmlns:controller="clr-namespace:TournamentTool.ViewModels.Selectable.Controller;assembly=TournamentTool.ViewModels"
              xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
              xmlns:obs1="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
@@ -53,7 +52,6 @@
                                     Value="{Binding Transform.Width, Mode=OneWay}" />
                             <Setter Property="Height"
                                     Value="{Binding Transform.Height, Mode=OneWay}" />
-                            
                             <Setter Property="Panel.ZIndex"
                                     Value="{Binding ZIndex, Mode=OneWay}" />
                         </Style>
@@ -62,6 +60,7 @@
                     <ItemsControl.Resources>
                         <DataTemplate DataType="{x:Type items:PointOfView}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
+                                    Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     Width="{Binding Transform.Width, Mode=OneWay}"
                                     Height="{Binding Transform.Height, Mode=OneWay}"
                                     IsHitTestVisible="{Binding InEditMode, Converter={StaticResource BoolReverseConverter}, Mode=OneWay}"
@@ -119,6 +118,7 @@
                         
                         <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
+                                    Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     Width="{Binding Transform.Width, Mode=OneWay}"
                                     Height="{Binding Transform.Height, Mode=OneWay}"
                                     IsHitTestVisible="False"
@@ -126,7 +126,6 @@
                                     BorderBrush="#1873cc"
                                     BorderThickness="0.8" />
                         </DataTemplate>
-                        
                     </ItemsControl.Resources>
                 </ItemsControl>
             </Canvas>

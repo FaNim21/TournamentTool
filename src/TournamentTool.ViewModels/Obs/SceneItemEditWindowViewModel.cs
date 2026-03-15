@@ -1,4 +1,5 @@
-﻿using TournamentTool.Core.Common;
+﻿using System.Collections.ObjectModel;
+using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
@@ -9,7 +10,7 @@ namespace TournamentTool.ViewModels.Obs;
 
 public class SceneItemEditWindowViewModel : BaseWindowViewModel
 {
-    private readonly IObsCommunicationProvider _obsCommunicationProvider;
+    private readonly IBindingEngine _bindingEngine;
     private readonly AppCache _appCache;
 
     public SceneItemViewModel SceneItem { get; }
@@ -25,16 +26,139 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
             OnPropertyChanged(nameof(InputKind));
         }
     }
-    
-    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItem, IObsCommunicationProvider obsCommunicationProvider, AppCache appCache, 
-        IDispatcherService dispatcher) : base(dispatcher)
-    {
-        _obsCommunicationProvider = obsCommunicationProvider;
-        _appCache = appCache;
-        SceneItem = sceneItem;
 
-        InputKind = SceneItem.InputKind;
+    private readonly IReadOnlyCollection<BindingSchema> Schemas;
+
+    public ObservableCollection<string> Sources { get; init; }
+
+    private ObservableCollection<string> _fields = [];
+    public ObservableCollection<string> Fields
+    {
+        get => _fields;
+        private set
+        {
+            _fields = value;
+            OnPropertyChanged(nameof(Fields));
+        }
+    }
+
+    private string _chosenSource = string.Empty;
+    public string ChosenSource
+    {
+        get => _chosenSource;
+        set
+        {
+            _chosenSource = value;
+            OnPropertyChanged(nameof(ChosenSource));
+
+            Fields = new ObservableCollection<string>(Schemas
+                .Where(f => f.Source.Equals(ChosenSource))
+                .Select(f => f.Field));
+        }
+    }
+
+    private string _chosenField = string.Empty;
+    public string ChosenField
+    {
+        get => _chosenField;
+        set
+        {
+            _chosenField = value;
+            OnPropertyChanged(nameof(ChosenField));
+            
+            LoadSchema(ChosenField);
+        }
     }
     
+    private string _sourceName = string.Empty;
+    public string SourceName
+    {
+        get => _sourceName;
+        set
+        {
+            _sourceName = value;
+            OnPropertyChanged(nameof(SourceName));
+        }
+    }
+
+    private int _index;
+    public int Index
+    {
+        get => _index;
+        set
+        {
+            _index = value;
+            OnPropertyChanged(nameof(Index));
+        }
+    }
+
+    private bool _isUsingName;
+    public bool IsUsingName
+    {
+        get => _isUsingName;
+        set
+        {
+            _isUsingName = value;
+            OnPropertyChanged(nameof(IsUsingName));
+        }
+    }
+
+    private bool _isUsingIndex;
+    public bool IsUsingIndex
+    {
+        get => _isUsingIndex;
+        set
+        {
+            _isUsingIndex = value;
+            OnPropertyChanged(nameof(IsUsingIndex));
+        }
+    }
+
+    public BindingKey BindingKey { get; private set; } = BindingKey.CreateEmpty();
     
+
+    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItem, IBindingEngine bindingEngine, AppCache appCache, 
+        IDispatcherService dispatcher) : base(dispatcher)
+    {
+        _bindingEngine = bindingEngine;
+        _appCache = appCache;
+        SceneItem = sceneItem;
+        InputKind = SceneItem.InputKind;
+
+        Schemas = bindingEngine.AvailableSchemas;
+        Sources = new ObservableCollection<string>(Schemas.Select(s => s.Source).Distinct());
+        
+        appCache.SceneItemConfigs.TryGetValue(SceneItem.SourceUUID, out SceneItemConfiguration? config);
+        Initialize(config);
+    }
+    public override void Dispose()
+    {
+        string? sourceName = string.IsNullOrEmpty(SourceName) ? null : SourceName;
+        int? index = Index <= 0 ? null : Index;
+        
+        BindingKey = new BindingKey(ChosenSource, ChosenField, sourceName, index);
+    }
+
+    private void Initialize(SceneItemConfiguration? config)
+    {
+        BindingKey? binding = config?.BindingKey;
+        if (binding == null || binding.IsEmpty()) return;
+
+        ChosenSource = binding.Source;
+        ChosenField = binding.Field;
+        
+        Index = binding.Index ?? 0;
+        SourceName = binding.Source ?? string.Empty;
+    }
+
+    private void LoadSchema(string field)
+    {
+        BindingSchema? schema = Schemas.FirstOrDefault(s => 
+            s.Source.Equals(ChosenSource, StringComparison.OrdinalIgnoreCase) && 
+            s.Field.Equals(field, StringComparison.OrdinalIgnoreCase));
+        if (schema == null) return;
+
+        IsUsingName = schema.haveName;
+        IsUsingIndex = schema.haveIndex;
+    }
 }

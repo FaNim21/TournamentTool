@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text.Json;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
@@ -41,7 +40,9 @@ public interface ISceneController
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 
-    void SetupBindings(SceneItemViewModel sceneItem);
+    void RegisterBinding(SceneItemViewModel sceneItem);
+    void RegisterSchema(BindingSchema schema);
+    Task PublishAsync(BindingKey key, object value);
 }
 
 public class SceneControllerViewModel : BaseViewModel, ISceneController, IScenePovInteractable
@@ -489,13 +490,13 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
         => _playerRepository.GetPlayerByStreamName(name, type);
 
-    public void SetupBindings(SceneItemViewModel sceneItem)
-    {
-        if (string.IsNullOrEmpty(sceneItem.BindingPath)) return;
-        
-        _bindingEngine.Register(sceneItem.BindingPath, sceneItem);
-    }
-    
+    public void RegisterBinding(SceneItemViewModel sceneItem) 
+        => _bindingEngine.RegisterTarget(sceneItem.BindingKey, sceneItem);
+    public void RegisterSchema(BindingSchema schema) 
+        => _bindingEngine.RegisterSchema(schema);
+    public async Task PublishAsync(BindingKey key, object value) 
+        => await _bindingEngine.PublishAsync(key, value);
+
     public async Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid)
     {
         List<(SceneItemStub, SceneItemStub?)> items = [];

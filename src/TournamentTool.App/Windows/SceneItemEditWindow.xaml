@@ -9,6 +9,8 @@
         xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
         xmlns:obsDomain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
         xmlns:converters="clr-namespace:TournamentTool.App.Converters"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
         d:DataContext="{d:DesignInstance Type=obs:SceneItemEditWindowViewModel}"
         mc:Ignorable="d"
         Title="Scene item edit window"
@@ -37,27 +39,161 @@
         </DataTemplate>
         
         <DataTemplate DataType="{x:Type items:BrowserItemViewModel}">
-            <StackPanel>
-                <TextBlock Text="Browser type"/>
-                <!-- TODO: 0 TU TRZEBA USTALIC caly config dla browser z opcja aktualizowania danych-->
-                <!-- TODO: 0 dla browser i text item bedzie konfiguracja komunikacji z zewnetrznymi czesciami lub danymi z pova (opcja wyboru z posrod aktywnych) -->
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Browser"
+                           FontSize="22"
+                           TextAlignment="Center"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Background="Transparent"
+                           Foreground="White"
+                           Padding="0"
+                           Margin="2" />
 
-                <ComboBox Style="{StaticResource ComboBoxTest2}"
-                          Width="200"
-                          Margin="10 0 0 0"
-                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
-                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="150"
+                              Margin="10 0 0 0"
+                              ItemsSource="{Binding DataContext.Sources, RelativeSource={RelativeSource AncestorType=Window}}"
+                              SelectedItem="{Binding DataContext.ChosenSource, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="150"
+                              Margin="10 0 0 0"
+                              ItemsSource="{Binding DataContext.Fields, RelativeSource={RelativeSource AncestorType=Window}}"
+                              SelectedItem="{Binding DataContext.ChosenField, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding DataContext.IsUsingName, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Margin="0 10 0 5">
+                    <TextBox TextWrapping="Wrap"
+                             Width="120"
+                             Height="20"
+                             Text="{Binding DataContext.SourceName, RelativeSource={RelativeSource AncestorType=Window}}"
+                             Background="#9E9E9E"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Top" />
+                    <TextBlock Text="Source name"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Binding source name (for multiple elements of same source, differencing only by source name like POV type)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding DataContext.IsUsingIndex, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Margin="0 10 0 5">
+                    <TextBox TextWrapping="Wrap"
+                             Width="120"
+                             Height="20"
+                             Text="{Binding DataContext.Index, RelativeSource={RelativeSource AncestorType=Window}}"
+                             Background="#9E9E9E"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Top">
+                        <b:Interaction.Behaviors>
+                            <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                        </b:Interaction.Behaviors>
+                    </TextBox>
+                    <TextBlock Text="Position"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Binding position (for list/array of elements, 1-based indexing)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type items:TextItemViewModel}">
-            <StackPanel>
-                <TextBlock Text="Text type"/>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Text"
+                           FontSize="22"
+                           TextAlignment="Center"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Background="Transparent"
+                           Foreground="White"
+                           Padding="0"
+                           Margin="2" />
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="150"
+                              Margin="10 0 0 0"
+                              ItemsSource="{Binding DataContext.Sources, RelativeSource={RelativeSource AncestorType=Window}}"
+                              SelectedItem="{Binding DataContext.ChosenSource, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="150"
+                              Margin="10 0 0 0"
+                              ItemsSource="{Binding DataContext.Fields, RelativeSource={RelativeSource AncestorType=Window}}"
+                              SelectedItem="{Binding DataContext.ChosenField, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding DataContext.IsUsingName, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Margin="0 10 0 5">
+                    <TextBox TextWrapping="Wrap"
+                             Width="120"
+                             Height="20"
+                             Text="{Binding DataContext.SourceName, RelativeSource={RelativeSource AncestorType=Window}}"
+                             Background="#9E9E9E"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Top" />
+                    <TextBlock Text="Source name"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Binding source name (for multiple elements of same source, differencing only by source name like POV type)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding DataContext.IsUsingIndex, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Margin="0 10 0 5">
+                    <TextBox TextWrapping="Wrap"
+                             Width="120"
+                             Height="20"
+                             Text="{Binding DataContext.Index, RelativeSource={RelativeSource AncestorType=Window}}"
+                             Background="#9E9E9E"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Top">
+                        <b:Interaction.Behaviors>
+                            <behaviors:NumericTextBoxBehavior AllowNegative="False" />
+                        </b:Interaction.Behaviors>
+                    </TextBox>
+                    <TextBlock Text="Position"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Binding position (for list/array of elements, 1-based indexing)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
 
-    </Window.Resources> 
-    
+    </Window.Resources>
+
     <Border BorderThickness="1"
             BorderBrush="Black">
         <Grid>
