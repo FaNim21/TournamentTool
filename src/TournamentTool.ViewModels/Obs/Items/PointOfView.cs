@@ -128,9 +128,17 @@ public class PointOfView : BrowserItemViewModel
     public ICommand ApplyVolumeCommand { get; set; }
     public ICommand RefreshCommand { get; set; }
 
+    private BindingKey keyHead { get; set; } = BindingKey.Empty();
+    private BindingKey keyDisplayName { get; set; } = BindingKey.Empty();
+    private BindingKey keyIgn { get; set; } = BindingKey.Empty();
+    private BindingKey keyPb { get; set; } = BindingKey.Empty();
+    private BindingKey keyTeamName { get; set; } = BindingKey.Empty();
+    private BindingKey keyStreamName { get; set; } = BindingKey.Empty();
+    private BindingKey keyStreamType { get; set; } = BindingKey.Empty();
 
-    public PointOfView(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger, SceneType type = SceneType.Main) 
-        : base(controller, dispatcher, logger)
+
+    public PointOfView(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger, SceneType type = SceneType.Main) 
+        : base(controllerViewModel, dispatcher, logger)
     {
         Type = type;
         
@@ -139,17 +147,7 @@ public class PointOfView : BrowserItemViewModel
 
         ApplyVolumeCommand = new RelayCommand(async () => await ApplyVolume());
         RefreshCommand = new RelayCommand(async () => await RefreshAsync());
-        
-        Controller.RegisterSchema(BindingSchema.New("POV", "head", true));
-        Controller.RegisterSchema(BindingSchema.New("POV", "head", true));
-        Controller.RegisterSchema(BindingSchema.New("POV", "display_name", true));
-        // Controller.RegisterSchema(BindingSchema.New("POV", "ign"));
-        Controller.RegisterSchema(BindingSchema.New("POV", "pb", true));
-        // Controller.RegisterSchema(BindingSchema.New("POV", "team_name"));
-        Controller.RegisterSchema(BindingSchema.New("POV", "stream_name", true));
-        Controller.RegisterSchema(BindingSchema.New("POV", "stream_type", true));
     }
-
     public override void OnDestroy()
     {
         if (player == null) return;
@@ -163,9 +161,19 @@ public class PointOfView : BrowserItemViewModel
     {
         await base.InitializeAsync(scene, inEditMode, isDisplaed, item, group);
         
+        keyHead = BindingKey.New("POV", "head", SourceName);
+        keyDisplayName = BindingKey.New("POV", "display_name", SourceName);
+        keyIgn = BindingKey.New("POV", "ign", SourceName);
+        keyPb = BindingKey.New("POV", "pb", SourceName);
+        keyTeamName = BindingKey.New("POV", "team_name", SourceName);
+        keyStreamName = BindingKey.New("POV", "stream_name", SourceName);
+        keyStreamType = BindingKey.New("POV", "stream_type", SourceName);
+    }
+    public override async Task LoadAsync()
+    {
         (string? currentName, int volume, StreamType type) data = await GetBrowserURLStreamInfo(SourceUUID);
 
-        bool specificPovExists = scene.ExistInItems<PointOfView>(p => 
+        bool specificPovExists = Scene.ExistInItems<PointOfView>(p => 
             p.StreamDisplayInfo.Name.Equals(data.currentName, StringComparison.OrdinalIgnoreCase)
             && p.StreamDisplayInfo.Type.Equals(data.type));
         
@@ -175,7 +183,7 @@ public class PointOfView : BrowserItemViewModel
             return;
         }
 
-        IPlayerViewModel? foundPlayer = Controller.GetPlayerByStreamName(data.currentName, data.type);
+        IPlayerViewModel? foundPlayer = ControllerViewModel.GetPlayerByStreamName(data.currentName, data.type);
 
         ChangeVolume(data.volume);
 
@@ -271,12 +279,26 @@ public class PointOfView : BrowserItemViewModel
 
         Url = GetURL();
         await UpdateAsync();
+        await UpdateBindingsAsync();
+    }
 
-        await Controller.PublishAsync(BindingKey.New("POV", "head", SourceName), player.HeadViewParameter);
-        await Controller.PublishAsync(BindingKey.New("POV", "display_name", SourceName), DisplayedPlayer);
-        await Controller.PublishAsync(BindingKey.New("POV", "pb", SourceName), player.GetPersonalBest);
-        await Controller.PublishAsync(BindingKey.New("POV", "stream_name", SourceName), player.StreamDisplayInfo.Name);
-        await Controller.PublishAsync(BindingKey.New("POV", "stream_type", SourceName), player.StreamDisplayInfo.Type);
+    private async Task UpdateBindingsAsync()
+    {
+        string headUrl = string.Empty;
+        if (player != null)
+        {
+            headUrl = ControllerViewModel.GetHeadURL(player.HeadViewParameter, 180);
+            if (string.IsNullOrEmpty(player.HeadViewParameter)) headUrl = string.Empty;
+        }
+        
+        //TODO: 0 trzeba zrobic publish kolejke z racji aktualizacji wielu scene item na raz, dla wydajnosci trzeba zrobic grupowe aktualizowanie
+        await ControllerViewModel.PublishAsync(keyHead, headUrl);
+        await ControllerViewModel.PublishAsync(keyDisplayName, DisplayedPlayer);
+        await ControllerViewModel.PublishAsync(keyIgn, player?.InGameName ?? string.Empty);
+        await ControllerViewModel.PublishAsync(keyPb, player?.GetPersonalBest ?? string.Empty);
+        await ControllerViewModel.PublishAsync(keyTeamName, player?.TeamName ?? string.Empty);
+        await ControllerViewModel.PublishAsync(keyStreamName, player?.StreamDisplayInfo.Name ?? string.Empty);
+        await ControllerViewModel.PublishAsync(keyStreamType, player == null ? string.Empty : player.StreamDisplayInfo.Type);
     }
     
     public async Task<bool> SwapAsync(PointOfView? pov)
@@ -340,6 +362,7 @@ public class PointOfView : BrowserItemViewModel
         }
 
         await base.ClearAsync(fullClear);
+        await UpdateBindingsAsync();
     }
 
     private void ClearCustomData()
@@ -368,7 +391,7 @@ public class PointOfView : BrowserItemViewModel
     
     public async Task<(string?, int, StreamType)> GetBrowserURLStreamInfo(string sourceUuid)
     {
-        GetInputSettingsResponseData? settingsResponse = await Controller.GetItemInputSettingsAsync(sourceUuid);
+        GetInputSettingsResponseData? settingsResponse = await ControllerViewModel.GetItemInputSettingsAsync(sourceUuid);
         if (settingsResponse == null ||
             !settingsResponse.InputSettings.HasValue ||
             !settingsResponse.InputSettings.Value.TryGetProperty("url", out JsonElement urlElement)) 

@@ -4,6 +4,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Obs.Items;
 
 namespace TournamentTool.ViewModels.Obs;
@@ -114,8 +115,9 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         }
     }
 
-    public BindingKey BindingKey { get; private set; } = BindingKey.CreateEmpty();
+    public BindingKey BindingKey { get; private set; } = BindingKey.Empty();
     
+    //TODO: 0 Pomysl jest taki zeby name bylo comboboxem, bo mozna sie uprzec i raz na odpalenie edycji pobrac wszystkie nazwy niby
 
     public SceneItemEditWindowViewModel(SceneItemViewModel sceneItem, IBindingEngine bindingEngine, AppCache appCache, 
         IDispatcherService dispatcher) : base(dispatcher)
@@ -148,7 +150,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         ChosenField = binding.Field;
         
         Index = binding.Index ?? 0;
-        SourceName = binding.Source ?? string.Empty;
+        SourceName = binding.Name ?? string.Empty;
     }
 
     private void LoadSchema(string field)

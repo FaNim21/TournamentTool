@@ -22,6 +22,7 @@ public class RankedPaceViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public PlayerInventoryViewModel Inventory { get; }
 
     public string DisplayName => Data.Player == null ? InGameName : Data.Player.Name ?? string.Empty;
+    public string TeamName => Data.Player == null ? string.Empty : Data.Player.TeamName ?? string.Empty;
     public string GetPersonalBest => Data.Player == null ? "Unk" : Data.Player.PersonalBest;
     public string HeadViewParameter => Data.Player == null ? InGameName : Data.Player.InGameName ?? string.Empty;
     public StreamDisplayInfo StreamDisplayInfo => Data.Player == null ? new StreamDisplayInfo(string.Empty, StreamType.twitch) : Data.Player.StreamData.GetStreamDisplayInfo();

@@ -5,22 +5,20 @@ using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.ViewModels.Obs.Items;
 
 public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
 {
-    //TODO: 0 Parent od relacji i mogą to być: SceneItem, Leaderboard (entries, rules), SidePanel, ManagementPanel
-    //TODO: 0 lista dzieci, ktore sa aktualizowane przez rodzica, bo aktualizacji informacji
-
     protected ILoggingService Logger { get; }
     
-    protected ISceneController Controller { get; }
+    protected ISceneControllerViewModel ControllerViewModel { get; }
     protected IScene Scene { get; private set; } = null!;
 
     public TransformViewModel Transform { get; init; }
 
-    public BindingKey BindingKey { get; set; } = BindingKey.CreateEmpty();
+    public BindingKey BindingKey { get; set; } = BindingKey.Empty();
 
     public bool IsDisplayed { get; protected set; } = true;
     public float Opacity { get; protected set; } = 1f;
@@ -44,9 +42,9 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
     private int _rememberedZIndex;
 
     
-    protected SceneItemViewModel(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger) : base(dispatcher)
+    protected SceneItemViewModel(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(dispatcher)
     {
-        Controller = controller;
+        ControllerViewModel = controllerViewModel;
         Logger = logger;
         Transform = new TransformViewModel(dispatcher);
 
@@ -79,8 +77,9 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
 
         return Task.CompletedTask;
     }
+    public virtual Task LoadAsync() => Task.CompletedTask;
 
-    protected virtual async Task UpdateAsync() => await Controller.SetItemInputSettingsAsync(SourceUUID, Inputs);
+    protected virtual async Task UpdateAsync() => await ControllerViewModel.SetItemInputSettingsAsync(SourceUUID, Inputs);
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
     public virtual Task ApplyBindingValueAsync(object? value) => Task.CompletedTask;

@@ -22,6 +22,7 @@ public class PaceManViewModel : BaseViewModel, IGroupableItem, IPlayer, IPace
     public long ModelCurrentSplitTimeMiliseconds => _paceman.CurrentSplitTimeMiliseconds;
 
     public string DisplayName => _paceman.Player == null ? _paceman.Nickname : _paceman.Player.Name ?? "Unk";
+    public string TeamName => _paceman.Player == null ? string.Empty : _paceman.Player.TeamName ?? string.Empty;
     public string GetPersonalBest => _paceman.Player == null ? "Unk" : _paceman.Player.PersonalBest;
     public string HeadViewParameter => _paceman.Player == null ? _paceman.UUID! : _paceman.Player.InGameName ?? string.Empty;
     public StreamDisplayInfo StreamDisplayInfo => _paceman.StreamDisplayInfo ?? new StreamDisplayInfo("", StreamType.twitch);

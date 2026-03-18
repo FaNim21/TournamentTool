@@ -4,6 +4,7 @@ using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable.Controller;
 
@@ -11,7 +12,7 @@ namespace TournamentTool.ViewModels.Factories;
 
 public interface ISceneControllerViewModelFactory
 {
-    SceneControllerViewModel Create(bool inEditMode = true);
+    SceneControllerViewModelViewModel Create(bool inEditMode = true);
 }
 
 public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
@@ -37,9 +38,9 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
         _windowService = windowService;
     }
 
-    public SceneControllerViewModel Create(bool inEditMode = true)
+    public SceneControllerViewModelViewModel Create(bool inEditMode = true)
     {
-        return new SceneControllerViewModel(_obs, _playerRepository, _logger, _bindingEngine, _settingsProvider, _dispatcher, 
+        return new SceneControllerViewModelViewModel(_obs, _playerRepository, _logger, _bindingEngine, _settingsProvider, _dispatcher, 
             _windowService, inEditMode);
     }
 }

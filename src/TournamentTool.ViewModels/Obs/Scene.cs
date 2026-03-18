@@ -35,7 +35,7 @@ public class Scene : BaseViewModel, IScene
     protected SceneType Type { get; set; }
 
     public IScenePovInteractable Interactable { get; }
-    public ISceneController SceneController { get; }
+    public ISceneControllerViewModel SceneControllerViewModel { get; }
     
     protected ILoggingService Logger { get; }
 
@@ -117,11 +117,11 @@ public class Scene : BaseViewModel, IScene
     private const float _studioFactor = 2.05f;
 
 
-    public Scene(SceneType type, IScenePovInteractable interactable, ISceneController sceneController, IWindowService windowService, 
+    public Scene(SceneType type, IScenePovInteractable interactable, ISceneControllerViewModel sceneControllerViewModel, IWindowService windowService, 
         ILoggingService logger, IDispatcherService dispatcher, AppCache appCache) : base(dispatcher)
     {
         Interactable = interactable;
-        SceneController = sceneController;
+        SceneControllerViewModel = sceneControllerViewModel;
         Logger = logger;
         _appCache = appCache;
 
@@ -180,7 +180,7 @@ public class Scene : BaseViewModel, IScene
             sceneItem.OnDestroy();
         }
 
-        List<(SceneItemStub, SceneItemStub?)> items = await SceneController.GetSceneItemsAsync(sceneName, sceneUuid);
+        List<(SceneItemStub, SceneItemStub?)> items = await SceneControllerViewModel.GetSceneItemsAsync(sceneName, sceneUuid);
         List<SceneItemViewModel> createdSceneItems = [];
         
         for (int i = items.Count - 1; i >= 0; i--)
@@ -191,6 +191,11 @@ public class Scene : BaseViewModel, IScene
             if (sceneItem == null) continue;
             
             createdSceneItems.Add(sceneItem);
+        }
+        
+        foreach (var item in createdSceneItems)
+        {
+            await item.LoadAsync();
         }
 
         await Dispatcher.InvokeAsync(delegate
@@ -233,23 +238,23 @@ public class Scene : BaseViewModel, IScene
 
         SceneItemViewModel? sceneItem = inputKind switch
         {
-            InputKind.tt_point_of_view => new PointOfView(SceneController, Dispatcher, Logger, Type),
-            InputKind.browser_source => new BrowserItemViewModel(SceneController, Dispatcher, Logger),
-            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItemViewModel(SceneController, Dispatcher, Logger),
+            InputKind.tt_point_of_view => new PointOfView(SceneControllerViewModel, Dispatcher, Logger, Type),
+            InputKind.browser_source => new BrowserItemViewModel(SceneControllerViewModel, Dispatcher, Logger),
+            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItemViewModel(SceneControllerViewModel, Dispatcher, Logger),
             _ => null
         };
 
         if (sceneItem == null) return null;
 
-        bool isDisplayed = !(!SceneController.InEditMode && inputKind != InputKind.tt_point_of_view);
+        bool isDisplayed = !(!SceneControllerViewModel.InEditMode && inputKind != InputKind.tt_point_of_view);
         
-        await sceneItem.InitializeAsync(this, SceneController.InEditMode, isDisplayed, item, group);
+        await sceneItem.InitializeAsync(this, SceneControllerViewModel.InEditMode, isDisplayed, item, group);
         sceneItem.Transform.UpdateProportions(ProportionsRatio);
 
         SetupConfiguration(sceneItem, config);
-        if (!SceneController.InEditMode)
+        if (!SceneControllerViewModel.InEditMode)
         {
-            SceneController.RegisterBinding(sceneItem);
+            SceneControllerViewModel.RegisterBinding(sceneItem);
         }
 
         return sceneItem;
@@ -258,6 +263,8 @@ public class Scene : BaseViewModel, IScene
     {
         SceneItemViewModel? sceneItem = await CreateSceneItem(item, group);
         if (sceneItem == null) return;
+
+        await sceneItem.LoadAsync();
         
         await Dispatcher.InvokeAsync(delegate
         {
@@ -339,14 +346,6 @@ public class Scene : BaseViewModel, IScene
 
         sceneItem.BindingKey = configuration.BindingKey;
         sceneItem.InputKind = configuration.InputKind;
-    }
-    
-    private bool IsInputKindCorrect(string itemInputKind)
-    {
-        if (string.IsNullOrEmpty(itemInputKind) ||
-            (!SceneController.InEditMode && !itemInputKind.Equals(nameof(InputKind.tt_point_of_view)))) return false;
-        
-        return true;
     }
     
     public void Clear()

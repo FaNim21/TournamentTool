@@ -6,6 +6,8 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels;
 
 namespace TournamentTool.App.Services;
@@ -29,11 +31,12 @@ public class ApplicationLifetime : IApplicationLifetime
     private readonly ITwitchService _twitchService;
     private readonly ILoggingService _logger;
     private readonly ILogStore _logStore;
+    private readonly IBindingSchemaInitializer _bindingSchemaInitializer;
 
 
     public ApplicationLifetime(MainViewModel mainViewModel, IPresetSaver presetSaver, IInputController inputController, ISettingsSaver settingsSaver, 
         ISettingsProvider settingsProvider, IObsController obsController, IWindowService windowService, ITwitchService twitchService, ILoggingService logger,
-        ILogStore logStore)
+        ILogStore logStore, IBindingSchemaInitializer bindingSchemaInitializer)
     {
         _mainViewModel = mainViewModel;
         _presetSaver = presetSaver;
@@ -45,6 +48,7 @@ public class ApplicationLifetime : IApplicationLifetime
         _twitchService = twitchService;
         _logger = logger;
         _logStore = logStore;
+        _bindingSchemaInitializer = bindingSchemaInitializer;
     }
     
     /// <summary>
@@ -57,6 +61,8 @@ public class ApplicationLifetime : IApplicationLifetime
         
         _windowService.SetMainWindowTopMost(settings.IsAlwaysOnTop);
 
+        _bindingSchemaInitializer.Initialize();
+        
         if (settings is { SaveTwitchToken: true, AutoLoginToTwitch: true } && !string.IsNullOrEmpty(apiKeys.TwitchAccessToken))
         {
             _twitchService.ConnectAsync();

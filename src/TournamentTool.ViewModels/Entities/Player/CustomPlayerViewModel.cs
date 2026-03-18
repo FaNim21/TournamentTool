@@ -19,6 +19,8 @@ public class CustomPlayerViewModel : IPlayer
         set => _other.IsUsedInPreview = value;
     }
     public string DisplayName => _data.StreamDisplayInfo.Name;
+    public string InGameName => string.Empty;
+    public string TeamName => string.Empty;
     public string GetPersonalBest => _data.PersonalBest;
     public string HeadViewParameter => _data.HeadViewParameter;
     public StreamDisplayInfo StreamDisplayInfo => _data.StreamDisplayInfo;

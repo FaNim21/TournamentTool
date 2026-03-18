@@ -8,6 +8,7 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
@@ -21,7 +22,7 @@ public class SceneManagementViewModel : SelectableViewModel
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
 
-    public SceneControllerViewModel SceneController { get; }
+    public SceneControllerViewModelViewModel SceneController { get; }
 
     public ObservableCollection<SceneStub> Scenes { get; set; } = [];
 

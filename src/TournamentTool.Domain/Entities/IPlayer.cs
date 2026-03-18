@@ -15,6 +15,8 @@ public interface IPlayer : IPovUsage
     public bool IsLive { get; }
 
     public string DisplayName { get; }
+    public string InGameName { get; }
+    public string TeamName { get; }
     public string GetPersonalBest { get; }
     public string HeadViewParameter { get; }
     public StreamDisplayInfo StreamDisplayInfo { get; }

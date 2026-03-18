@@ -12,7 +12,7 @@ public class TextItemViewModel : SceneItemViewModel
     protected string Text { get; set; } = string.Empty;
     
 
-    public TextItemViewModel(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger) : base(controller, dispatcher, logger)
+    public TextItemViewModel(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(controllerViewModel, dispatcher, logger)
     {
         DefaultColor = Consts.TextSourceColor;
     }

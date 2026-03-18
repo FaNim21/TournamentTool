@@ -31,7 +31,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     public ILoggingService Logger { get; }
     
-    public SceneControllerViewModel SceneController { get; }
+    public SceneControllerViewModelViewModel SceneController { get; }
     public ControllerServiceHub ServiceHub { get; }
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
@@ -131,12 +131,10 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public ICommand UnSelectItemsCommand { get; set; }
     
-    private readonly Domain.Entities.Settings _settings;
-    
 
     public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IBackgroundCoordinator backgroundCoordinator,
-        ITwitchService twitch, ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, 
-        ISceneControllerViewModelFactory sceneControllerFactory) : base(dispatcher)
+        ITwitchService twitch, ILoggingService logger, IDispatcherService dispatcher, ISceneControllerViewModelFactory sceneControllerFactory) 
+        : base(dispatcher)
     {
         Logger = logger;
         _playerRepository = playerRepository;
@@ -145,8 +143,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         _twitch = twitch;
         
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
-        
-        _settings = settingsProvider.Get<Domain.Entities.Settings>();
 
         SceneController = sceneControllerFactory.Create(false);
         ServiceHub = new ControllerServiceHub(this, twitch, logger, playerRepository);
@@ -291,11 +287,6 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         UnSelectItems();
     }
     
-    public string GetHeadURL(string id, int size)
-    {
-        return _settings.HeadAPIType.GetHeadURL(id, size);
-    }
-
     public void UnSelectItems(bool ClearAll = false)
     {
         CurrentChosenPlayer = null;

@@ -49,6 +49,12 @@
                            Foreground="White"
                            Padding="0"
                            Margin="2" />
+                
+                <ComboBox Style="{StaticResource ComboBoxTest2}"
+                          Width="200"
+                          Margin="10 0 0 0"
+                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
+                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center">

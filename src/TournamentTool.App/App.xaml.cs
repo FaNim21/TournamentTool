@@ -3,8 +3,6 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
-using Microsoft.Extensions.Options;
-using ObsWebSocket.Core;
 using ObsWebSocket.Core.Serialization;
 using TournamentTool.App.Services;
 using TournamentTool.Core.Common;
@@ -22,13 +20,13 @@ using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.Services.State;
 using TournamentTool.ViewModels;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Menu;
-using TournamentTool.ViewModels.Modals;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
 
@@ -129,6 +127,7 @@ public partial class App : Application
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
         
         //OBS
+        services.AddSingleton<IBindingSchemaInitializer, BindingSchemaInitializer>();
         services.AddSingleton<IBindingEngine, BindingEngine>();
         
         services.TryAddSingleton<JsonMessageSerializer>();

@@ -12,7 +12,7 @@ namespace TournamentTool.ViewModels.Tests;
 
 public class PointOfViewTests
 {
-    private readonly ISceneController _controller = Substitute.For<ISceneController>();
+    private readonly ISceneControllerViewModel _controllerViewModel = Substitute.For<ISceneControllerViewModel>();
     private readonly IDispatcherService _dispatcher = Substitute.For<IDispatcherService>();
     private readonly ILoggingService _logger = Substitute.For<ILoggingService>();
     private readonly IScene _scene = Substitute.For<IScene>();
@@ -40,7 +40,7 @@ public class PointOfViewTests
             group = null;
         }
         
-        var pov = new PointOfView(_controller, _dispatcher, _logger, type);
+        var pov = new PointOfView(_controllerViewModel, _dispatcher, _logger, type);
         await pov.InitializeAsync(_scene, false, true, item, group);
 
         return pov;

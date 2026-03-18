@@ -4,6 +4,7 @@ using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
+using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
@@ -12,7 +13,7 @@ using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
-using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Obs.Items;
 using ConnectionState = TournamentTool.Services.Controllers.ConnectionState;
@@ -30,7 +31,7 @@ public interface IScenePovInteractable
     void UnSelectItems(bool clearAll = false);
 }
 
-public interface ISceneController
+public interface ISceneControllerViewModel
 {
     public bool InEditMode { get; }
     
@@ -41,11 +42,12 @@ public interface ISceneController
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 
     void RegisterBinding(SceneItemViewModel sceneItem);
-    void RegisterSchema(BindingSchema schema);
     Task PublishAsync(BindingKey key, object value);
+
+    string GetHeadURL(string id, int size);
 }
 
-public class SceneControllerViewModel : BaseViewModel, ISceneController, IScenePovInteractable
+public class SceneControllerViewModelViewModel : BaseViewModel, ISceneControllerViewModel, IScenePovInteractable
 {
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly IBindingEngine _bindingEngine;
@@ -131,9 +133,11 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
     public ICommand SwitchStudioModeCommand {  get; private set; }
     public ICommand StudioModeTransitionCommand { get; private set; }
     public ICommand OnSceneResizeCommand { get; private set; }
+
+    private readonly Domain.Entities.Settings _settings;
     
 
-    public SceneControllerViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, IBindingEngine bindingEngine,
+    public SceneControllerViewModelViewModel(IObsController obs, ITournamentPlayerRepository playerRepository, ILoggingService logger, IBindingEngine bindingEngine,
         ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService, bool inEditMode = true) : base(dispatcher)
     {
         _playerRepository = playerRepository;
@@ -143,6 +147,8 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
         InEditMode = inEditMode;
         
         AppCache appCache = settingsProvider.Get<AppCache>();
+        _settings = settingsProvider.Get<Domain.Entities.Settings>();
+        
         MainScene = new Scene(SceneType.Main, this, this, windowService, logger, dispatcher, appCache);
         PreviewScene = new Scene(SceneType.Preview, this, this, windowService, logger, dispatcher, appCache);
 
@@ -492,8 +498,6 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
 
     public void RegisterBinding(SceneItemViewModel sceneItem) 
         => _bindingEngine.RegisterTarget(sceneItem.BindingKey, sceneItem);
-    public void RegisterSchema(BindingSchema schema) 
-        => _bindingEngine.RegisterSchema(schema);
     public async Task PublishAsync(BindingKey key, object value) 
         => await _bindingEngine.PublishAsync(key, value);
 
@@ -548,4 +552,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneController, ISceneP
         PreviewScene.ClearSceneItems();
         PreviewScene.SetStudioMode(false);
     }
+    
+    public string GetHeadURL(string id, int size) 
+        => _settings.HeadAPIType.GetHeadURL(id, size);
 }

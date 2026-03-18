@@ -12,7 +12,7 @@ public class BrowserItemViewModel : SceneItemViewModel
     protected string Url { get; set; } = string.Empty;
 
     
-    public BrowserItemViewModel(ISceneController controller, IDispatcherService dispatcher, ILoggingService logger) : base(controller, dispatcher, logger)
+    public BrowserItemViewModel(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(controllerViewModel, dispatcher, logger)
     {
         DefaultColor = Consts.BrowserSourceColor;
     }
