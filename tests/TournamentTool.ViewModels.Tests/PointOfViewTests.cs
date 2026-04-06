@@ -10,22 +10,22 @@ using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels.Tests;
 
-public class PointOfViewTests
+public class PointOfViewViewModelTests
 {
     private readonly ISceneControllerViewModel _controllerViewModel = Substitute.For<ISceneControllerViewModel>();
     private readonly IDispatcherService _dispatcher = Substitute.For<IDispatcherService>();
     private readonly ILoggingService _logger = Substitute.For<ILoggingService>();
     private readonly IScene _scene = Substitute.For<IScene>();
     
-    private readonly PointOfView _sut;
+    private readonly PointOfViewViewModel _sut;
     
     
-    protected PointOfViewTests()
+    protected PointOfViewViewModelTests()
     {
         _sut = CreatePOV(1234, SceneType.Main, false).GetAwaiter().GetResult();
     }
 
-    public async Task<PointOfView> CreatePOV(int id, SceneType type = SceneType.Main, bool useGroup = true)
+    public async Task<PointOfViewViewModel> CreatePOV(int id, SceneType type = SceneType.Main, bool useGroup = true)
     {
         var transform = new SceneItemTransformStub(
             100, 200, 0, 1, 1, 1920, 1080,
@@ -40,8 +40,8 @@ public class PointOfViewTests
             group = null;
         }
         
-        var pov = new PointOfView(_controllerViewModel, _dispatcher, _logger, type);
-        await pov.InitializeAsync(_scene, false, true, item, group);
+        var pov = new PointOfViewViewModel(_controllerViewModel, _dispatcher, _logger, type);
+        await pov.Initialize(_scene, false, true, item, group);
 
         return pov;
     }
@@ -60,7 +60,7 @@ public class PointOfViewTests
         return player;
     }
 
-    public class CoreFunctionalityTests : PointOfViewTests
+    public class CoreFunctionalityViewModelTests : PointOfViewViewModelTests
     {
         [Fact]
         public void Constructor_InitializesWithCorrectDefaults()
@@ -103,7 +103,7 @@ public class PointOfViewTests
         }
     }
 
-    public class VolumeTests : PointOfViewTests
+    public class VolumeViewModelTests : PointOfViewViewModelTests
     {
         [Theory]
         [InlineData(0, true)]
@@ -134,7 +134,7 @@ public class PointOfViewTests
         }
     }
 
-    public class SetPOVTests : PointOfViewTests
+    public class SetPovViewModelTests : PointOfViewViewModelTests
     {
         private IPlayer CreateMockPlayer(bool isFromWhitelist = true, string displayName = "TestPlayer")
         {
@@ -199,7 +199,7 @@ public class PointOfViewTests
         }
     }
 
-    public class SetCustomPOVTests : PointOfViewTests
+    public class SetCustomPovViewModelTests : PointOfViewViewModelTests
     {
         [Fact]
         public async Task SetCustomPOV_WithEmptyName_ClearsIfPreviouslySet()
@@ -229,7 +229,7 @@ public class PointOfViewTests
         }
     }
 
-    public class SwapTests : PointOfViewTests
+    public class SwapViewModelTests : PointOfViewViewModelTests
     {
         [Fact]
         public async Task Swap_WithNull_ReturnsFalse()
@@ -265,7 +265,7 @@ public class PointOfViewTests
         }
     }
 
-    public class OnPOVClickSimulationTests : PointOfViewTests
+    public class OnPovClickSimulationViewModelTests : PointOfViewViewModelTests
     {
         [Fact]
         public async Task OnPOVClick_SamePOV_ShouldDeselect()

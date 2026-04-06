@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Domain.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.ViewModels.Tests", "tests\TournamentTool.ViewModels.Tests\TournamentTool.ViewModels.Tests.csproj", "{F58A4C08-421A-41FE-B7B8-3D595428DA08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentTool.Presentation", "src\TournamentTool.Presentation\TournamentTool.Presentation.csproj", "{4C5663BA-BA86-4E8A-8B02-6D56A260F812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F58A4C08-421A-41FE-B7B8-3D595428DA08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C5663BA-BA86-4E8A-8B02-6D56A260F812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C5663BA-BA86-4E8A-8B02-6D56A260F812}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C5663BA-BA86-4E8A-8B02-6D56A260F812}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C5663BA-BA86-4E8A-8B02-6D56A260F812}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

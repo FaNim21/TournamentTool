@@ -1,41 +1,33 @@
 ﻿using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
+using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
 
 namespace TournamentTool.ViewModels.Obs.Items;
 
-public class BrowserItemViewModel : SceneItemViewModel
+public abstract class BrowserItemViewModel<T> : SceneItemViewModel<T> where T : BrowserItem
 {
     public override int ZIndex { get; protected set; } = 10;
-    public override string BaseItemType => "Browser";
-
-    protected string Url { get; set; } = string.Empty;
+    
+    public string Url
+    {
+        get => _sceneItem.Url;
+        set
+        {
+            _sceneItem.Url = value;  
+            OnPropertyChanged();
+        } 
+    }
 
     
-    public BrowserItemViewModel(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(controllerViewModel, dispatcher, logger)
+    protected BrowserItemViewModel(T sceneItem, IDispatcherService dispatcher, ILoggingService logger) 
+        : base(sceneItem, dispatcher, logger) { }
+}
+
+public class BrowserItemViewModel : BrowserItemViewModel<BrowserItem>
+{
+    public BrowserItemViewModel(BrowserItem sceneItem, IDispatcherService dispatcher, ILoggingService logger) : base(sceneItem, dispatcher, logger)
     {
         DefaultColor = Consts.BrowserSourceColor;
-    }
-
-    public override async Task ApplyBindingValueAsync(object? value)
-    {
-        Url = value?.ToString() ?? string.Empty;
-        
-        await UpdateAsync();
-    }
-
-    protected override async Task UpdateAsync()
-    {
-        Inputs["url"] = Url;
-        
-        await base.UpdateAsync();
-    }
-
-    public override async Task ClearAsync(bool fullClear = false)
-    {
-        Url = string.Empty;
-        await UpdateAsync();
-        
-        await base.ClearAsync(fullClear);
     }
 }

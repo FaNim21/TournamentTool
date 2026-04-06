@@ -1,10 +1,10 @@
 ﻿using TournamentTool.Domain.Entities;
 
-namespace TournamentTool.ViewModels.Entities.Player;
+namespace TournamentTool.Presentation.Entities;
 
-public class CustomPlayerViewModel : IPlayer
+public class CustomPlayer : IPlayer
 {
-    private readonly CustomPlayer _data;
+    private readonly CustomPlayerData _data;
     private readonly IPovUsage _other;
 
     public bool IsLive => true;
@@ -27,7 +27,7 @@ public class CustomPlayerViewModel : IPlayer
     public bool IsFromWhitelist => false;
     
     
-    public CustomPlayerViewModel(CustomPlayer data, IPovUsage? other)
+    public CustomPlayer(CustomPlayerData data, IPovUsage? other)
     {
         _data = data;
         _other = other ?? new EmptyPlayerViewModel();

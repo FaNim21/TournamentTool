@@ -2,10 +2,11 @@
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Presentation.Obs;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
-using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Managers.Preset;
+using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Menu;
 
 namespace TournamentTool.ViewModels.StatusBar;
@@ -44,14 +45,16 @@ public class StatusBarViewModel : BaseViewModel
 
     
     public StatusBarViewModel(IObsController obs, ITwitchService twitch, IBackgroundCoordinator backgroundCoordinator, IDispatcherService dispatcher, 
-        ITournamentState tournamentState, NotificationPanelViewModel notificationPanelViewModel, IImageService imageService, IMenuService menuService) : base(dispatcher)
+        ITournamentState tournamentState, NotificationPanelViewModel notificationPanelViewModel, IImageService imageService, IMenuService menuService,
+        ISceneManager sceneManager) : base(dispatcher)
     {
         _tournamentState = tournamentState;
 
-        var notifications = new NotificationStatusViewModel(notificationPanelViewModel, dispatcher, imageService, menuService);
-        var obsStatus = new OBSStatusViewModel(obs, dispatcher, imageService, menuService);
-        var backgroundServiceStatus = new BackgroundServiceStatusViewModel(backgroundCoordinator, (IBackgroundServiceRegistry)backgroundCoordinator, dispatcher, imageService, menuService);
-        var twitchStatus = new TwitchStatusViewModel(twitch, dispatcher, imageService, menuService);
+        NotificationStatusViewModel notifications = new(notificationPanelViewModel, dispatcher, imageService, menuService);
+        OBSStatusViewModel obsStatus = new(obs, sceneManager, dispatcher, imageService, menuService);
+        BackgroundServiceStatusViewModel backgroundServiceStatus = new(backgroundCoordinator, (IBackgroundServiceRegistry)backgroundCoordinator, 
+            dispatcher, imageService, menuService);
+        TwitchStatusViewModel twitchStatus = new(twitch, dispatcher, imageService, menuService);
 
         StatusItems.Add(notifications);
         StatusItems.Add(obsStatus);

@@ -8,6 +8,10 @@ public class RelayCommand : BaseCommand
     {
         _execute = execute;
     }
+    public RelayCommand(Action execute, Func<bool> canExecute) : base(_ => canExecute())
+    {
+        _execute = execute;
+    }
 
     public override void Execute(object? parameter)
     {
@@ -23,11 +27,27 @@ public class RelayCommand<T> : BaseCommand
     {
         _execute = execute;
     }
+    public RelayCommand(Action<T> execute, Func<T?, bool> canExecute) : base(p => canExecute((T?)p))
+    {
+        _execute = execute;
+    }
+    
+    public override bool CanExecute(object? parameter)
+    {
+        if (!base.CanExecute(parameter)) return false;
+
+        return parameter is T || (parameter == null && default(T) == null);
+    }
 
     public override void Execute(object? parameter)
     {
-        if (parameter == null) return;
-
-        _execute((T)parameter);
+        if (parameter is T value)
+        {
+            _execute(value);
+        }
+        else if (parameter is null && default(T) is null)
+        {
+            _execute(default!);
+        }
     }
 }

@@ -7,7 +7,7 @@
              xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
              xmlns:obs1="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
-             d:DataContext="{d:DesignInstance Type=obs1:Scene}"
+             d:DataContext="{d:DesignInstance Type=obs1:SceneViewModel}"
              mc:Ignorable="d">
     <UserControl.Resources>
         <ContextMenu x:Key="POVContextMenu">
@@ -58,7 +58,7 @@
                     </ItemsControl.ItemContainerStyle>
                     
                     <ItemsControl.Resources>
-                        <DataTemplate DataType="{x:Type items:PointOfView}">
+                        <DataTemplate DataType="{x:Type items:PointOfViewViewModel}">
                             <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
                                     Visibility="{Binding IsDisplayed, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     Width="{Binding Transform.Width, Mode=OneWay}"
@@ -74,7 +74,7 @@
                                     MouseLeave="PointOfView_MouseLeave"
                                     ContextMenuOpening="Border_ContextMenuOpening">
                                 <i:Interaction.Behaviors>
-                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type items:PointOfView}"/>
+                                    <behaviors:BorderDragDropBehavior DragDataType="{x:Type items:PointOfViewViewModel}"/>
                                 </i:Interaction.Behaviors>
                                 <Grid Visibility="{Binding InEditMode, Converter={StaticResource ReverseBoolToVisibilityConverter}, Mode=OneWay}"
                                       IsHitTestVisible="False">

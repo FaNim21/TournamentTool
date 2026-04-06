@@ -1,48 +1,50 @@
-﻿using ObsWebSocket.Core.Protocol.Common;
-using TournamentTool.Core.Common;
+﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
+using TournamentTool.Presentation.Obs.Entities;
 
 namespace TournamentTool.ViewModels.Obs;
 
 public class TransformViewModel : BaseViewModel
 {
-    public int OriginWidth { get; private set; }
-    public int OriginHeight { get; private set; }
-    public int OriginX { get; private set; }
-    public int OriginY { get; private set; }
+    private readonly Transform _transform;
 
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-    public int X { get; private set; }
-    public int Y { get; private set; }
-    
-    
-    public TransformViewModel(IDispatcherService dispatcher) : base(dispatcher) { }
+    public int OriginWidth => _transform.OriginWidth;
+    public int OriginHeight => _transform.OriginHeight;
+    public int OriginX => _transform.OriginX;
+    public int OriginY => _transform.OriginY;
 
-    public void Initialize(SceneItemTransformStub itemTransform, SceneItemTransformStub? groupTransform)
+    private int _width;
+    public int Width
     {
-        double positionX = itemTransform.PositionX ?? 0d;
-        double positionY = itemTransform.PositionY ?? 0d;
+        get => _width; 
+        private set => SetField(ref _width, value);
+    }
+    
+    private int _height;
+    public int Height 
+    {
+        get => _height; 
+        private set => SetField(ref _height, value);    
+    }    
+    
+    private int _x;
+    public int X
+    {
+        get => _x;
+        private set => SetField(ref _x, value);
+    }
 
-        double width = itemTransform.Width ?? 0d;
-        double height = itemTransform.Height ?? 0d;
+    private int _y;
+    public int Y 
+    {
+        get => _y;
+        private set => SetField(ref _y, value);
+    }
 
-        if (groupTransform != null)
-        {
-            positionX *= groupTransform.ScaleX ?? 0d;
-            positionY *= groupTransform.ScaleY! ?? 0d;
 
-            positionX += groupTransform.PositionX ?? 0d;
-            positionY += groupTransform.PositionY ?? 0d;
-
-            width *= groupTransform.ScaleX ?? 0d;
-            height *= groupTransform.ScaleY ?? 0d;
-        }
-
-        OriginX = (int)positionX;
-        OriginY = (int)positionY;
-        OriginWidth = (int)width;
-        OriginHeight = (int)height;
+    public TransformViewModel(Transform transform, IDispatcherService dispatcher) : base(dispatcher)
+    {
+        _transform = transform;
     }
     
     public void UpdateProportions(float proportion)
@@ -52,11 +54,5 @@ public class TransformViewModel : BaseViewModel
 
         Width = (int)(OriginWidth / proportion);
         Height = (int)(OriginHeight / proportion);
-
-        OnPropertyChanged(nameof(X));
-        OnPropertyChanged(nameof(Y));
-
-        OnPropertyChanged(nameof(Width));
-        OnPropertyChanged(nameof(Height));
     }
 }

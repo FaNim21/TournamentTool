@@ -74,6 +74,8 @@ public class BindingEngine : IBindingEngine
 
     public void UpsertItem(string uuid, BindingKey key)
     {
+        if (key is null) return;
+        
         if (!_items.TryGetValue(uuid, out BindingItem? item))
         {
             item = new BindingItem(uuid, key);
@@ -88,6 +90,7 @@ public class BindingEngine : IBindingEngine
             }
         }
 
+        _index.TryAdd(key, []);
         _index[key].Add(uuid);
     }
     
@@ -96,7 +99,7 @@ public class BindingEngine : IBindingEngine
         if (!_items.TryGetValue(uuid, out var item)) return;
 
         item.AttachTarget(target);
-    } 
+    }
     
     public void DetachTarget(string uuid)
     {

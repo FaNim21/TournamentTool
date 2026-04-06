@@ -1,12 +1,13 @@
 ﻿using TournamentTool.Core.Interfaces;
 using TournamentTool.Services;
-using TournamentTool.Services.Controllers;
+using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Menu;
 
 namespace TournamentTool.ViewModels.StatusBar;
 
-public class TwitchStatusViewModel : StatusItemViewModel
+public class 
+    TwitchStatusViewModel : StatusItemViewModel
 {
     private readonly ITwitchService _twitchService;
 

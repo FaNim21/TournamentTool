@@ -4,7 +4,6 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services;
-using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs;
 using TournamentTool.Services.Obs.Binding;

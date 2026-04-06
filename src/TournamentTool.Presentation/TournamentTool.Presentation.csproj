@@ -9,7 +9,6 @@
     <ItemGroup>
       <ProjectReference Include="..\TournamentTool.Core\TournamentTool.Core.csproj" />
       <ProjectReference Include="..\TournamentTool.Domain\TournamentTool.Domain.csproj" />
-      <ProjectReference Include="..\TournamentTool.Presentation\TournamentTool.Presentation.csproj" />
       <ProjectReference Include="..\TournamentTool.Services\TournamentTool.Services.csproj" />
     </ItemGroup>
 

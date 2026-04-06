@@ -60,7 +60,7 @@
                            Margin="5 0 0 0"
                            Foreground="#CCCCCC">
                     <Run Text="Scene:" />
-                    <Run Text="{Binding SceneController.MainScene.SceneName, Mode=OneWay}"
+                    <Run Text="{Binding SceneController.MainSceneViewModel.SceneName, Mode=OneWay}"
                          Foreground="#ffffff" />
                 </TextBlock>
             </StackPanel>
@@ -106,11 +106,11 @@
 
                 <Grid Grid.Row="0"
                       Background="#525252">
-                    <Grid Visibility="{Binding SceneController.StudioMode, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
-                        <components:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
+                    <Grid Visibility="{Binding SceneController.StudioMode, Mode=OneWay, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
+                        <components:SceneCanvas DataContext="{Binding SceneController.MainSceneViewModel}" />
                     </Grid>
 
-                    <Grid Visibility="{Binding SceneController.StudioMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid Visibility="{Binding SceneController.StudioMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
@@ -125,15 +125,16 @@
                                        Margin="0 10 0 0">
                                 <Run Text="Preview:" />
                                 <LineBreak />
-                                <Run Text="{Binding SceneController.PreviewScene.SceneName}" />
+                                <Run Text="{Binding SceneController.PreviewSceneViewModel.SceneName, Mode=OneWay}" />
                             </TextBlock>
-                            <components:SceneCanvas DataContext="{Binding SceneController.PreviewScene}" />
+                            <components:SceneCanvas DataContext="{Binding SceneController.PreviewSceneViewModel}" />
 
                             <ComboBox Style="{StaticResource ComboBoxTest2}"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Bottom"
                                       ItemsSource="{Binding SceneController.Scenes}"
                                       SelectedItem="{Binding SceneController.SelectedScene, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Name"
                                       Width="140"
                                       Height="20"
                                       Margin="0 0 0 22" />
@@ -147,9 +148,9 @@
                                        Margin="0 10 0 0">
                                 <Run Text="Program:" />
                                 <LineBreak />
-                                <Run Text="{Binding SceneController.MainScene.SceneName}" />
+                                <Run Text="{Binding SceneController.MainSceneViewModel.SceneName, Mode=OneWay}" />
                             </TextBlock>
-                            <components:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
+                            <components:SceneCanvas DataContext="{Binding SceneController.MainSceneViewModel}" />
 
                             <buttons:ButtonNormal Width="150"
                                                      Height="35"
@@ -162,7 +163,7 @@
                         </Grid>
                     </Grid>
 
-                    <TextBlock Visibility="{Binding SceneController.Connected, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                    <TextBlock Visibility="{Binding SceneController.Connected, Mode=OneWay, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
                                Text="OBS is not connected"
                                Foreground="White"
                                HorizontalAlignment="Center"

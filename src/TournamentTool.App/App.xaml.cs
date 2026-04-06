@@ -10,10 +10,10 @@ using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Interfaces;
+using TournamentTool.Presentation.Obs;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Configuration;
-using TournamentTool.Services.Controllers;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
@@ -27,6 +27,7 @@ using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Menu;
+using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
 
@@ -127,9 +128,12 @@ public partial class App : Application
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
         
         //OBS
+        services.AddSingleton<ISceneManager, SceneManager>();
+        
         services.AddSingleton<IBindingSchemaInitializer, BindingSchemaInitializer>();
         services.AddSingleton<IBindingEngine, BindingEngine>();
         
+        //zrobic jako zwykly add singleton dla web socketu
         services.TryAddSingleton<JsonMessageSerializer>();
         services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
 

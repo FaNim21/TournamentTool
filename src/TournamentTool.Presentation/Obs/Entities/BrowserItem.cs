@@ -1,0 +1,37 @@
+﻿using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs;
+
+namespace TournamentTool.Presentation.Obs.Entities;
+
+public class BrowserItem : SceneItem
+{
+    public override string BaseItemType => "Browser";
+    
+    public string Url { get; set; } = string.Empty;
+    
+    
+    public BrowserItem(ISceneManager sceneManager, ILoggingService logger) 
+        : base(sceneManager, logger) { }
+
+    public override async Task ApplyBindingValueAsync(object? value)
+    {
+        Url = value?.ToString() ?? string.Empty;
+        
+        await UpdateAsync();
+    }
+
+    public override async Task UpdateAsync()
+    {
+        Inputs["url"] = Url;
+        
+        await base.UpdateAsync();
+    }
+
+    public override async Task ClearAsync(bool fullClear = false)
+    {
+        Url = string.Empty;
+        await UpdateAsync();
+        
+        await base.ClearAsync(fullClear);
+    }
+}

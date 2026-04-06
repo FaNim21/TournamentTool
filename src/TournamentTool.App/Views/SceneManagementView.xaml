@@ -11,6 +11,7 @@
              xmlns:obs="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
              xmlns:common="clr-namespace:ObsWebSocket.Core.Protocol.Common;assembly=ObsWebSocket.Core"
              xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
+             xmlns:domain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -40,7 +41,7 @@
                     <behaviors:ActualSizeBehavior Dimension="{Binding SceneDimension, Mode=OneWayToSource, BindsDirectlyToSource=True}" />
                 </i:Interaction.Behaviors>
 
-                <components:SceneCanvas DataContext="{Binding SceneController.MainScene}" />
+                <components:SceneCanvas DataContext="{Binding SceneController.MainSceneViewModel}" />
             </Grid>
 
             <Grid Grid.Row="1">
@@ -82,10 +83,10 @@
                                                               RefreshTrigger="{Binding SceneRefreshTrigger}" />
                         </i:Interaction.Behaviors>
                         <ListBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type common:SceneStub}">
+                            <DataTemplate DataType="{x:Type domain:SceneDto}">
                                 <Border BorderBrush="Transparent"
                                         BorderThickness="1">
-                                    <TextBlock Text="{Binding SceneName}"
+                                    <TextBlock Text="{Binding Name}"
                                                Foreground="White"
                                                FontSize="20"
                                                HorizontalAlignment="Left"
@@ -120,7 +121,7 @@
                          VirtualizingStackPanel.VirtualizationMode="Recycling"
                          VirtualizingStackPanel.ScrollUnit="Pixel">
                     <i:Interaction.Behaviors>
-                        <behaviors:CollectionViewBehavior Source="{Binding SceneController.MainScene.SceneItems}"
+                        <behaviors:CollectionViewBehavior Source="{Binding SceneController.MainSceneViewModel.SceneItems}"
                                                           RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>

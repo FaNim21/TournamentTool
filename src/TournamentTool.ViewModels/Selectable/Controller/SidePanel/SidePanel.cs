@@ -31,7 +31,7 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgr
         }
     }
     
-    public PointOfView? CurrentChosenPOV
+    public PointOfViewViewModel? CurrentChosenPOV
     {
         get => Controller.CurrentChosenPOV;
         set => Controller.CurrentChosenPOV = value;

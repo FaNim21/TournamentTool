@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using ObsWebSocket.Core.Protocol.Common;
-using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
-using TournamentTool.Services.Controllers;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Obs;
 using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
@@ -22,26 +21,20 @@ public class SceneManagementViewModel : SelectableViewModel
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
 
-    public SceneControllerViewModelViewModel SceneController { get; }
+    public SceneControllerViewModel SceneController { get; }
 
-    public ObservableCollection<SceneStub> Scenes { get; set; } = [];
+    public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
 
-    private SceneStub? _selectedScene;
-    public SceneStub? SelectedScene
+    private SceneDto? _selectedScene;
+    public SceneDto? SelectedScene
     {
         get => _selectedScene;
         set
         {
             _selectedScene = value;
-            OnPropertyChanged(nameof(SelectedScene));
-
-            if (_selectedScene == null) return;
+            OnPropertyChanged();
             
-            //TODO: Przemyslec miejsce tego na nowo przy okazji robienia detekcji zmiany sceny z poziomu obs
-            Task.Run(async ()=>
-            {
-                await SceneController.MainScene.SetSceneItemsAsync(_selectedScene.SceneName ?? string.Empty, _selectedScene.SceneUuid ?? string.Empty);
-            });
+            OnSelectedSceneChanged(value);
         }
     }
     
@@ -54,7 +47,7 @@ public class SceneManagementViewModel : SelectableViewModel
             _selectedSceneItem?.UnFocus();
             
             _selectedSceneItem = value;
-            OnPropertyChanged(nameof(SelectedSceneItem));
+            OnPropertyChanged();
             
             _selectedSceneItem?.Focus();
         }
@@ -78,7 +71,7 @@ public class SceneManagementViewModel : SelectableViewModel
         set
         {
             _sceneRefreshTrigger = value;
-            OnPropertyChanged(nameof(SceneRefreshTrigger));
+            OnPropertyChanged();
         }
     }
     
@@ -89,7 +82,7 @@ public class SceneManagementViewModel : SelectableViewModel
         set
         {
             _sceneItemsRefreshTrigger = value;
-            OnPropertyChanged(nameof(SceneItemsRefreshTrigger));
+            OnPropertyChanged();
         }
     }
     
@@ -116,7 +109,8 @@ public class SceneManagementViewModel : SelectableViewModel
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
     /// </summary>
     public SceneManagementViewModel(IDispatcherService dispatcher, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
-        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService) : base(dispatcher)
+        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService) 
+        : base(dispatcher)
     {
         _bindingEngine = bindingEngine;
         _obs = obs;
@@ -124,8 +118,8 @@ public class SceneManagementViewModel : SelectableViewModel
 
         _appCache = settingsProvider.Get<AppCache>();
 
-        SceneController = sceneControllerFactory.Create();
-        SceneController.IsStudioModeSupported = false;
+        SceneController = sceneControllerFactory.Create(isStudioModeSupported: false);
+        Scenes = SceneController.Scenes;
         
         //TODO: 0 Przechwytywac eventy z OBS'a
 
@@ -135,20 +129,10 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         SceneController.OnEnable(null);
 
-        Task.Run(async () =>
-        {
-            GetSceneListResponseData? sceneResponse = await _obs.GetSceneList();
-            if (sceneResponse == null) return;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                Scenes = new ObservableCollection<SceneStub>(sceneResponse.Scenes ?? []);
-                OnPropertyChanged(nameof(Scenes));
-
-                _selectedScene = Scenes.FirstOrDefault(s => s.SceneUuid!.Equals(sceneResponse.CurrentProgramSceneUuid));
-                OnPropertyChanged(nameof(SelectedScene));
-            });
-        });
+        if (string.IsNullOrEmpty(SceneController.MainSceneViewModel.SceneUuid)) return;
+        
+        _selectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneController.MainSceneViewModel.SceneUuid));
+        OnPropertyChanged(nameof(SelectedScene));
     }
     public override bool OnDisable()
     {
@@ -160,18 +144,24 @@ public class SceneManagementViewModel : SelectableViewModel
     private void EditSceneItem(SceneItemViewModel sceneItem)
     {
         SceneItemEditWindowViewModel viewModel = new(sceneItem, _bindingEngine, _appCache, Dispatcher);
-        _windowService.ShowCustomDialog(viewModel, async edit => await OnEditSceneItemClosed(edit), "SceneItemEditWindow");
+        _windowService.ShowCustomDialog(viewModel, OnEditSceneItemClosed, "SceneItemEditWindow");
     }
 
-    private async Task OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
+    private void OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
     {
         SceneItemConfiguration config = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
         
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
         
-        string sceneName = SceneController.MainScene.SceneName;
-        string sceneUuid = SceneController.MainScene.SceneUuid;
+        string sceneName = SceneController.MainSceneViewModel.SceneName;
+        string sceneUuid = SceneController.MainSceneViewModel.SceneUuid;
+        SceneController.MainSceneViewModel.SetSceneItems(sceneName, sceneUuid, true);
+    }
+    
+    private void OnSelectedSceneChanged(SceneDto? selectedScene)
+    {
+        if (selectedScene == null) return;
         
-        await SceneController.MainScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
+        SceneController.MainSceneViewModel.SetSceneItems(selectedScene.Name, selectedScene.Uuid);
     }
 }

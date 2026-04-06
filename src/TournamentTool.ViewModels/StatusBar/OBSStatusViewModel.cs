@@ -1,5 +1,6 @@
 ﻿using TournamentTool.Core.Interfaces;
-using TournamentTool.Services.Controllers;
+using TournamentTool.Presentation.Obs;
+using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Menu;
 
@@ -8,15 +9,19 @@ namespace TournamentTool.ViewModels.StatusBar;
 public class OBSStatusViewModel : StatusItemViewModel
 {
     private readonly IObsController _obsController;
+    private readonly ISceneManager _sceneManager;
 
     protected override string Name => "OBS";
      
     private ConnectionState _currentState;
  
     
-    public OBSStatusViewModel(IObsController obsController, IDispatcherService dispatcher, IImageService imageService, IMenuService menuService) : base(dispatcher, imageService, menuService)
+    public OBSStatusViewModel(IObsController obsController, ISceneManager sceneManager, IDispatcherService dispatcher, IImageService imageService, 
+        IMenuService menuService) : base(dispatcher, imageService, menuService)
     {
         _obsController = obsController;
+        _sceneManager = sceneManager;
+        
         _obsController.ConnectionStateChanged += OnConnectionStateChanged;
     }
     public override void Dispose()

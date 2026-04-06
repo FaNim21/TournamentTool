@@ -1,31 +1,29 @@
 ﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.ViewModels.Entities;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
-using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels;
 
 public class POVInformationViewModel : BaseWindowViewModel
 {
-    private readonly Scene _scene;
+    private readonly SceneViewModel _sceneViewModel;
     
-    public PointOfView PointOfView { get; private set; }
+    public PointOfViewViewModel PointOfViewViewModel { get; }
 
 
-    public POVInformationViewModel(PointOfView pov, Scene scene, IDispatcherService dispatcher) : base(dispatcher)
+    public POVInformationViewModel(PointOfViewViewModel pov, SceneViewModel sceneViewModel, IDispatcherService dispatcher) : base(dispatcher)
     {
-        _scene = scene;
-        PointOfView = pov;
+        _sceneViewModel = sceneViewModel;
+        PointOfViewViewModel = pov;
     }
 
     public override void Dispose()
     {
-        bool exists = _scene.ExistInItems<PointOfView>(p => p.StreamDisplayInfo.Name.Equals(PointOfView.CustomStreamName) 
-                                                            && p.StreamDisplayInfo.Type.Equals(PointOfView.CustomStreamType));
+        bool exists = _sceneViewModel.ExistInItems<PointOfViewViewModel>(p => p.StreamDisplayInfo.Name.Equals(PointOfViewViewModel.CustomStreamName) 
+                                                            && p.StreamDisplayInfo.Type.Equals(PointOfViewViewModel.CustomStreamType));
         if (exists) return;
         
-        Task.Run(async () => await PointOfView.SetCustomPOVAsync());
+        Task.Run(async () => await PointOfViewViewModel.SetCustomPOVAsync());
     }
 }

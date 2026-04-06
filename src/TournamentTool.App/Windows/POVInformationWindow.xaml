@@ -52,14 +52,14 @@
                                   VerticalAlignment="Top"
                                   SelectedValuePath="Value"
                                   DisplayMemberPath="DisplayName"
-                                  ItemsSource="{Binding PointOfView.CustomStreamType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
-                                  SelectedValue="{Binding PointOfView.CustomStreamType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding PointOfViewViewModel.CustomStreamType, Converter={converters:EnumToCollectionConverter}, Mode=OneTime}"
+                                  SelectedValue="{Binding PointOfViewViewModel.CustomStreamType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Width="80"
                                   Height="20" />
                         <TextBox TextWrapping="Wrap"
                                  Width="120"
                                  Height="20"
-                                 Text="{Binding PointOfView.CustomStreamName}"
+                                 Text="{Binding PointOfViewViewModel.CustomStreamName}"
                                  Background="#9E9E9E"
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Top"
@@ -76,7 +76,7 @@
                         <Run Text="Item: "
                              FontSize="12"
                              Foreground="White" />
-                        <Run Text="{Binding PointOfView.SourceName, Mode=OneWay}"
+                        <Run Text="{Binding PointOfViewViewModel.SourceName, Mode=OneWay}"
                              Foreground="White"
                              FontWeight="SemiBold" />
                     </TextBlock>
@@ -84,7 +84,7 @@
                         <Run Text="Player: "
                              FontSize="12"
                              Foreground="White" />
-                        <Run Text="{Binding PointOfView.DisplayedPlayer}"
+                        <Run Text="{Binding PointOfViewViewModel.DisplayedPlayer}"
                              Foreground="Cyan" />
                     </TextBlock>
                     <StackPanel Orientation="Horizontal"
@@ -94,7 +94,7 @@
                         <buttons:ButtonNormal Width="115"
                                               Height="25"
                                               ContentText="Apply new volume"
-                                              OnCommand="{Binding PointOfView.ApplyVolumeCommand}" />
+                                              OnCommand="{Binding PointOfViewViewModel.ApplyVolumeCommand}" />
                         <Grid>
                             <Slider Width="150"
                                     Height="20"
@@ -103,14 +103,14 @@
                                     Minimum="0"
                                     Maximum="100"
                                     TickFrequency="1"
-                                    Value="{Binding PointOfView.Volume}" />
+                                    Value="{Binding PointOfViewViewModel.Volume}" />
 
                             <Slider Width="150"
                                     Height="20"
                                     Minimum="0"
                                     Maximum="100"
                                     IsSnapToTickEnabled="True"
-                                    Value="{Binding PointOfView.NewVolume}"
+                                    Value="{Binding PointOfViewViewModel.NewVolume}"
                                     TickFrequency="1"
                                     SmallChange="1"
                                     LargeChange="0"
@@ -120,7 +120,7 @@
                                 </i:Interaction.Behaviors>
                             </Slider>
                         </Grid>
-                        <TextBlock Text="{Binding PointOfView.TextVolume, Mode=OneWay}"
+                        <TextBlock Text="{Binding PointOfViewViewModel.TextVolume, Mode=OneWay}"
                                    FontWeight="Bold"
                                    Foreground="Wheat"
                                    Padding="0"

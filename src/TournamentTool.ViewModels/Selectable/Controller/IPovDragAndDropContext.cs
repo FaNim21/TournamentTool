@@ -6,5 +6,5 @@ namespace TournamentTool.ViewModels.Selectable.Controller;
 
 public interface IPovDragAndDropContext
 {
-    public PointOfView? CurrentChosenPOV { get; set; }
+    public PointOfViewViewModel? CurrentChosenPOV { get; set; }
 }

@@ -3,7 +3,6 @@ using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
-using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 

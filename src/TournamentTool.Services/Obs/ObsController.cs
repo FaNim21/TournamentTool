@@ -10,14 +10,12 @@ using ObsWebSocket.Core.Protocol.Generated;
 using ObsWebSocket.Core.Protocol.Requests;
 using ObsWebSocket.Core.Protocol.Responses;
 using ObsWebSocket.Core.Serialization;
-using TournamentTool.Core.Parsers;
 using TournamentTool.Domain.Entities;
-using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 
-namespace TournamentTool.Services.Controllers;
+namespace TournamentTool.Services.Obs;
 
 public enum ConnectionState
 {
@@ -46,6 +44,8 @@ public interface IObsController
     event EventHandler<CurrentPreviewSceneChangedPayload>? CurrentPreviewSceneChanged;
     event EventHandler? SceneTransitionStarted;
     event EventHandler? StudioModeChanged;
+    event EventHandler<SceneCreatedPayload>? SceneCreated;
+    event EventHandler<SceneRemovedPayload>? SceneRemoved;
     
     bool IsConnectedToWebSocket { get; }
     bool StudioMode { get; }
@@ -85,6 +85,8 @@ public class ObsController : IObsController, IDisposable
     public event EventHandler<CurrentPreviewSceneChangedPayload>? CurrentPreviewSceneChanged;
     public event EventHandler? SceneTransitionStarted;
     public event EventHandler? StudioModeChanged;
+    public event EventHandler<SceneCreatedPayload>? SceneCreated;
+    public event EventHandler<SceneRemovedPayload>? SceneRemoved;
 
     public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
@@ -107,6 +109,7 @@ public class ObsController : IObsController, IDisposable
         _settings = settingsProvider.Get<Settings>();
 
         _tournamentState.PresetChanged += PresetChanged;
+        
         Client = new ObsWebSocketClient(NullLogger<ObsWebSocketClient>.Instance, _webSocketMessageSerializer, Options.Create(ClientOptions));
         CreateClient();
     }
@@ -160,6 +163,9 @@ public class ObsController : IObsController, IDisposable
         Client.CurrentProgramSceneChanged += OnCurrentProgramSceneChanged;
         Client.CurrentPreviewSceneChanged += OnCurrentPreviewSceneChanged;
         Client.SceneTransitionStarted += OnSceneTransitionStarted;
+        
+        Client.SceneCreated += OnSceneCreated;
+        Client.SceneRemoved += OnSceneRemoved;
     }
     private void ClearClient()
     {
@@ -176,6 +182,9 @@ public class ObsController : IObsController, IDisposable
         Client.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
         Client.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
         Client.SceneTransitionStarted -= OnSceneTransitionStarted;
+        
+        Client.SceneCreated -= OnSceneCreated;
+        Client.SceneRemoved -= OnSceneRemoved;
     }
 
     public async Task Connect()
@@ -259,6 +268,11 @@ public class ObsController : IObsController, IDisposable
     }
     
     public async Task Disconnect() => await Client.DisconnectAsync();
+
+    private void OnSceneCreated(object? sender, SceneCreatedEventArgs e) 
+        => SceneCreated?.Invoke(this, new SceneCreatedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
+    private void OnSceneRemoved(object? sender, SceneRemovedEventArgs e) 
+        => SceneRemoved?.Invoke(this, new SceneRemovedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
 
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {

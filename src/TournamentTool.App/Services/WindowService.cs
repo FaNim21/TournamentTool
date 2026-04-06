@@ -206,7 +206,13 @@ public class WindowService : IWindowService
             closeRequest.RequestClose = window.Close;
         
         window.DataContext = viewModel;
-        window.Owner = Application.Current.MainWindow;
+        
+        Window? owner = Application.Current.MainWindow;;
+        if (owner is { IsLoaded: true })
+        {
+            window.Owner = Application.Current.MainWindow;
+        }
+        
         return window;
     } 
     

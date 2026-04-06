@@ -9,23 +9,23 @@ namespace TournamentTool.ViewModels.Commands.Controller;
 public class ShowPOVInfoWindowCommand : BaseCommand
 {
     private readonly IWindowService _windowService;
-    private readonly Scene _scene;
+    private readonly SceneViewModel _sceneViewModel;
     private readonly IDispatcherService _dispatcher;
 
 
     //TODO: 1 Rewrite this to not contain this things in scene and just make in in scene controller or something like that
-    public ShowPOVInfoWindowCommand(IWindowService windowService, Scene scene, IDispatcherService dispatcher)
+    public ShowPOVInfoWindowCommand(IWindowService windowService, SceneViewModel sceneViewModel, IDispatcherService dispatcher)
     {
         _windowService = windowService;
-        _scene = scene;
+        _sceneViewModel = sceneViewModel;
         _dispatcher = dispatcher;
     }
 
     public override void Execute(object? parameter)
     {
-        if (parameter is not PointOfView pov) return;
+        if (parameter is not PointOfViewViewModel pov) return;
 
-        POVInformationViewModel viewModel = new(pov, _scene, _dispatcher);
+        POVInformationViewModel viewModel = new(pov, _sceneViewModel, _dispatcher);
         _windowService.ShowCustomDialog(viewModel);
     }
 }

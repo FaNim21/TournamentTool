@@ -23,25 +23,25 @@ public partial class SceneCanvas : UserControl
         try
         {
             if (sender is not Border droppedBorder) return;
-            if (DataContext is not Scene scene) return;
-            if (droppedBorder.DataContext is not PointOfView pov) return;
+            if (DataContext is not SceneViewModel scene) return;
+            if (droppedBorder.DataContext is not PointOfViewViewModel pov) return;
 
             if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
             {
-                if (!scene.ExistInItems<PointOfView>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo)))
+                if (!scene.ExistInItems<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo)))
                 {
                     await pov.SetPOVAsync(info);
                 }
                 else
                 {
-                    PointOfView? foundPov =
-                        scene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
+                    PointOfViewViewModel? foundPov =
+                        scene.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
                     if (foundPov == null) return;
 
                     await foundPov.SwapAsync(pov);
                 }
             }
-            else if (e.Data.GetData(typeof(PointOfView)) is PointOfView dragPov)
+            else if (e.Data.GetData(typeof(PointOfViewViewModel)) is PointOfViewViewModel dragPov)
             {
                 await dragPov.SwapAsync(pov);
             }
@@ -58,9 +58,9 @@ public partial class SceneCanvas : UserControl
     {
         try
         {
-            if (DataContext is not Scene scene) return;
+            if (DataContext is not SceneViewModel scene) return;
             if (sender is not Border clickedBorder) return;
-            if (clickedBorder!.DataContext is not PointOfView pov) return;
+            if (clickedBorder!.DataContext is not PointOfViewViewModel pov) return;
 
             await scene.Interactable.OnPOVClickAsync(scene, pov);
         }
@@ -77,7 +77,7 @@ public partial class SceneCanvas : UserControl
             if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
 
             if (sender is not Border border) return;
-            if (border.DataContext is not PointOfView pov) return;
+            if (border.DataContext is not PointOfViewViewModel pov) return;
 
             e.Handled = true;
             await pov.ClearAsync(true);

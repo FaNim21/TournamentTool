@@ -24,7 +24,7 @@
         WindowStyle="None">
     <Window.Resources>
 
-        <DataTemplate DataType="{x:Type items:PointOfView}">
+        <DataTemplate DataType="{x:Type items:PointOfViewViewModel}">
             <StackPanel>
                 <TextBlock Text="Point of view" />
                 <!-- TODO: TU TRZEBA USTALIC caly config dla pov'a, chyba w sumie tu nic nie bedzie xd-->

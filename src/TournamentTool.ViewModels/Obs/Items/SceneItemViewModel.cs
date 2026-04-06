@@ -1,40 +1,45 @@
-﻿using ObsWebSocket.Core.Protocol.Common;
-using TournamentTool.Core.Common;
+﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Obs;
+using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Obs;
-using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.ViewModels.Obs.Items;
 
-public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
+public abstract class SceneItemViewModel<T> : SceneItemViewModel where T : SceneItem
 {
+    protected readonly T _sceneItem;
+    public override SceneItem SceneItem => _sceneItem;
+
+    protected SceneItemViewModel(T sceneItem, IDispatcherService dispatcher, ILoggingService logger) 
+        : base(dispatcher, logger)
+    {
+        _sceneItem = sceneItem;
+        
+        Transform = new TransformViewModel(SceneItem.Transform, dispatcher);
+    }
+}
+
+public abstract class SceneItemViewModel : BaseViewModel
+{
+    public abstract SceneItem SceneItem { get; }
     protected ILoggingService Logger { get; }
-    
-    protected ISceneControllerViewModel ControllerViewModel { get; }
-    protected IScene Scene { get; private set; } = null!;
 
-    public TransformViewModel Transform { get; init; }
-
-    public BindingKey BindingKey { get; set; } = BindingKey.Empty();
+    public TransformViewModel Transform { get; protected init; } = new(null!, null!);
 
     public bool IsDisplayed { get; protected set; } = true;
     public float Opacity { get; protected set; } = 1f;
     public virtual int ZIndex { get; protected set; }
-    public abstract string BaseItemType { get; }
-    public InputKind InputKind { get; set; }
+    public InputKind InputKind => SceneItem.InputKind;
 
     public bool InEditMode { get; protected set; }
     public bool IsFocused { get; protected set; }
 
-    public string GroupName { get; protected set; } = string.Empty;
+    public string GroupName => SceneItem.GroupName;
     
-    public string SourceName { get; protected set; } = string.Empty;
-    public string SourceUUID { get; private set; } = string.Empty;
-
-    protected Dictionary<string, object> Inputs { get; } = [];
+    public string SourceName => SceneItem.SourceName;
+    public string SourceUUID => SceneItem.SourceUUID;
 
     public string? BackgroundColor { get; set; }
     protected string? DefaultColor { get; init; }
@@ -42,47 +47,28 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
     private int _rememberedZIndex;
 
     
-    protected SceneItemViewModel(ISceneControllerViewModel controllerViewModel, IDispatcherService dispatcher, ILoggingService logger) : base(dispatcher)
+    protected SceneItemViewModel(IDispatcherService dispatcher, ILoggingService logger) : base(dispatcher)
     {
-        ControllerViewModel = controllerViewModel;
         Logger = logger;
-        Transform = new TransformViewModel(dispatcher);
 
         _rememberedZIndex = ZIndex;
         UnFocus();
     }
     public virtual void OnDestroy() { }
 
-    public virtual Task InitializeAsync(IScene scene, bool inEditMode, bool isDisplayed, SceneItemStub item, SceneItemStub? group = null)
+    public virtual void Initialize(bool inEditMode, bool isDisplayed)
     {
         BackgroundColor = DefaultColor;
         
         Opacity = inEditMode ? 0.5f : 1f;
         IsDisplayed = isDisplayed;
         InEditMode = inEditMode;
-        
-        Scene = scene;
-        SourceName = item.SourceName ?? string.Empty;
-        SourceUUID = item.SourceUuid ?? string.Empty;
-        GroupName = group != null ? group.SourceName ?? string.Empty : string.Empty;
-        
-        Transform.Initialize(item.SceneItemTransform!, group?.SceneItemTransform);
-        
-        string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-        if (!string.IsNullOrEmpty(inputKindText))
-        {
-            InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
-            InputKind = inputKind;
-        }
-
-        return Task.CompletedTask;
     }
-    public virtual Task LoadAsync() => Task.CompletedTask;
+    
+    protected async Task UpdateAsync() => await SceneItem.UpdateAsync();
 
-    protected virtual async Task UpdateAsync() => await ControllerViewModel.SetItemInputSettingsAsync(SourceUUID, Inputs);
-
-    public virtual Task RefreshAsync() => Task.CompletedTask;
-    public virtual Task ApplyBindingValueAsync(object? value) => Task.CompletedTask;
+    public virtual async Task RefreshAsync() => await SceneItem.RefreshAsync();
+    public virtual async Task ClearAsync(bool fullClear = false) => await SceneItem.ClearAsync(fullClear);
 
     public void Focus()
     {
@@ -90,7 +76,6 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
         BackgroundColor = Consts.FocusedPovColor;
         OnPropertyChanged(nameof(BackgroundColor));
 
-        //TODO: 0 ZIndex chyba nie dziala
         _rememberedZIndex = ZIndex;
         ZIndex = 9999;
         OnPropertyChanged(nameof(ZIndex));
@@ -104,6 +89,4 @@ public abstract class SceneItemViewModel : BaseViewModel, IBindingTarget
         ZIndex = _rememberedZIndex;
         OnPropertyChanged(nameof(ZIndex));
     }
-
-    public virtual Task ClearAsync(bool fullClear = false) => Task.CompletedTask;
 }

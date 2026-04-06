@@ -6,11 +6,12 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
+using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
-using TournamentTool.Services.Controllers;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
+using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
@@ -31,7 +32,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     public ILoggingService Logger { get; }
     
-    public SceneControllerViewModelViewModel SceneController { get; }
+    public SceneControllerViewModel SceneController { get; }
     public ControllerServiceHub ServiceHub { get; }
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
@@ -78,7 +79,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         }
     }
 
-    public PointOfView? CurrentChosenPOV
+    public PointOfViewViewModel? CurrentChosenPOV
     {
         get => SceneController.CurrentChosenPOV;
         set => SceneController.CurrentChosenPOV = value;
@@ -267,15 +268,15 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
         bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main
-            ? SceneController.MainScene.ExistInItems<PointOfView>(p =>
+            ? SceneController.MainSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
                 p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo))
-            : SceneController.PreviewScene.ExistInItems<PointOfView>(p =>
+            : SceneController.PreviewSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
                 p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
         if (isPlayerInPOV)
         {
-            PointOfView? pov = CurrentChosenPOV.Type == SceneType.Main 
-                ? SceneController.MainScene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo)) 
-                : SceneController.PreviewScene.GetItem<PointOfView>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
+            PointOfViewViewModel? pov = CurrentChosenPOV.Type == SceneType.Main 
+                ? SceneController.MainSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo)) 
+                : SceneController.PreviewSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
             if (pov == null) return;
             
             CurrentChosenPOV!.SwapAsync(pov);
