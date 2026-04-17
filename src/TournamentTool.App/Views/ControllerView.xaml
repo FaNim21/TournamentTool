@@ -137,7 +137,14 @@
                                       DisplayMemberPath="Name"
                                       Width="140"
                                       Height="20"
-                                      Margin="0 0 0 22" />
+                                      Margin="0 0 0 22">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding SceneController.SelectedSceneChangedCommand}"
+                                                               CommandParameter="{Binding SceneController.SelectedScene}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers> 
+                            </ComboBox>
                         </Grid>
                         <Grid Grid.Column="1">
                             <TextBlock Foreground="LightGray"

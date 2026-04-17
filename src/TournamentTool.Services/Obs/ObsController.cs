@@ -50,22 +50,22 @@ public interface IObsController
     bool IsConnectedToWebSocket { get; }
     bool StudioMode { get; }
 
-    Task Connect();
-    Task Disconnect();
+    Task ConnectAsync();
+    Task DisconnectAsync();
 
-    Task SwitchStudioMode();
+    Task SwitchStudioModeAsync();
     Task TransitionStudioModeAsync();
 
     Task<GetInputSettingsResponseData?> GetInputSettingsAsync(string sourceUuid);
-    Task<GetVideoSettingsResponseData?> GetVideoSettings();
-    Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramScene();
-    Task<GetSceneListResponseData?> GetSceneList();
+    Task<GetVideoSettingsResponseData?> GetVideoSettingsAsync();
+    Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramSceneAsync();
+    Task<GetSceneListResponseData?> GetSceneListAsync();
 
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
-    Task SetCurrentPreviewScene(string scene);
+    Task SetCurrentPreviewSceneAsync(string scene);
 
-    Task<List<SceneItemStub>> GetSceneItemList(string? sceneName = null, string? sceneUuid = null);
-    Task<List<SceneItemStub>> GetGroupSceneItemList(string group);
+    Task<List<SceneItemStub>> GetSceneItemListAsync(string? sceneName = null, string? sceneUuid = null);
+    Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string group);
 
     void SetStartedTransition(bool option);
 }
@@ -135,7 +135,7 @@ public class ObsController : IObsController, IDisposable
         }
     }
     
-    public async Task SwitchStudioMode()
+    public async Task SwitchStudioModeAsync()
     {
         if (!IsConnectedToWebSocket) return;
         await Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
@@ -187,7 +187,7 @@ public class ObsController : IObsController, IDisposable
         Client.SceneRemoved -= OnSceneRemoved;
     }
 
-    public async Task Connect()
+    public async Task ConnectAsync()
     {
         if (_tryingToConnect) return;
         _tryingToConnect = true;
@@ -216,7 +216,7 @@ public class ObsController : IObsController, IDisposable
         catch (Exception ex)
         {
             Logger.Error($"Error: {ex}");
-            await Disconnect();
+            await DisconnectAsync();
         }
     }
     private async void OnConnecting(object? sender, ConnectingEventArgs e)
@@ -229,7 +229,7 @@ public class ObsController : IObsController, IDisposable
         catch (Exception ex)
         {
             Logger.Error($"Error: {ex}");
-            await Disconnect();
+            await DisconnectAsync();
         }
     }
     private async void OnDisconnected(object? sender, DisconnectedEventArgs e)
@@ -242,7 +242,7 @@ public class ObsController : IObsController, IDisposable
         catch (Exception ex)
         {
             Logger.Error($"Error: {ex}");
-            await Disconnect();
+            await DisconnectAsync();
         }
     }
     
@@ -256,7 +256,7 @@ public class ObsController : IObsController, IDisposable
         catch (Exception ex)
         {
             Logger.Error($"Error: {ex}");
-            await Disconnect();
+            await DisconnectAsync();
         }
     }
 
@@ -267,7 +267,7 @@ public class ObsController : IObsController, IDisposable
         _tryingToConnect = false;
     }
     
-    public async Task Disconnect() => await Client.DisconnectAsync();
+    public async Task DisconnectAsync() => await Client.DisconnectAsync();
 
     private void OnSceneCreated(object? sender, SceneCreatedEventArgs e) 
         => SceneCreated?.Invoke(this, new SceneCreatedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
@@ -286,7 +286,7 @@ public class ObsController : IObsController, IDisposable
     {
         try
         {
-            GetSceneListResponseData? listResponse = await GetSceneList();
+            GetSceneListResponseData? listResponse = await GetSceneListAsync();
             if (listResponse == null) return;
 
             Logger.Log(e.EventData.SceneName + " - " + e.EventData.SourceName);
@@ -302,7 +302,7 @@ public class ObsController : IObsController, IDisposable
     {
         try
         {
-            GetSceneListResponseData? listResponse = await GetSceneList();
+            GetSceneListResponseData? listResponse = await GetSceneListAsync();
             if (listResponse == null) return;
 
             Logger.Log(e.EventData.SceneName + " - " + e.EventData.SourceName);
@@ -319,7 +319,7 @@ public class ObsController : IObsController, IDisposable
     {
         try
         {
-            GetCurrentProgramSceneResponseData? programScene = await GetCurrentProgramScene();
+            GetCurrentProgramSceneResponseData? programScene = await GetCurrentProgramSceneAsync();
             if (programScene == null) return;
             
             CurrentProgramSceneChanged?.Invoke(this, new CurrentProgramSceneChangedPayload(programScene.SceneName, programScene.SceneUuid));
@@ -368,11 +368,11 @@ public class ObsController : IObsController, IDisposable
 
     public async Task<GetInputSettingsResponseData?> GetInputSettingsAsync(string sourceUuid) 
         => await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(null, sourceUuid));
-    public async Task<GetVideoSettingsResponseData?> GetVideoSettings() 
+    public async Task<GetVideoSettingsResponseData?> GetVideoSettingsAsync() 
         => await Client.GetVideoSettingsAsync();
-    public async Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramScene() 
+    public async Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramSceneAsync() 
         => await Client.GetCurrentProgramSceneAsync();
-    public async Task<GetSceneListResponseData?> GetSceneList() 
+    public async Task<GetSceneListResponseData?> GetSceneListAsync() 
         => await Client.GetSceneListAsync();
     
     public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
@@ -382,16 +382,19 @@ public class ObsController : IObsController, IDisposable
         JsonElement element = JsonSerializer.SerializeToElement(input);
         await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
     }
-    public async Task SetCurrentPreviewScene(string scene) 
-        => await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
+    public async Task SetCurrentPreviewSceneAsync(string scene)
+    {
+        if (string.IsNullOrEmpty(scene)) return;
+        await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
+    }
 
-    public async Task<List<SceneItemStub>> GetSceneItemList(string? sceneName = null, string? sceneUuid = null)
+    public async Task<List<SceneItemStub>> GetSceneItemListAsync(string? sceneName = null, string? sceneUuid = null)
     {
         GetSceneItemListResponseData? response = await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(sceneName, sceneUuid));
         if (response == null) return [];
         return response.SceneItems ?? [];
     }
-    public async Task<List<SceneItemStub>> GetGroupSceneItemList(string group)
+    public async Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string group)
     {
         GetGroupSceneItemListResponseData? response = await Client.GetGroupSceneItemListAsync(new GetGroupSceneItemListRequestData(group));
         if (response == null) return [];

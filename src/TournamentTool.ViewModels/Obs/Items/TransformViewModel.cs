@@ -2,7 +2,7 @@
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Presentation.Obs.Entities;
 
-namespace TournamentTool.ViewModels.Obs;
+namespace TournamentTool.ViewModels.Obs.Items;
 
 public class TransformViewModel : BaseViewModel
 {

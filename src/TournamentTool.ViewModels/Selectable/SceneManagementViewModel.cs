@@ -33,8 +33,6 @@ public class SceneManagementViewModel : SelectableViewModel
         {
             _selectedScene = value;
             OnPropertyChanged();
-            
-            OnSelectedSceneChanged(value);
         }
     }
     
@@ -86,7 +84,7 @@ public class SceneManagementViewModel : SelectableViewModel
         }
     }
     
-    public ICommand EditSceneItemCommand { get; private set; }
+    public ICommand EditSceneItemCommand { get; }
 
     private AppCache _appCache;
 
@@ -124,6 +122,7 @@ public class SceneManagementViewModel : SelectableViewModel
         //TODO: 0 Przechwytywac eventy z OBS'a
 
         EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
+        SceneController.SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);
     }
     public override void OnEnable(object? parameter)
     {
@@ -153,15 +152,17 @@ public class SceneManagementViewModel : SelectableViewModel
         
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
         
-        string sceneName = SceneController.MainSceneViewModel.SceneName;
-        string sceneUuid = SceneController.MainSceneViewModel.SceneUuid;
-        SceneController.MainSceneViewModel.SetSceneItems(sceneName, sceneUuid, true);
+        SceneController.MainSceneViewModel.Refresh();
     }
     
-    private void OnSelectedSceneChanged(SceneDto? selectedScene)
+    private async Task OnSelectedSceneChanged(SceneDto? selectedScene, CancellationToken token)
     {
         if (selectedScene == null) return;
         
-        SceneController.MainSceneViewModel.SetSceneItems(selectedScene.Name, selectedScene.Uuid);
+        //TODO: 0 problem tutaj jest taki, ze trzeba uwazac tutaj na to, ze jest razem z tym modyfikowana scena w glownym scene manager
+        // a tez nie wiem czy chce zeby ona byla tutaj celem do edycji, jezeli sobie dziala w tle pod bindingi itp itd
+        // ale w teorii wszystkie sceny sa lapane do aktualizacji i trzeba sprawdzic, czy to trzymanie glownej sceny cos w sumie zmienia
+        // bo niby mialo byc do dynamicznej aktualizacji
+        await SceneController.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
     }
 }

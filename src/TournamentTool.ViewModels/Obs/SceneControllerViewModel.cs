@@ -1,7 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using ObsWebSocket.Core.Protocol.Common;
-using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
@@ -13,7 +11,6 @@ using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Obs.Items;
-using ConnectionState = TournamentTool.Services.Obs.ConnectionState;
 
 namespace TournamentTool.ViewModels.Obs;
 
@@ -36,7 +33,6 @@ public interface ISceneControllerViewModel
 public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel, IScenePovInteractable
 {
     private readonly ISceneManager _sceneManager;
-    private readonly Lock _lock = new();
     
     public ILoggingService Logger { get; }
     public IObsController OBS { get; }
@@ -69,10 +65,6 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
         {
             _selectedScene = value;
             OnPropertyChanged();
-            
-            if (_selectedScene == value) return;
-            
-            _ = _sceneManager.LoadPreviewScene(value.Name ?? string.Empty);
         }
     }
 
@@ -111,17 +103,12 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
     public ICommand SwitchStudioModeCommand {  get; private set; }
     public ICommand StudioModeTransitionCommand { get; private set; }
     public ICommand OnSceneResizeCommand { get; private set; }
+    public ICommand SelectedSceneChangedCommand { get; set; }
 
     private readonly Domain.Entities.Settings _settings;
+    private bool _blockSetCurrentPreview;
     
-    /// <summary>
-    /// Nowa struktura:
-    /// - Scene controller, dzialajacy jako singleton ciagle w tle po polaczeniu sie z obsem do trzymania informacji o tym co sie dzieje w scenach,
-    /// - Scene jako model ze wszystkimi informacjami ze sceney, czyli scene items, itp itd i wtedy SceneViewModel wyswietla scene i itemy z niej,
-    /// - Nie wiem czy robic SceneItem wrapper, tutaj troche logiki juz zawarte jest, wiec nie wiem jak to zalatwic,
-    /// - Scene controller dodam jeszcze powinien miec info o wszystkich scenach i aktywnie aktualizowac dane tak zeby view model mogl z niego czerpac i tez
-    ///   byc aktywny przy bindingach i aktualizacji danych z serwisem do batch udpate'ow itemow
-    /// </summary>
+    
     public SceneControllerViewModel(IObsController obs, ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher,
         IWindowService windowService, ISceneManager sceneManager, bool inEditMode = true, bool isStudioModeSupported = true) : base(dispatcher)
     {
@@ -135,13 +122,12 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
         _settings = settingsProvider.Get<Domain.Entities.Settings>();
         Scenes = sceneManager.Scenes;
         
-        //TODO: 0 Tu trzeba przydzielic modele scene do view modeli
         MainSceneViewModel = new SceneViewModel(sceneManager.MainScene, SceneType.Main, this, this, windowService, logger, dispatcher);
         PreviewSceneViewModel = new SceneViewModel(sceneManager.PreviewScene, SceneType.Preview, this, this, windowService, logger, dispatcher);
 
         RefreshPOVsCommand = new RelayCommand(async () => { await sceneManager.RefreshScenesPOVS(); });
         RefreshOBSCommand = new RelayCommand(RefreshScenes);
-        SwitchStudioModeCommand = new RelayCommand(async () => { await OBS.SwitchStudioMode(); });
+        SwitchStudioModeCommand = new RelayCommand(async () => { await OBS.SwitchStudioModeAsync(); });
         StudioModeTransitionCommand = new RelayCommand(async () =>
         {
             if (MainSceneViewModel.SceneName!.Equals(PreviewSceneViewModel.SceneName) ||
@@ -149,6 +135,7 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
             await OBS.TransitionStudioModeAsync();
         });
         OnSceneResizeCommand = new RelayCommand<Dimension>(OnSceneResize);
+        SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);
     }
     public override void OnEnable(object? parameter)
     {
@@ -206,8 +193,11 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
     {
         MainSceneViewModel.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
         PreviewSceneViewModel.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
+        
         OnPropertyChanged(nameof(Connected));
         OnPropertyChanged(nameof(StudioMode));
+
+        OnSelectedSceneUpdated(null, StudioMode ? PreviewSceneViewModel.SceneName : MainSceneViewModel.SceneName);
     }
 
     private void OnOBSConnected(object? sender, EventArgs e)
@@ -220,43 +210,37 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
         ClearScenes();
     }
 
-    private async void OnStudioModeChanged(object? sender, EventArgs e)
+    private void OnStudioModeChanged(object? sender, EventArgs e)
     {
-        try
-        {
-            bool option = IsStudioModeSupported && OBS.StudioMode;
+        bool option = IsStudioModeSupported && OBS.StudioMode;
 
-            OnPropertyChanged(nameof(StudioMode));
+        OnPropertyChanged(nameof(StudioMode));
             
-            MainSceneViewModel.SetStudioMode(option);
-            MainSceneViewModel.UpdateItemsProportions();
+        MainSceneViewModel.SetStudioMode(option);
+        MainSceneViewModel.UpdateItemsProportions();
             
-            PreviewSceneViewModel.SetStudioMode(option);
-            PreviewSceneViewModel.UpdateItemsProportions();
+        PreviewSceneViewModel.SetStudioMode(option);
+        PreviewSceneViewModel.UpdateItemsProportions();
 
-            if (!option) return;
+        if (!option) return;
             
-            OnSelectedSceneUpdated(null, MainSceneViewModel.SceneName);
-            // PreviewSceneViewModel.Clear();
-            await _sceneManager.LoadPreviewScene(MainSceneViewModel.SceneName);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
+        OnSelectedSceneUpdated(null, MainSceneViewModel.SceneName);
+        PreviewSceneViewModel.Refresh();
     }
 
     private void OnSelectedSceneUpdated(object? sender, string sceneName)
     {
+        if (SelectedScene.Name.Equals(sceneName)) return;
+        
         for (int i = 0; i < Scenes.Count; i++)
         {
-            var current = Scenes[i];
+            SceneDto current = Scenes[i];
             if (!current.Name!.Equals(sceneName)) continue;
                 
             Dispatcher.Invoke(() =>
             {
-                _selectedScene = current;
-                OnPropertyChanged(nameof(SelectedScene));
+                _blockSetCurrentPreview = true;
+                SelectedScene = current;
             });
             break;
         }
@@ -306,6 +290,18 @@ public class SceneControllerViewModel : BaseViewModel, ISceneControllerViewModel
     public void UnSelectItems(bool clearAll = false) 
         => UnSelectTriggered?.Invoke(this, new UnSelectTriggeredEventArgs(clearAll));
 
+    private async Task OnSelectedSceneChanged(SceneDto? selectedScene, CancellationToken token)
+    {
+        if (selectedScene == null) return;
+        if (_blockSetCurrentPreview)
+        {
+            _blockSetCurrentPreview = false;
+            return;
+        }
+        
+        await OBS.SetCurrentPreviewSceneAsync(selectedScene.Name);
+    }
+    
     private void ClearScenes()
     {
         MainSceneViewModel.ClearSceneItems();

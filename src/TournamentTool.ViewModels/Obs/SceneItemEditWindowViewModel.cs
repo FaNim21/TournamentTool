@@ -3,7 +3,6 @@ using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
-using TournamentTool.Services.Obs;
 using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Obs.Items;
 

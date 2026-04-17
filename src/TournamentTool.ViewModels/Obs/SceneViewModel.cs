@@ -52,8 +52,7 @@ public class SceneViewModel : BaseViewModel
         private set => SetField(ref _canvasHeight, value);
     }
 
-    public float BaseWidth => _scene.BaseWidth;
-    public float ProportionsRatio => BaseWidth / CanvasWidth;
+    public float ProportionsRatio => _scene.BaseWidth / CanvasWidth;
 
     private bool _studioModeEnabled;
     public bool StudioModeEnabled 
@@ -66,20 +65,9 @@ public class SceneViewModel : BaseViewModel
         }
     }
 
-    private float _fontSizeSceneName;
-    public float FontSizeSceneName
-    {
-        get => _fontSizeSceneName;
-        set
-        {
-            _fontSizeSceneName = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public ICommand ClearPOVCommand { get; private set; }
-    public ICommand RefreshPOVCommand { get; private set; }
-    public ICommand ShowInfoWindowCommand { get; private set; }
+    public ICommand ClearPOVCommand { get; }
+    public ICommand RefreshPOVCommand { get; }
+    public ICommand ShowInfoWindowCommand { get; }
 
 
     public SceneViewModel(Scene scene, SceneType type, IScenePovInteractable interactable, ISceneControllerViewModel sceneControllerViewModel, IWindowService windowService, 
@@ -92,7 +80,7 @@ public class SceneViewModel : BaseViewModel
 
         Type = type;
 
-        ClearPOVCommand = new RelayCommand<PointOfViewViewModel>(async pov => { await pov.ClearAsync(true); });
+        ClearPOVCommand = new AsyncRelayCommand<PointOfViewViewModel>(async (pov, _) => { await pov!.ClearAsync(true); });
         RefreshPOVCommand = new RelayCommand<PointOfViewViewModel>(pov => { pov.RefreshCommand.Execute(null); });
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(windowService, this, dispatcher);
     }
@@ -115,17 +103,13 @@ public class SceneViewModel : BaseViewModel
         return base.OnDisable();
     }
 
-    private void OnSceneRecreated(object? sender, Scene scene)
-    {
-        //TODO: 0 resetowanie view modelu sceny
-    }
+    private void OnSceneRecreated(object? sender, Scene scene) => Refresh();
     private void OnItemsCleared(object? sender, EventArgs e) => Dispatcher.Invoke(SceneItems.Clear);
     private void OnItemAdded(object? sender, SceneItem item) => AddSceneItemAsync(item);
     private void OnItemRemoved(object? sender, SceneItem item) => RemoveSceneItem(item);
 
     public void SetStudioMode(bool option)
     {
-        //TODO: 0 To nie dziala przez to, ze w momencie juz wywolania tego studio mode enabled jest juz zmienione przez scene manager
         if (option && !StudioModeEnabled)
         {
             CanvasWidth /= _studioFactor;
@@ -147,11 +131,11 @@ public class SceneViewModel : BaseViewModel
         if (string.IsNullOrEmpty(sceneName) && string.IsNullOrEmpty(sceneUuid)) return;
         if (SceneName.Equals(sceneName) && SceneUuid.Equals(sceneUuid) && !force) return;
 
-        if (!SceneName.Equals(sceneName))
+        if (!SceneName.Equals(sceneName) || force)
         {
             OnPropertyChanged(nameof(SceneName));
         }
-        if (!SceneUuid.Equals(sceneUuid))
+        if (!SceneUuid.Equals(sceneUuid) || force)
         {
             OnPropertyChanged(nameof(SceneUuid));
         }
@@ -185,6 +169,14 @@ public class SceneViewModel : BaseViewModel
         }, CustomDispatcherPriority.Background);
     }
 
+    public async Task NewSceneAsync(string sceneName, string sceneUuid, bool force = false)
+    {
+        if (SceneUuid.Equals(sceneUuid)) return;
+        
+        await _scene.SetSceneItemsAsync(sceneName, sceneUuid, force);
+        Refresh();
+    }
+    
     public void Refresh()
     {
         SetSceneItems(SceneName!, SceneUuid, true);

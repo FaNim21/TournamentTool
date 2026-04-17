@@ -2,11 +2,8 @@
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Presentation.Obs;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
-using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Obs;
-using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.ViewModels.Factories;
 
@@ -17,7 +14,6 @@ public interface ISceneControllerViewModelFactory
 
 public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
 {
-    private readonly ITournamentPlayerRepository _playerRepository;
     private readonly IObsController _obs;
     private readonly ILoggingService _logger;
     private readonly ISettingsProvider _settingsProvider;
@@ -26,11 +22,9 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
     private readonly ISceneManager _sceneManager;
 
 
-    public SceneControllerViewModelFactory(ITournamentPlayerRepository playerRepository, IObsController obs, 
-        ILoggingService logger, ISettingsProvider settingsProvider, IDispatcherService dispatcher, IWindowService windowService,
-        ISceneManager sceneManager)
+    public SceneControllerViewModelFactory(IObsController obs, ILoggingService logger, ISettingsProvider settingsProvider, 
+        IDispatcherService dispatcher, IWindowService windowService, ISceneManager sceneManager)
     {
-        _playerRepository = playerRepository;
         _obs = obs;
         _logger = logger;
         _settingsProvider = settingsProvider;
@@ -43,7 +37,12 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
     // in edit mode bool
     public SceneControllerViewModel Create(bool inEditMode = true, bool isStudioModeSupported = true)
     {
-        return new SceneControllerViewModel(_obs, _logger, _settingsProvider, _dispatcher, _windowService, _sceneManager, inEditMode, 
-            isStudioModeSupported);
+        if (inEditMode)
+        {
+            //To by musialabyc klasa, ktora sluzy do edycji wszystkich danych z obs'a, bez ingerencji 
+            
+        }
+        
+        return new SceneControllerViewModel(_obs, _logger, _settingsProvider, _dispatcher, _windowService, _sceneManager, inEditMode, isStudioModeSupported);
     }
 }

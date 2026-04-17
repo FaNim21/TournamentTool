@@ -4,11 +4,8 @@ public class RelayCommand : BaseCommand
 {
     private readonly Action _execute;
 
-    public RelayCommand(Action execute)
-    {
-        _execute = execute;
-    }
-    public RelayCommand(Action execute, Func<bool> canExecute) : base(_ => canExecute())
+    public RelayCommand(Action execute, Func<bool>? canExecute = null) 
+        : base(_ => canExecute?.Invoke() ?? true)
     {
         _execute = execute;
     }
@@ -23,31 +20,22 @@ public class RelayCommand<T> : BaseCommand
 {
     private readonly Action<T> _execute;
 
-    public RelayCommand(Action<T> execute)
+    public RelayCommand(Action<T> execute, Func<T?, bool>? canExecute = null) 
+        : base(p => canExecute?.Invoke((T?)p) ?? true)
     {
         _execute = execute;
     }
-    public RelayCommand(Action<T> execute, Func<T?, bool> canExecute) : base(p => canExecute((T?)p))
-    {
-        _execute = execute;
-    }
-    
+
     public override bool CanExecute(object? parameter)
     {
         if (!base.CanExecute(parameter)) return false;
 
-        return parameter is T || (parameter == null && default(T) == null);
+        return parameter is T or null;
     }
 
     public override void Execute(object? parameter)
     {
-        if (parameter is T value)
-        {
-            _execute(value);
-        }
-        else if (parameter is null && default(T) is null)
-        {
-            _execute(default!);
-        }
+        T value = parameter is T t ? t : default!;
+        _execute(value);
     }
 }

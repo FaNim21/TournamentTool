@@ -3,7 +3,6 @@ using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Obs;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 
@@ -31,7 +30,6 @@ public class Scene : IScene
     
     protected SceneType Type { get; set; }
 
-    //TODO: 0 Observable collection z read only wersja zeby latwiej lapac aktualizacje???????? to jest dobry pomysl
     public List<SceneItem> SceneItems { get; set; } = [];
 
     public string SceneName { get; private set; } = string.Empty;
@@ -59,12 +57,15 @@ public class Scene : IScene
         List<SceneItem> povs = other.SceneItems;
         float baseWidth = other.BaseWidth;
         string sceneName = other.SceneName;
+        string sceneUuid = other.SceneUuid;
 
         other.SceneName = SceneName;
+        other.SceneUuid = SceneUuid;
         other.SceneItems = SceneItems;
         other.BaseWidth = BaseWidth;
 
         SceneName = sceneName;
+        SceneUuid = sceneUuid;
         SceneItems = povs;
         BaseWidth = baseWidth;
         
@@ -115,7 +116,7 @@ public class Scene : IScene
         }
     }
 
-    public async Task Refresh()
+    public async Task RefreshAsync()
     {
         await SetSceneItemsAsync(SceneName!, SceneUuid, true);
     }
@@ -191,6 +192,8 @@ public class Scene : IScene
         {
             SceneItems.Clear();
         }
+        
+        ItemsCleared?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetBaseWidth(float baseWidth) => BaseWidth = baseWidth;

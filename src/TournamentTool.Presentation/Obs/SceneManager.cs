@@ -28,9 +28,6 @@ public interface ISceneManager
     ReadOnlyObservableCollection<SceneDto> Scenes { get; }
     
     Task RefreshScenesPOVS();
-    Task RefreshScenes();
-
-    Task LoadPreviewScene(string sceneName, bool isFromApi = false);
     
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
     
@@ -66,8 +63,6 @@ public class SceneManager : ISceneManager, IDisposable
     
     public bool BusyWithOBS { get; private set; }
     
-    //TODO: 0 Pamietaj na rozbicie logiki domena -> viewmodel, czyli domena to logika ogolna, dzialania komunikacji w tle, dla aktualizowania
-    // danych dla wszystkich scen bez potrzeby odpalonego SceneControllerViewModel jak wczesniej, a viewmodel to typowo logika tylko wymagana dla interakcji UI
     
     public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ILoggingService logger,
         ISettingsProvider settingsProvider)
@@ -119,11 +114,14 @@ public class SceneManager : ISceneManager, IDisposable
         _obs.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
         _obs.SceneTransitionStarted -= OnSceneTransitionStarted;
         _obs.StudioModeChanged -= OnStudioModeChanged;
+        
+        _obs.SceneCreated -= OnSceneCreated;
+        _obs.SceneRemoved -= OnSceneRemoved;
     }
     
     private async Task InitializeAsync()
     {
-        GetSceneListResponseData? sceneResponse = await _obs.GetSceneList();
+        GetSceneListResponseData? sceneResponse = await _obs.GetSceneListAsync();
         if (sceneResponse != null)
         {
             _scenes.Clear();
@@ -133,20 +131,20 @@ public class SceneManager : ISceneManager, IDisposable
             }
         }
 
-        GetVideoSettingsResponseData? settings = await _obs.GetVideoSettings();
+        GetVideoSettingsResponseData? settings = await _obs.GetVideoSettingsAsync();
         if (settings != null)
         {
             MainScene.SetBaseWidth((float)settings.BaseWidth);
             PreviewScene.SetBaseWidth((float)settings.BaseWidth);
         }
 
-        GetCurrentProgramSceneResponseData? mainScene = await _obs.GetCurrentProgramScene();
+        GetCurrentProgramSceneResponseData? mainScene = await _obs.GetCurrentProgramSceneAsync();
         if (mainScene != null)
         {
             await MainScene.SetSceneItemsAsync(mainScene.SceneName ?? string.Empty, mainScene.SceneUuid ?? string.Empty, true);
         }
         
-        await StudioModeChanged();
+        StudioModeChanged();
     }
     
     private async Task OnOBSConnectedAsync()
@@ -177,18 +175,8 @@ public class SceneManager : ISceneManager, IDisposable
             _logger.Error(ex);
         }
     }
-    private async void OnStudioModeChanged(object? sender, EventArgs e)
-    {
-        try
-        {
-            await StudioModeChanged();
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex);
-        }
-    }
-    
+    private void OnStudioModeChanged(object? sender, EventArgs e) => StudioModeChanged();
+
     private async void OnSceneUpdateRequested(object? sender, SceneItemListReindexedPayload sceneItemListReindexedPayload)
     {
         try
@@ -234,14 +222,12 @@ public class SceneManager : ISceneManager, IDisposable
         SelectedSceneUpdated?.Invoke(this, PreviewScene.SceneName);
     }
     
-    private async Task StudioModeChanged()
+    private void StudioModeChanged()
     {
         bool option = _obs.StudioMode;
         if (!option) return;
         
         PreviewScene.Clear();
-        await LoadPreviewScene(MainScene.SceneName);
-        // await LoadScenesForStudioMode();
     }
     
     private async Task CurrentMainSceneChanged(string sceneName, string sceneUuid)
@@ -259,12 +245,14 @@ public class SceneManager : ISceneManager, IDisposable
         if (sceneName.Equals(MainScene.SceneName))
         {
             PreviewScene.Clear();
+            SelectedSceneUpdated?.Invoke(this, MainScene.SceneName);
             return;
         }
+        
         _logger.Log("Loading Preview scene: " + sceneName);
         
         await PreviewScene.SetSceneItemsAsync(sceneName, sceneUuid);
-        await LoadPreviewScene(sceneName, true);
+        SelectedSceneUpdated?.Invoke(this, PreviewScene.SceneName);
     }
     
     private async Task UpdateSceneItems(string sceneName, string sceneUuid)
@@ -278,18 +266,6 @@ public class SceneManager : ISceneManager, IDisposable
         await PreviewScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
     }
     
-    public async Task LoadPreviewScene(string sceneName, bool isFromApi = false)
-    {
-        if(!_obs.IsConnectedToWebSocket || string.IsNullOrEmpty(sceneName)) return;
-        _logger.Log($"loading preview - {sceneName}");
-
-        //TODO: 0 tu trzeba zrobic ladowanie sceny w obsie z poziomu tt
-        /*UpdateSelectedScene(sceneName);
-
-        if (isFromApi || SelectedScene.Equals(PreviewScene.SceneName)) return;
-        await _obs.SetCurrentPreviewScene(SelectedScene);*/
-    }
-    
     public async Task RefreshScenesPOVS()
     {
         if (BusyWithOBS) return;
@@ -297,17 +273,6 @@ public class SceneManager : ISceneManager, IDisposable
         
         await MainScene.RefreshItems();
         await PreviewScene.RefreshItems();
-        BusyWithOBS = false;
-    }
-    public async Task RefreshScenes()
-    {
-        if (!_obs.IsConnectedToWebSocket || BusyWithOBS) return;
-        BusyWithOBS = true;
-        
-        ClearPlayersFromPovs();
-        
-        await MainScene.Refresh();
-        await PreviewScene.Refresh();
         BusyWithOBS = false;
     }
 
@@ -335,12 +300,11 @@ public class SceneManager : ISceneManager, IDisposable
     public async Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid)
     {
         List<(SceneItemStub, SceneItemStub?)> items = [];
-
         if (string.IsNullOrEmpty(sceneUuid)) return items;
         
         try
         {
-            List<SceneItemStub> sceneItems = await _obs.GetSceneItemList(sceneName, sceneUuid);
+            List<SceneItemStub> sceneItems = await _obs.GetSceneItemListAsync(sceneName, sceneUuid);
 
             foreach (SceneItemStub item in sceneItems)
             {
@@ -351,7 +315,7 @@ public class SceneManager : ISceneManager, IDisposable
                 string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
                 {
-                    List<SceneItemStub> groupItems = item.IsGroup == true ? await _obs.GetGroupSceneItemList(item.SourceName!) : [];
+                    List<SceneItemStub> groupItems = item.IsGroup == true ? await _obs.GetGroupSceneItemListAsync(item.SourceName!) : [];
                     foreach (SceneItemStub groupItem in groupItems)
                     {
                         if (groupItem.ExtensionData == null) continue;

@@ -69,7 +69,7 @@ public class ApplicationLifetime : IApplicationLifetime
         
         _inputController.HotkeyPressed += HandleGeneralHotkeys;
         
-        Task.Run(_obsController.Connect);
+        Task.Run(_obsController.ConnectAsync);
     }
 
     public void OnExit()

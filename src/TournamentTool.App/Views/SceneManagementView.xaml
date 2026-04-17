@@ -78,10 +78,18 @@
                              VirtualizingStackPanel.IsVirtualizing="True"
                              VirtualizingStackPanel.VirtualizationMode="Recycling"
                              VirtualizingStackPanel.ScrollUnit="Pixel">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding SceneController.SelectedSceneChangedCommand}"
+                                                       CommandParameter="{Binding SelectedScene}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers> 
+                        
                         <i:Interaction.Behaviors>
                             <behaviors:CollectionViewBehavior Source="{Binding Scenes}"
                                                               RefreshTrigger="{Binding SceneRefreshTrigger}" />
                         </i:Interaction.Behaviors>
+                        
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type domain:SceneDto}">
                                 <Border BorderBrush="Transparent"

@@ -84,11 +84,11 @@ public class OBSStatusViewModel : StatusItemViewModel
     private async Task ConnectOBS()
     {
         if (_currentState == ConnectionState.Connected) return;
-        await _obsController.Connect();    
+        await _obsController.ConnectAsync();    
     }
     private async Task DisconnectOBS()
     {
         if (_currentState == ConnectionState.Disconnected) return;
-        await _obsController.Disconnect();
+        await _obsController.DisconnectAsync();
     }
 }
