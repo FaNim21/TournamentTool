@@ -32,7 +32,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     private readonly IBackgroundCoordinator _backgroundCoordinator;
     public ILoggingService Logger { get; }
     
-    public SceneControllerViewModel SceneController { get; }
+    public SceneRuntimeViewModel SceneRuntime { get; }
     public ControllerServiceHub ServiceHub { get; }
 
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => _playerRepository.Players;
@@ -44,7 +44,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         set
         {
             _playerViewRefreshTrigger = value;
-            OnPropertyChanged(nameof(PlayerViewRefreshTrigger));
+            OnPropertyChanged();
         }
     }
 
@@ -57,9 +57,9 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         get => _currentChosenPlayer;
         set
         {
-            SceneController.CurrentChosenPlayer = value;
+            SceneRuntime.CurrentChosenPlayer = value;
             _currentChosenPlayer = value;
-            OnPropertyChanged(nameof(CurrentChosenPlayer));
+            OnPropertyChanged();
         }
     }
 
@@ -73,7 +73,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
             ClearSelectedWhitelistPlayer();
 
             _selectedWhitelistPlayer = value;
-            OnPropertyChanged(nameof(SelectedWhitelistPlayer));
+            OnPropertyChanged();
 
             SetPovAfterClickedCanvas(value!);
         }
@@ -81,8 +81,8 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public PointOfViewViewModel? CurrentChosenPOV
     {
-        get => SceneController.CurrentChosenPOV;
-        set => SceneController.CurrentChosenPOV = value;
+        get => SceneRuntime.CurrentChosenPOV;
+        set => SceneRuntime.CurrentChosenPOV = value;
     }
 
     private string _searchText = string.Empty;
@@ -93,7 +93,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         {
             _searchText = value;
             RefreshFilteredCollection();
-            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged();
         }
     }
 
@@ -104,7 +104,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         set
         {
             _useSidePanel = value;
-            OnPropertyChanged(nameof(UseSidePanel));
+            OnPropertyChanged();
         }
     }
 
@@ -115,7 +115,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         set
         {
             _twitchUpdateProgressText = value;
-            OnPropertyChanged(nameof(TwitchUpdateProgressText));
+            OnPropertyChanged();
         }
     }
 
@@ -126,7 +126,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         set
         {
             _isTwitchAPIConnect = value;
-            OnPropertyChanged(nameof(IsTwitchAPIConnect));
+            OnPropertyChanged();
         }
     }
 
@@ -145,7 +145,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
 
-        SceneController = sceneControllerFactory.Create(false);
+        SceneRuntime = sceneControllerFactory.CreateRuntime();
         ServiceHub = new ControllerServiceHub(this, twitch, logger, playerRepository);
 
         UnSelectItemsCommand = new RelayCommand(() => { UnSelectItems(true); });
@@ -157,7 +157,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     } 
     public override void OnEnable(object? parameter)
     {
-        SceneController.UnSelectTriggered += OnUnSelectTriggered;
+        SceneRuntime.UnSelectTriggered += OnUnSelectTriggered;
         
         switch(_tournamentState.CurrentPreset.ControllerMode)
         {
@@ -194,7 +194,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         
         SidePanel?.OnEnable(null);
         ManagementPanel?.OnEnable(null);
-        SceneController.OnEnable(null);
+        SceneRuntime.OnEnable(null);
         ServiceHub.OnEnable();
         
         _backgroundCoordinator.Register(this);
@@ -203,7 +203,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     }
     public override bool OnDisable()
     {
-        SceneController.UnSelectTriggered -= OnUnSelectTriggered;
+        SceneRuntime.UnSelectTriggered -= OnUnSelectTriggered;
         
         _backgroundCoordinator.Unregister(SidePanel);
         _backgroundCoordinator.Unregister(this);
@@ -211,7 +211,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         
         SidePanel?.OnDisable();
         ManagementPanel?.OnDisable();
-        SceneController.OnDisable();
+        SceneRuntime.OnDisable();
         ServiceHub.OnDisable();
 
         for (int i = 0; i < Players.Count; i++)
@@ -234,7 +234,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         switch (actionType)
         {
             case HotkeyActionType.Controller_ToggleStudioMode: 
-                SceneController.SwitchStudioModeCommand.Execute(null);
+                SceneRuntime.SwitchStudioModeCommand.Execute(null);
                 break;
             //...
         }
@@ -268,15 +268,15 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
         if (CurrentChosenPOV == null || CurrentChosenPlayer == null) return;
 
         bool isPlayerInPOV = CurrentChosenPOV.Type == SceneType.Main
-            ? SceneController.MainSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
+            ? SceneRuntime.MainSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
                 p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo))
-            : SceneController.PreviewSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
+            : SceneRuntime.PreviewSceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
                 p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
         if (isPlayerInPOV)
         {
             PointOfViewViewModel? pov = CurrentChosenPOV.Type == SceneType.Main 
-                ? SceneController.MainSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo)) 
-                : SceneController.PreviewSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
+                ? SceneRuntime.MainSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo)) 
+                : SceneRuntime.PreviewSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
             if (pov == null) return;
             
             CurrentChosenPOV!.SwapAsync(pov);

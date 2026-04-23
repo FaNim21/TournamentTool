@@ -21,7 +21,7 @@ public class SceneManagementViewModel : SelectableViewModel
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
 
-    public SceneControllerViewModel SceneController { get; }
+    public SceneEditorViewModel SceneEditor { get; }
 
     public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
 
@@ -58,7 +58,7 @@ public class SceneManagementViewModel : SelectableViewModel
         set
         {
             _sceneDimension = value;
-            SceneController.ResizeScene(value);
+            SceneEditor.ResizeScene(value);
         }
     }
 
@@ -116,26 +116,26 @@ public class SceneManagementViewModel : SelectableViewModel
 
         _appCache = settingsProvider.Get<AppCache>();
 
-        SceneController = sceneControllerFactory.Create(isStudioModeSupported: false);
-        Scenes = SceneController.Scenes;
+        SceneEditor = sceneControllerFactory.CreateEditor();
+        Scenes = SceneEditor.Scenes;
         
         //TODO: 0 Przechwytywac eventy z OBS'a
 
         EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
-        SceneController.SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);
+        SceneEditor.SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);
     }
     public override void OnEnable(object? parameter)
     {
-        SceneController.OnEnable(null);
+        SceneEditor.OnEnable(null);
 
-        if (string.IsNullOrEmpty(SceneController.MainSceneViewModel.SceneUuid)) return;
+        if (string.IsNullOrEmpty(SceneEditor.MainSceneViewModel.SceneUuid)) return;
         
-        _selectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneController.MainSceneViewModel.SceneUuid));
+        _selectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneEditor.MainSceneViewModel.SceneUuid));
         OnPropertyChanged(nameof(SelectedScene));
     }
     public override bool OnDisable()
     {
-        SceneController.OnDisable();
+        SceneEditor.OnDisable();
         
         return true;
     }
@@ -150,19 +150,20 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         SceneItemConfiguration config = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
         
+        //TODO: 0 Trzeba uwzglednic aktualizacje BindingEngine
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
         
-        SceneController.MainSceneViewModel.Refresh();
+        SceneEditor.MainSceneViewModel.Refresh();
     }
     
     private async Task OnSelectedSceneChanged(SceneDto? selectedScene, CancellationToken token)
     {
         if (selectedScene == null) return;
         
-        //TODO: 0 problem tutaj jest taki, ze trzeba uwazac tutaj na to, ze jest razem z tym modyfikowana scena w glownym scene manager
+        //TODO: 0 problem tutaj jest taki, ze trzeba uwazac na to, ze jest razem z tym modyfikowana scena w glownym scene manager
         // a tez nie wiem czy chce zeby ona byla tutaj celem do edycji, jezeli sobie dziala w tle pod bindingi itp itd
         // ale w teorii wszystkie sceny sa lapane do aktualizacji i trzeba sprawdzic, czy to trzymanie glownej sceny cos w sumie zmienia
         // bo niby mialo byc do dynamicznej aktualizacji
-        await SceneController.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
+        await SceneEditor.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
+using TournamentTool.Core.Common.OBS;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
@@ -16,7 +17,7 @@ public class PointOfViewViewModel<T> : BrowserItemViewModel<T> where T : PointOf
         : base(sceneItem, dispatcher, logger) { }
 }
 
-public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>
+public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappable<PointOfViewViewModel>
 {
     public SceneType Type => _sceneItem.Type;
 

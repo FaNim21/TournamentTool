@@ -41,7 +41,7 @@
                     <behaviors:ActualSizeBehavior Dimension="{Binding SceneDimension, Mode=OneWayToSource, BindsDirectlyToSource=True}" />
                 </i:Interaction.Behaviors>
 
-                <components:SceneCanvas DataContext="{Binding SceneController.MainSceneViewModel}" />
+                <components:SceneCanvas DataContext="{Binding SceneEditor.MainSceneViewModel}" />
             </Grid>
 
             <Grid Grid.Row="1">
@@ -80,7 +80,7 @@
                              VirtualizingStackPanel.ScrollUnit="Pixel">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
-                                <i:InvokeCommandAction Command="{Binding SceneController.SelectedSceneChangedCommand}"
+                                <i:InvokeCommandAction Command="{Binding SceneEditor.SelectedSceneChangedCommand}"
                                                        CommandParameter="{Binding SelectedScene}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers> 
@@ -129,7 +129,7 @@
                          VirtualizingStackPanel.VirtualizationMode="Recycling"
                          VirtualizingStackPanel.ScrollUnit="Pixel">
                     <i:Interaction.Behaviors>
-                        <behaviors:CollectionViewBehavior Source="{Binding SceneController.MainSceneViewModel.SceneItems}"
+                        <behaviors:CollectionViewBehavior Source="{Binding SceneEditor.MainSceneViewModel.SceneItems}"
                                                           RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
                     </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>

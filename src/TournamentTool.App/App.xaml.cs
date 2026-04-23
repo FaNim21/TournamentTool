@@ -71,7 +71,7 @@ public partial class App : Application
         //View model factories
         services.AddSingleton<IPlayerViewModelFactory, PlayerViewModelFactory>();
         services.AddSingleton<IPopupViewModelFactory, PopupViewModelFactory>();
-        services.AddSingleton<ISceneControllerViewModelFactory, SceneControllerViewModelFactory>();
+        services.AddSingleton<ISceneControllerViewModelFactory, SceneCanvasViewModelFactory>();
         
         //Http access services
         services.AddSingleton<IMinecraftDataService, MinecraftDataService>();

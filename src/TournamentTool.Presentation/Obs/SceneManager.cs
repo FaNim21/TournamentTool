@@ -27,7 +27,7 @@ public interface ISceneManager
     
     ReadOnlyObservableCollection<SceneDto> Scenes { get; }
     
-    Task RefreshScenesPOVS();
+    Task RefreshScenesPOVSAsync();
     
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
     
@@ -266,7 +266,7 @@ public class SceneManager : ISceneManager, IDisposable
         await PreviewScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
     }
     
-    public async Task RefreshScenesPOVS()
+    public async Task RefreshScenesPOVSAsync()
     {
         if (BusyWithOBS) return;
         BusyWithOBS = true;

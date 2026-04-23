@@ -19,10 +19,10 @@ public class SceneViewModel : BaseViewModel
     private readonly Lock _lock = new();
     protected SceneType Type { get; set; }
 
-    public IScenePovInteractable Interactable { get; }
-    public ISceneControllerViewModel SceneControllerViewModel { get; }
-    
+    public IScenePovInteractable? Interactable { get; }
     protected ILoggingService Logger { get; }
+
+    private bool InEditMode { get; }
 
     private ObservableCollection<SceneItemViewModel> _sceneItems = [];
     public ObservableCollection<SceneItemViewModel> SceneItems
@@ -70,13 +70,15 @@ public class SceneViewModel : BaseViewModel
     public ICommand ShowInfoWindowCommand { get; }
 
 
-    public SceneViewModel(Scene scene, SceneType type, IScenePovInteractable interactable, ISceneControllerViewModel sceneControllerViewModel, IWindowService windowService, 
+    public static SceneViewModel Empty() 
+        => new(null!, SceneType.Main, false, null, null!, null!, null!);
+    public SceneViewModel(Scene scene, SceneType type, bool inEditMode, IScenePovInteractable? interactable, IWindowService windowService, 
         ILoggingService logger, IDispatcherService dispatcher) : base(dispatcher)
     {
         _scene = scene;
         Interactable = interactable;
-        SceneControllerViewModel = sceneControllerViewModel;
         Logger = logger;
+        InEditMode = inEditMode;
 
         Type = type;
 
@@ -201,9 +203,9 @@ public class SceneViewModel : BaseViewModel
         
         if (sceneItem == null) return null;
 
-        bool isDisplayed = !(!SceneControllerViewModel.InEditMode && sceneItem.InputKind != InputKind.tt_point_of_view);
+        bool isDisplayed = !(!InEditMode && sceneItem.InputKind != InputKind.tt_point_of_view);
         
-        sceneItem.Initialize(SceneControllerViewModel.InEditMode, isDisplayed);
+        sceneItem.Initialize(InEditMode, isDisplayed);
         sceneItem.Transform.UpdateProportions(ProportionsRatio);
 
         return sceneItem;

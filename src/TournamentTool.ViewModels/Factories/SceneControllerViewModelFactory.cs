@@ -7,12 +7,7 @@ using TournamentTool.ViewModels.Obs;
 
 namespace TournamentTool.ViewModels.Factories;
 
-public interface ISceneControllerViewModelFactory
-{
-    SceneControllerViewModel Create(bool inEditMode = true, bool isStudioModeSupported = true);
-}
-
-public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
+public class SceneCanvasViewModelFactory : ISceneControllerViewModelFactory
 {
     private readonly IObsController _obs;
     private readonly ILoggingService _logger;
@@ -22,7 +17,7 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
     private readonly ISceneManager _sceneManager;
 
 
-    public SceneControllerViewModelFactory(IObsController obs, ILoggingService logger, ISettingsProvider settingsProvider, 
+    public SceneCanvasViewModelFactory(IObsController obs, ILoggingService logger, ISettingsProvider settingsProvider, 
         IDispatcherService dispatcher, IWindowService windowService, ISceneManager sceneManager)
     {
         _obs = obs;
@@ -33,16 +28,25 @@ public class SceneControllerViewModelFactory : ISceneControllerViewModelFactory
         _sceneManager = sceneManager;
     }
 
+    public SceneRuntimeViewModel CreateRuntime()
+    {
+        return new SceneRuntimeViewModel(_obs, _logger, _dispatcher, _windowService, _sceneManager);
+    }
+    
+    public SceneEditorViewModel CreateEditor()
+    {
+        return new SceneEditorViewModel(_obs, _logger, _dispatcher, _windowService, _sceneManager);
+    }
+    
     //TODO: 0 Moze zrobic dwie rozne klasy z racji tego, ze logika bedzie przeniesiona do SceneController, to wtedy mozna oprzec sie na roznicy przez 
     // in edit mode bool
-    public SceneControllerViewModel Create(bool inEditMode = true, bool isStudioModeSupported = true)
+    public SceneRuntimeViewModel Create(bool inEditMode = true, bool isStudioModeSupported = true)
     {
-        if (inEditMode)
-        {
-            //To by musialabyc klasa, ktora sluzy do edycji wszystkich danych z obs'a, bez ingerencji 
-            
-        }
+        //isStudioModeSupported nie bedzie potrzebne, bo w edytowalnym opierac sie wszystko bedzie na liscie scen
         
-        return new SceneControllerViewModel(_obs, _logger, _settingsProvider, _dispatcher, _windowService, _sceneManager, inEditMode, isStudioModeSupported);
+        //To by musialabyc klasa, ktora sluzy do edycji wszystkich danych z obs'a, bez ingerencji w cos tam juz nie pamietam
+        // przeczytaj to do w OnSelectedSceneChanged in SceneManagementViewModel
+        
+        return null;
     }
 }

@@ -1,17 +1,18 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TournamentTool.Core.Common.OBS;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
-using TournamentTool.ViewModels.Selectable.Controller;
 
 namespace TournamentTool.App.Components;
 
 public partial class SceneCanvas : UserControl
 {
-    //TODO: 1 TO CALE GOWNO DAC DO BEHAVIORS
+    //TODO: 0 TO CALE GOWNO DAC DO BEHAVIORS i rozbic to na mniejsze behaviors i przeniesc logike do viewmodeli
+    //To jest okropne, bo chcialbym tutaj zrobic wchodzenie w interakcje z itemami poprzez klikanie w scene, ale 
 
     public SceneCanvas()
     {
@@ -34,19 +35,19 @@ public partial class SceneCanvas : UserControl
                 }
                 else
                 {
-                    PointOfViewViewModel? foundPov =
+                    ISwappable<PointOfViewViewModel>? foundPov =
                         scene.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
                     if (foundPov == null) return;
 
                     await foundPov.SwapAsync(pov);
                 }
             }
-            else if (e.Data.GetData(typeof(PointOfViewViewModel)) is PointOfViewViewModel dragPov)
+            else if (e.Data.GetData(typeof(PointOfViewViewModel)) is ISwappable<PointOfViewViewModel> dragPov)
             {
                 await dragPov.SwapAsync(pov);
             }
 
-            scene.Interactable.UnSelectItems(true);
+            scene.Interactable?.UnSelectItems(true);
         }
         catch (Exception ex)
         {
@@ -59,6 +60,8 @@ public partial class SceneCanvas : UserControl
         try
         {
             if (DataContext is not SceneViewModel scene) return;
+            if (scene.Interactable is null) return;
+            
             if (sender is not Border clickedBorder) return;
             if (clickedBorder!.DataContext is not PointOfViewViewModel pov) return;
 

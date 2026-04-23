@@ -138,12 +138,28 @@ public class ObsController : IObsController, IDisposable
     public async Task SwitchStudioModeAsync()
     {
         if (!IsConnectedToWebSocket) return;
-        await Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
+        
+        try
+        {
+            await Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
     public async Task TransitionStudioModeAsync()
     {
         if (!IsConnectedToWebSocket) return;
-        await Client.TriggerStudioModeTransitionAsync();
+        
+        try
+        {
+            await Client.TriggerStudioModeTransitionAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 
     private void CreateClient()
@@ -379,13 +395,29 @@ public class ObsController : IObsController, IDisposable
     {
         if (string.IsNullOrWhiteSpace(sourceUuid)) return;
         
-        JsonElement element = JsonSerializer.SerializeToElement(input);
-        await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
+        try
+        {
+            JsonElement element = JsonSerializer.SerializeToElement(input);
+            await Client.SetInputSettingsAsync(new SetInputSettingsRequestData(element, null, sourceUuid));
+        } 
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
     public async Task SetCurrentPreviewSceneAsync(string scene)
     {
+        if (!StudioMode) return;
         if (string.IsNullOrEmpty(scene)) return;
-        await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
+        
+        try
+        {
+            await Client.SetCurrentPreviewSceneAsync(new SetCurrentPreviewSceneRequestData(scene));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 
     public async Task<List<SceneItemStub>> GetSceneItemListAsync(string? sceneName = null, string? sceneUuid = null)

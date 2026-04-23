@@ -27,8 +27,6 @@ public class ListBoxUpdateBehavior : BehaviorBase<ListBox>
     }
     protected override void OnCleanup()
     {
-        base.OnCleanup();
-
         AssociatedObject.SelectionChanged -= OnSelectionChanged;
         attachedListBoxes.Remove(AssociatedObject);
     }

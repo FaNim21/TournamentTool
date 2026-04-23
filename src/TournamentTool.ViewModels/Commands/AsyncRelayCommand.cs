@@ -112,6 +112,17 @@ public class AsyncRelayCommand<T> : BaseCommand
 public class AsyncRelayCommand : AsyncRelayCommand<object?>
 {
     public AsyncRelayCommand(
+        Func<Task> execute,
+        Func<bool>? canExecute = null,
+        Func<Exception, Task>? errorHandler = null,
+        AsyncCommandConcurrencyMode concurrencyMode = AsyncCommandConcurrencyMode.Ignore)
+        : base(
+            (_, _) => execute(),
+            canExecute != null ? _ => canExecute() : null,
+            errorHandler,
+            concurrencyMode) { }
+    
+    public AsyncRelayCommand(
         Func<CancellationToken, Task> execute,
         Func<bool>? canExecute = null,
         Func<Exception, Task>? errorHandler = null,
