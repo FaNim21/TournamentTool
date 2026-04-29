@@ -18,7 +18,7 @@ public abstract class SceneItem : IBindingTarget
     public BindingKey BindingKey { get; private set; } = BindingKey.Empty();
 
     public abstract string BaseItemType { get; }
-    public InputKind InputKind { get; set; }
+    public InputKind InputKind { get; protected set; }
 
     public string GroupName { get; protected set; } = string.Empty;
     public string SourceName { get; protected set; } = string.Empty;
@@ -72,10 +72,11 @@ public abstract class SceneItem : IBindingTarget
     }
     
     public virtual Task LoadAsync() => Task.CompletedTask;
-    public virtual async Task UpdateAsync() => await SceneManager.SetItemInputSettingsAsync(SourceUUID, Inputs);
+    public virtual void Update() => SceneManager.QueueUpdate(SourceUUID, Inputs);
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
-    public virtual Task ApplyBindingValueAsync(object? value) => Task.CompletedTask;
+
+    public virtual void ApplyBindingValue(object? value) { }
     public virtual Task ClearAsync(bool fullClear = false) => Task.CompletedTask;
     
     public void SetupConfiguration(SceneItemConfiguration? configuration)

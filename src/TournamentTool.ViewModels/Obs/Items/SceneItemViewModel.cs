@@ -65,7 +65,7 @@ public abstract class SceneItemViewModel : BaseViewModel
         InEditMode = inEditMode;
     }
     
-    protected async Task UpdateAsync() => await SceneItem.UpdateAsync();
+    protected void Update() => SceneItem.Update();
 
     public virtual async Task RefreshAsync() => await SceneItem.RefreshAsync();
     public virtual async Task ClearAsync(bool fullClear = false) => await SceneItem.ClearAsync(fullClear);

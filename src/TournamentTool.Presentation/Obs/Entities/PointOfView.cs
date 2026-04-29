@@ -286,11 +286,11 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         IsPlayerUsed = true;
 
         UpdateUrl();
-        await UpdateAsync();
-        await UpdateBindingsAsync();
+        Update();
+        UpdateBindings();
     }
 
-    public async Task UpdateBindingsAsync()
+    public void UpdateBindings()
     {
         string headUrl = string.Empty;
         if (Player != null)
@@ -300,19 +300,20 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         }
         
         //TODO: 0 trzeba zrobic publish kolejke z racji aktualizacji wielu scene item na raz, dla wydajnosci trzeba zrobic grupowe aktualizowanie
-        await SceneManager.PublishAsync(keyHead, headUrl);
-        await SceneManager.PublishAsync(keyDisplayName, DisplayedPlayer);
-        await SceneManager.PublishAsync(keyIgn, Player?.InGameName ?? string.Empty);
-        await SceneManager.PublishAsync(keyPb, Player?.GetPersonalBest ?? string.Empty);
-        await SceneManager.PublishAsync(keyTeamName, Player?.TeamName ?? string.Empty);
-        await SceneManager.PublishAsync(keyStreamName, Player?.StreamDisplayInfo.Name ?? string.Empty);
-        await SceneManager.PublishAsync(keyStreamType, Player == null ? string.Empty : Player.StreamDisplayInfo.Type);
+        SceneManager.Publish(keyHead, headUrl);
+        SceneManager.Publish(keyDisplayName, DisplayedPlayer);
+        SceneManager.Publish(keyIgn, Player?.InGameName ?? string.Empty);
+        SceneManager.Publish(keyPb, Player?.GetPersonalBest ?? string.Empty);
+        SceneManager.Publish(keyTeamName, Player?.TeamName ?? string.Empty);
+        SceneManager.Publish(keyStreamName, Player?.StreamDisplayInfo.Name ?? string.Empty);
+        SceneManager.Publish(keyStreamType, Player == null ? string.Empty : Player.StreamDisplayInfo.Type);
     }
     
     public override async Task RefreshAsync()
     {
         Url = string.Empty;
-        await UpdateAsync();
+        Update();
+        //TODO: 0 Przez batch update nie zadziala odswiezanie
         
         await Task.Delay(25);
         await UpdatePOVInfoAsync();
@@ -344,7 +345,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         }
 
         await base.ClearAsync(fullClear);
-        await UpdateBindingsAsync();
+        UpdateBindings();
     }
 
     private void ClearCustomData()

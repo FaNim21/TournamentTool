@@ -92,7 +92,7 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
     {
         DefaultColor = Consts.UnFocusedPovColor;
 
-        ApplyVolumeCommand = new RelayCommand(async () => await ApplyVolume());
+        ApplyVolumeCommand = new RelayCommand(ApplyVolume);
         RefreshCommand = new RelayCommand(async () => await RefreshAsync());
 
         _sceneItem.PropertyChanged += OnModelPropertyChanged;
@@ -121,13 +121,13 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
         return await _sceneItem.SwapAsync((PointOfView)pov.SceneItem);
     }
 
-    public async Task ApplyVolume()
+    public void ApplyVolume()
     {
         Volume = NewVolume;
         IsMuted = Volume == 0;
 
         _sceneItem.UpdateUrl();
-        await UpdateAsync();
+        Update();
     }
     
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

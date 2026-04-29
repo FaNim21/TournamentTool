@@ -2,5 +2,5 @@
 
 public interface IBindingTarget
 {
-    Task ApplyBindingValueAsync(object? value);
+    void ApplyBindingValue(object? value);
 }

@@ -6,7 +6,7 @@ namespace TournamentTool.Services.Obs;
 
 public class ObsUpdateBatcher : IObsUpdateBatcher
 {
-    private const int _UPDATE_DEBOUNCE_TIME = 500;
+    private const int _UPDATE_DEBOUNCE_TIME = 250;
     
     private readonly IObsController _obsController;
     private readonly ILoggingService _logger;

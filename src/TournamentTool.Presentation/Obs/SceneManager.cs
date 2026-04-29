@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
+using ObsWebSocket.Core.Protocol.Requests;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
@@ -29,6 +31,7 @@ public interface ISceneManager
     
     Task RefreshScenesPOVSAsync();
     
+    void QueueUpdate(string sourceUuid, Dictionary<string, object> input);
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
     
     Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid);
@@ -36,7 +39,7 @@ public interface ISceneManager
 
     void RegisterTarget(BindingKey key, IBindingTarget target);
     void UnregisterTarget(BindingKey key, IBindingTarget target);
-    Task PublishAsync(BindingKey key, object value);
+    void Publish(BindingKey key, object value);
 
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     string GetHeadURL(string id, int size);
@@ -51,6 +54,7 @@ public class SceneManager : ISceneManager, IDisposable
     private readonly IBindingEngine _bindingEngine;
     private readonly ILoggingService _logger;
     private readonly IDispatcherService _dispatcher;
+    private readonly IObsUpdateBatcher _obsUpdateBatcher;
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
@@ -67,13 +71,14 @@ public class SceneManager : ISceneManager, IDisposable
     
     
     public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ILoggingService logger,
-        ISettingsProvider settingsProvider, IDispatcherService dispatcher)
+        ISettingsProvider settingsProvider, IDispatcherService dispatcher, IObsUpdateBatcher obsUpdateBatcher)
     {
         _obs = obs;
         _playerRepository = playerRepository;
         _bindingEngine = bindingEngine;
         _logger = logger;
         _dispatcher = dispatcher;
+        _obsUpdateBatcher = obsUpdateBatcher;
 
         Scenes = new ReadOnlyObservableCollection<SceneDto>(_scenes);
         
@@ -283,6 +288,12 @@ public class SceneManager : ISceneManager, IDisposable
         BusyWithOBS = false;
     }
 
+    public void QueueUpdate(string sourceUuid, Dictionary<string, object> input)
+    {
+        JsonElement element = JsonSerializer.SerializeToElement(input);
+        _obsUpdateBatcher.Queue(new SetInputSettingsRequestData(element, null, sourceUuid));
+    }
+
     public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
         => await _obs.SetItemInputSettingsAsync(sourceUuid, input);
     public async Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid)
@@ -291,10 +302,10 @@ public class SceneManager : ISceneManager, IDisposable
     public void RegisterTarget(BindingKey key, IBindingTarget target)
         => _bindingEngine.RegisterTarget(key, target);
     public void UnregisterTarget(BindingKey key, IBindingTarget target)
-        => _bindingEngine.UnregisterTarget(key, target);
+        => _bindingEngine.RemoveTarget(key, target);
 
-    public async Task PublishAsync(BindingKey key, object value) 
-        => await _bindingEngine.PublishAsync(key, value);
+    public void Publish(BindingKey key, object value) 
+        => _bindingEngine.Publish(key, value);
     
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
         => _playerRepository.GetPlayerByStreamName(name, type);

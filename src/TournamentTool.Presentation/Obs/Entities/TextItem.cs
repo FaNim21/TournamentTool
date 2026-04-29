@@ -12,24 +12,24 @@ public class TextItem : SceneItem
     public TextItem(ISceneManager sceneManager, ILoggingService logger) : 
         base(sceneManager, logger) { }
     
-    public override async Task ApplyBindingValueAsync(object? value)
+    public override void ApplyBindingValue(object? value)
     {
         Text = value?.ToString() ?? string.Empty;
         
-        await UpdateAsync();
+        Update();
     }
     
-    public override async Task UpdateAsync()
+    public override void Update()
     {
         Inputs["text"] = Text;
         
-        await base.UpdateAsync();
+        base.Update();
     }
 
     public override async Task ClearAsync(bool fullClear = false)
     {
         Text = string.Empty;
-        await UpdateAsync();
+        Update();
         
         await base.ClearAsync(fullClear);
     }

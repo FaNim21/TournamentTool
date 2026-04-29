@@ -40,7 +40,8 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
     {
         foreach (KeyValuePair<string, SceneItemConfiguration> config in _appCache.SceneItemConfigs)
         {
-            _bindingEngine.UpsertItem(config.Key, config.Value.BindingKey);
+            _bindingEngine.GetOrCreateNode(config.Value.BindingKey);
+            // _bindingEngine.UpsertItem(config.Key, config.Value.BindingKey);
         }
         
         //TODO: 0 Ladowac wszystkie configi z appcache do binding engine

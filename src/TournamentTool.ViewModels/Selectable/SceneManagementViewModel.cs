@@ -152,11 +152,9 @@ public class SceneManagementViewModel : SelectableViewModel
         // _bindingEngine.UpsertItem(config.Key, config.Value.BindingKey); // Tez trzeba resetowac binding.UpsertItem z BindingSchemaInitializer
         _appCache.SceneItemConfigs[editWindowViewModel.SceneItemViewModel.SourceUUID] = config;
         
-        //TODO: 0 To nie koniecznie moze miec sens, poniewaz trzeba ogarnac to zeby nie bylo duplikatow
-        // i tez tylko z glownego scene managera byly dane w bindingu, takze tez wtedy tutaj najlepiej bylo by od razu update'owac
-        // oryginalnie odpalone sceny zeby zmiany wchodzily live
-        
-        //TODO: 0 To pozniej, bo w sumie
+        //TODO: 0 Dziala baza teraz trzeba zrobic aktualizowanie binding node przy aktualizowaniu binding
+        // - czyli najpierw idzie update binding node
+        // - nastepnie update targetu zeby usunac go ze starego node'a i dodac do nowego z racji ze po to byl on aktualizowane
         //SceneEditor.UpdateBinding(BindingKey.Empty(), string.Empty);
         
         editWindowViewModel.SceneItemViewModel.SceneItem.UpdateBinding(editWindowViewModel.BindingKey);
@@ -167,10 +165,6 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         if (selectedScene == null) return;
         
-        //TODO: 0 problem tutaj jest taki, ze trzeba uwazac na to, ze jest razem z tym modyfikowana scena w glownym scene manager
-        // a tez nie wiem czy chce zeby ona byla tutaj celem do edycji, jezeli sobie dziala w tle pod bindingi itp itd
-        // ale w teorii wszystkie sceny sa lapane do aktualizacji i trzeba sprawdzic, czy to trzymanie glownej sceny cos w sumie zmienia
-        // bo niby mialo byc do dynamicznej aktualizacji
         await SceneEditor.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
     }
 }
