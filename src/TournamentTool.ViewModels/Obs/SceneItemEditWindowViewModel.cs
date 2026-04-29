@@ -13,7 +13,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
     private readonly IBindingEngine _bindingEngine;
     private readonly AppCache _appCache;
 
-    public SceneItemViewModel SceneItem { get; }
+    public SceneItemViewModel SceneItemViewModel { get; }
 
     private InputKind _inputKind = InputKind.unsupported;
     public InputKind InputKind
@@ -118,18 +118,18 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
     
     //TODO: 0 Pomysl jest taki zeby name bylo comboboxem, bo mozna sie uprzec i raz na odpalenie edycji pobrac wszystkie nazwy niby
 
-    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItem, IBindingEngine bindingEngine, AppCache appCache, 
+    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, IBindingEngine bindingEngine, AppCache appCache, 
         IDispatcherService dispatcher) : base(dispatcher)
     {
         _bindingEngine = bindingEngine;
         _appCache = appCache;
-        SceneItem = sceneItem;
-        InputKind = SceneItem.InputKind;
+        SceneItemViewModel = sceneItemViewModel;
+        InputKind = SceneItemViewModel.InputKind;
 
         Schemas = bindingEngine.AvailableSchemas;
         Sources = new ObservableCollection<string>(Schemas.Select(s => s.Source).Distinct());
         
-        appCache.SceneItemConfigs.TryGetValue(SceneItem.SourceUUID, out SceneItemConfiguration? config);
+        appCache.SceneItemConfigs.TryGetValue(SceneItemViewModel.SourceUUID, out SceneItemConfiguration? config);
         Initialize(config);
     }
     public override void Dispose()

@@ -126,6 +126,7 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
         Volume = NewVolume;
         IsMuted = Volume == 0;
 
+        _sceneItem.UpdateUrl();
         await UpdateAsync();
     }
     

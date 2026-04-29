@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using ObsWebSocket.Core;
 using ObsWebSocket.Core.Events;
 using ObsWebSocket.Core.Events.Generated;
+using ObsWebSocket.Core.Protocol;
 using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Generated;
@@ -60,6 +61,8 @@ public interface IObsController
     Task<GetVideoSettingsResponseData?> GetVideoSettingsAsync();
     Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramSceneAsync();
     Task<GetSceneListResponseData?> GetSceneListAsync();
+    
+    Task CallBatchAsync(IEnumerable<BatchRequestItem> requests);
 
     Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
     Task SetCurrentPreviewSceneAsync(string scene);
@@ -391,6 +394,9 @@ public class ObsController : IObsController, IDisposable
     public async Task<GetSceneListResponseData?> GetSceneListAsync() 
         => await Client.GetSceneListAsync();
     
+    public async Task CallBatchAsync(IEnumerable<BatchRequestItem> requests) 
+        => await Client.CallBatchAsync(requests);
+
     public async Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input)
     {
         if (string.IsNullOrWhiteSpace(sourceUuid)) return;

@@ -239,7 +239,7 @@
                                Padding="0">
 
                         <Run Text="Scene item name: " />
-                        <Run Text="{Binding SceneItem.SourceName, Mode=OneWay}"
+                        <Run Text="{Binding SceneItemViewModel.SourceName, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
                     
@@ -253,7 +253,7 @@
                                Padding="0">
 
                         <Run Text="Group name: " />
-                        <Run Text="{Binding SceneItem.GroupName, Mode=OneWay}"
+                        <Run Text="{Binding SceneItemViewModel.GroupName, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
 
@@ -267,7 +267,7 @@
                                Padding="0">
 
                         <Run Text="Base type: " />
-                        <Run Text="{Binding SceneItem.BaseItemType, Mode=OneWay}"
+                        <Run Text="{Binding SceneItemViewModel.BaseItemType, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
                     
@@ -281,13 +281,13 @@
                                Padding="0">
 
                         <Run Text="Custom type: " />
-                        <Run Text="{Binding SceneItem.InputKind, Mode=OneWay}"
+                        <Run Text="{Binding SceneItemViewModel.InputKind, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
                 </StackPanel>
 
                 <Grid Grid.Column="1">
-                    <ContentControl Content="{Binding SceneItem}" />
+                    <ContentControl Content="{Binding SceneItemViewModel}" />
                 </Grid>
             </Grid>
         </Grid>

@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
@@ -150,9 +149,17 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         SceneItemConfiguration config = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
         
-        //TODO: 0 Trzeba uwzglednic aktualizacje BindingEngine
-        _appCache.SceneItemConfigs[editWindowViewModel.SceneItem.SourceUUID] = config;
+        // _bindingEngine.UpsertItem(config.Key, config.Value.BindingKey); // Tez trzeba resetowac binding.UpsertItem z BindingSchemaInitializer
+        _appCache.SceneItemConfigs[editWindowViewModel.SceneItemViewModel.SourceUUID] = config;
         
+        //TODO: 0 To nie koniecznie moze miec sens, poniewaz trzeba ogarnac to zeby nie bylo duplikatow
+        // i tez tylko z glownego scene managera byly dane w bindingu, takze tez wtedy tutaj najlepiej bylo by od razu update'owac
+        // oryginalnie odpalone sceny zeby zmiany wchodzily live
+        
+        //TODO: 0 To pozniej, bo w sumie
+        //SceneEditor.UpdateBinding(BindingKey.Empty(), string.Empty);
+        
+        editWindowViewModel.SceneItemViewModel.SceneItem.UpdateBinding(editWindowViewModel.BindingKey);
         SceneEditor.MainSceneViewModel.Refresh();
     }
     

@@ -17,6 +17,8 @@ public interface IScene
     string SceneName { get; }
     string SceneUuid { get; }
 
+    bool IsReadonly { get; }
+
     bool ExistInItems<T>(Func<T, bool> condition) where T : SceneItem;
     T? GetItem<T>(Func<T, bool> condition) where T : SceneItem;
 }
@@ -35,7 +37,9 @@ public class Scene : IScene
     public string SceneName { get; private set; } = string.Empty;
     public string SceneUuid { get; private set; } = string.Empty;
 
-    public float BaseWidth {  get; set; } 
+    public float BaseWidth { get; set; }
+
+    public bool IsReadonly { get; init; }
 
     public event EventHandler<SceneItem>? ItemAdded;
     public event EventHandler<SceneItem>? ItemRemoved;
@@ -51,7 +55,21 @@ public class Scene : IScene
 
         Type = type;
     }
+    
+    public Scene Clone()
+    {
+        Scene clonedScene = new(_sceneManager, _logger, _appCache, Type)
+        {
+            SceneItems = [..SceneItems],
+            SceneName = SceneName,
+            SceneUuid = SceneUuid,
+            BaseWidth = BaseWidth,
+            IsReadonly = true
+        };
 
+        return clonedScene;
+    }
+    
     public void Swap(Scene other)
     {
         List<SceneItem> povs = other.SceneItems;
@@ -151,10 +169,7 @@ public class Scene : IScene
 
         if (sceneItem == null) return null;
 
-        sceneItem.Initialize(this, item, group);
-
-        SetupConfiguration(sceneItem, config);
-        _sceneManager.RegisterBinding(sceneItem);
+        sceneItem.Initialize(this, item, group, config);
 
         return sceneItem;
     }
@@ -207,14 +222,6 @@ public class Scene : IScene
         if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;
 
         sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(configuration.InputKind.ToString());
-    }
-    private void SetupConfiguration(SceneItem sceneItem, SceneItemConfiguration? configuration)
-    {
-        if (string.IsNullOrEmpty(sceneItem.SourceUUID)) return;
-        if (configuration == null) return;
-
-        sceneItem.BindingKey = configuration.BindingKey;
-        sceneItem.InputKind = configuration.InputKind;
     }
     
     public void Clear()

@@ -34,7 +34,7 @@ public class SceneRuntimeViewModel : SceneCanvasViewModel, IScenePovInteractable
     {
         IsStudioModeSupported = isStudioModeSupported;
 
-        Setup(this, windowService);
+        Setup(SceneManager.MainScene, SceneManager.PreviewScene, this, windowService);
         
         RefreshPOVsCommand = new AsyncRelayCommand(sceneManager.RefreshScenesPOVSAsync);
         RefreshOBSCommand = new RelayCommand(RefreshScenes);

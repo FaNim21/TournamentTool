@@ -34,7 +34,8 @@ public interface ISceneManager
     Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid);
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 
-    void RegisterBinding(SceneItem sceneItem);
+    void RegisterTarget(BindingKey key, IBindingTarget target);
+    void UnregisterTarget(BindingKey key, IBindingTarget target);
     Task PublishAsync(BindingKey key, object value);
 
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
@@ -49,6 +50,7 @@ public class SceneManager : ISceneManager, IDisposable
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly IBindingEngine _bindingEngine;
     private readonly ILoggingService _logger;
+    private readonly IDispatcherService _dispatcher;
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
@@ -65,12 +67,13 @@ public class SceneManager : ISceneManager, IDisposable
     
     
     public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ILoggingService logger,
-        ISettingsProvider settingsProvider)
+        ISettingsProvider settingsProvider, IDispatcherService dispatcher)
     {
         _obs = obs;
         _playerRepository = playerRepository;
         _bindingEngine = bindingEngine;
         _logger = logger;
+        _dispatcher = dispatcher;
 
         Scenes = new ReadOnlyObservableCollection<SceneDto>(_scenes);
         
@@ -124,11 +127,14 @@ public class SceneManager : ISceneManager, IDisposable
         GetSceneListResponseData? sceneResponse = await _obs.GetSceneListAsync();
         if (sceneResponse != null)
         {
-            _scenes.Clear();
-            foreach (SceneStub scene in sceneResponse.Scenes ?? [])
+            await _dispatcher.InvokeAsync(()=>
             {
-                _scenes.Add(SceneDto.Create(scene.SceneName, scene.SceneUuid));
-            }
+                _scenes.Clear();
+                foreach (SceneStub scene in sceneResponse.Scenes ?? [])
+                {
+                    _scenes.Add(SceneDto.Create(scene.SceneName, scene.SceneUuid));
+                }
+            });
         }
 
         GetVideoSettingsResponseData? settings = await _obs.GetVideoSettingsAsync();
@@ -149,11 +155,12 @@ public class SceneManager : ISceneManager, IDisposable
     
     private async Task OnOBSConnectedAsync()
     {
-        ObsConnected?.Invoke(this, EventArgs.Empty);
         await InitializeAsync();
+        ObsConnected?.Invoke(this, EventArgs.Empty);
     }
     private void OnOBSDisconnected()
     {
+        _dispatcher.Invoke(_scenes.Clear);
         ClearPlayersFromPovs();
         ObsDisconnected?.Invoke(this, EventArgs.Empty);
     }
@@ -280,9 +287,12 @@ public class SceneManager : ISceneManager, IDisposable
         => await _obs.SetItemInputSettingsAsync(sourceUuid, input);
     public async Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid)
         => await _obs.GetInputSettingsAsync(sourceUuid);
-    
-    public void RegisterBinding(SceneItem sceneItem) 
-        => _bindingEngine.RegisterTarget(sceneItem.BindingKey, sceneItem);
+
+    public void RegisterTarget(BindingKey key, IBindingTarget target)
+        => _bindingEngine.RegisterTarget(key, target);
+    public void UnregisterTarget(BindingKey key, IBindingTarget target)
+        => _bindingEngine.UnregisterTarget(key, target);
+
     public async Task PublishAsync(BindingKey key, object value) 
         => await _bindingEngine.PublishAsync(key, value);
     

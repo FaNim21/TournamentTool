@@ -335,7 +335,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     {
         FilterWhitelist(false);
     }
-    public void FilterWhitelist(bool forceFilter = false)
+    public void FilterWhitelist(bool forceFilter)
     {
         if (!IsSearchEnabled) return;
         SearchText = SearchText.Trim();

@@ -95,23 +95,22 @@ public abstract class SceneCanvasViewModel : BaseViewModel
     }
     public override void OnEnable(object? parameter)
     {
-        SceneManager.ObsConnected += OnOBSConnected;
-        SceneManager.ObsDisconnected += OnOBSDisconnected;
+        SceneManager.ObsConnected += OnObsConnected;
+        SceneManager.ObsDisconnected += OnObsDisconnected;
         SceneManager.SelectedSceneUpdated += OnSelectedSceneUpdated;
         
         MainSceneViewModel.OnEnable(null);
         PreviewSceneViewModel.OnEnable(null);
         
         if (Connected)
-            OnOBSConnected(null, EventArgs.Empty);
+            OnObsConnected();
         else
-            OnOBSDisconnected(null, EventArgs.Empty);
-        
+            OnObsDisconnected();
     }
     public override bool OnDisable()
     {
-        SceneManager.ObsConnected -= OnOBSConnected;
-        SceneManager.ObsDisconnected -= OnOBSDisconnected;
+        SceneManager.ObsConnected -= OnObsConnected;
+        SceneManager.ObsDisconnected -= OnObsDisconnected;
         SceneManager.SelectedSceneUpdated -= OnSelectedSceneUpdated;
         
         MainSceneViewModel.OnDisable();
@@ -120,10 +119,10 @@ public abstract class SceneCanvasViewModel : BaseViewModel
         return base.OnDisable();
     }
     
-    protected void Setup(IScenePovInteractable? povInteractable, IWindowService windowService)
+    protected void Setup(Scene main, Scene preview, IScenePovInteractable? povInteractable, IWindowService windowService)
     {
-        MainSceneViewModel = new SceneViewModel(SceneManager.MainScene, SceneType.Main, InEditMode, povInteractable, windowService, Logger, Dispatcher);
-        PreviewSceneViewModel = new SceneViewModel(SceneManager.PreviewScene, SceneType.Preview, InEditMode, povInteractable, windowService, Logger, Dispatcher);
+        MainSceneViewModel = new SceneViewModel(main, SceneType.Main, InEditMode, povInteractable, windowService, Logger, Dispatcher);
+        PreviewSceneViewModel = new SceneViewModel(preview, SceneType.Preview, InEditMode, povInteractable, windowService, Logger, Dispatcher);
     }
 
     private void OnSceneResize(Dimension dimension)
@@ -142,11 +141,14 @@ public abstract class SceneCanvasViewModel : BaseViewModel
         PreviewSceneViewModel.ChangeSceneSize(ScenePreviewWidth, ScenePreviewHeight);
     }
     
-    private void OnOBSConnected(object? sender, EventArgs e)
+    private void OnObsConnected(object? sender, EventArgs e) => OnObsConnected();
+    private void OnObsDisconnected(object? sender, EventArgs e) => OnObsDisconnected();
+
+    protected virtual void OnObsConnected()
     {
         UpdateView();
     }
-    private void OnOBSDisconnected(object? sender, EventArgs e)
+    protected virtual void OnObsDisconnected()
     {
         UpdateView();
         ClearScenes();
@@ -168,6 +170,7 @@ public abstract class SceneCanvasViewModel : BaseViewModel
     
     protected void OnSelectedSceneUpdated(object? sender, string sceneName)
     {
+        if (SelectedScene is null) return;
         if (SelectedScene.Name.Equals(sceneName)) return;
         
         for (int i = 0; i < Scenes.Count; i++)

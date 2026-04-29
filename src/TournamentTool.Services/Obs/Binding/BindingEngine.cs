@@ -48,6 +48,9 @@ public class BindingEngine : IBindingEngine
     private readonly Dictionary<string, BindingItem> _items = [];
     private readonly Dictionary<BindingKey, List<string>> _index = [];
     
+    //NOTKI (28.04.2026)
+    // - Ten problem nizej jest chyba rozwiazywany przez OnDestroy i usuwanie wtedy tego, ALE DO WERYFIKACJI
+    
     //TODO: 0 Sa 2 problemy:
     //- List<IBindingTarget> nie recyklinguje sie, przez co sa duplikaty przy odswiezaniu sceny
     //- To, ze przy wczytywaniu itemow rejestracja itemow jest za wolna przez to, ze pov robic initialize z czytaniem danych z obsa i laduje juz znajdujacego sie
@@ -118,6 +121,11 @@ public class BindingEngine : IBindingEngine
         }
 
         list.Add(target);
+    }
+    public void UnregisterTarget(BindingKey key, IBindingTarget target)
+    {
+        //TODO: 0 Wyrejestrowywac target z dictionary
+        throw new NotImplementedException();
     }
 
     public async Task PublishAsync(BindingKey key, object? value)

@@ -98,8 +98,6 @@ public partial class App : Application
         services.AddSingleton<ISettingsSaver>(s => s.GetRequiredService<SettingsProvider>());
         
         //Rest xd
-        services.AddSingleton<IObsController, ObsController>();
-
         services.AddSingleton<IPopupNotificationService, PopupNotificationService>();
         
         services.AddSingleton<IPresetSaver, PresetService>();
@@ -128,7 +126,9 @@ public partial class App : Application
         services.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
         
         //OBS
+        services.AddSingleton<IObsController, ObsController>();
         services.AddSingleton<ISceneManager, SceneManager>();
+        services.AddSingleton<IObsUpdateBatcher, ObsUpdateBatcher>();
         
         services.AddSingleton<IBindingSchemaInitializer, BindingSchemaInitializer>();
         services.AddSingleton<IBindingEngine, BindingEngine>();

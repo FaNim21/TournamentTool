@@ -133,6 +133,8 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
     }
     public override void OnDestroy()
     {
+        base.OnDestroy();
+        
         if (Player == null) return;
         
         Player.IsUsedInPov = false;
@@ -140,9 +142,9 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
-    public override void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null)
+    public override void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null, SceneItemConfiguration? configuration = null)
     {
-        base.Initialize(scene, item, group);
+        base.Initialize(scene, item, group, configuration);
         
         keyHead = BindingKey.New("POV", "head", SourceName);
         keyDisplayName = BindingKey.New("POV", "display_name", SourceName);
@@ -265,6 +267,11 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         await UpdatePOVInfoAsync();
         return true;
     }
+
+    public void UpdateUrl()
+    {
+        Url = GetURL();
+    }
     
     private async Task UpdatePOVInfoAsync()
     {
@@ -278,7 +285,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         StreamDisplayInfo = Player.StreamDisplayInfo;
         IsPlayerUsed = true;
 
-        Url = GetURL();
+        UpdateUrl();
         await UpdateAsync();
         await UpdateBindingsAsync();
     }
@@ -348,7 +355,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         CustomStreamType = StreamType.twitch;
     }
     
-    public string GetURL()
+    private string GetURL()
     {
         if (string.IsNullOrEmpty(StreamDisplayInfo.Name)) return string.Empty;
 
