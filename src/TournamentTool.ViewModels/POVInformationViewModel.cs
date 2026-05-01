@@ -20,10 +20,12 @@ public class POVInformationViewModel : BaseWindowViewModel
 
     public override void Dispose()
     {
-        bool exists = _sceneViewModel.ExistInItems<PointOfViewViewModel>(p => p.StreamDisplayInfo.Name.Equals(PointOfViewViewModel.CustomStreamName) 
-                                                            && p.StreamDisplayInfo.Type.Equals(PointOfViewViewModel.CustomStreamType));
-        if (exists) return;
+        bool exists = _sceneViewModel.ExistInItems<PointOfViewViewModel>(p =>
+            p.StreamDisplayInfo.Name.Equals(PointOfViewViewModel.CustomStreamName) &&
+            p.StreamDisplayInfo.Type.Equals(PointOfViewViewModel.CustomStreamType));
         
-        Task.Run(async () => await PointOfViewViewModel.SetCustomPOVAsync());
+        if (exists) return;
+
+        PointOfViewViewModel.SetCustomPOV();
     }
 }

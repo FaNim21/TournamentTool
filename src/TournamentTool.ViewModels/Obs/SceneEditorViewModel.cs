@@ -1,6 +1,5 @@
 ﻿using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
-using TournamentTool.Domain.Obs;
 using TournamentTool.Presentation.Obs;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
@@ -35,11 +34,24 @@ public class SceneEditorViewModel : SceneCanvasViewModel
         Setup(_editableMainScene, _editablePreviewScene, null, windowService);
     }
     
-    public void UpdateBinding(BindingKey key, string sourceUuid)
+    public async Task UpdateScenes(string sourceUuid)
     {
-        SceneItem? foundItem = SceneManager.MainScene.GetItem<SceneItem>(item => item.SourceUUID.Equals(sourceUuid));
-        foundItem ??= SceneManager.PreviewScene.GetItem<SceneItem>(item => item.SourceUUID.Equals(sourceUuid));
+        await _editableMainScene.RefreshAsync();
 
-        foundItem?.UpdateBinding(key);
+        SceneItem? foundItem = SceneManager.MainScene.GetItem<SceneItem>(item => item.SourceUUID.Equals(sourceUuid));
+        if (foundItem is { })
+        {
+            await SceneManager.MainScene.RefreshAsync();
+        }
+        else
+        {
+            foundItem ??= SceneManager.PreviewScene.GetItem<SceneItem>(item => item.SourceUUID.Equals(sourceUuid));
+            if (foundItem is { })
+            {
+                await SceneManager.PreviewScene.RefreshAsync();
+            }
+        }
+
+        MainSceneViewModel.Refresh();
     }
 }

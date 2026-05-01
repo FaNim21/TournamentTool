@@ -103,7 +103,7 @@ public class Scene : IScene
         {
             sceneItem.OnDestroy();
         }
-
+        
         List<(SceneItemStub, SceneItemStub?)> items = await _sceneManager.GetSceneItemsAsync(sceneName, sceneUuid);
         List<SceneItem> createdSceneItems = [];
         
@@ -121,11 +121,12 @@ public class Scene : IScene
         {
             await item.LoadAsync();
         }
-
+        
         lock (_lock)
         {
             SceneItems.Clear();
             ItemsCleared?.Invoke(this, EventArgs.Empty);
+            
             foreach (var item in createdSceneItems)
             {
                 SceneItems.Add(item);
@@ -134,10 +135,7 @@ public class Scene : IScene
         }
     }
 
-    public async Task RefreshAsync()
-    {
-        await SetSceneItemsAsync(SceneName!, SceneUuid, true);
-    }
+    public async Task RefreshAsync() => await SetSceneItemsAsync(SceneName, SceneUuid, true);
     public async Task RefreshItems() 
     {
         for (int i = 0; i < SceneItems.Count; i++)

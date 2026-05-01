@@ -70,14 +70,15 @@ public abstract class SceneItem : IBindingTarget
         if (Scene.IsReadonly) return;
         SceneManager.RegisterTarget(BindingKey, this);
     }
-    
+
     public virtual Task LoadAsync() => Task.CompletedTask;
     public virtual void Update() => SceneManager.QueueUpdate(SourceUUID, Inputs);
+    protected async Task ForceUpdateAsync() => await SceneManager.SetItemInputSettingsAsync(SourceUUID, Inputs);
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
 
     public virtual void ApplyBindingValue(object? value) { }
-    public virtual Task ClearAsync(bool fullClear = false) => Task.CompletedTask;
+    public virtual void Clear(bool fullClear = false) { }
     
     public void SetupConfiguration(SceneItemConfiguration? configuration)
     {

@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     {
         if (!IsSingleInstance())
         {
+            MessageBox.Show("Existing instance of Tournament Tool is running");
             Application.Current.Shutdown();
             return;
         }
@@ -33,7 +34,22 @@ public partial class MainWindow : Window
             Top = Settings.Default.MainWindowTop;
         }
 
-        Dispatcher.UnhandledException += DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
+        };
+
+        Application.Current.DispatcherUnhandledException += (_, e) =>
+        {
+            LogUnhandledExceptionAsNotCrashed(e.Exception, "Application.Current.DispatcherUnhandledException");
+            e.Handled = true; //Problem z tym, ze to blokuje wywalanie aplikacji, a nie wiem czy to sie do czegos ma jak i tak nie ma UI xd
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            LogUnhandledExceptionAsNotCrashed(e.Exception, "TaskScheduler.UnobservedTaskException");
+            e.SetObserved();
+        };
     }
     
     private static bool IsSingleInstance()
@@ -42,19 +58,30 @@ public partial class MainWindow : Window
         return createdNew;
     }
 
-    private void DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    private void LogUnhandledExceptionAsNotCrashed(Exception exception, string source)
+    {
+        if (DataContext is not MainViewModel mainViewModel) return;
+        
+        mainViewModel.Logger.Error($"({source}) {exception}");
+    }
+    private void LogUnhandledException(Exception exception, string source)
     {
         if (DataContext is MainViewModel mainViewModel)
         {
-            mainViewModel.PresetSaver.SavePreset();
-            mainViewModel.ShowUnhandledExceptionLog(e.Exception.Message);
-            Task.Run(async ()=> await mainViewModel.LogStore.SaveToFileAsync());
+            mainViewModel.SaveAll();
+            try
+            {
+                mainViewModel.ShowUnhandledExceptionLog(exception.Message);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            Task.Run(async () => await mainViewModel.LogStore.SaveToFileAsync());
         }
         
-        if (_handledCrash) return;
-        _handledCrash = true;
-
-        string output = $"UnhandledException: {e.Exception}";
+        string output = $"UnhandledException ({source}): {exception}";
         Helper.SaveLog(output, "crash_log");
     }
 

@@ -94,7 +94,7 @@ public class PointOfViewViewModelTests
             _sut.Volume = 50;
             _sut.CustomStreamName = "CustomStream";
 
-            await _sut.ClearAsync(fullClear);
+            await _sut.Clear(fullClear);
 
             Assert.Equal(string.Empty, _sut.DisplayedPlayer);
             Assert.Equal(0, _sut.Volume);
@@ -157,7 +157,7 @@ public class PointOfViewViewModelTests
         {
             _sut.player = CreateMockPlayer();
             
-            await _sut.SetPOVAsync(null);
+            await _sut.SetPOV(null);
             
             Assert.True(_sut.IsEmpty);
         }
@@ -167,7 +167,7 @@ public class PointOfViewViewModelTests
         {
             var player = CreateMockPlayer(isFromWhitelist: true);
 
-            await _sut.SetPOVAsync(player);
+            await _sut.SetPOV(player);
 
             Assert.Equal("TestPlayer", _sut.DisplayedPlayer);
             Assert.False(_sut.IsEmpty);
@@ -178,7 +178,7 @@ public class PointOfViewViewModelTests
         {
             var player = CreateMockPlayer(isFromWhitelist: false);
 
-            await _sut.SetPOVAsync(player);
+            await _sut.SetPOV(player);
 
             Assert.Equal("TestStream", _sut.CustomStreamName);
             Assert.Equal("TestStream", _sut.DisplayedPlayer);
@@ -192,7 +192,7 @@ public class PointOfViewViewModelTests
             var pov = await CreatePOV(1, sceneType);
             IPlayer player = CreateMockPlayer();
 
-            await pov.SetPOVAsync(player);
+            await pov.SetPOV(player);
 
             Assert.Equal(expectedUsedInPov, player.IsUsedInPov);
             Assert.Equal(expectedUsedInPreview, player.IsUsedInPreview);
@@ -205,10 +205,10 @@ public class PointOfViewViewModelTests
         public async Task SetCustomPOV_WithEmptyName_ClearsIfPreviouslySet()
         {
             _sut.CustomStreamName = "PreviousStream";
-            await _sut.SetCustomPOVAsync();
+            await _sut.SetCustomPOV();
             
             _sut.CustomStreamName = "";
-            await _sut.SetCustomPOVAsync();
+            await _sut.SetCustomPOV();
 
             Assert.Equal(string.Empty, _sut.CurrentCustomStreamName);
         }
@@ -221,7 +221,7 @@ public class PointOfViewViewModelTests
             _sut.CustomStreamName = streamName;
             _sut.CustomStreamType = streamType;
 
-            await _sut.SetCustomPOVAsync();
+            await _sut.SetCustomPOV();
 
             Assert.Equal(streamName, _sut.DisplayedPlayer);
             Assert.Equal(streamName, _sut.CurrentCustomStreamName);
@@ -234,7 +234,7 @@ public class PointOfViewViewModelTests
         [Fact]
         public async Task Swap_WithNull_ReturnsFalse()
         {
-            var result = await _sut.SwapAsync(null);
+            var result = await _sut.Swap(null);
 
             Assert.False(result);
         }
@@ -244,7 +244,7 @@ public class PointOfViewViewModelTests
         {
             var otherPov = await CreatePOV(2, SceneType.Preview);
             
-            var result = await _sut.SwapAsync(otherPov);
+            var result = await _sut.Swap(otherPov);
 
             Assert.False(result);
         }
@@ -257,7 +257,7 @@ public class PointOfViewViewModelTests
             _sut.CustomStreamName = "Stream1";
             otherPov.CustomStreamName = "Stream2";
 
-            var result = await _sut.SwapAsync(otherPov);
+            var result = await _sut.Swap(otherPov);
 
             Assert.True(result);
             Assert.Equal("Stream2", _sut.CustomStreamName);
@@ -306,10 +306,10 @@ public class PointOfViewViewModelTests
             var player1 = CreatePlayer("Player1");
             var player2 = CreatePlayer("Player2");
             
-            await pov1.SetPOVAsync(player1);
-            await pov2.SetPOVAsync(player2);
+            await pov1.SetPOV(player1);
+            await pov2.SetPOV(player2);
             
-            var swapResult = await pov1.SwapAsync(pov2);
+            var swapResult = await pov1.Swap(pov2);
             
             Assert.True(swapResult);
             Assert.Equal("Player2", pov1.DisplayedPlayer);
@@ -323,7 +323,7 @@ public class PointOfViewViewModelTests
             var pov = await CreatePOV(1);
             var player = CreatePlayer("TestPlayer");
             
-            await pov.SetPOVAsync(player);
+            await pov.SetPOV(player);
             
             Assert.Equal("TestPlayer", pov.DisplayedPlayer);
             Assert.True(player.IsUsedInPov);
@@ -340,9 +340,9 @@ public class PointOfViewViewModelTests
             var pov2 = await CreatePOV(2, scene2Type);
             var player = CreatePlayer("Player1");
             
-            await pov1.SetPOVAsync(player);
+            await pov1.SetPOV(player);
             
-            var swapResult = await pov1.SwapAsync(pov2);
+            var swapResult = await pov1.Swap(pov2);
             
             Assert.Equal(shouldSwap, swapResult);
             if (shouldSwap)
@@ -367,24 +367,24 @@ public class PointOfViewViewModelTests
             var player2 = CreatePlayer("Player2");
             
             // Step 1: Set player1 to mainPov1
-            await mainPov1.SetPOVAsync(player1);
+            await mainPov1.SetPOV(player1);
             Assert.Equal("Player1", mainPov1.DisplayedPlayer);
             Assert.True(player1.IsUsedInPov);
             
             // Step 2: Try to swap with preview POV (should fail)
-            var swapResult = await mainPov1.SwapAsync(previewPov1);
+            var swapResult = await mainPov1.Swap(previewPov1);
             Assert.False(swapResult);
             Assert.Equal("Player1", mainPov1.DisplayedPlayer);
             Assert.True(previewPov1.IsEmpty);
             
             // Step 3: Swap with another main POV
-            swapResult = await mainPov1.SwapAsync(mainPov2);
+            swapResult = await mainPov1.Swap(mainPov2);
             Assert.True(swapResult);
             Assert.True(mainPov1.IsEmpty);
             Assert.Equal("Player1", mainPov2.DisplayedPlayer);
             
             // Step 4: Set player2 to preview POV
-            await previewPov1.SetPOVAsync(player2);
+            await previewPov1.SetPOV(player2);
             Assert.Equal("Player2", previewPov1.DisplayedPlayer);
             Assert.True(player2.IsUsedInPreview);
             Assert.False(player2.IsUsedInPov);
@@ -399,12 +399,12 @@ public class PointOfViewViewModelTests
             var player = CreatePlayer("Player1");
             
             // Set player to pov1
-            await pov1.SetPOVAsync(player);
+            await pov1.SetPOV(player);
             Assert.True(player.IsUsedInPov);
             
             // Try to set same player to pov2 (should keep old player)
             player.IsUsedInPov = true; // Simulate player already in use
-            await pov2.SetPOVAsync(player);
+            await pov2.SetPOV(player);
             
             // Since SetPlayerToPOV checks IsPlayerUsed, it should not change
             Assert.True(pov2.IsEmpty || pov2.DisplayedPlayer != "Player1");
@@ -424,14 +424,14 @@ public class PointOfViewViewModelTests
             // Set custom streams
             pov1.CustomStreamName = "CustomStream1";
             pov1.CustomStreamType = StreamType.twitch;
-            await pov1.SetCustomPOVAsync();
+            await pov1.SetCustomPOV();
             
             pov2.CustomStreamName = "CustomStream2";
             pov2.CustomStreamType = StreamType.youtube;
-            await pov2.SetCustomPOVAsync();
+            await pov2.SetCustomPOV();
             
             // Try to swap
-            var result = await pov1.SwapAsync(pov2);
+            var result = await pov1.Swap(pov2);
             
             Assert.Equal(shouldSucceed, result);
             if (shouldSucceed)
@@ -452,16 +452,16 @@ public class PointOfViewViewModelTests
             var player2 = CreatePlayer("Player2");
             
             // Set first player
-            await pov.SetPOVAsync(player1);
+            await pov.SetPOV(player1);
             Assert.Equal("Player1", pov.DisplayedPlayer);
             
             // Clear
-            await pov.ClearAsync(fullClear: true);
+            await pov.Clear(fullClear: true);
             Assert.True(pov.IsEmpty);
             Assert.False(player1.IsUsedInPov);
             
             // Set new player
-            await pov.SetPOVAsync(player2);
+            await pov.SetPOV(player2);
             Assert.Equal("Player2", pov.DisplayedPlayer);
             Assert.True(player2.IsUsedInPov);
         }
@@ -503,17 +503,17 @@ public class PointOfViewViewModelTests
             var customPlayer = CreatePlayer("CustomPlayer", false);
             
             // Set whitelisted player
-            await pov1.SetPOVAsync(whitelistedPlayer);
+            await pov1.SetPOV(whitelistedPlayer);
             Assert.Equal("WhitelistedPlayer", pov1.DisplayedPlayer);
             Assert.Equal(string.Empty, pov1.CustomStreamName); // Should not set custom stream
             
             // Set non-whitelisted player (creates custom POV)
-            await pov2.SetPOVAsync(customPlayer);
+            await pov2.SetPOV(customPlayer);
             Assert.Equal("CustomPlayer", pov2.DisplayedPlayer);
             Assert.Equal("CustomPlayer", pov2.CustomStreamName); // Should set custom stream
             
             // Swap them
-            bool swapResult = await pov1.SwapAsync(pov2);
+            bool swapResult = await pov1.Swap(pov2);
             Assert.True(swapResult);
             Assert.Equal("CustomPlayer", pov1.DisplayedPlayer);
             Assert.Equal("WhitelistedPlayer", pov2.DisplayedPlayer);

@@ -82,7 +82,7 @@ public class SceneViewModel : BaseViewModel
 
         Type = type;
 
-        ClearPOVCommand = new AsyncRelayCommand<PointOfViewViewModel>(async (pov, _) => { await pov!.ClearAsync(true); });
+        ClearPOVCommand = new RelayCommand<PointOfViewViewModel>(pov => { pov!.Clear(true); });
         RefreshPOVCommand = new RelayCommand<PointOfViewViewModel>(pov => { pov.RefreshCommand.Execute(null); });
         ShowInfoWindowCommand = new ShowPOVInfoWindowCommand(windowService, this, dispatcher);
     }

@@ -5,6 +5,7 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Domain.Obs;
+using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs;
 using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
@@ -19,6 +20,7 @@ public class SceneManagementViewModel : SelectableViewModel
     private readonly IBindingEngine _bindingEngine;
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
+    private readonly ILoggingService _logger;
 
     public SceneEditorViewModel SceneEditor { get; }
 
@@ -106,12 +108,13 @@ public class SceneManagementViewModel : SelectableViewModel
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
     /// </summary>
     public SceneManagementViewModel(IDispatcherService dispatcher, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
-        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService) 
+        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService, ILoggingService logger) 
         : base(dispatcher)
     {
         _bindingEngine = bindingEngine;
         _obs = obs;
         _windowService = windowService;
+        _logger = logger;
 
         _appCache = settingsProvider.Get<AppCache>();
 
@@ -145,20 +148,24 @@ public class SceneManagementViewModel : SelectableViewModel
         _windowService.ShowCustomDialog(viewModel, OnEditSceneItemClosed, "SceneItemEditWindow");
     }
 
-    private void OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
+    private async void OnEditSceneItemClosed(SceneItemEditWindowViewModel editWindowViewModel)
     {
-        SceneItemConfiguration config = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
-        
-        // _bindingEngine.UpsertItem(config.Key, config.Value.BindingKey); // Tez trzeba resetowac binding.UpsertItem z BindingSchemaInitializer
-        _appCache.SceneItemConfigs[editWindowViewModel.SceneItemViewModel.SourceUUID] = config;
-        
-        //TODO: 0 Dziala baza teraz trzeba zrobic aktualizowanie binding node przy aktualizowaniu binding
-        // - czyli najpierw idzie update binding node
-        // - nastepnie update targetu zeby usunac go ze starego node'a i dodac do nowego z racji ze po to byl on aktualizowane
-        //SceneEditor.UpdateBinding(BindingKey.Empty(), string.Empty);
-        
-        editWindowViewModel.SceneItemViewModel.SceneItem.UpdateBinding(editWindowViewModel.BindingKey);
-        SceneEditor.MainSceneViewModel.Refresh();
+        try
+        {
+            SceneItemConfiguration editedConfig = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
+            string uuid = editWindowViewModel.SceneItemViewModel.SourceUUID;
+
+            if (_appCache.SceneItemConfigs.TryGetValue(uuid, out SceneItemConfiguration? cachedConfig)
+                && editedConfig.Equals(cachedConfig)) return;
+
+            _appCache.SceneItemConfigs[uuid] = editedConfig;
+            
+            await SceneEditor.UpdateScenes(uuid);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex);
+        }
     }
     
     private async Task OnSelectedSceneChanged(SceneDto? selectedScene, CancellationToken token)

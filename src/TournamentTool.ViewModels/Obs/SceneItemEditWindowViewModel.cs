@@ -10,9 +10,6 @@ namespace TournamentTool.ViewModels.Obs;
 
 public class SceneItemEditWindowViewModel : BaseWindowViewModel
 {
-    private readonly IBindingEngine _bindingEngine;
-    private readonly AppCache _appCache;
-
     public SceneItemViewModel SceneItemViewModel { get; }
 
     private InputKind _inputKind = InputKind.unsupported;
@@ -23,7 +20,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         {
             if (value == _inputKind) return;
             _inputKind = value;
-            OnPropertyChanged(nameof(InputKind));
+            OnPropertyChanged();
         }
     }
 
@@ -35,11 +32,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
     public ObservableCollection<string> Fields
     {
         get => _fields;
-        private set
-        {
-            _fields = value;
-            OnPropertyChanged(nameof(Fields));
-        }
+        private set => SetField(ref _fields, value);
     }
 
     private string _chosenSource = string.Empty;
@@ -49,7 +42,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _chosenSource = value;
-            OnPropertyChanged(nameof(ChosenSource));
+            OnPropertyChanged();
 
             Fields = new ObservableCollection<string>(Schemas
                 .Where(f => f.Source.Equals(ChosenSource))
@@ -77,7 +70,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _sourceName = value;
-            OnPropertyChanged(nameof(SourceName));
+            OnPropertyChanged();
         }
     }
 
@@ -88,7 +81,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _index = value;
-            OnPropertyChanged(nameof(Index));
+            OnPropertyChanged();
         }
     }
 
@@ -99,7 +92,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _isUsingName = value;
-            OnPropertyChanged(nameof(IsUsingName));
+            OnPropertyChanged();
         }
     }
 
@@ -110,7 +103,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _isUsingIndex = value;
-            OnPropertyChanged(nameof(IsUsingIndex));
+            OnPropertyChanged();
         }
     }
 
@@ -121,8 +114,6 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
     public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, IBindingEngine bindingEngine, AppCache appCache, 
         IDispatcherService dispatcher) : base(dispatcher)
     {
-        _bindingEngine = bindingEngine;
-        _appCache = appCache;
         SceneItemViewModel = sceneItemViewModel;
         InputKind = SceneItemViewModel.InputKind;
 

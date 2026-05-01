@@ -279,12 +279,12 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 : SceneRuntime.PreviewSceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
             if (pov == null) return;
             
-            CurrentChosenPOV!.SwapAsync(pov);
+            CurrentChosenPOV!.Swap(pov);
             UnSelectItems();
             return;
         }
 
-        CurrentChosenPOV.SetPOVAsync(CurrentChosenPlayer);
+        CurrentChosenPOV.SetPOV(CurrentChosenPlayer);
         UnSelectItems();
     }
     

@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TournamentTool.Core.Common.OBS;
 using TournamentTool.Domain.Entities;
-using TournamentTool.Services.Logging;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
 
@@ -19,76 +18,55 @@ public partial class SceneCanvas : UserControl
         InitializeComponent();
     }
 
-    private async void PointOfView_Drop(object sender, DragEventArgs e)
+    private void PointOfView_Drop(object sender, DragEventArgs e)
     {
-        try
+        if (sender is not Border droppedBorder) return;
+        if (DataContext is not SceneViewModel scene) return;
+        if (droppedBorder.DataContext is not PointOfViewViewModel pov) return;
+
+        if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
         {
-            if (sender is not Border droppedBorder) return;
-            if (DataContext is not SceneViewModel scene) return;
-            if (droppedBorder.DataContext is not PointOfViewViewModel pov) return;
-
-            if (e.Data.GetData(typeof(IPlayer)) is IPlayer info)
+            if (!scene.ExistInItems<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo)))
             {
-                if (!scene.ExistInItems<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo)))
-                {
-                    await pov.SetPOVAsync(info);
-                }
-                else
-                {
-                    ISwappable<PointOfViewViewModel>? foundPov =
-                        scene.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
-                    if (foundPov == null) return;
-
-                    await foundPov.SwapAsync(pov);
-                }
+                pov.SetPOV(info);
             }
-            else if (e.Data.GetData(typeof(PointOfViewViewModel)) is ISwappable<PointOfViewViewModel> dragPov)
+            else
             {
-                await dragPov.SwapAsync(pov);
-            }
+                ISwappable<PointOfViewViewModel>? foundPov =
+                    scene.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(info.StreamDisplayInfo));
+                if (foundPov == null) return;
 
-            scene.Interactable?.UnSelectItems(true);
+                foundPov.Swap(pov);
+            }
         }
-        catch (Exception ex)
+        else if (e.Data.GetData(typeof(PointOfViewViewModel)) is ISwappable<PointOfViewViewModel> dragPov)
         {
-            LogHelper.Error(ex);
+            dragPov.Swap(pov);
         }
+
+        scene.Interactable?.UnSelectItems(true);
     }
 
-    private async void PointOfView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void PointOfView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        try
-        {
-            if (DataContext is not SceneViewModel scene) return;
-            if (scene.Interactable is null) return;
-            
-            if (sender is not Border clickedBorder) return;
-            if (clickedBorder!.DataContext is not PointOfViewViewModel pov) return;
+        if (DataContext is not SceneViewModel scene) return;
+        if (scene.Interactable is null) return;
 
-            await scene.Interactable.OnPOVClickAsync(scene, pov);
-        }
-        catch (Exception ex)
-        {
-            LogHelper.Error(ex);
-        }
+        if (sender is not Border clickedBorder) return;
+        if (clickedBorder!.DataContext is not PointOfViewViewModel pov) return;
+
+        scene.Interactable.OnPOVClick(scene, pov);
     }
 
-    private async void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
-        try
-        {
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
+        if ((Keyboard.Modifiers & ModifierKeys.Control) == 0) return;
 
-            if (sender is not Border border) return;
-            if (border.DataContext is not PointOfViewViewModel pov) return;
+        if (sender is not Border border) return;
+        if (border.DataContext is not PointOfViewViewModel pov) return;
 
-            e.Handled = true;
-            await pov.ClearAsync(true);
-        }
-        catch (Exception ex)
-        {
-            LogHelper.Error(ex);
-        }
+        e.Handled = true;
+        pov.Clear(true);
     }
 
     private void PointOfView_MouseEnter(object sender, MouseEventArgs e) 

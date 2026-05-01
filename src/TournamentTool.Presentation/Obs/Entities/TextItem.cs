@@ -26,11 +26,11 @@ public class TextItem : SceneItem
         base.Update();
     }
 
-    public override async Task ClearAsync(bool fullClear = false)
+    public override void Clear(bool fullClear = false)
     {
         Text = string.Empty;
         Update();
         
-        await base.ClearAsync(fullClear);
+        base.Clear(fullClear);
     }
 }

@@ -28,6 +28,7 @@ public class MainViewModel : BaseViewModel
     private readonly IApplicationState _applicationState;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
+    private readonly ISettingsSaver _settingsProvider;
 
     public DebugWindowViewModel? DebugWindowViewModel { get; private set; }
     
@@ -81,13 +82,14 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel,
         IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, 
-        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel, ILogStore logStore) 
-        : base(dispatcher)
+        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel, ILogStore logStore,
+        ISettingsSaver settingsProvider) : base(dispatcher)
     {
         _updateChecker = updateChecker;
         _applicationState = applicationState;
         _windowService = windowService;
         _dialogService = dialogService;
+        _settingsProvider = settingsProvider;
         LogStore = logStore;
         NavigationService = navigationService;
         StatusBar = statusBar;
@@ -132,6 +134,12 @@ public class MainViewModel : BaseViewModel
     public void OnClose()
     {
         NavigationService.SelectedView.OnDisable();
+    }
+    
+    public void SaveAll()
+    {
+        _settingsProvider.Save();
+        PresetSaver.SavePreset();
     }
 
     public void SelectViewModel(string viewModelName)
@@ -185,7 +193,7 @@ public class MainViewModel : BaseViewModel
     {
         _dialogService.Show($"Unhandled exception: {exceptionMessage}", "Application crash", MessageBoxButton.OK, MessageBoxImage.Error);
     }
-    
+
     public void SwitchDebugWindow()
     {
         if (!IsDebugWindowOpened)

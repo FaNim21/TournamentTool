@@ -87,7 +87,7 @@ public class SceneRuntimeViewModel : SceneCanvasViewModel, IScenePovInteractable
         PreviewSceneViewModel.Refresh();
     }
 
-    public async Task OnPOVClickAsync(SceneViewModel sceneViewModel, PointOfViewViewModel clickedPov)
+    public void OnPOVClick(SceneViewModel sceneViewModel, PointOfViewViewModel clickedPov)
     {
         CurrentChosenPOV?.UnFocus();
         if (CurrentChosenPOV is { } && CurrentChosenPOV == clickedPov)
@@ -105,7 +105,7 @@ public class SceneRuntimeViewModel : SceneCanvasViewModel, IScenePovInteractable
             {
                 previousPOV.UnFocus();
             }
-            else if (await CurrentChosenPOV!.SwapAsync(previousPOV))
+            else if (CurrentChosenPOV!.Swap(previousPOV))
             {
                 CurrentChosenPOV = null;
             }
@@ -117,12 +117,12 @@ public class SceneRuntimeViewModel : SceneCanvasViewModel, IScenePovInteractable
         PointOfViewViewModel? pov = sceneViewModel.GetItem<PointOfViewViewModel>(p => p.StreamDisplayInfo.Equals(CurrentChosenPlayer.StreamDisplayInfo));
         if (pov != null)
         {
-            await CurrentChosenPOV!.SwapAsync(pov);
+            CurrentChosenPOV!.Swap(pov);
             UnSelectItems();
             return;
         }
 
-        await clickedPov.SetPOVAsync(CurrentChosenPlayer);
+        clickedPov.SetPOV(CurrentChosenPlayer);
 
         CurrentChosenPOV.UnFocus();
         UnSelectItems(true);

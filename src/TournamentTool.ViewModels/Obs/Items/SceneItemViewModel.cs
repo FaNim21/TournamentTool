@@ -68,7 +68,7 @@ public abstract class SceneItemViewModel : BaseViewModel
     protected void Update() => SceneItem.Update();
 
     public virtual async Task RefreshAsync() => await SceneItem.RefreshAsync();
-    public virtual async Task ClearAsync(bool fullClear = false) => await SceneItem.ClearAsync(fullClear);
+    public virtual void Clear(bool fullClear = false) => SceneItem.Clear(fullClear);
 
     public void Focus()
     {

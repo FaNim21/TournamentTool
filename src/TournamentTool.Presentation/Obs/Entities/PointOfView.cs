@@ -164,7 +164,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         
         if (string.IsNullOrEmpty(data.currentName) || specificPovExists)
         {
-            await ClearAsync(true);
+            Clear(true);
             return;
         }
 
@@ -176,55 +176,55 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         {
             CustomStreamType = data.type;
             CustomStreamName = data.currentName;
-            await SetCustomPOVAsync();
+            SetCustomPOV();
             return;
         }
 
         if (foundPlayer is not IPlayer playerViewModel) return;
-        await SetPOVAsync(playerViewModel);
+        SetPOV(playerViewModel);
     }
 
-    public async Task SetCustomPOVAsync(IPovUsage? other = null)
+    public void SetCustomPOV(IPovUsage? other = null)
     {
         if (string.IsNullOrEmpty(CustomStreamName) && !string.IsNullOrEmpty(CurrentCustomStreamName))
         {
             CurrentCustomStreamName = string.Empty;
-            await ClearAsync();
+            Clear();
             return;
         }
         if (CustomStreamName.Equals(CurrentCustomStreamName) && CustomStreamType == CurrentCustomStreamType) return;
         
-        if (Player != null) await ClearAsync();
+        if (Player != null) Clear();
         CurrentCustomStreamName = CustomStreamName;
         CurrentCustomStreamType = CustomStreamType;
 
         CustomPlayerData customPlayerData = new(new StreamDisplayInfo(CustomStreamName, CustomStreamType), "Unk", string.Empty);
         CustomPlayer playerViewModel = new(customPlayerData, other);
         
-        await SetPlayerToPOV(playerViewModel);
+        SetPlayerToPOV(playerViewModel);
     }
 
-    public async Task SetPOVAsync(IPlayer? povInfo)
+    public void SetPOV(IPlayer? povInfo)
     {
         if (povInfo is null)
         {
-            await ClearAsync();
+            Clear();
             return;
         }
 
         if (povInfo.IsFromWhitelist)
         {
-            await SetPlayerToPOV(povInfo);
+            SetPlayerToPOV(povInfo);
             ClearCustomData();
         }
         else
         {
             CustomStreamName = povInfo.StreamDisplayInfo.Name;
             CustomStreamType = povInfo.StreamDisplayInfo.Type;
-            await SetCustomPOVAsync(povInfo);
+            SetCustomPOV(povInfo);
         }
     }
-    private async Task SetPlayerToPOV(IPlayer? povInfo)
+    private void SetPlayerToPOV(IPlayer? povInfo)
     {
         var oldPlayer = Player;
         Player = povInfo;
@@ -246,10 +246,10 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
             }
         }
         
-        await UpdatePOVInfoAsync();
+        UpdatePOVInfoAsync();
     }
     
-    public async Task<bool> SwapAsync(PointOfView? pov)
+    public bool Swap(PointOfView? pov)
     {
         if (pov is null) return false;
         if (Type != pov.Type) return false;
@@ -262,9 +262,9 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         (pov.CurrentCustomStreamType, CurrentCustomStreamType) = (CurrentCustomStreamType, pov.CurrentCustomStreamType);
 
         pov.Player = Player;
-        await pov.UpdatePOVInfoAsync();
+        pov.UpdatePOVInfoAsync();
         Player = povPlayer;
-        await UpdatePOVInfoAsync();
+        UpdatePOVInfoAsync();
         return true;
     }
 
@@ -273,11 +273,11 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         Url = GetURL();
     }
     
-    private async Task UpdatePOVInfoAsync()
+    private void UpdatePOVInfoAsync()
     {
         if (Player == null)
         {
-            await ClearAsync();
+            Clear();
             return;
         }
 
@@ -312,11 +312,11 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
     public override async Task RefreshAsync()
     {
         Url = string.Empty;
-        Update();
-        //TODO: 0 Przez batch update nie zadziala odswiezanie
+        Inputs["url"] = Url;
+        await ForceUpdateAsync();
         
         await Task.Delay(25);
-        await UpdatePOVInfoAsync();
+        UpdatePOVInfoAsync();
     }
 
     public void ChangeVolume(int volume)
@@ -328,7 +328,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         IsMuted = Volume == 0;
     }
 
-    public override async Task ClearAsync(bool fullClear = false)
+    public override void Clear(bool fullClear = false)
     {
         DisplayedPlayer = string.Empty;
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
@@ -344,7 +344,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
             Player = null;
         }
 
-        await base.ClearAsync(fullClear);
+        base.Clear(fullClear);
         UpdateBindings();
     }
 

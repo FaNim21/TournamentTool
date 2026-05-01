@@ -111,14 +111,14 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
 
     public override void Initialize(bool inEditMode, bool isDisplaed) => base.Initialize(inEditMode, isDisplaed);
 
-    public async Task SetCustomPOVAsync(IPovUsage? other = null) => await _sceneItem.SetCustomPOVAsync(other);
-    public async Task SetPOVAsync(IPlayer? povInfo) => await _sceneItem.SetPOVAsync(povInfo);
+    public void SetCustomPOV(IPovUsage? other = null) => _sceneItem.SetCustomPOV(other);
+    public void SetPOV(IPlayer? povInfo) => _sceneItem.SetPOV(povInfo);
 
-    public async Task<bool> SwapAsync(PointOfViewViewModel? pov)
+    public bool Swap(PointOfViewViewModel? pov)
     {
         if (pov == null) return false;
         
-        return await _sceneItem.SwapAsync((PointOfView)pov.SceneItem);
+        return _sceneItem.Swap((PointOfView)pov.SceneItem);
     }
 
     public void ApplyVolume()

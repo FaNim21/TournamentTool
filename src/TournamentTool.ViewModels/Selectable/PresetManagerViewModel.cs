@@ -223,7 +223,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
                 if (string.IsNullOrEmpty(text)) continue;
 
                 TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
-                if (data == null) continue;
+                if (data is null) continue;
+                if (string.IsNullOrEmpty(data.Name)) continue;
 
                 TournamentPresetViewModel presetViewModel = new(data, this, _tournamentState, Dispatcher, PresetService);
                 presetList.Add(presetViewModel);
@@ -253,6 +254,8 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         for (int i = 0; i < Presets.Count; i++)
         {
             var current = Presets[i];
+            if (string.IsNullOrEmpty(current.Name)) continue;
+            
             if (current.Name!.Equals(name, StringComparison.OrdinalIgnoreCase)) return false;
         }
         return true;
@@ -335,6 +338,7 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
         {
             TournamentPreset? data = JsonSerializer.Deserialize<TournamentPreset>(text);
             if (data == null) return;
+            if (string.IsNullOrEmpty(data.Name)) return;
             
             TournamentPresetViewModel presetViewModel = new(data, this, _tournamentState, Dispatcher, PresetService);
 
