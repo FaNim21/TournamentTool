@@ -60,13 +60,22 @@ public class Scene : IScene
     {
         Scene clonedScene = new(_sceneManager, _logger, _appCache, Type)
         {
-            SceneItems = [..SceneItems],
             SceneName = SceneName,
             SceneUuid = SceneUuid,
             BaseWidth = BaseWidth,
             IsReadonly = true
         };
 
+        List<SceneItem> clonedSceneItems = [];
+        foreach (SceneItem sceneItem in SceneItems)
+        {
+            SceneItem? clonedItem = sceneItem.Clone(clonedScene);
+            if (clonedItem is null) continue;
+
+            clonedSceneItems.Add(clonedItem);
+        }
+        
+        clonedScene.SceneItems = clonedSceneItems;
         return clonedScene;
     }
     
@@ -117,9 +126,12 @@ public class Scene : IScene
             createdSceneItems.Add(sceneItem);
         }
         
-        foreach (var item in createdSceneItems)
+        if (!IsReadonly)
         {
-            await item.LoadAsync();
+            foreach (var item in createdSceneItems)
+            {
+                await item.LoadAsync();
+            }
         }
         
         lock (_lock)
@@ -157,14 +169,7 @@ public class Scene : IScene
         InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
         if (inputKind == InputKind.unsupported) return null;
 
-        SceneItem? sceneItem = inputKind switch
-        {
-            InputKind.tt_point_of_view => new PointOfView(_sceneManager, _logger, Type),
-            InputKind.browser_source => new BrowserItem(_sceneManager, _logger),
-            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItem(_sceneManager, _logger),
-            _ => null
-        };
-
+        SceneItem? sceneItem = SceneItem.Create(inputKind, _sceneManager, _logger, Type);
         if (sceneItem == null) return null;
 
         sceneItem.Initialize(this, item, group, config);

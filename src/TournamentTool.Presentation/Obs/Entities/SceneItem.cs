@@ -25,6 +25,8 @@ public abstract class SceneItem : IBindingTarget
     public string SourceUUID { get; private set; } = string.Empty;
 
     protected Dictionary<string, object> Inputs { get; } = [];
+    protected SceneItemStub _item = new();
+    protected SceneItemStub? _group = null;
 
     
     protected SceneItem(ISceneManager sceneManager, ILoggingService logger)
@@ -39,34 +41,40 @@ public abstract class SceneItem : IBindingTarget
         SceneManager.UnregisterTarget(BindingKey, this);
     }
     
-    public void UpdateBinding(BindingKey newKey)
+    public static SceneItem? Create(InputKind inputKind, ISceneManager sceneManager, ILoggingService logger, SceneType sceneType = SceneType.Main)
     {
-        if (Scene.IsReadonly) return;
-        
-        SceneManager.UnregisterTarget(BindingKey, this);
-        
-        BindingKey = newKey;
-        SceneManager.RegisterTarget(newKey, this);
+        return inputKind switch
+        {
+            InputKind.tt_point_of_view => new PointOfView(sceneManager, logger, sceneType),
+            InputKind.browser_source => new BrowserItem(sceneManager, logger),
+            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItem(sceneManager, logger),
+            _ => null
+        };
     }
+    
+    public abstract SceneItem? Clone(IScene scene);
 
     public virtual void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null, SceneItemConfiguration? configuration = null)
     {
         Scene = scene;
-        SourceName = item.SourceName ?? string.Empty;
-        SourceUUID = item.SourceUuid ?? string.Empty;
-        GroupName = group != null ? group.SourceName ?? string.Empty : string.Empty;
+        _item = item;
+        _group = group;
         
-        Transform.Initialize(item.SceneItemTransform!, group?.SceneItemTransform);
-        
+        SourceName = _item.SourceName ?? string.Empty;
+        SourceUUID = _item.SourceUuid ?? string.Empty;
+        GroupName = _group != null ? _group.SourceName ?? string.Empty : string.Empty;
+
+        Transform.Initialize(_item.SceneItemTransform!, _group?.SceneItemTransform);
+
         string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
         if (!string.IsNullOrEmpty(inputKindText))
         {
             InputKind inputKind = Enum.TryParse<InputKind>(inputKindText, out var kind) ? kind : InputKind.unsupported;
             InputKind = inputKind;
         }
-        
+
         SetupConfiguration(configuration);
-        
+
         if (Scene.IsReadonly) return;
         SceneManager.RegisterTarget(BindingKey, this);
     }

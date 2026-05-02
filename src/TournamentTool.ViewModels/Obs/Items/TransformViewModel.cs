@@ -52,7 +52,7 @@ public class TransformViewModel : BaseViewModel
         X = (int)(OriginX / proportion);
         Y = (int)(OriginY / proportion);
 
-        Width = (int)(OriginWidth / proportion);
-        Height = (int)(OriginHeight / proportion);
+        Width = Math.Clamp((int)(OriginWidth / proportion), 25, int.MaxValue);
+        Height = Math.Clamp((int)(OriginHeight / proportion), 25, int.MaxValue);
     }
 }

@@ -142,6 +142,13 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
+    public override SceneItem Clone(IScene scene)
+    {
+        PointOfView clonedItem = new PointOfView(SceneManager, Logger, Type);
+        clonedItem.Initialize(scene, _item, _group, new SceneItemConfiguration(InputKind, BindingKey));
+        return clonedItem;
+    }
+
     public override void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null, SceneItemConfiguration? configuration = null)
     {
         base.Initialize(scene, item, group, configuration);
@@ -299,7 +306,6 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
             if (string.IsNullOrEmpty(Player.HeadViewParameter)) headUrl = string.Empty;
         }
         
-        //TODO: 0 trzeba zrobic publish kolejke z racji aktualizacji wielu scene item na raz, dla wydajnosci trzeba zrobic grupowe aktualizowanie
         SceneManager.Publish(keyHead, headUrl);
         SceneManager.Publish(keyDisplayName, DisplayedPlayer);
         SceneManager.Publish(keyIgn, Player?.InGameName ?? string.Empty);
@@ -308,13 +314,13 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         SceneManager.Publish(keyStreamName, Player?.StreamDisplayInfo.Name ?? string.Empty);
         SceneManager.Publish(keyStreamType, Player == null ? string.Empty : Player.StreamDisplayInfo.Type);
     }
-    
+
     public override async Task RefreshAsync()
     {
         Url = string.Empty;
         Inputs["url"] = Url;
         await ForceUpdateAsync();
-        
+
         await Task.Delay(25);
         UpdatePOVInfoAsync();
     }

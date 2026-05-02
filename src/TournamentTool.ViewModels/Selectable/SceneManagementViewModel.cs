@@ -155,9 +155,6 @@ public class SceneManagementViewModel : SelectableViewModel
             SceneItemConfiguration editedConfig = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
             string uuid = editWindowViewModel.SceneItemViewModel.SourceUUID;
 
-            if (_appCache.SceneItemConfigs.TryGetValue(uuid, out SceneItemConfiguration? cachedConfig)
-                && editedConfig.Equals(cachedConfig)) return;
-
             _appCache.SceneItemConfigs[uuid] = editedConfig;
             
             await SceneEditor.UpdateScenes(uuid);

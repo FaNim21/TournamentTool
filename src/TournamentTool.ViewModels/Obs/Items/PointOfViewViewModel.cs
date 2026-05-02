@@ -109,7 +109,10 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
         // StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
-    public override void Initialize(bool inEditMode, bool isDisplaed) => base.Initialize(inEditMode, isDisplaed);
+    public override void Initialize(bool inEditMode, bool isDisplaed)
+    {
+        base.Initialize(inEditMode, isDisplaed);
+    }
 
     public void SetCustomPOV(IPovUsage? other = null) => _sceneItem.SetCustomPOV(other);
     public void SetPOV(IPlayer? povInfo) => _sceneItem.SetPOV(povInfo);
