@@ -2,6 +2,8 @@
 
 public sealed record BindingSchema(string Source, string Field, bool haveName, bool haveIndex)
 {
+    //TODO: Zrobic BindingScheme jako abstract i wtedy dzieci beda definiowac binding scheme zaleznie od pov, leaderboard, itp itd w przyszlosci
+    
     public static BindingSchema New(string Source, string Field, bool haveName = false, bool haveIndex = false) => new(Source, Field.ToLower(), haveName, haveIndex);
     
     public static BindingSchema Empty() => new(string.Empty, string.Empty, false, false);

@@ -144,7 +144,7 @@ public class SceneManagementViewModel : SelectableViewModel
 
     private void EditSceneItem(SceneItemViewModel sceneItem)
     {
-        SceneItemEditWindowViewModel viewModel = new(sceneItem, _bindingEngine, _appCache, Dispatcher);
+        SceneItemEditWindowViewModel viewModel = new(sceneItem, SceneEditor.MainSceneViewModel, _bindingEngine, _appCache, Dispatcher);
         _windowService.ShowCustomDialog(viewModel, OnEditSceneItemClosed, "SceneItemEditWindow");
     }
 

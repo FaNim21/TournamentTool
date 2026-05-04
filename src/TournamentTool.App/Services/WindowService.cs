@@ -171,7 +171,6 @@ public class WindowService : IWindowService
     {
         if (!_windows.TryGetValue(guid, out var data)) return;
         
-        //TODO: 0 to zweryfikowac z onwindowclose, bo nie potrzebny duplikat kodu
         data.Window.Close();
         _windows.Remove(guid);
         StopBlockingWindow();

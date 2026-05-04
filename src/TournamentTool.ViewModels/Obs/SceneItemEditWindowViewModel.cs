@@ -35,6 +35,8 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         private set => SetField(ref _fields, value);
     }
 
+    public ObservableCollection<string> PovNames { get; private set; } = [];
+
     private string _chosenSource = string.Empty;
     public string ChosenSource
     {
@@ -57,7 +59,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         set
         {
             _chosenField = value;
-            OnPropertyChanged(nameof(ChosenField));
+            OnPropertyChanged();
             
             LoadSchema(ChosenField);
         }
@@ -109,13 +111,19 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
 
     public BindingKey BindingKey { get; private set; } = BindingKey.Empty();
     
-    //TODO: 0 Pomysl jest taki zeby name bylo comboboxem, bo mozna sie uprzec i raz na odpalenie edycji pobrac wszystkie nazwy niby
-
-    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, IBindingEngine bindingEngine, AppCache appCache, 
+    
+    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, SceneViewModel sceneViewModel, IBindingEngine bindingEngine, AppCache appCache, 
         IDispatcherService dispatcher) : base(dispatcher)
     {
         SceneItemViewModel = sceneItemViewModel;
         InputKind = SceneItemViewModel.InputKind;
+
+        foreach (SceneItemViewModel sceneItem in sceneViewModel.SceneItems)
+        {
+            if (sceneItem is not PointOfViewViewModel pov) continue;
+            
+            PovNames.Add(pov.SourceName);
+        }
 
         Schemas = bindingEngine.AvailableSchemas;
         Sources = new ObservableCollection<string>(Schemas.Select(s => s.Source).Distinct());
@@ -137,10 +145,10 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         if (binding == null || binding.IsEmpty()) return;
 
         ChosenSource = binding.Source;
-        ChosenField = binding.Field;
-        
+        ChosenField = Fields.FirstOrDefault(field => field.Equals(binding.Field, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
+
         Index = binding.Index ?? 0;
-        SourceName = binding.Name ?? string.Empty;
+        SourceName = PovNames.FirstOrDefault(name => name.Equals(binding.Name, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
     }
 
     private void LoadSchema(string field)

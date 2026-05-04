@@ -205,8 +205,6 @@ public class RankedService : IBackgroundService
     private void AddPace(PrivRoomPlayer player) => AddPace(player.UUID, player.InGameName);
     private RankedPace AddPace(string UUID, string ign = "")
     {
-        //TODO: 0 tu jest blad logiczny z tym, ze w rankedpace jest null check, player data nigdy nie jest null,
-        // a po tym jest sprawdzane czy wliczac go do leaderboard'a
         Player? data = _playerRepository.GetPlayerByUUID(UUID)?.Data;
         string inGameName = data != null ? data.InGameName ?? ign : ign;
         
