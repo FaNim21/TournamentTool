@@ -84,7 +84,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    
     public bool ShowStreamCategory
     {
         get => _tournamentState.CurrentPreset.ShowStreamCategory;
@@ -96,37 +95,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             OnPropertyChanged(nameof(ShowStreamCategory));
             PresetIsModified();
             _playerRepository.UpdateCategoryForPlayers();
-        }
-    }
-    
-    public bool SetPovHeadsInBrowser
-    {
-        get => _tournamentState.CurrentPreset.SetPovHeadsInBrowser;
-        set
-        {
-            _tournamentState.CurrentPreset.SetPovHeadsInBrowser = value;
-            OnPropertyChanged(nameof(SetPovHeadsInBrowser));
-            PresetIsModified();
-        }
-    }
-    public bool SetPovPBText
-    {
-        get => _tournamentState.CurrentPreset.SetPovPBText;
-        set
-        {
-            _tournamentState.CurrentPreset.SetPovPBText = value;
-            OnPropertyChanged(nameof(SetPovPBText));
-            PresetIsModified();
-        }
-    }
-    public DisplayedNameType DisplayedNameType
-    {
-        get => _tournamentState.CurrentPreset.DisplayedNameType;
-        set
-        {
-            _tournamentState.CurrentPreset.DisplayedNameType = value;
-            OnPropertyChanged(nameof(DisplayedNameType));
-            PresetIsModified();
         }
     }
     
@@ -325,11 +293,6 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         OnPropertyChanged(nameof(AddUnknownPacemanPlayersToWhitelist));
         
         OnPropertyChanged(nameof(SceneCollection));
-        
-        OnPropertyChanged(nameof(SetPovHeadsInBrowser));
-        OnPropertyChanged(nameof(SetPovPBText));
-        OnPropertyChanged(nameof(DisplayedNameType));
-        
         OnPropertyChanged(nameof(ShowStreamCategory));
         
         OnPropertyChanged(nameof(PaceManRefreshRateMiliseconds));

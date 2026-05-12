@@ -45,6 +45,40 @@
             </Grid>
 
             <Grid Grid.Row="1">
+                <!--
+                <StackPanel Orientation="Vertical"
+                            Margin="0 0 0 5">
+                    <TextBlock Text="Display name in pov"
+                               HorizontalAlignment="Left"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Chosen type will define what will be displayed for name element in pov"
+                               Foreground="White"
+                               Padding="0"
+                               Margin="0 0 0 2" />
+                    <RadioButton GroupName="DisplayedNames"
+                                 Foreground="White"
+                                 Content="None"
+                                 HorizontalAlignment="Left"
+                                 IsChecked="{Binding Tournament.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.None}}" />
+                    <RadioButton GroupName="DisplayedNames"
+                                 Foreground="White"
+                                 Content="Twitch"
+                                 HorizontalAlignment="Left"
+                                 IsChecked="{Binding Tournament.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.Twitch}}" />
+                    <RadioButton GroupName="DisplayedNames"
+                                 Foreground="White"
+                                 Content="Ign"
+                                 HorizontalAlignment="Left"
+                                 IsChecked="{Binding Tournament.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.IGN}}" />
+                    <RadioButton GroupName="DisplayedNames"
+                                 Foreground="White"
+                                 Content="Whitelist"
+                                 HorizontalAlignment="Left"
+                                 IsChecked="{Binding Tournament.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
+                </StackPanel>
+                -->
+                
                 <!-- TUTAJ JAKIES GUZIKI? -->
             </Grid>
         </Grid>

@@ -41,6 +41,7 @@ public class PacemanManagementData : ManagementData
 
 public class Tournament : IPreset
 {
+    //TODO: 0 To potrzebuje specjalnej troski przez to ze musze jako robic publish w binding engine dla tych danych w managementData
     public ManagementData? ManagementData { get; set; }
     public Leaderboard Leaderboard { get; init; } = new();
 
@@ -54,11 +55,6 @@ public class Tournament : IPreset
     public bool ShowOnlyLive { get; set; } = true;
 
     public string SceneCollection { get; set; } = string.Empty;
-
-    public bool SetPovHeadsInBrowser { get; set; }
-    public bool SetPovPBText { get; set; }
-    public DisplayedNameType DisplayedNameType { get; set; }
-
     public bool ShowStreamCategory { get; set; } = true;
     
     public int PaceManRefreshRateMiliseconds { get; set; } = 3000;
@@ -84,11 +80,6 @@ public class Tournament : IPreset
         AddUnknownPacemanPlayersToWhitelist = false;
 
         SceneCollection = string.Empty;
-
-        SetPovHeadsInBrowser = false;
-        SetPovPBText = false;
-        DisplayedNameType = DisplayedNameType.None;
-
         ShowStreamCategory = true;
 
         PaceManRefreshRateMiliseconds = 3000;
