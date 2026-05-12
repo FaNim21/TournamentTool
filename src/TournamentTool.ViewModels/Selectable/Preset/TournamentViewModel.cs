@@ -155,7 +155,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    public string? Structure2ToText { set; get; }
+    public string? Structure2ToText { get; set; }
     
     public int FirstPortalGoodPaceMiliseconds
     {
@@ -171,7 +171,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    public string? FirstPortalToText { set; get; }
+    public string? FirstPortalToText { get; set; }
     
     public int EnterStrongholdGoodPaceMiliseconds
     {
@@ -187,7 +187,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    public string? EnterStrongholdToText { set; get; }
+    public string? EnterStrongholdToText { get; set; }
     
     public int EnterEndGoodPaceMiliseconds
     {
@@ -203,7 +203,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    public string? EnterEndToText { set; get; }
+    public string? EnterEndToText { get; set; }
     
     public int CreditsGoodPaceMiliseconds
     {
@@ -219,7 +219,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             PresetIsModified();
         }
     }
-    public string? CreditsToText { set; get; }
+    public string? CreditsToText { get; set; }
 
     public ControllerMode ControllerMode
     {
@@ -229,15 +229,10 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             if (_tournamentState.CurrentPreset.ControllerMode == value) return;
             
             _tournamentState.CurrentPreset.ControllerMode = value;
-            OnPropertyChanged(nameof(ControllerMode));
+            OnPropertyChanged();
             PresetIsModified();
 
-            if (value == ControllerMode.Ranked)
-                _tournamentState.CurrentPreset.ManagementData = new RankedManagementData();
-            else if (value == ControllerMode.Paceman)
-                _tournamentState.CurrentPreset.ManagementData = new PacemanManagementData();
-            else if (value == ControllerMode.Solo)
-                _tournamentState.CurrentPreset.ManagementData = new SoloManagementData();
+            _tournamentState.CurrentPreset.ManagementData = CreateSpecifiedManagement(value);
             
             UpdateBackgroundService(value);
         }
@@ -312,15 +307,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         }
         IsCurrentlyOpened = true;
         
-        if (_tournamentState.CurrentPreset.ManagementData == null)
-        {
-            if (ControllerMode == ControllerMode.Ranked)
-                _tournamentState.CurrentPreset.ManagementData = new RankedManagementData();
-            else if (ControllerMode == ControllerMode.Paceman)
-                _tournamentState.CurrentPreset.ManagementData = new PacemanManagementData();
-            else if (ControllerMode == ControllerMode.Solo)
-                _tournamentState.CurrentPreset.ManagementData = new SoloManagementData();
-        }
+        _tournamentState.CurrentPreset.ManagementData ??= CreateSpecifiedManagement(ControllerMode);
         UpdateBackgroundService(_tournamentState.CurrentPreset.ControllerMode);
         
         int time = _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds;
@@ -416,6 +403,16 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
     private void PresetIsModified()
     {
         _tournamentState.MarkAsModified();
+    }
+    
+    private ManagementData? CreateSpecifiedManagement(ControllerMode mode)
+    {
+        if (mode == ControllerMode.Ranked)
+            return _tournamentState.CurrentPreset.ManagementData = new RankedManagementData();
+        if (mode == ControllerMode.Paceman)
+            return _tournamentState.CurrentPreset.ManagementData = new PacemanManagementData();
+        
+        return null;
     }
     
     public void Clear()

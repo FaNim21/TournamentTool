@@ -2,9 +2,10 @@
 using System.Globalization;
 using System.Windows.Input;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Background;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities;
 
@@ -13,14 +14,20 @@ namespace TournamentTool.ViewModels.Selectable.Controller.ManagementPanel;
 public class RankedManagementPanel : ManagementPanel, IRankedManagementDataReceiver
 {
     private RankedManagementData _data;
+    private readonly IBindingEngine _bindingEngine;
 
+    private BindingKey keyCustomText { get; }
+    private BindingKey keyRounds { get; }
+    private BindingKey keyCompletions { get; }
+    private BindingKey keyPlayers { get; }
+    
     public string CustomText
     {
         get => _data.CustomText; 
         set
         {
             _data.CustomText = value;
-            OnPropertyChanged(nameof(CustomText));
+            OnPropertyChanged();
         }
     }
     public int Rounds
@@ -28,8 +35,10 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         get => _data.Rounds; 
         set
         {
+            if (_data.Rounds == value) return;
+            
             _data.Rounds = value;
-            OnPropertyChanged(nameof(Rounds));
+            OnPropertyChanged();
         }
     }
     public int Completions
@@ -37,8 +46,10 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         get => _data.Completions; 
         set
         {
+            if (_data.Completions == value) return;
+            
             _data.Completions = value;
-            OnPropertyChanged(nameof(Completions));
+            OnPropertyChanged();
         }
     }
     public int Players
@@ -46,8 +57,10 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         get => _data.Players; 
         set
         {
+            if (_data.Players == value) return;
+            
             _data.Players = value;
-            OnPropertyChanged(nameof(Players));
+            OnPropertyChanged();
         }
     }
     public long StartTime 
@@ -56,7 +69,7 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         set
         {
             _data.StartTime = value;  
-            OnPropertyChanged(nameof(StartTime));
+            OnPropertyChanged();
         } 
     }
     
@@ -67,36 +80,35 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
         set
         {
             _timeStartedText = value;
-            OnPropertyChanged(nameof(TimeStartedText));
+            OnPropertyChanged();
         }
     }
 
-    private ObservableCollection<RankedBestSplitViewModel> _bestSplits = [];
-    public ObservableCollection<RankedBestSplitViewModel> BestSplits
-    {
-        get => _bestSplits;
-        set
-        {
-            _bestSplits = value;
-            OnPropertyChanged(nameof(BestSplits));
-        }
-    }
+    public ObservableCollection<RankedBestSplitViewModel> BestSplits { get; private set; } = [];
 
     public ICommand AddRoundCommand { get; set; }
     public ICommand SubtractRoundCommand { get; set; }
 
     private long _oldStartTime;
-
-    private const string _rankedPlayerCountFileName = "Ranked_players_count";
-    private const string _rankedCompletedCountFileName = "Ranked_completes_count";
-    private const string _rankedRoundsFileName = "Ranked_rounds";
-    private const string _rankedCustomTextFileName = "Ranked_customText";
+    private Action? _debounceUpdateAPI;
 
 
-    public RankedManagementPanel(RankedManagementData managementData, IDispatcherService dispatcher) : base(dispatcher)
+    /// <summary>
+    /// TODO: 0 Panel powinien byc tylko jako UI, bo w koncu jest to viewmodel, takze trzeba zrobic serwis do managementu? czy cos pod controller panel caly
+    ///  bo w zasadzie, side panel to jest BackgroundService, ale to managementu nie ma nic, wiec chyba trzeba cos ogarnac na rozwoj pod pacemana 
+    /// </summary>
+    public RankedManagementPanel(RankedManagementData managementData, IDispatcherService dispatcher, IBindingEngine bindingEngine) : base(dispatcher)
     {
         _data = managementData;
-        
+        _bindingEngine = bindingEngine;
+
+        // _debounceUpdateAPI = ((Action)UpdateAPI).Debounce();
+
+        keyCompletions = BindingKey.New("Ranked_management", "completions");
+        keyPlayers = BindingKey.New("Ranked_management", "players");
+        keyCustomText = BindingKey.New("Ranked_management", "custom_text");
+        keyRounds = BindingKey.New("Ranked_management", "rounds");
+
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubtractRoundCommand = new RelayCommand(() => { Rounds--; });
     }
@@ -104,18 +116,22 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() => true;
 
-    public override void InitializeAPI(APIDataSaver api)
+    public override void InitializeAPI()
     {
+        //TODO: 0 inicjalizowac binding
         Update();
     }
-    public override async Task UpdateAPI(APIDataSaver api)
-    {
-        //TODO: 0 to zamiast do pliku to bedzie podpiete do aktualizacji itemow w obsie, czyli podpiete scene itemy do tych rzeczy z managementu beda aktualizowaly wartosc
-        await api.UpdateFileContent(_rankedCompletedCountFileName, Completions);
-        await api.UpdateFileContent(_rankedPlayerCountFileName, Players);
 
-        await api.UpdateFileContent(_rankedRoundsFileName, Rounds);
-        await api.UpdateFileContent(_rankedCustomTextFileName, CustomText);
+    public override void UpdateAPI()
+    {
+        //TODO: 0 Publikowac zmiany do bindingu, ale w properties, tutaj jest samo aktualizowanie do obs'a (w sensie w tej metodzie)
+        //TODO: 0 to zamiast do pliku to bedzie podpiete do aktualizacji itemow w obsie, czyli podpiete scene itemy do tych rzeczy z managementu beda aktualizowaly wartosc
+
+        _bindingEngine.Publish(keyCustomText, CustomText);
+        _bindingEngine.Publish(keyRounds, Rounds);
+
+        _bindingEngine.Publish(keyCompletions, Completions);
+        _bindingEngine.Publish(keyPlayers, Players);
     }
 
     public void Update()

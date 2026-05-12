@@ -19,7 +19,6 @@ public interface IPreset
     string GetPath(string presetsPath) => Path.Combine(presetsPath, Name + ".json");
 }
 
-[JsonDerivedType(typeof(SoloManagementData), typeDiscriminator: "Solo")]
 [JsonDerivedType(typeof(PacemanManagementData), typeDiscriminator: "Paceman")]
 [JsonDerivedType(typeof(RankedManagementData), typeDiscriminator: "Ranked")]
 public abstract class ManagementData;
@@ -27,23 +26,17 @@ public abstract class ManagementData;
 public class RankedManagementData : ManagementData
 {
     public string CustomText { get; set; } = string.Empty;
-    public int Rounds { get; set; } = 0;
-    public long StartTime { get; set; } = 0;
+    public int Rounds { get; set; }
+    public long StartTime { get; set; }
     [JsonIgnore] public List<PrivRoomBestSplit> BestSplitsDatas { get; set; } = [];
     [JsonIgnore] public int Players { get; set; }
     [JsonIgnore] public int Completions { get; set; }
-    [JsonIgnore] public bool RefreshUI { get; set; } = false;
+    [JsonIgnore] public bool RefreshUI { get; set; }
 }
 
 public class PacemanManagementData : ManagementData
 {
     //TODO: 5 dane od api i rzeczy z zarzadzania pacemanem w kontrolerze
-}
-
-public class SoloManagementData : ManagementData
-{
-    public string LastFileName { get; set; } = string.Empty;
-    //TODO: 5 Tez jakas zmienna pod ostatni timeline i fajny bylby record tutaj
 }
 
 public class Tournament : IPreset

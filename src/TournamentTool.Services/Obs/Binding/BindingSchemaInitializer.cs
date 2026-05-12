@@ -34,6 +34,11 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
         _bindingEngine.RegisterSchema(BindingSchema.New("POV", "team_name", true));
         _bindingEngine.RegisterSchema(BindingSchema.New("POV", "stream_name", true));
         _bindingEngine.RegisterSchema(BindingSchema.New("POV", "stream_type", true));
+
+        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "custom_text"));
+        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "rounds"));
+        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "completions"));
+        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "players"));
     }
     
     private void LoadAppCacheBindings()

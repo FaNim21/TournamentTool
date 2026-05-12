@@ -17,7 +17,6 @@ public class BackgroundServiceFactory
         {
             ControllerMode.Paceman => ActivatorUtilities.CreateInstance<PaceManService>(_serviceProvider),
             ControllerMode.Ranked => ActivatorUtilities.CreateInstance<RankedService>(_serviceProvider),
-            ControllerMode.Solo => ActivatorUtilities.CreateInstance<SoloService>(_serviceProvider),
             _ => null,
         };
 }

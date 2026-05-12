@@ -21,6 +21,7 @@ public class Settings
     public bool SaveRankedPrivRoomDataOnSeedFinish { get; set; } = true;
 
     public HeadAPIType HeadAPIType { get; set; }
+    public string RankedApiDomain { get; set; } = "api.mcsrranked.com";
     
     // Console/logs
     public bool SaveLogsAfterShutdown { get; set; }

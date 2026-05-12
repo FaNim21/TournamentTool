@@ -34,11 +34,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public ObservableCollection<PlayerViewModel> SelectedPlayers
     {
         get => _selectedPlayers;
-        set
-        {
-            _selectedPlayers = value;
-            OnPropertyChanged(nameof(SelectedPlayers));
-        }
+        set => SetField(ref _selectedPlayers, value);
     }
     
     public ReadOnlyObservableCollection<IPlayerViewModel> Players => PlayerRepository.Players;
@@ -47,11 +43,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public int PlayerViewRefreshTrigger
     {
         get => _playerViewRefreshTrigger;
-        set
-        {
-            _playerViewRefreshTrigger = value;
-            OnPropertyChanged(nameof(PlayerViewRefreshTrigger));
-        }
+        set => SetField(ref _playerViewRefreshTrigger, value);
     }
 
     private int _filteredCount;
@@ -69,11 +61,7 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public PaceManEvent? ChosenEvent
     {
         get => _chosenEvent;
-        set
-        {
-            _chosenEvent = value;
-            OnPropertyChanged(nameof(ChosenEvent));
-        }
+        set => SetField(ref _chosenEvent, value);
     }
 
     private string _searchText = string.Empty;
@@ -96,57 +84,35 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public PlayerSortingType SortingType
     {
         get => _sortingType;
-        set
-        {
-            if (value == _sortingType) return;
-            _sortingType = value;
-            OnPropertyChanged(nameof(SortingType));
-        }
+        set => SetField(ref _sortingType, value);
     }
 
     private string _informationCount = string.Empty;
     public string InformationCount
     {
         get => _informationCount;
-        set
-        {
-            _informationCount = value;
-            OnPropertyChanged(nameof(InformationCount));
-        }
+        set => SetField(ref _informationCount, value);
     }
 
     private bool _isSearchEnabled = true;
     public bool IsSearchEnabled
     {
         get => _isSearchEnabled;
-        set
-        {
-            _isSearchEnabled = value;
-            OnPropertyChanged(nameof(IsSearchEnabled));
-        }
+        set => SetField(ref _isSearchEnabled, value);
     }
     
     private bool _isSearchEmpty = true;
     public bool IsSearchEmpty
     {
         get => _isSearchEmpty;
-        set
-        {
-            if (IsSearchEmpty == value) return;
-            _isSearchEmpty = value;
-            OnPropertyChanged(nameof(IsSearchEmpty));
-        }
+        set => SetField(ref _isSearchEmpty, value);
     }
 
     private bool _showPlayers;
     public bool ShowPlayers
     {
         get => _showPlayers;
-        set
-        {
-            _showPlayers = value;
-            OnPropertyChanged(nameof(ShowPlayers));
-        }
+        set => SetField(ref _showPlayers, value);
     }
 
     public ICommand AddPlayerCommand { get; set; }

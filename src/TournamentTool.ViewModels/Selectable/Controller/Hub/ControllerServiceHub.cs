@@ -5,17 +5,6 @@ using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.Hub;
 
-public interface IServiceUpdaterTimer
-{
-    public void UpdateTimer(string time);
-}
-public interface IServiceUpdater
-{
-    Task UpdateAsync(CancellationToken token);
-    void OnEnable();
-    void OnDisable();
-}
-
 public class ControllerServiceHub
 {
     private ILoggingService Logger { get; }
@@ -39,14 +28,6 @@ public class ControllerServiceHub
         {
             twitchService.OneTimeImmediately = true;
         }
-
-        APIUpdaterService apiUpdater = new(controller, logger);
-        ServiceRunner? apiService = AddService("API-data", apiUpdater, TimeSpan.FromSeconds(2), true);
-        if (apiService != null)
-        {
-            apiService.RunImmediately = true;
-        }
-        
     }
 
     public void OnEnable()

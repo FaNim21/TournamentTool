@@ -27,7 +27,6 @@ using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Logging;
 using TournamentTool.ViewModels.Menu;
-using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Selectable;
 using TournamentTool.ViewModels.StatusBar;
 

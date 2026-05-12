@@ -1,12 +1,14 @@
 ﻿namespace TournamentTool.Domain.Obs;
 
+//TODO: 3 Zrobic BindingScheme jako abstract i wtedy dzieci beda definiowac binding scheme zaleznie od pov, leaderboard, itp itd w przyszlosci
+// to trzeba jednak zrobic pozniej przez to jak czytane jest to w edytorze itp itd
+
+//Punkt jest taki, ze jak zrobie klasy zaleznie od typu schema to moge wtedy ewentualnie ustalac mozliwosci w xaml ze strony typu zaladowanej schemy czy bindingu
+// poniewaz i tak wtedy scene item type mialby support ogolnie do bindingu, a reszta by sie przelaczala ze wzgledu na typ bindingu
+
 public sealed record BindingSchema(string Source, string Field, bool haveName, bool haveIndex)
 {
-    //TODO: Zrobic BindingScheme jako abstract i wtedy dzieci beda definiowac binding scheme zaleznie od pov, leaderboard, itp itd w przyszlosci
-    
     public static BindingSchema New(string Source, string Field, bool haveName = false, bool haveIndex = false) => new(Source, Field.ToLower(), haveName, haveIndex);
-    
-    public static BindingSchema Empty() => new(string.Empty, string.Empty, false, false);
 }
 
 public sealed record BindingKey(string Source, string Field, string? Name = null, int? Index = null)

@@ -1,17 +1,16 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TournamentTool.Core.Common;
-using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Domain.Interfaces;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
+using TournamentTool.Services.Obs.Binding;
 using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Entities.Player;
 using TournamentTool.ViewModels.Factories;
@@ -27,6 +26,7 @@ namespace TournamentTool.ViewModels.Selectable;
 public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, IPlayerAddReceiver, IHotkeyReceiver
 {
     private readonly ITwitchService _twitch;
+    private readonly IBindingEngine _bindingEngine;
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
@@ -134,15 +134,17 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
     
 
     public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IBackgroundCoordinator backgroundCoordinator,
-        ITwitchService twitch, ILoggingService logger, IDispatcherService dispatcher, ISceneControllerViewModelFactory sceneControllerFactory) 
-        : base(dispatcher)
+        ITwitchService twitch, ILoggingService logger, IDispatcherService dispatcher, ISceneControllerViewModelFactory sceneControllerFactory,
+        IBindingEngine bindingEngine) : base(dispatcher)
     {
         Logger = logger;
         _playerRepository = playerRepository;
         _tournamentState = tournamentState;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
-        
+        _bindingEngine = bindingEngine;
+
+
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
 
         SceneRuntime = sceneControllerFactory.CreateRuntime();
@@ -185,7 +187,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
                     SidePanel = new RankedPacePanel(this, Dispatcher);
-                    ManagementPanel = new RankedManagementPanel((RankedManagementData)_tournamentState.CurrentPreset.ManagementData!, Dispatcher);
+                    ManagementPanel = new RankedManagementPanel((RankedManagementData)_tournamentState.CurrentPreset.ManagementData!, Dispatcher, _bindingEngine);
                 }
                 break;
         }

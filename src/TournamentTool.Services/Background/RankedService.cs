@@ -14,6 +14,7 @@ using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
+using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Services.Background;
 
@@ -45,6 +46,7 @@ public class RankedService : IBackgroundService
     private readonly IRankedAPIService _rankedApiService;
     private readonly ITournamentState _tournamentState;
     private readonly ITournamentPlayerRepository _playerRepository;
+    private readonly IBindingEngine _bindingEngine;
     private readonly RankedManagementData _rankedManagementData;
     
     private ILeaderboardManager Leaderboard { get; }
@@ -61,7 +63,6 @@ public class RankedService : IBackgroundService
     private Dictionary<RunMilestone, RankedEvaluateTimelineData> _splitDatas = [];
     private Dictionary<RankedSplitType, PrivRoomBestSplit> _bestSplits;
     
-    private readonly JsonSerializerOptions _options;
     private readonly JsonSerializerOptions _saveOptions;
     private MatchStatus _lastStatus;
     
@@ -73,7 +74,8 @@ public class RankedService : IBackgroundService
     
     
     public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettingsProvider settingsProvider, IPlayerViewModelFactory playerViewModelFactory, 
-        IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository)
+        IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
+        IBindingEngine bindingEngine)
     {
         Logger = logger;
         ImageService = imageService;
@@ -82,17 +84,13 @@ public class RankedService : IBackgroundService
         _rankedApiService = rankedApiService;
         _tournamentState = tournamentState;
         _playerRepository = playerRepository;
-        
+        _bindingEngine = bindingEngine;
+
         _settings = settingsProvider.Get<Settings>();
 
         _rankedManagementData = (tournamentState.CurrentPreset.ManagementData as RankedManagementData)!;
         _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
-        _options = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString,
-            PropertyNameCaseInsensitive = true
-        };
         _saveOptions = new JsonSerializerOptions() { WriteIndented = true };
     }
     

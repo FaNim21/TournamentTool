@@ -19,7 +19,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.Port = value;
-            OnPropertyChanged(nameof(Port));
+            OnPropertyChanged();
         }
     }
     public string Password
@@ -28,7 +28,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.Password = value;
-            OnPropertyChanged(nameof(Password));
+            OnPropertyChanged();
         }
     }
     public string FilterNameAtStartForSceneItems
@@ -39,7 +39,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
             if (!value.StartsWith("head", StringComparison.OrdinalIgnoreCase))
                 _settings.FilterNameAtStartForSceneItems = value;
     
-            OnPropertyChanged(nameof(FilterNameAtStartForSceneItems));
+            OnPropertyChanged();
         }
     }
     
@@ -51,7 +51,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
             if (value == _settings.IsAlwaysOnTop) return;
             
             _settings.IsAlwaysOnTop = value;
-            OnPropertyChanged(nameof(IsAlwaysOnTop));
+            OnPropertyChanged();
             
             _windowService.SetMainWindowTopMost(value);
         }
@@ -62,7 +62,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.SaveTwitchToken = value;
-            OnPropertyChanged(nameof(SaveTwitchToken));
+            OnPropertyChanged();
         }
     }
     public bool AutoLoginToTwitch
@@ -71,7 +71,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.AutoLoginToTwitch = value;
-            OnPropertyChanged(nameof(AutoLoginToTwitch));
+            OnPropertyChanged();
         }
     }
     public bool SaveRankedPrivRoomDataOnSeedFinish
@@ -80,7 +80,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.SaveRankedPrivRoomDataOnSeedFinish = value;
-            OnPropertyChanged(nameof(SaveRankedPrivRoomDataOnSeedFinish));
+            OnPropertyChanged();
         }
     }
     
@@ -90,7 +90,16 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.HeadAPIType = value;
-            OnPropertyChanged(nameof(HeadAPIType));
+            OnPropertyChanged();
+        }
+    }
+    public string RankedApiDomain
+    {
+        get => _settings.RankedApiDomain;
+        set
+        {
+            _settings.RankedApiDomain = value;
+            OnPropertyChanged();
         }
     }
 
@@ -100,7 +109,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         set
         {
             _settings.SaveLogsAfterShutdown = value;
-            OnPropertyChanged(nameof(SaveLogsAfterShutdown));
+            OnPropertyChanged();
         }
     }
     public int ConsoleLogsLimit
@@ -110,7 +119,7 @@ public class GeneralTabViewModel : BaseViewModel, ISettingsTab
         {
             int clampedValue = Math.Clamp(value, 50, 500);
             _settings.ConsoleLogsLimit = clampedValue;
-            OnPropertyChanged(nameof(ConsoleLogsLimit));
+            OnPropertyChanged();
         }
     }
     
