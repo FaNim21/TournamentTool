@@ -36,4 +36,14 @@ public static class InputKindSupportedGroupValues
     [
         InputKind.text_gdiplus_v3,
     ];
+    
+    public static IEnumerable<InputKind> GetSupportedInputKinds(this InputKind inputKind)
+    {
+        return inputKind switch
+        {
+            InputKind.browser_source or InputKind.tt_point_of_view => Browser,
+            InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => Text,
+            _ => []
+        };
+    }
 }

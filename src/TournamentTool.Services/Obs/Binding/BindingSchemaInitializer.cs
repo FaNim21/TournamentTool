@@ -27,18 +27,18 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
     private void InitializePointOfViewSchemes()
     {
         //POV
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "head", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "display_name", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "ign", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "pb", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "team_name", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "stream_name", true));
-        _bindingEngine.RegisterSchema(BindingSchema.New("POV", "stream_type", true));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("head"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("display_name"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("ign"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("pb"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("team_name"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_name"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_type"));
 
-        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "custom_text"));
-        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "rounds"));
-        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "completions"));
-        _bindingEngine.RegisterSchema(BindingSchema.New("Ranked_management", "players"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("custom_text"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("rounds"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("completions"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("players"));
     }
     
     private void LoadAppCacheBindings()

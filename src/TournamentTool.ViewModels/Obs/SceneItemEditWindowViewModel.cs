@@ -4,13 +4,22 @@ using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Obs.Binding;
+using TournamentTool.ViewModels.Obs.Bindings;
 using TournamentTool.ViewModels.Obs.Items;
 
 namespace TournamentTool.ViewModels.Obs;
 
 public class SceneItemEditWindowViewModel : BaseWindowViewModel
 {
+    private readonly SceneViewModel _sceneViewModel;
     public SceneItemViewModel SceneItemViewModel { get; }
+
+    private ObservableCollection<InputKind> _supportedInputKinds = [];
+    public ObservableCollection<InputKind> SupportedInputKinds
+    {
+        get => _supportedInputKinds;
+        set => SetField(ref _supportedInputKinds, value);
+    }
 
     private InputKind _inputKind = InputKind.unsupported;
     public InputKind InputKind
@@ -18,147 +27,79 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         get => _inputKind;
         set
         {
-            if (value == _inputKind) return;
+            if (_inputKind == value) return;
+
             _inputKind = value;
             OnPropertyChanged();
+
+            SupportedInputKinds = [.. _inputKind.GetSupportedInputKinds()];
+            //TODO: 0 Zostalo zrobic tylko powiazanie tak zeby zdefiniowac na jakim inputkind jakie bindingi moga byc
         }
     }
 
-    private readonly IReadOnlyCollection<BindingSchema> Schemas;
+    private readonly IReadOnlyCollection<BindingSchema> AllSchemas;
 
-    public ObservableCollection<string> Sources { get; init; }
-
-    private ObservableCollection<string> _fields = [];
-    public ObservableCollection<string> Fields
+    private BindingViewModelBase? _bindingViewModelBase;
+    public BindingViewModelBase? BindingConfigurationViewModel
     {
-        get => _fields;
-        private set => SetField(ref _fields, value);
+        get => _bindingViewModelBase;
+        private set => SetField(ref _bindingViewModelBase, value);
     }
 
-    public ObservableCollection<string> PovNames { get; private set; } = [];
+    public ObservableCollection<string> Schemas { get; init; }
 
-    private string _chosenSource = string.Empty;
-    public string ChosenSource
+    private string _chosenSchema = string.Empty;
+    public string ChosenSchema
     {
-        get => _chosenSource;
+        get => _chosenSchema;
         set
         {
-            _chosenSource = value;
-            OnPropertyChanged();
-
-            Fields = new ObservableCollection<string>(Schemas
-                .Where(f => f.Source.Equals(ChosenSource))
-                .Select(f => f.Field));
-        }
-    }
-
-    private string _chosenField = string.Empty;
-    public string ChosenField
-    {
-        get => _chosenField;
-        set
-        {
-            _chosenField = value;
-            OnPropertyChanged();
+            if (_chosenSchema.Equals(value)) return;
             
-            LoadSchema(ChosenField);
-        }
-    }
-    
-    private string _sourceName = string.Empty;
-    public string SourceName
-    {
-        get => _sourceName;
-        set
-        {
-            _sourceName = value;
+            _chosenSchema = value;
             OnPropertyChanged();
+
+            BindingSchema? configSchema = AllSchemas.FirstOrDefault(schema => schema.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
+            LoadBindingViewModel(configSchema);
         }
     }
 
-    private int _index;
-    public int Index
-    {
-        get => _index;
-        set
-        {
-            _index = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private bool _isUsingName;
-    public bool IsUsingName
-    {
-        get => _isUsingName;
-        set
-        {
-            _isUsingName = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private bool _isUsingIndex;
-    public bool IsUsingIndex
-    {
-        get => _isUsingIndex;
-        set
-        {
-            _isUsingIndex = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public BindingKey BindingKey { get; private set; } = BindingKey.Empty();
+    private SceneItemConfiguration? _configuration;
     
     
     public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, SceneViewModel sceneViewModel, IBindingEngine bindingEngine, AppCache appCache, 
         IDispatcherService dispatcher) : base(dispatcher)
     {
+        _sceneViewModel = sceneViewModel;
+        
         SceneItemViewModel = sceneItemViewModel;
         InputKind = SceneItemViewModel.InputKind;
 
-        foreach (SceneItemViewModel sceneItem in sceneViewModel.SceneItems)
-        {
-            if (sceneItem is not PointOfViewViewModel pov) continue;
-            
-            PovNames.Add(pov.SourceName);
-        }
+        AllSchemas = bindingEngine.AvailableSchemas;
+        Schemas = [.. AllSchemas.DistinctBy(s => s.Name).Select(s => s.Name)];
 
-        Schemas = bindingEngine.AvailableSchemas;
-        Sources = new ObservableCollection<string>(Schemas.Select(s => s.Source).Distinct());
-        
         appCache.SceneItemConfigs.TryGetValue(SceneItemViewModel.SourceUUID, out SceneItemConfiguration? config);
-        Initialize(config);
+        _configuration = config;
+
+        string configSchemaName = config?.BindingKey.GetSchema()?.Name ?? string.Empty;
+        ChosenSchema = Schemas.FirstOrDefault(schema => schema.Equals(configSchemaName)) ?? string.Empty;
     }
-    public override void Dispose()
+
+    public void LoadBindingViewModel(BindingSchema? schema)
     {
-        string? sourceName = string.IsNullOrEmpty(SourceName) ? null : SourceName;
-        int? index = Index <= 0 ? null : Index;
+        if (schema is null)
+        {
+            BindingConfigurationViewModel = null;
+            return;
+        }
         
-        BindingKey = new BindingKey(ChosenSource, ChosenField, sourceName, index);
+        BindingConfigurationViewModel = schema switch
+        {
+            BindingPOVSchema => new BindingPovViewModel(AllSchemas.OfType<BindingPOVSchema>().ToList(), _sceneViewModel, _configuration?.BindingKey, Dispatcher),
+            BindingRankedManagement => new BindingRankedManagementViewModel(Dispatcher),
+            _ => null
+        };
     }
 
-    private void Initialize(SceneItemConfiguration? config)
-    {
-        BindingKey? binding = config?.BindingKey;
-        if (binding == null || binding.IsEmpty()) return;
-
-        ChosenSource = binding.Source;
-        ChosenField = Fields.FirstOrDefault(field => field.Equals(binding.Field, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
-
-        Index = binding.Index ?? 0;
-        SourceName = PovNames.FirstOrDefault(name => name.Equals(binding.Name, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
-    }
-
-    private void LoadSchema(string field)
-    {
-        BindingSchema? schema = Schemas.FirstOrDefault(s => 
-            s.Source.Equals(ChosenSource, StringComparison.OrdinalIgnoreCase) && 
-            s.Field.Equals(field, StringComparison.OrdinalIgnoreCase));
-        if (schema == null) return;
-
-        IsUsingName = schema.haveName;
-        IsUsingIndex = schema.haveIndex;
-    }
+    public BindingKey GetBindingKey() => BindingConfigurationViewModel?.GetBindingKey() ?? BindingKey.CreateEmpty();
 }

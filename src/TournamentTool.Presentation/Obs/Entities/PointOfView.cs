@@ -117,13 +117,13 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         set => SetField(ref _newVolume, value);
     }
 
-    private BindingKey keyHead { get; set; } = BindingKey.Empty();
-    private BindingKey keyDisplayName { get; set; } = BindingKey.Empty();
-    private BindingKey keyIgn { get; set; } = BindingKey.Empty();
-    private BindingKey keyPb { get; set; } = BindingKey.Empty();
-    private BindingKey keyTeamName { get; set; } = BindingKey.Empty();
-    private BindingKey keyStreamName { get; set; } = BindingKey.Empty();
-    private BindingKey keyStreamType { get; set; } = BindingKey.Empty();
+    private BindingKey keyHead { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyDisplayName { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyIgn { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyPb { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyTeamName { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyStreamName { get; set; } = BindingKey.CreateEmpty();
+    private BindingKey keyStreamType { get; set; } = BindingKey.CreateEmpty();
 
 
     public PointOfView(ISceneManager sceneManager, ILoggingService logger, SceneType type) : base(sceneManager, logger)
@@ -153,13 +153,13 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
     {
         base.Initialize(scene, item, group, configuration);
         
-        keyHead = BindingKey.New("POV", "head", SourceName);
-        keyDisplayName = BindingKey.New("POV", "display_name", SourceName);
-        keyIgn = BindingKey.New("POV", "ign", SourceName);
-        keyPb = BindingKey.New("POV", "pb", SourceName);
-        keyTeamName = BindingKey.New("POV", "team_name", SourceName);
-        keyStreamName = BindingKey.New("POV", "stream_name", SourceName);
-        keyStreamType = BindingKey.New("POV", "stream_type", SourceName);
+        keyHead = BindingKey.CreatePov("head", SourceName);
+        keyDisplayName = BindingKey.CreatePov("display_name", SourceName);
+        keyIgn = BindingKey.CreatePov("ign", SourceName);
+        keyPb = BindingKey.CreatePov("pb", SourceName);
+        keyTeamName = BindingKey.CreatePov("team_name", SourceName);
+        keyStreamName = BindingKey.CreatePov("stream_name", SourceName);
+        keyStreamType = BindingKey.CreatePov("stream_type", SourceName);
     }
     public override async Task LoadAsync()
     {

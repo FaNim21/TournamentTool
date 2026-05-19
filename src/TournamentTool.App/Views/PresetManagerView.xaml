@@ -51,7 +51,7 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top">
 
-                        <StackPanel Orientation="Vertical" >
+                        <StackPanel Orientation="Vertical">
                             <TextBlock Text="Controller Mode"
                                        HorizontalAlignment="Left"
                                        FontSize="24"

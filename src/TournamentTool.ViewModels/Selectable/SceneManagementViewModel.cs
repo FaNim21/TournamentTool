@@ -142,9 +142,9 @@ public class SceneManagementViewModel : SelectableViewModel
         return true;
     }
 
-    private void EditSceneItem(SceneItemViewModel sceneItem)
+    private void EditSceneItem(SceneItemViewModel sceneItemViewModel)
     {
-        SceneItemEditWindowViewModel viewModel = new(sceneItem, SceneEditor.MainSceneViewModel, _bindingEngine, _appCache, Dispatcher);
+        SceneItemEditWindowViewModel viewModel = new(sceneItemViewModel, SceneEditor.MainSceneViewModel, _bindingEngine, _appCache, Dispatcher);
         _windowService.ShowCustomDialog(viewModel, OnEditSceneItemClosed, "SceneItemEditWindow");
     }
 
@@ -152,11 +152,11 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         try
         {
-            SceneItemConfiguration editedConfig = new(editWindowViewModel.InputKind, editWindowViewModel.BindingKey);
+            BindingKey key = editWindowViewModel.GetBindingKey();
+            SceneItemConfiguration editedConfig = new(editWindowViewModel.InputKind, key);
             string uuid = editWindowViewModel.SceneItemViewModel.SourceUUID;
-
-            _appCache.SceneItemConfigs[uuid] = editedConfig;
             
+            _appCache.SceneItemConfigs[uuid] = editedConfig;
             await SceneEditor.UpdateScenes(uuid);
         }
         catch (Exception ex)

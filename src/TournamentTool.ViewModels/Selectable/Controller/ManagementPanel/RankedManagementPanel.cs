@@ -104,10 +104,10 @@ public class RankedManagementPanel : ManagementPanel, IRankedManagementDataRecei
 
         // _debounceUpdateAPI = ((Action)UpdateAPI).Debounce();
 
-        keyCompletions = BindingKey.New("Ranked_management", "completions");
-        keyPlayers = BindingKey.New("Ranked_management", "players");
-        keyCustomText = BindingKey.New("Ranked_management", "custom_text");
-        keyRounds = BindingKey.New("Ranked_management", "rounds");
+        keyCompletions = BindingKey.CreateRankedManagement("completions");
+        keyPlayers = BindingKey.CreateRankedManagement("players");
+        keyCustomText = BindingKey.CreateRankedManagement("custom_text");
+        keyRounds = BindingKey.CreateRankedManagement("rounds");
 
         AddRoundCommand = new RelayCommand(() => { Rounds++; });
         SubtractRoundCommand = new RelayCommand(() => { Rounds--; });

@@ -15,7 +15,7 @@ public abstract class SceneItem : IBindingTarget
 
     public Transform Transform { get; init; } = new();
 
-    public BindingKey BindingKey { get; private set; } = BindingKey.Empty();
+    public BindingKey BindingKey { get; private set; } = BindingKey.CreateEmpty();
 
     public abstract string BaseItemType { get; }
     public InputKind InputKind { get; protected set; }

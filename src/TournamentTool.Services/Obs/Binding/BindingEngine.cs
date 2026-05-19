@@ -12,10 +12,12 @@ public class BindingEngine : IBindingEngine
     
     public BindingNode? GetOrCreateNode(BindingKey key)
     {
-        if (key is null) return null;
-        
+        if (key is null || key.IsEmpty()) return null;
         if (_nodes.TryGetValue(key, out var node)) return node;
         
+        // \/ to jest po to zeby pozniej publikowanie sie nie rozkrzaczalo przez to ze sa roznej wielkosci litery w nazwach itemow w obsie
+        // var validatedKey = new BindingKey(key.Source, key.Field.ToLower(), key?.Name?.ToLower(), key?.Index);
+        // nie potrzebne, bo nowa struktura, czyli czysczimy app_data i przy zapisywaniu uwzgledniamy to lower
         node = new BindingNode(key);
         _nodes[key] = node;
         return node;

@@ -11,6 +11,7 @@
         xmlns:converters="clr-namespace:TournamentTool.App.Converters"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
+        xmlns:bindings="clr-namespace:TournamentTool.ViewModels.Obs.Bindings;assembly=TournamentTool.ViewModels"
         d:DataContext="{d:DesignInstance Type=obs:SceneItemEditWindowViewModel}"
         mc:Ignorable="d"
         Title="Scene item edit window"
@@ -24,153 +25,60 @@
         WindowStyle="None">
     <Window.Resources>
 
-        <DataTemplate DataType="{x:Type items:PointOfViewViewModel}">
-            <StackPanel>
-                <TextBlock Text="Point of view" />
-                <!-- TODO: TU TRZEBA USTALIC caly config dla pov'a, chyba w sumie tu nic nie bedzie xd-->
+        <DataTemplate DataType="{x:Type bindings:BindingPovViewModel}">
+            <StackPanel HorizontalAlignment="Stretch">
 
-                <ComboBox Style="{StaticResource ComboBoxTest2}"
-                          Width="200"
-                          Margin="10 0 0 0"
-                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
-                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="0 5 0 0">
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="200"
+                              ItemsSource="{Binding Fields}"
+                              SelectedItem="{Binding ChosenField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
+                    <TextBlock Text="Field"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Field that api is reading data from"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="0 5 0 0">
+
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="200"
+                              ItemsSource="{Binding PovNames}"
+                              SelectedItem="{Binding ChosenPovName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="POV name"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Binding source pov name (for multiple elements of same source)"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
+                
             </StackPanel>
         </DataTemplate>
-        
-        <!-- BOLI TU DUPLIKOWANIE -->
+
+        <DataTemplate DataType="{x:Type bindings:BindingRankedManagementViewModel}">
+            <StackPanel>
+                <TextBlock Text="XD" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Zostalo jako templatka do indexu??????? -->
         <DataTemplate DataType="{x:Type items:BrowserItemViewModel}">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Browser"
-                           FontSize="22"
-                           TextAlignment="Center"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           Background="Transparent"
-                           Foreground="White"
-                           Padding="0"
-                           Margin="2" />
-                
-                <ComboBox Style="{StaticResource ComboBoxTest2}"
-                          Width="200"
-                          Margin="10 0 0 0"
-                          ItemsSource="{Binding Source={x:Static obsDomain:InputKindSupportedGroupValues.Browser}}"
-                          SelectedItem="{Binding DataContext.InputKind, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.Sources, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.ChosenSource, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.Fields, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.ChosenField, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            Visibility="{Binding DataContext.IsUsingName, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Margin="0 10 0 5">
-                    
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.PovNames, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.SourceName, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    
-                    <TextBlock Text="Source name"
-                               ToolTipService.InitialShowDelay="0"
-                               ToolTipService.ShowDuration="60000"
-                               ToolTip="Binding source name (for multiple elements of same source, differencing only by source name like POV type)"
-                               Foreground="White"
-                               Height="20"
-                               FontSize="16"
-                               Padding="0"
-                               Margin="5 0 0 3" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            Visibility="{Binding DataContext.IsUsingIndex, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Margin="0 10 0 5">
-                    <TextBox TextWrapping="Wrap"
-                             Width="120"
-                             Height="20"
-                             Text="{Binding DataContext.Index, RelativeSource={RelativeSource AncestorType=Window}}"
-                             Background="#9E9E9E"
-                             HorizontalAlignment="Left"
-                             VerticalAlignment="Top">
-                        <b:Interaction.Behaviors>
-                            <behaviors:NumericTextBoxBehavior AllowNegative="False" />
-                        </b:Interaction.Behaviors>
-                    </TextBox>
-                    <TextBlock Text="Position"
-                               ToolTipService.InitialShowDelay="0"
-                               ToolTipService.ShowDuration="60000"
-                               ToolTip="Binding position (for list/array of elements, 1-based indexing)"
-                               Foreground="White"
-                               Height="20"
-                               FontSize="16"
-                               Padding="0"
-                               Margin="5 0 0 3" />
-                </StackPanel>
-            </StackPanel>
-        </DataTemplate>
-
-        <!-- BOLI TU DUPLIKOWANIE -->
-        <DataTemplate DataType="{x:Type items:TextItemViewModel}">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Text"
-                           FontSize="22"
-                           TextAlignment="Center"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           Background="Transparent"
-                           Foreground="White"
-                           Padding="0"
-                           Margin="2" />
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.Sources, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.ChosenSource, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.Fields, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.ChosenField, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            Visibility="{Binding DataContext.IsUsingName, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Margin="0 10 0 5">
-                    
-                    <ComboBox Style="{StaticResource ComboBoxTest2}"
-                              Width="150"
-                              Margin="10 0 0 0"
-                              ItemsSource="{Binding DataContext.PovNames, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding DataContext.SourceName, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    
-                    <TextBlock Text="Source name"
-                               ToolTipService.InitialShowDelay="0"
-                               ToolTipService.ShowDuration="60000"
-                               ToolTip="Binding source name (for multiple elements of same source, differencing only by source name like POV type)"
-                               Foreground="White"
-                               Height="20"
-                               FontSize="16"
-                               Padding="0"
-                               Margin="5 0 0 3" />
-                </StackPanel>
 
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
@@ -228,7 +136,7 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                
+
                 <StackPanel Grid.Column="0"
                             Margin="5">
                     <TextBlock FontSize="12"
@@ -244,7 +152,7 @@
                         <Run Text="{Binding SceneItemViewModel.SourceName, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
-                    
+
                     <TextBlock FontSize="12"
                                TextAlignment="Left"
                                VerticalAlignment="Center"
@@ -272,7 +180,7 @@
                         <Run Text="{Binding SceneItemViewModel.BaseItemType, Mode=OneWay}"
                              Foreground="Wheat" />
                     </TextBlock>
-                    
+
                     <TextBlock FontSize="12"
                                TextAlignment="Left"
                                VerticalAlignment="Center"
@@ -288,9 +196,39 @@
                     </TextBlock>
                 </StackPanel>
 
-                <Grid Grid.Column="1">
-                    <ContentControl Content="{Binding SceneItemViewModel}" />
-                </Grid>
+                <StackPanel Grid.Column="1"
+                            HorizontalAlignment="Stretch">
+                    <TextBlock Text="Binding configuration"
+                               FontSize="22"
+                               TextAlignment="Center"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Background="Transparent"
+                               Foreground="Wheat"
+                               FontWeight="SemiBold"
+                               Padding="0"
+                               Margin="4" />
+                    
+                    <StackPanel Orientation="Vertical"
+                                HorizontalAlignment="Left">
+                        <!-- Trzeba dla kazdego comboxa dac textblock po -->
+                        <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                  Width="200"
+                                  Height="20"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding SupportedInputKinds}"
+                                  SelectedItem="{Binding InputKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                  Width="200"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding Schemas}"
+                                  SelectedItem="{Binding ChosenSchema, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0 5 0 0" />
+
+                        <ContentControl Content="{Binding BindingConfigurationViewModel}" />
+                    </StackPanel>
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>
