@@ -33,7 +33,15 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
             OnPropertyChanged();
 
             SupportedInputKinds = [.. _inputKind.GetSupportedInputKinds()];
-            //TODO: 0 Zostalo zrobic tylko powiazanie tak zeby zdefiniowac na jakim inputkind jakie bindingi moga byc
+            
+            ShowSchemaOptions = _inputKind.IsSupportingBinding();
+            if (!ShowSchemaOptions)
+            {
+                ChosenSchema = "Empty";
+                return;
+            }
+
+            LoadSchemaFromConfig();
         }
     }
 
@@ -46,22 +54,33 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         private set => SetField(ref _bindingViewModelBase, value);
     }
 
-    public ObservableCollection<string> Schemas { get; init; }
+    public ObservableCollection<string> Schemas { get; init; } = [];
 
-    private string _chosenSchema = string.Empty;
+    private string _chosenSchema = "Empty";
     public string ChosenSchema
     {
         get => _chosenSchema;
         set
         {
-            if (_chosenSchema.Equals(value)) return;
-            
             _chosenSchema = value;
             OnPropertyChanged();
 
-            BindingSchema? configSchema = AllSchemas.FirstOrDefault(schema => schema.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(_chosenSchema) || _chosenSchema.Equals("Empty"))
+            {
+                LoadBindingViewModel(null);
+                return;
+            }
+            
+            BindingSchema? configSchema = AllSchemas.FirstOrDefault(schema => schema.Name.Equals(_chosenSchema, StringComparison.OrdinalIgnoreCase));
             LoadBindingViewModel(configSchema);
         }
+    }
+    
+    private bool _showSchemaOptions = true;
+    public bool ShowSchemaOptions
+    {
+        get => _showSchemaOptions;
+        set => SetField(ref _showSchemaOptions, value);
     }
 
     private SceneItemConfiguration? _configuration;
@@ -76,13 +95,12 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         InputKind = SceneItemViewModel.InputKind;
 
         AllSchemas = bindingEngine.AvailableSchemas;
-        Schemas = [.. AllSchemas.DistinctBy(s => s.Name).Select(s => s.Name)];
+        Schemas = ["Empty", .. AllSchemas.DistinctBy(s => s.Name).Select(s => s.Name)];
 
         appCache.SceneItemConfigs.TryGetValue(SceneItemViewModel.SourceUUID, out SceneItemConfiguration? config);
         _configuration = config;
-
-        string configSchemaName = config?.BindingKey.GetSchema()?.Name ?? string.Empty;
-        ChosenSchema = Schemas.FirstOrDefault(schema => schema.Equals(configSchemaName)) ?? string.Empty;
+        
+        LoadSchemaFromConfig();
     }
 
     public void LoadBindingViewModel(BindingSchema? schema)
@@ -96,9 +114,16 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         BindingConfigurationViewModel = schema switch
         {
             BindingPOVSchema => new BindingPovViewModel(AllSchemas.OfType<BindingPOVSchema>().ToList(), _sceneViewModel, _configuration?.BindingKey, Dispatcher),
-            BindingRankedManagement => new BindingRankedManagementViewModel(Dispatcher),
+            BindingRankedManagementSchema => new BindingRankedManagementViewModel(Dispatcher),
+            BindingLeaderboardSchema => new BindingLeaderboardViewModel(Dispatcher),
             _ => null
         };
+    }
+    
+    private void LoadSchemaFromConfig()
+    {
+        string configSchemaName = _configuration?.BindingKey.GetSchema()?.Name ?? "Empty";
+        ChosenSchema = Schemas.FirstOrDefault(schema => schema.Equals(configSchemaName)) ?? string.Empty;
     }
 
     public BindingKey GetBindingKey() => BindingConfigurationViewModel?.GetBindingKey() ?? BindingKey.CreateEmpty();

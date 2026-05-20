@@ -7,7 +7,7 @@ namespace TournamentTool.ViewModels.Obs.Bindings;
 
 public class BindingPovViewModel : BindingViewModelBase
 {
-    public ObservableCollection<string> PovNames { get; } = [];
+    public ObservableCollection<string> PovNames { get; }
     
     private string _chosenPovName = string.Empty;
     public string ChosenPovName

@@ -72,7 +72,17 @@
 
         <DataTemplate DataType="{x:Type bindings:BindingRankedManagementViewModel}">
             <StackPanel>
-                <TextBlock Text="XD" />
+                <TextBlock Text="Ranked management data support WIP..."
+                           Foreground="White"
+                           Margin="0 5 0 0" />
+            </StackPanel>
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type bindings:BindingLeaderboardViewModel}">
+            <StackPanel>
+                <TextBlock Text="Leaderboard support WIP..."
+                           Foreground="White"
+                           Margin="0 5 0 0" />
             </StackPanel>
         </DataTemplate>
 
@@ -211,20 +221,43 @@
                     
                     <StackPanel Orientation="Vertical"
                                 HorizontalAlignment="Left">
-                        <!-- Trzeba dla kazdego comboxa dac textblock po -->
-                        <ComboBox Style="{StaticResource ComboBoxTest2}"
-                                  Width="200"
-                                  Height="20"
-                                  HorizontalAlignment="Left"
-                                  ItemsSource="{Binding SupportedInputKinds}"
-                                  SelectedItem="{Binding InputKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                      Width="200"
+                                      HorizontalAlignment="Left"
+                                      ItemsSource="{Binding SupportedInputKinds}"
+                                      SelectedItem="{Binding InputKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            
+                            <TextBlock Text="Input kind"
+                                       ToolTipService.InitialShowDelay="0"
+                                       ToolTipService.ShowDuration="60000"
+                                       ToolTip="Sets OBS or custom input kind for configuration purposes"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
 
-                        <ComboBox Style="{StaticResource ComboBoxTest2}"
-                                  Width="200"
-                                  HorizontalAlignment="Left"
-                                  ItemsSource="{Binding Schemas}"
-                                  SelectedItem="{Binding ChosenSchema, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Margin="0 5 0 0" />
+                        <StackPanel Visibility="{Binding ShowSchemaOptions, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Orientation="Horizontal">
+                            <ComboBox Style="{StaticResource ComboBoxTest2}"
+                                      Width="200"
+                                      HorizontalAlignment="Left"
+                                      ItemsSource="{Binding Schemas}"
+                                      SelectedItem="{Binding ChosenSchema, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Margin="0 5 0 0" />
+
+                            <TextBlock Text="Scheme type"
+                                       ToolTipService.InitialShowDelay="0"
+                                       ToolTipService.ShowDuration="60000"
+                                       ToolTip="Defines which the app schema from which you want to obtain data to this scene item"
+                                       Foreground="White"
+                                       Height="20"
+                                       FontSize="16"
+                                       Padding="0"
+                                       Margin="5 0 0 3" />
+                        </StackPanel>
 
                         <ContentControl Content="{Binding BindingConfigurationViewModel}" />
                     </StackPanel>

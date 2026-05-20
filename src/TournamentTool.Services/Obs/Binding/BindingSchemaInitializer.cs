@@ -35,10 +35,18 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
         _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_name"));
         _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_type"));
 
+        //Ranked Management data
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("custom_text"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("rounds"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("completions"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("players"));
+
+        //Leaderboard
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("points"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("head"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("display_name"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("ign"));
+        //wiecej od leaderboard bedzie...
     }
     
     private void LoadAppCacheBindings()
