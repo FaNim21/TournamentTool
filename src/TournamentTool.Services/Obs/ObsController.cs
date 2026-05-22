@@ -349,6 +349,11 @@ public class ObsController : IObsController, IDisposable
         SceneTransitionStarted?.Invoke(this, EventArgs.Empty);
     }
 
+    public async Task CreateGroupItem(string name)
+    {
+        // await Client.CreateSceneAsync(new CreateSceneRequestData());
+    }
+    
     public async Task<GetInputSettingsResponseData?> GetInputSettingsAsync(string sourceUuid) 
         => await Client.GetInputSettingsAsync(new GetInputSettingsRequestData(null, sourceUuid));
     public async Task<GetVideoSettingsResponseData?> GetVideoSettingsAsync() 

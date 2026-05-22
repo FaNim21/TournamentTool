@@ -21,6 +21,7 @@ public class SceneManagementViewModel : SelectableViewModel
     private readonly IObsController _obs;
     private readonly IWindowService _windowService;
     private readonly ILoggingService _logger;
+    private readonly ISettingsSaver _settingsSaver;
 
     public SceneEditorViewModel SceneEditor { get; }
 
@@ -108,13 +109,14 @@ public class SceneManagementViewModel : SelectableViewModel
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
     /// </summary>
     public SceneManagementViewModel(IDispatcherService dispatcher, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
-        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService, ILoggingService logger) 
-        : base(dispatcher)
+        ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService, ILoggingService logger,
+        ISettingsSaver settingsSaver) : base(dispatcher)
     {
         _bindingEngine = bindingEngine;
         _obs = obs;
         _windowService = windowService;
         _logger = logger;
+        _settingsSaver = settingsSaver;
 
         _appCache = settingsProvider.Get<AppCache>();
 
@@ -138,6 +140,7 @@ public class SceneManagementViewModel : SelectableViewModel
     public override bool OnDisable()
     {
         SceneEditor.OnDisable();
+        _settingsSaver.Save();
         
         return true;
     }

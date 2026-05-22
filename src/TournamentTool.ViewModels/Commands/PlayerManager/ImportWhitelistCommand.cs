@@ -141,9 +141,13 @@ public class ImportWhitelistCommand : BaseCommand
             player.PersonalBest = fields[3];
             if (fields.Length > 4) 
             {
-                player.StreamData.SetName(fields[4].ToLower().Trim());
+                player.StreamData.SetName(fields[4]);
                 if (fields.Length > 5)
-                    player.StreamData.SetName(fields[5].ToLower().Trim());
+                    player.StreamData.SetName(fields[5]);
+            }
+            if (fields.Length > 6)
+            {
+                player.TeamName = fields[6];
             }
 
             if (_playerRepository.ContainsDuplicatesNoDialog(player.Data))

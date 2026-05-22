@@ -331,7 +331,17 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     private void OnPresetAddedInFile(object sender, FileSystemEventArgs e)
     {
         string fullPath = e.FullPath;
-        string text = File.ReadAllText(fullPath) ?? string.Empty;
+        string text = string.Empty;
+        
+        try
+        {
+            text = File.ReadAllText(fullPath) ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error reading created file in preset folder - {ex}");
+        }
+        
         if (string.IsNullOrEmpty(text)) return;
         
         try

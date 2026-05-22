@@ -41,15 +41,22 @@ public partial class MainWindow : Window
 
         Application.Current.DispatcherUnhandledException += (_, e) =>
         {
-            LogUnhandledExceptionAsNotCrashed(e.Exception, "Application.Current.DispatcherUnhandledException");
-            e.Handled = true; //Problem z tym, ze to blokuje wywalanie aplikacji, a nie wiem czy to sie do czegos ma jak i tak nie ma UI xd
+            LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
+            // e.Handled = true; //Problem z tym, ze to blokuje wywalanie aplikacji, a nie wiem czy to sie do czegos ma jak i tak nie ma UI xd
         };
 
-        TaskScheduler.UnobservedTaskException += (_, e) =>
+        Dispatcher.UnhandledException += (_, e) =>
         {
-            LogUnhandledExceptionAsNotCrashed(e.Exception, "TaskScheduler.UnobservedTaskException");
-            e.SetObserved();
+            LogUnhandledException(e.Exception, "Dispatcher.UnhandledException");
+            // e.Handled = true;
         };
+        
+        /*TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            // LogUnhandledExceptionAsNotCrashed(e.Exception, "TaskScheduler.UnobservedTaskException");
+            LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
+            e.SetObserved();
+        };*/
     }
     
     private static bool IsSingleInstance()

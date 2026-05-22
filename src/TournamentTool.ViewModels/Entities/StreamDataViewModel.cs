@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
+using TournamentTool.Domain.Common;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.ViewModels.Modals;
@@ -230,15 +231,19 @@ public class StreamDataViewModel : BaseViewModel
     
     public void SetName(string name)
     {
-        if (string.IsNullOrEmpty(name) || ExistName(name)) return;
-
+        string newName = name.ToLowerInvariant().Trim();
+        
+        if (string.IsNullOrWhiteSpace(newName)) return;
+        if (!RegexPatterns.TwitchValidLoginPattern().IsMatch(newName)) return;
+        if (ExistName(newName)) return;
+        
         if (Data.IsMainEmpty())
         {
-            Main = name;
+            Main = newName;
         }
         else if (Data.IsAltEmpty())
         {
-            Alt = name;
+            Alt = newName;
         }
     }
     public bool ExistName(string name) => Data.ExistName(name);
@@ -247,9 +252,25 @@ public class StreamDataViewModel : BaseViewModel
 
     public bool EqualsNoDialog(StreamData data)
     {
-        if (ExistName(data.Main)) return true;
-        if (ExistName(data.Alt)) return true;
-        if (!string.IsNullOrEmpty(data.Other) && Other.Equals(data.Other, _ordinalIgnoreCaseComparison)) return true;
+        if (!string.IsNullOrEmpty(data.Main) &&
+            (Main.Equals(data.Main, StringComparison.OrdinalIgnoreCase)
+             || Alt.Equals(data.Main, StringComparison.OrdinalIgnoreCase))
+            )
+        {
+            data.Main = string.Empty;
+            return false;
+        }
+        if (!string.IsNullOrEmpty(data.Alt) &&
+            (Main.Equals(data.Alt, StringComparison.OrdinalIgnoreCase)
+             || Alt.Equals(data.Alt, StringComparison.OrdinalIgnoreCase)))
+        {
+            data.Alt = string.Empty;
+            return false;
+        }
+        if (!string.IsNullOrEmpty(data.Other) && Other.Equals(data.Other, _ordinalIgnoreCaseComparison))
+        {
+            data.Other = string.Empty;
+        }
         return false;
     }
     public bool Equals(StreamData data)

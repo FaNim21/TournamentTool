@@ -183,7 +183,7 @@
                                     <Run Text="(.csv extension) CSV, Headers (all unique): "
                                          FontWeight="Bold"
                                          Foreground="Wheat" />
-                                    <Run Text="Name | IGN | UUID | PB | Twitch-Main(Optional) | Twitch-Alt(Optional)" />
+                                    <Run Text="Name | IGN | UUID | PB | Twitch-Main(Optional) | Twitch-Alt(Optional) | Team-Name(Optional)" />
                                 </TextBlock>
                             </ToolTip>
                         </Border.ToolTip>

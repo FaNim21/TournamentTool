@@ -21,14 +21,15 @@ public class BindingPovViewModel : BindingViewModelBase
     }
 
 
-    public BindingPovViewModel(IReadOnlyList<BindingPOVSchema> povSchemas, SceneViewModel sceneViewModel, BindingKey? bindingKey, IDispatcherService dispatcher) : base(dispatcher)
+    public BindingPovViewModel(IReadOnlyList<BindingPOVSchema> povSchemas, SceneViewModel sceneViewModel,
+        BindingKey? bindingKey, IDispatcherService dispatcher) : base(dispatcher)
     {
         PovNames = [.. sceneViewModel.SceneItems.OfType<PointOfViewViewModel>().Select(p => p.SourceName)];
         Fields = [.. povSchemas.Select(f => f.Field)];
 
         if (bindingKey is not BindingKeyPOV povKey) return;
         if (povKey.IsEmpty()) return;
-        
+
         ChosenPovName = PovNames.FirstOrDefault(name => name.Equals(povKey.PovName, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
         ChosenField = Fields.FirstOrDefault(field => field.Equals(povKey.Field, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
     }

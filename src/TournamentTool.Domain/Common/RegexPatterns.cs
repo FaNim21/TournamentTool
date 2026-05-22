@@ -6,7 +6,7 @@ public static partial class RegexPatterns
 {
     public static void cos()
     {
-        //Regex regex = new("");
+        // Regex regex = MyRegex();
     }
     
 
@@ -27,4 +27,7 @@ public static partial class RegexPatterns
     
     [GeneratedRegex(@"chunk_0:\((\d+),")]
     public static partial Regex LuaErrorLogPattern();
+    
+    [GeneratedRegex(@"^[a-z0-9_]+$")]
+    public static partial Regex TwitchValidLoginPattern();
 }

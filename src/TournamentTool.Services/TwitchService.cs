@@ -9,6 +9,7 @@ using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs;
 using TwitchLib.Api.Helix.Models.Clips.CreateClip;
 using TwitchLib.Api.Core.Exceptions;
+using TwitchLib.Api.Helix.Models.Streams.GetStreams;
 using Stream = TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream;
 
 namespace TournamentTool.Services;
@@ -160,24 +161,25 @@ public class TwitchService : ITwitchService
     
     public async Task<List<Stream>> GetAllStreamsAsync(List<string> logins)
     {
-        var allStreams = new List<Stream>();
+        List<Stream> allStreams = [];
         const int batchSize = 100;
 
-        var loginBatches = logins
-            .Select((login, index) => new { login, index })
-            .GroupBy(x => x.index / batchSize)
-            .Select(g => g.Select(x => x.login).ToList())
-            .ToList();
+        List<List<string>> loginBatches =
+        [
+            ..logins.Select((login, index) => new { login, index })
+                    .GroupBy(x => x.index / batchSize)
+                    .Select(g => g.Select(x => x.login).ToList())
+        ];
 
         try
         {
-            foreach (var batch in loginBatches)
+            foreach (List<string> batch in loginBatches)
             {
-                var cursor = string.Empty;
+                string cursor = string.Empty;
 
                 do
                 {
-                    var streamsResponse = await _api.Helix.Streams.GetStreamsAsync(userLogins: batch, after: cursor);
+                    GetStreamsResponse streamsResponse = await _api.Helix.Streams.GetStreamsAsync(userLogins: batch, after: cursor);
                     allStreams.AddRange(streamsResponse.Streams);
                     cursor = streamsResponse.Pagination.Cursor;
                 } while (!string.IsNullOrEmpty(cursor));
@@ -202,7 +204,7 @@ public class TwitchService : ITwitchService
             Logger.Error($"Error while fetching streaming datas - {ex}");
         }
 
-        return allStreams.DistinctBy(stream => stream.UserId).ToList();
+        return [..allStreams.DistinctBy(stream => stream.UserId)];
     }
     
     public async Task<CreatedClipResponse?> CreateClipAsync(string broadcasterID)
