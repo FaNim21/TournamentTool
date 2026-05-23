@@ -1,7 +1,9 @@
-﻿namespace TournamentTool.Services.Managers.Preset;
+﻿using System.Runtime.CompilerServices;
+
+namespace TournamentTool.Services.Managers.Preset;
 
 public interface INotifyPresetModification
 {
-    void MarkAsModified();
+    void MarkAsModified([CallerMemberName] string? propertyName = null);
     void MarkAsUnmodified();
 }

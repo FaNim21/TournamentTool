@@ -5,12 +5,31 @@ namespace TournamentTool.ViewModels.Obs.Bindings;
 
 public class BindingLeaderboardViewModel : BindingViewModelBase
 {
-    public BindingLeaderboardViewModel(IDispatcherService dispatcher) : base(dispatcher)
+    private int _position = 0;
+    public int Position
     {
+        get => _position;
+        set
+        {
+            _position = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    
+    public BindingLeaderboardViewModel(IReadOnlyList<BindingLeaderboardSchema> leaderboardSchemas,
+        BindingKey? bindingKey, IDispatcherService dispatcher) : base(dispatcher)
+    {
+        Fields = [.. leaderboardSchemas.Select(f => f.Field)];
+        
+        if (bindingKey is not BindingKeyLeaderboard leaderboardKey) return;
+        if (leaderboardKey.IsEmpty()) return;
+        
+        ChosenField = Fields.FirstOrDefault(field => field.Equals(leaderboardKey.Field, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
     }
 
     public override BindingKey GetBindingKey()
     {
-        return BindingKey.CreateLeaderboard(ChosenField, -1);
+        return BindingKey.CreateLeaderboard(ChosenField, Position);
     }
 }

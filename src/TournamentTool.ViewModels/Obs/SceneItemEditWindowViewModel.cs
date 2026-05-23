@@ -113,9 +113,9 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         
         BindingConfigurationViewModel = schema switch
         {
-            BindingPOVSchema => new BindingPovViewModel(AllSchemas.OfType<BindingPOVSchema>().ToList(), _sceneViewModel, _configuration?.BindingKey, Dispatcher),
-            BindingRankedManagementSchema => new BindingRankedManagementViewModel(Dispatcher),
-            BindingLeaderboardSchema => new BindingLeaderboardViewModel(Dispatcher),
+            BindingPOVSchema => new BindingPovViewModel([..AllSchemas.OfType<BindingPOVSchema>()], _sceneViewModel, _configuration?.BindingKey, Dispatcher),
+            BindingRankedManagementSchema => new BindingRankedManagementViewModel([..AllSchemas.OfType<BindingRankedManagementSchema>()], _configuration?.BindingKey, Dispatcher),
+            BindingLeaderboardSchema => new BindingLeaderboardViewModel([..AllSchemas.OfType<BindingLeaderboardSchema>()], _configuration?.BindingKey, Dispatcher),
             _ => null
         };
     }

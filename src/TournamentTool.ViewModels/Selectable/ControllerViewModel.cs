@@ -7,6 +7,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services;
 using TournamentTool.Services.Background;
+using TournamentTool.Services.Factories;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
@@ -26,7 +27,7 @@ namespace TournamentTool.ViewModels.Selectable;
 public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, IPlayerAddReceiver, IHotkeyReceiver
 {
     private readonly ITwitchService _twitch;
-    private readonly IBindingEngine _bindingEngine;
+    private readonly IManagementDataContextFactory _managementDataContextFactory;
     private readonly ITournamentPlayerRepository _playerRepository;
     private readonly ITournamentState _tournamentState;
     private readonly IBackgroundCoordinator _backgroundCoordinator;
@@ -135,15 +136,14 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
 
     public ControllerViewModel(ITournamentPlayerRepository playerRepository, ITournamentState tournamentState, IBackgroundCoordinator backgroundCoordinator,
         ITwitchService twitch, ILoggingService logger, IDispatcherService dispatcher, ISceneControllerViewModelFactory sceneControllerFactory,
-        IBindingEngine bindingEngine) : base(dispatcher)
+        IManagementDataContextFactory managementDataContextFactory) : base(dispatcher)
     {
         Logger = logger;
         _playerRepository = playerRepository;
         _tournamentState = tournamentState;
         _backgroundCoordinator = backgroundCoordinator;
         _twitch = twitch;
-        _bindingEngine = bindingEngine;
-
+        _managementDataContextFactory = managementDataContextFactory;
 
         _twitch.ConnectionStateChanged += OnTwitchConnectionChanged;
 
@@ -187,7 +187,7 @@ public class ControllerViewModel : SelectableViewModel, IPovDragAndDropContext, 
                 if (SidePanel == null || (SidePanel != null && SidePanel.GetType() != typeof(RankedPacePanel)))
                 {
                     SidePanel = new RankedPacePanel(this, Dispatcher);
-                    ManagementPanel = new RankedManagementPanel((RankedManagementData)_tournamentState.CurrentPreset.ManagementData!, Dispatcher, _bindingEngine);
+                    ManagementPanel = new RankedManagementPanel(_managementDataContextFactory, Dispatcher);
                 }
                 break;
         }

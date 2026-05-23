@@ -10,10 +10,10 @@ using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.External;
+using TournamentTool.Services.Factories;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Preset;
-using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Services.Background;
 
@@ -45,9 +45,8 @@ public class RankedService : IBackgroundService
     private readonly IRankedAPIService _rankedApiService;
     private readonly ITournamentState _tournamentState;
     private readonly ITournamentPlayerRepository _playerRepository;
-    private readonly IBindingEngine _bindingEngine;
-    private readonly RankedManagementData _rankedManagementData;
-    
+    private readonly IManagementDataContext<RankedManagementData> _managementDataContext;
+
     private ILeaderboardManager Leaderboard { get; }
 
     public bool blockSavingPrivRoomData = false;
@@ -74,7 +73,7 @@ public class RankedService : IBackgroundService
     
     public RankedService(ILeaderboardManager leaderboard, ILoggingService logger, ISettingsProvider settingsProvider, IPlayerViewModelFactory playerViewModelFactory, 
         IRankedAPIService rankedApiService, IImageService imageService, ITournamentState tournamentState, ITournamentPlayerRepository playerRepository,
-        IBindingEngine bindingEngine)
+        IManagementDataContextFactory managementDataContextFactory)
     {
         Logger = logger;
         ImageService = imageService;
@@ -83,12 +82,12 @@ public class RankedService : IBackgroundService
         _rankedApiService = rankedApiService;
         _tournamentState = tournamentState;
         _playerRepository = playerRepository;
-        _bindingEngine = bindingEngine;
+        _managementDataContext = managementDataContextFactory.Create<RankedManagementData>();
 
         _settings = settingsProvider.Get<Settings>();
 
-        _rankedManagementData = (tournamentState.CurrentPreset.ManagementData as RankedManagementData)!;
-        _bestSplits = _rankedManagementData.BestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
+        List<PrivRoomBestSplit> bestSplitsDatas = _managementDataContext.Get(m => m.BestSplitsDatas);
+        _bestSplits = bestSplitsDatas.ToDictionary(b => b.Type, b => b) ?? [];
 
         _saveOptions = new JsonSerializerOptions() { WriteIndented = true };
     }
@@ -137,9 +136,9 @@ public class RankedService : IBackgroundService
 
         FilterJSON(_privRoomData);
         _rankedDataReceiver?.Update();
-        
-        _rankedManagementData!.Completions = _privRoomData.Completions.Length;
-        _rankedManagementData!.Players = _privRoomData.Players.Length;
+
+        _managementDataContext.Set(m => m.Completions, _privRoomData.Completions.Length);
+        _managementDataContext.Set(m => m.Players, _privRoomData.Players.Length);
         _rankedManagementDataReceiver?.Update();
     }
     
@@ -255,8 +254,9 @@ public class RankedService : IBackgroundService
         {
             previousTimeline = new LeaderboardTimeline(previous.Milestone, (int)previous.Time);
         }
-        
-        var data = new LeaderboardRankedEvaluateData(player, _rankedManagementData.Rounds, mainTimeline, previousTimeline);
+
+        int round = _managementDataContext.Get(m => m.Rounds);
+        LeaderboardRankedEvaluateData data = new(player, round, mainTimeline, previousTimeline);
         evaluateTimelineData.Add(data);
     }
 
@@ -314,20 +314,25 @@ public class RankedService : IBackgroundService
         if (_splitDatas.Count == 0 || completions == 0) return;
 
         Leaderboard.EvaluateData(_splitDatas);
-        _rankedManagementData.Rounds++;
+
+        int rounds = _managementDataContext.Get(m => m.Rounds) + 1;
+        _managementDataContext.Set(m => m.Rounds, rounds);
     }
     private void SeedStarted()
     {
         //Seed change | New match
-        _rankedManagementData.StartTime = DateTimeOffset.Now.Millisecond;
+        _managementDataContext.Set(m => m.StartTime, DateTimeOffset.Now.Millisecond);
         _lastEvaluatedRoomID = -1;
         Clear();
     }
     public void ReadySeed(PrivRoomData privRoomData)
     {
-        if (_rankedManagementData!.BestSplitsDatas.Count != 0)
+        List<PrivRoomBestSplit> bestSplitsDatas = _managementDataContext.Get(m => m.BestSplitsDatas);        
+        
+        if (bestSplitsDatas.Count != 0)
         {
-            _rankedManagementData.StartTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - privRoomData.Time;
+            long newStartTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - privRoomData.Time;
+            _managementDataContext.Set(m => m.StartTime, newStartTime);
         }
         
         //Counting after seed loaded
@@ -345,7 +350,9 @@ public class RankedService : IBackgroundService
 
         bestSplit = new PrivRoomBestSplit { Type = splitType };
         _bestSplits[bestSplit.Type] = bestSplit;
-        _rankedManagementData?.BestSplitsDatas.Add(bestSplit);
+        
+        List<PrivRoomBestSplit> bestSplitsDatas = _managementDataContext.Get(m => m.BestSplitsDatas);        
+        bestSplitsDatas.Add(bestSplit);
         return bestSplit;
     }
 
@@ -359,16 +366,18 @@ public class RankedService : IBackgroundService
         _bestSplits.Clear();
         _paces.Clear();
 
-        for (int i = 0; i < _rankedManagementData.BestSplitsDatas.Count; i++)
+        List<PrivRoomBestSplit> bestSplitsDatas = _managementDataContext.Get(m => m.BestSplitsDatas);        
+        for (int i = 0; i < bestSplitsDatas.Count; i++)
         {
-            var currentSplit = _rankedManagementData.BestSplitsDatas[i];
+            var currentSplit = bestSplitsDatas[i];
             currentSplit.Datas.Clear();
         }
-        _rankedManagementData.RefreshUI = true;
-        _rankedManagementData!.BestSplitsDatas.Clear();
-        _rankedManagementData.Completions = 0;
-        _rankedManagementData.Players = 0;
-        _rankedManagementData.StartTime = 0;
+
+        bestSplitsDatas.Clear();
+        _managementDataContext.Set(m => m.RefreshUI, true);
+        _managementDataContext.Set(m => m.Completions, 0);
+        _managementDataContext.Set(m => m.Players, 0);
+        _managementDataContext.Set(m => m.StartTime, 0);
         
         _rankedDataReceiver?.Clear();
     }

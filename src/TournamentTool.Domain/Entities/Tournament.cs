@@ -41,7 +41,6 @@ public class PacemanManagementData : ManagementData
 
 public class Tournament : IPreset
 {
-    //TODO: 0 To potrzebuje specjalnej troski przez to ze musze jako robic publish w binding engine dla tych danych w managementData
     public ManagementData? ManagementData { get; set; }
     public Leaderboard Leaderboard { get; init; } = new();
 

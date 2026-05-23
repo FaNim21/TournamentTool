@@ -1,9 +1,13 @@
-﻿using TournamentTool.Domain.Entities;
+﻿using System.Runtime.CompilerServices;
+using TournamentTool.Domain.Entities;
 
 namespace TournamentTool.Services.Managers.Preset;
 
 public class TournamentState : ITournamentState
 {
+    //TODO: 1 Zrobic z tego liste w status barze z policzeniem tez zmian na dany text
+    public List<string> UnsavedChanges { get; } = [];
+    
     public Tournament CurrentPreset { get; private set; } = new();
     public bool IsModified { get; private set; }
     public bool IsCurrentlyOpened { get; private set; }
@@ -13,12 +17,15 @@ public class TournamentState : ITournamentState
     public event EventHandler<string>? PresetNameChanged;
 
     
-    public void MarkAsModified()
+    public void MarkAsModified([CallerMemberName] string? propertyName = null)
     {
         if (IsModified) return;
         
         IsModified = true;
         ModificationStateChanged?.Invoke(this, true);
+        
+        if (string.IsNullOrEmpty(propertyName)) return;
+        UnsavedChanges.Add(propertyName);
     }
     public void MarkAsUnmodified()
     {
@@ -26,6 +33,7 @@ public class TournamentState : ITournamentState
         
         IsModified = false;
         ModificationStateChanged?.Invoke(this, false);
+        UnsavedChanges.Clear();
     }
 
     public void ChangePreset(Tournament? newPreset)

@@ -36,10 +36,10 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
         _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_type"));
 
         //Ranked Management data
-        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("custom_text"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("rounds"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("completions"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement("players"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.CustomText)));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.Rounds)));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.Completions)));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.Players)));
 
         //Leaderboard
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("points"));

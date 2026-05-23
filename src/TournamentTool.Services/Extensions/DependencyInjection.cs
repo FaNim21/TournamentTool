@@ -5,6 +5,7 @@ using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
 using TournamentTool.Services.Configuration;
 using TournamentTool.Services.External;
+using TournamentTool.Services.Factories;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers;
 using TournamentTool.Services.Managers.Lua;
@@ -71,5 +72,7 @@ public static class DependencyInjection
         services.AddSingleton<ITournamentPresetManager, TournamentPresetManager>();
         services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentLeaderboardRepository, TournamentLeaderboardRepository>();
+        
+        services.AddSingleton<IManagementDataContextFactory, ManagementDataContextFactory>();
     }
 }

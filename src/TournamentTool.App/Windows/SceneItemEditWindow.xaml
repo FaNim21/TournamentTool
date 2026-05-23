@@ -3,12 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:TournamentTool.App.Windows"
         xmlns:obs="clr-namespace:TournamentTool.ViewModels.Obs;assembly=TournamentTool.ViewModels"
         xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
-        xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
-        xmlns:obsDomain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
-        xmlns:converters="clr-namespace:TournamentTool.App.Converters"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:TournamentTool.App.Components.Behaviors"
         xmlns:bindings="clr-namespace:TournamentTool.ViewModels.Obs.Bindings;assembly=TournamentTool.ViewModels"
@@ -27,7 +23,6 @@
 
         <DataTemplate DataType="{x:Type bindings:BindingPovViewModel}">
             <StackPanel HorizontalAlignment="Stretch">
-
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             Margin="0 5 0 0">
@@ -66,45 +61,73 @@
                                Padding="0"
                                Margin="5 0 0 3" />
                 </StackPanel>
-                
             </StackPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type bindings:BindingRankedManagementViewModel}">
-            <StackPanel>
-                <TextBlock Text="Ranked management data support WIP..."
-                           Foreground="White"
-                           Margin="0 5 0 0" />
+            <StackPanel HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="0 5 0 0">
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="200"
+                              ItemsSource="{Binding Fields}"
+                              SelectedItem="{Binding ChosenField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="Field"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Field that api is reading data from"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
         
         <DataTemplate DataType="{x:Type bindings:BindingLeaderboardViewModel}">
-            <StackPanel>
+            <StackPanel HorizontalAlignment="Stretch">
                 <TextBlock Text="Leaderboard support WIP..."
                            Foreground="White"
                            Margin="0 5 0 0" />
-            </StackPanel>
-        </DataTemplate>
-
-        <!-- Zostalo jako templatka do indexu??????? -->
-        <DataTemplate DataType="{x:Type items:BrowserItemViewModel}">
-            <StackPanel Orientation="Vertical">
-
+                
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
-                            Visibility="{Binding DataContext.IsUsingIndex, Converter={StaticResource BoolToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Margin="0 10 0 5">
+                            Margin="0 5 0 0">
+                    <ComboBox Style="{StaticResource ComboBoxTest2}"
+                              Width="200"
+                              ItemsSource="{Binding Fields}"
+                              SelectedItem="{Binding ChosenField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="Field"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.ShowDuration="60000"
+                               ToolTip="Field that api is reading data from"
+                               Foreground="White"
+                               Height="20"
+                               FontSize="16"
+                               Padding="0"
+                               Margin="5 0 0 3" />
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="0 5 0 0">
                     <TextBox TextWrapping="Wrap"
-                             Width="120"
+                             Width="50"
                              Height="20"
-                             Text="{Binding DataContext.Index, RelativeSource={RelativeSource AncestorType=Window}}"
+                             Text="{Binding Position}"
                              Background="#9E9E9E"
                              HorizontalAlignment="Left"
-                             VerticalAlignment="Top">
+                             VerticalAlignment="Top"
+                             Margin="1 0 0 0">
                         <b:Interaction.Behaviors>
                             <behaviors:NumericTextBoxBehavior AllowNegative="False" />
                         </b:Interaction.Behaviors>
                     </TextBox>
+                    
                     <TextBlock Text="Position"
                                ToolTipService.InitialShowDelay="0"
                                ToolTipService.ShowDuration="60000"
@@ -113,7 +136,7 @@
                                Height="20"
                                FontSize="16"
                                Padding="0"
-                               Margin="5 0 0 3" />
+                               Margin="5 0 0 0" />
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
