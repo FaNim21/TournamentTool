@@ -2,24 +2,42 @@
 
 namespace TournamentTool.Domain.Obs;
 
-public abstract record BindingSchema
+public abstract record NameableSchema
 {
     public abstract string Name { get; }
-    
-    public static BindingPOVSchema CreatePOV(string field) => new(field.ToLower());
-    public static BindingRankedManagementSchema CreateRankedManagement(string field) => new(field.ToLower());
-    public static BindingLeaderboardSchema CreateLeaderboard(string field) => new(field.ToLower());
 }
 
-public sealed record BindingPOVSchema(string Field) : BindingSchema
+public abstract record BindingSubSchema(string Field) : NameableSchema
+{
+    public static BindingWhitelistSubSchema CreateWhitelist(string field) => new(field.ToLower());
+    public static BindingWhitelistSubSchema GetWhitelistSubSchema() => new(string.Empty);
+}
+public sealed record BindingWhitelistSubSchema(string Field) : BindingSubSchema(Field)
+{
+    public override string Name => "Whitelist";
+}
+
+public abstract record BindingSchema(string Field) : NameableSchema
+{
+    public static BindingPOVSchema CreatePOV(string field) => new(field.ToLower());
+    public static BindingPOVSchema GetPOV() => new(string.Empty);
+    
+    public static BindingRankedManagementSchema CreateRankedManagement(string field) => new(field.ToLower());
+    public static BindingRankedManagementSchema GetRankedManagement() => new(string.Empty);
+    
+    public static BindingLeaderboardSchema CreateLeaderboard(string field) => new(field.ToLower());
+    public static BindingLeaderboardSchema GetLeaderboard() => new(string.Empty);
+}
+
+public sealed record BindingPOVSchema(string Field) : BindingSchema(Field)
 {
     public override string Name => "POV";
 }
-public sealed record BindingRankedManagementSchema(string Field) : BindingSchema
+public sealed record BindingRankedManagementSchema(string Field) : BindingSchema(Field)
 {
     public override string Name => "Ranked_management";
 }
-public sealed record BindingLeaderboardSchema(string Field) : BindingSchema
+public sealed record BindingLeaderboardSchema(string Field) : BindingSchema(Field)
 {
     public override string Name => "Leaderboard";
 }
@@ -53,16 +71,4 @@ public sealed record BindingKeyRankedManagement(string Field) : BindingKey
 public sealed record BindingKeyLeaderboard(string Field, int Position) : BindingKey
 {
     public override bool IsEmpty() => string.IsNullOrEmpty(Field);
-}
-
-public static class BindingKeyHelper
-{
-    public static BindingSchema? GetSchema(this BindingKey bindingKey) =>
-        bindingKey switch
-        {
-            BindingKeyPOV pov => BindingSchema.CreatePOV(pov.Field),
-            BindingKeyRankedManagement rankedManagement => BindingSchema.CreateRankedManagement(rankedManagement.Field),
-            BindingKeyLeaderboard leaderboard => BindingSchema.CreateLeaderboard(leaderboard.Field),
-            _ => null
-        };
 }

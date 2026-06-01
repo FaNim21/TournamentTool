@@ -34,10 +34,6 @@ public sealed class LeaderboardEntry
     public List<EntryMilestoneData> Milestones { get; init; } = [];
 
 
-    public void AddPoints(int points)
-    {
-        Points += points;
-    }
     public bool AddMilestone<T>(T data) where T : EntryMilestoneData
     {
         if (AlreadyExists(data)) return false;
@@ -54,6 +50,11 @@ public sealed class LeaderboardEntry
         Milestones.Add(data);
         AddPoints(data.Points);
         return true;
+    }
+    
+    private void AddPoints(int points)
+    {
+        Points += points;
     }
 
     private bool AlreadyExists<T>(T data) where T : EntryMilestoneData

@@ -52,7 +52,8 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
         }
     }
 
-    public TValue Get<TValue>(Func<TManagement, TValue> getter) where TValue : notnull => getter(ManagementData);
+    public TValue Get<TValue>(Func<TManagement, TValue> getter) where TValue : notnull 
+        => getter(ManagementData);
     
     private Action<TManagement, TValue> GetOrCreateSetter<TValue>(string propertyName)
     {

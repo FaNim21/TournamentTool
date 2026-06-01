@@ -53,22 +53,23 @@ public class LeaderboardManager : ILeaderboardManager
         if (data.Count == 0) return;
         if (_leaderboardRepository.Rules.Count == 0) return;
 
-        foreach (var rule in _leaderboardRepository.Rules)
+        foreach (LeaderboardRule rule in _leaderboardRepository.Rules)
         {
             if (!rule.IsEnabled) continue;
             if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
             if (!data.TryGetValue(rule.ChosenAdvancement, out RankedEvaluateTimelineData? timelineData)) continue;
 
-            foreach (var subRule in rule.SubRules)
+            foreach (LeaderboardSubRule subRule in rule.SubRules)
             {
                 if (timelineData.Evaluations.Count == 0) break;
                 List<LeaderboardRankedEvaluateData> subRuleDatas = [];
 
                 int count = 0;
-                for (var i = 0; i < timelineData.Evaluations.Count; i++)
+                for (int i = 0; i < timelineData.Evaluations.Count; i++)
                 {
                     if (subRule.MaxWinners <= count && subRule.MaxWinners > 0) break;
-                    var evaluation = timelineData.Evaluations[i];
+                    
+                    LeaderboardRankedEvaluateData evaluation = timelineData.Evaluations[i];
                     if (!subRule.EvaluateTime(evaluation.MainSplit.Time)) break;
 
                     subRuleDatas.Add(evaluation);
@@ -87,13 +88,13 @@ public class LeaderboardManager : ILeaderboardManager
         if (data.Player == null) return;
         if (_leaderboardRepository.Rules.Count == 0) return;
         
-        foreach (var rule in _leaderboardRepository.Rules)
+        foreach (LeaderboardRule rule in _leaderboardRepository.Rules)
         {
             if (!rule.IsEnabled) continue;
             if (ruleType != rule.RuleType && ruleType != LeaderboardRuleType.None) continue;
-            
-            var subRule = rule.Evaluate(data);
-            if (subRule == null) continue;
+
+            LeaderboardSubRule? subRule = rule.Evaluate(data);
+            if (subRule is null) continue;
             
             UpdateEntry(rule, subRule, data);
             break;
@@ -103,7 +104,7 @@ public class LeaderboardManager : ILeaderboardManager
     private void UpdateEntries(LeaderboardRule rule, LeaderboardSubRule subRule, List<LeaderboardRankedEvaluateData> datas)
     {
         List<LuaPlayerData> luaPlayerDatas = [];
-        foreach (var data in datas)
+        foreach (LeaderboardRankedEvaluateData data in datas)
         {
             if (data.Player == null) continue;
             LeaderboardEntry entry = _leaderboardRepository.GetOrCreateEntry(data.Player.UUID);
@@ -114,7 +115,7 @@ public class LeaderboardManager : ILeaderboardManager
         LuaAPIRankedContext context = new LuaAPIRankedContext(rule, subRule, _tournamentState.CurrentPreset, luaPlayerDatas, OnEntryRunRegistered);
         RunScript(subRule.LuaPath, context);
         
-        var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
+        string subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
         Logger.Log($"Evaluated: {luaPlayerDatas.Count} players for {datas[0].MainSplit.Milestone}" +
                    $"for sub rule with desc: {subRule.Description}, so under {subRuleTime}");
     }
@@ -125,16 +126,17 @@ public class LeaderboardManager : ILeaderboardManager
         
         int oldPosition = entry.Position;
         RunScript(subRule.LuaPath, context);
-        
-        var playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
-        var subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
+
+        string playerTime = TimeSpan.FromMilliseconds(data.MainSplit.Time).ToFormattedTime();
+        string subRuleTime = TimeSpan.FromMilliseconds(subRule.Time).ToFormattedTime();
         Logger.Log($"Player: \"{data.Player.InGameName}\" just achieved milestone: \"{data.MainSplit.Milestone}\" " +
-                   $"in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}," +
+                   $"in time: {playerTime}, so under {subRuleTime} with new points: {subRule.BasePoints}, " +
                    $"advancing from position {oldPosition} to {entry.Position}");
     }
     
     private void OnEntryRunRegistered(LeaderboardEntry entry)
     {
+        //TODO: 0 Leaderboard binding update
         _leaderboardRepository.RecalculateEntryPosition(entry);
         OnEntryUpdate?.Invoke(entry);
         _tournamentState.MarkAsModified();
@@ -142,8 +144,8 @@ public class LeaderboardManager : ILeaderboardManager
 
     private void RunScript(string path, object context)
     {
-        var script = LuaManager.Get(path);
-        if (script == null) return;
+        LuaLeaderboardScript? script = LuaManager.Get(path);
+        if (script is null) return;
 
         try
         {

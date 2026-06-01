@@ -1,14 +1,15 @@
-﻿using TournamentTool.Core.Interfaces;
+﻿using System.Collections.ObjectModel;
+using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Obs;
 
 namespace TournamentTool.ViewModels.Obs.Bindings;
 
 public class BindingRankedManagementViewModel : BindingViewModelBase
 {
-    public BindingRankedManagementViewModel(IReadOnlyList<BindingRankedManagementSchema> rankedManagementSchemas, BindingKey? bindingKey,
+    public BindingRankedManagementViewModel(ObservableCollection<string> rankedManagementSchemas, BindingKey? bindingKey,
         IDispatcherService dispatcher) : base(dispatcher)
     {
-        Fields = [.. rankedManagementSchemas.Select(f => f.Field)];
+        Fields = rankedManagementSchemas;
 
         if (bindingKey is not BindingKeyRankedManagement rankedManagementKey) return;
         if (rankedManagementKey.IsEmpty()) return;

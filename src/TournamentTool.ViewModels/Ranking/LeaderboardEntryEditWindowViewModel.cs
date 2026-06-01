@@ -377,6 +377,7 @@ public class LeaderboardEntryEditWindowViewModel : BaseWindowViewModel
         {
             _originalEntry.AddMilestone(milestone);
         }
+        //TODO: 0 Leaderboard binding update, jako tylko przy zapisywaniu zmian
     }
     private void Rollback()
     {

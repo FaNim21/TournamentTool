@@ -19,22 +19,18 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
     
     public void Initialize()
     {
-        InitializePointOfViewSchemes();
+        InitializeSchemas();
+        InitializeSubSchemas();
+        InitializeConnections();
 
-        LoadAppCacheBindings();
+        LoadAppCachedBindings();
     }
-
-    private void InitializePointOfViewSchemes()
+    
+    private void InitializeSchemas()
     {
         //POV
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("head"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("display_name"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("ign"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("pb"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("team_name"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_name"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV("stream_type"));
-
+        _bindingEngine.RegisterSchema(BindingSchema.CreatePOV(string.Empty));   //Nie ma obecnie unikatowych dla siebie zadnych wartosci
+        
         //Ranked Management data
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.CustomText)));
         _bindingEngine.RegisterSchema(BindingSchema.CreateRankedManagement(nameof(RankedManagementData.Rounds)));
@@ -43,13 +39,35 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
 
         //Leaderboard
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("points"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("head"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("display_name"));
-        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("ign"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("position"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_best_time"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_average"));
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_amount"));
         //wiecej od leaderboard bedzie...
+        
+        //TODO: 0 Leaderboard trzeba dobrze rozkminic z zamiana pozycji i tym zeby aktualizowac tylko rzeczywiste zmiany, i to jak ktos wejdze
+        // w dana pozycje to trzeba wszystkich pomiedzy aktualizowac? :/
     }
     
-    private void LoadAppCacheBindings()
+    private void InitializeSubSchemas()
+    {
+        //Whitelist
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("head"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("display_name"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("ign"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("pb"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("team_name"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("stream_name"));
+        _bindingEngine.RegisterSubSchema(BindingSubSchema.CreateWhitelist("stream_type"));
+    }
+    
+    private void InitializeConnections()
+    {
+        _bindingEngine.RegisterConnections(BindingSchema.GetPOV(), BindingSubSchema.GetWhitelistSubSchema());
+        _bindingEngine.RegisterConnections(BindingSchema.GetLeaderboard(), BindingSubSchema.GetWhitelistSubSchema());
+    }
+    
+    private void LoadAppCachedBindings()
     {
         foreach (KeyValuePair<string, SceneItemConfiguration> config in _appCache.SceneItemConfigs)
         {

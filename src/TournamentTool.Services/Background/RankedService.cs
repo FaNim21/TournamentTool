@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using TournamentTool.Core.Exceptions;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Factories;
@@ -199,7 +200,7 @@ public class RankedService : IBackgroundService
     }
 
     private void AddPace(PrivRoomPlayer player) => AddPace(player.UUID, player.InGameName);
-    private RankedPace AddPace(string UUID, string ign = "")
+    public RankedPace AddPace(string UUID, string ign = "")
     {
         Player? data = _playerRepository.GetPlayerByUUID(UUID)?.Data;
         string inGameName = data != null ? data.InGameName ?? ign : ign;
@@ -293,7 +294,7 @@ public class RankedService : IBackgroundService
         _lastEvaluatedRoomID = dataLastID;
         
         int completions = data.Completions.Length;
-        var display = RunMilestone.ProjectEloComplete.GetDisplay()!;
+        DisplayAttribute display = RunMilestone.ProjectEloComplete.GetDisplay()!;
 
         if (_settings.SaveRankedPrivRoomDataOnSeedFinish && !blockSavingPrivRoomData)
         {
@@ -302,12 +303,12 @@ public class RankedService : IBackgroundService
         
         for (int i = 0; i < data.Completions.Length; i++)
         {
-            var completion = data.Completions[i];
+            PrivRoomCompletion completion = data.Completions[i];
 
             if (!_paces.TryGetValue(completion.UUID, out var paceData)) continue;
             if (paceData.GetLastSplit().Split == RankedSplitType.complete) continue;
 
-            var paceTimeline = new RankedPaceTimeline(display.ShortName!, RunMilestone.ProjectEloComplete, completion.Time);
+            RankedPaceTimeline paceTimeline = new(display.ShortName!, RunMilestone.ProjectEloComplete, completion.Time);
             paceData.AddTimeline(paceTimeline);
         }
         

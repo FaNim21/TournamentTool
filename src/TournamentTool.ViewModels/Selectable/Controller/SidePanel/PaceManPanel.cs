@@ -42,9 +42,4 @@ public class PaceManPanel : GroupedPanelBase<PaceManViewModel, Paceman>, IPacema
     {
         return new PaceManViewModel(model, Dispatcher);
     }
-
-    public void FilterItems()
-    {
-        RefreshControllerPlayers();
-    }
 }

@@ -1,4 +1,5 @@
-﻿using TournamentTool.Core.Interfaces;
+﻿using System.Collections.ObjectModel;
+using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Obs;
 
 namespace TournamentTool.ViewModels.Obs.Bindings;
@@ -17,10 +18,10 @@ public class BindingLeaderboardViewModel : BindingViewModelBase
     }
     
     
-    public BindingLeaderboardViewModel(IReadOnlyList<BindingLeaderboardSchema> leaderboardSchemas,
+    public BindingLeaderboardViewModel(ObservableCollection<string> leaderboardSchemas,
         BindingKey? bindingKey, IDispatcherService dispatcher) : base(dispatcher)
     {
-        Fields = [.. leaderboardSchemas.Select(f => f.Field)];
+        Fields = leaderboardSchemas;
         
         if (bindingKey is not BindingKeyLeaderboard leaderboardKey) return;
         if (leaderboardKey.IsEmpty()) return;

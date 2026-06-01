@@ -10,8 +10,6 @@ public interface IPacemanDataReceiver : IBackgroundDataReceiver
     void AddPaces(IEnumerable<Paceman> pacemans);
     void Update();
     void Remove(Paceman paceman);
-    
-    void FilterItems();
 }
 
 public interface IRankedDataReceiver : IBackgroundDataReceiver

@@ -12,6 +12,8 @@ namespace TournamentTool.ViewModels.Obs;
 public class SceneItemEditWindowViewModel : BaseWindowViewModel
 {
     private readonly SceneViewModel _sceneViewModel;
+    private readonly IBindingEngine _bindingEngine;
+    
     public SceneItemViewModel SceneItemViewModel { get; }
 
     private ObservableCollection<InputKind> _supportedInputKinds = [];
@@ -90,7 +92,8 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         IDispatcherService dispatcher) : base(dispatcher)
     {
         _sceneViewModel = sceneViewModel;
-        
+        _bindingEngine = bindingEngine;
+
         SceneItemViewModel = sceneItemViewModel;
         InputKind = SceneItemViewModel.InputKind;
 
@@ -111,11 +114,28 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
             return;
         }
         
+        string schemaName = schema.Name;
+        ObservableCollection<string> fields = [.. AllSchemas.Where(s => s.Name.Equals(schemaName) && !string.IsNullOrEmpty(s.Field)).Select(s => s.Field)];;
+        
+        if (_bindingEngine.SchemaToSubSchemaConnection.TryGetValue(schemaName, out var subSchemas))
+        {
+            foreach (BindingSubSchema subSchema in subSchemas)
+            {
+                string subSchemaName = subSchema.Name;
+                foreach (BindingSubSchema availableSubSchema in _bindingEngine.AvailableSubSchemas)
+                {
+                    if (!subSchemaName.Equals(availableSubSchema.Name)) continue;
+                    
+                    fields.Add(availableSubSchema.Field);
+                }
+            }
+        }
+        
         BindingConfigurationViewModel = schema switch
         {
-            BindingPOVSchema => new BindingPovViewModel([..AllSchemas.OfType<BindingPOVSchema>()], _sceneViewModel, _configuration?.BindingKey, Dispatcher),
-            BindingRankedManagementSchema => new BindingRankedManagementViewModel([..AllSchemas.OfType<BindingRankedManagementSchema>()], _configuration?.BindingKey, Dispatcher),
-            BindingLeaderboardSchema => new BindingLeaderboardViewModel([..AllSchemas.OfType<BindingLeaderboardSchema>()], _configuration?.BindingKey, Dispatcher),
+            BindingPOVSchema => new BindingPovViewModel(fields, _sceneViewModel, _configuration?.BindingKey, Dispatcher),
+            BindingRankedManagementSchema => new BindingRankedManagementViewModel(fields, _configuration?.BindingKey, Dispatcher),
+            BindingLeaderboardSchema => new BindingLeaderboardViewModel(fields, _configuration?.BindingKey, Dispatcher),
             _ => null
         };
     }

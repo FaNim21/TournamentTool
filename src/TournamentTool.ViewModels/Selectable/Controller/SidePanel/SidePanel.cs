@@ -3,10 +3,7 @@ using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Domain.Interfaces;
 using TournamentTool.Services.Background;
-using TournamentTool.ViewModels.Entities;
-using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
 
 namespace TournamentTool.ViewModels.Selectable.Controller.SidePanel;
@@ -51,8 +48,6 @@ public abstract class SidePanel : BaseViewModel, IPovDragAndDropContext, IBackgr
 
     public override void OnEnable(object? parameter) { }
     public override bool OnDisable() { return true; }
-
-    protected void RefreshControllerPlayers() => Controller.RefreshFilteredCollection();
     
     public void ClearSelectedPlayer()
     {

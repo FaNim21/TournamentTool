@@ -16,16 +16,18 @@ public class TournamentState : ITournamentState
     public event EventHandler<bool>? ModificationStateChanged;
     public event EventHandler<string>? PresetNameChanged;
 
-    
-    public void MarkAsModified([CallerMemberName] string? propertyName = null)
+
+    public void MarkAsModified([CallerFilePath] string? filePath = null, [CallerMemberName] string? propertyName = null)
     {
+        if (!string.IsNullOrEmpty(propertyName) && !string.IsNullOrEmpty(filePath))
+        {
+            UnsavedChanges.Add($"{Path.GetFileNameWithoutExtension(filePath)}.{propertyName}");
+        }
+
         if (IsModified) return;
-        
+
         IsModified = true;
         ModificationStateChanged?.Invoke(this, true);
-        
-        if (string.IsNullOrEmpty(propertyName)) return;
-        UnsavedChanges.Add(propertyName);
     }
     public void MarkAsUnmodified()
     {
