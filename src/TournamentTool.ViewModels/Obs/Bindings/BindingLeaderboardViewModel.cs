@@ -6,7 +6,7 @@ namespace TournamentTool.ViewModels.Obs.Bindings;
 
 public class BindingLeaderboardViewModel : BindingViewModelBase
 {
-    private int _position = 0;
+    private int _position = 1;
     public int Position
     {
         get => _position;
@@ -27,6 +27,7 @@ public class BindingLeaderboardViewModel : BindingViewModelBase
         if (leaderboardKey.IsEmpty()) return;
         
         ChosenField = Fields.FirstOrDefault(field => field.Equals(leaderboardKey.Field, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
+        Position = leaderboardKey.Position;
     }
 
     public override BindingKey GetBindingKey()

@@ -73,6 +73,10 @@ public static class DependencyInjection
         services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentLeaderboardRepository, TournamentLeaderboardRepository>();
         
+        services.AddSingleton<ILeaderboardBindingUpdater, LeaderboardBindingUpdater>();
+        services.AddSingleton<IPointOfViewBindingUpdater, PointOfViewBindingUpdater>();
+        services.AddSingleton<IBindingUpdater, BindingUpdater>();
+        
         services.AddSingleton<IManagementDataContextFactory, ManagementDataContextFactory>();
     }
 }

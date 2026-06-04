@@ -1,16 +1,11 @@
 ﻿using System.Text.Json;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 
 namespace TournamentTool.Presentation.Obs.Entities;
-
-public enum SceneType
-{
-    Main,
-    Preview
-}
 
 public interface IScene
 {

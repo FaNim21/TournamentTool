@@ -105,8 +105,6 @@ public class PointOfViewViewModel : PointOfViewViewModel<PointOfView>, ISwappabl
         
         player.IsUsedInPov = false;
         player.IsUsedInPreview = false;
-        //TODO: ?
-        // StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
     public override void Initialize(bool inEditMode, bool isDisplaed)

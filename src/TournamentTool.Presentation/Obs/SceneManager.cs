@@ -7,6 +7,7 @@ using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Entities.Obs;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Domain.Obs;
@@ -39,13 +40,13 @@ public interface ISceneManager
 
     void RegisterTarget(BindingKey key, IBindingTarget target);
     void UnregisterTarget(BindingKey key, IBindingTarget target);
-    void Publish(BindingKey key, object value);
+    void Publish(IPointOfView pointOfView, string sourceName);
 
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
     string GetHeadURL(string id, int size);
 }
 
-public class SceneManager : ISceneManager, IDisposable
+public sealed class SceneManager : ISceneManager, IDisposable
 {
     private readonly Settings _settings;
     
@@ -55,6 +56,7 @@ public class SceneManager : ISceneManager, IDisposable
     private readonly ILoggingService _logger;
     private readonly IDispatcherService _dispatcher;
     private readonly IObsUpdateBatcher _obsUpdateBatcher;
+    private readonly IPointOfViewBindingUpdater _pointOfViewBindingUpdater;
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
@@ -68,10 +70,10 @@ public class SceneManager : ISceneManager, IDisposable
     public event EventHandler<string>? SelectedSceneUpdated; 
     
     public bool BusyWithOBS { get; private set; }
-    
-    
-    public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ILoggingService logger,
-        ISettingsProvider settingsProvider, IDispatcherService dispatcher, IObsUpdateBatcher obsUpdateBatcher)
+
+
+    public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
+        ILoggingService logger, IDispatcherService dispatcher, IObsUpdateBatcher obsUpdateBatcher, IPointOfViewBindingUpdater pointOfViewBindingUpdater)
     {
         _obs = obs;
         _playerRepository = playerRepository;
@@ -79,6 +81,7 @@ public class SceneManager : ISceneManager, IDisposable
         _logger = logger;
         _dispatcher = dispatcher;
         _obsUpdateBatcher = obsUpdateBatcher;
+        _pointOfViewBindingUpdater = pointOfViewBindingUpdater;
 
         Scenes = new ReadOnlyObservableCollection<SceneDto>(_scenes);
         
@@ -303,9 +306,8 @@ public class SceneManager : ISceneManager, IDisposable
         => _bindingEngine.RegisterTarget(key, target);
     public void UnregisterTarget(BindingKey key, IBindingTarget target)
         => _bindingEngine.RemoveTarget(key, target);
-
-    public void Publish(BindingKey key, object value) 
-        => _bindingEngine.Publish(key, value);
+    public void Publish(IPointOfView pointOfView, string sourceName)
+        => _pointOfViewBindingUpdater.Publish(pointOfView, sourceName);
     
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
         => _playerRepository.GetPlayerByStreamName(name, type);

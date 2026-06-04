@@ -190,6 +190,8 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
 
         Dispatcher.Invoke(async () =>
         {
+            PaceManEvents = [new PaceManEvent { Name = "Loading..." }];
+            ChosenEvent = PaceManEvents[0];
             PaceManEvent[]? eventsData = null;
             try
             {
@@ -197,12 +199,12 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
             }
             catch (Exception ex)
             {
-                Logger.Error($"Can't load paceman events: {ex.Message}"); 
+                Logger.Error($"Can't load paceman events: {ex.Message}");
             }
 
             if (eventsData == null) return;
 
-            PaceManEvents = new ObservableCollection<PaceManEvent>(eventsData);
+            PaceManEvents = [.. eventsData];
             OnPropertyChanged(nameof(PaceManEvents));
         }, CustomDispatcherPriority.Background);
     }
@@ -219,10 +221,11 @@ public class PlayerManagerViewModel : SelectableViewModel, IPlayerAddReceiver
     public override bool OnDisable()
     {
         BackgroundCoordinator.Unregister(this);
-        PaceManEvents.Clear();
         SelectedPlayers.Clear();
-        ChosenEvent = null;
         ShowPlayers = false;
+        
+        // PaceManEvents.Clear();
+        // ChosenEvent = null;
         
         return true;
     }

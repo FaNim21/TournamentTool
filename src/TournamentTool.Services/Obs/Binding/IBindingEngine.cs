@@ -1,9 +1,12 @@
-﻿using TournamentTool.Domain.Obs;
+﻿using TournamentTool.Core.Common.OBS;
+using TournamentTool.Domain.Obs;
 
 namespace TournamentTool.Services.Obs.Binding;
 
 public interface IBindingEngine
 {
+    IReadOnlyDictionary<BindingKey, BindingNode> Nodes { get; }
+    
     IReadOnlyCollection<BindingSchema> AvailableSchemas { get; }
     IReadOnlyCollection<BindingSubSchema> AvailableSubSchemas { get; }
     IReadOnlyDictionary<string, HashSet<BindingSubSchema>> SchemaToSubSchemaConnection { get; }
@@ -15,7 +18,7 @@ public interface IBindingEngine
 
     void Publish(BindingKey key, object? value);
 
-    bool ExistBinding(BindingKey key);
+    bool BindingExists(BindingKey key);
     
     void RegisterSchema(BindingSchema schema);
     void RegisterSubSchema(BindingSubSchema subSchema);

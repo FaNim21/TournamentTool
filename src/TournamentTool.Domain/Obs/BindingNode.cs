@@ -1,6 +1,4 @@
-﻿using TournamentTool.Domain.Obs;
-
-namespace TournamentTool.Services.Obs.Binding;
+﻿namespace TournamentTool.Domain.Obs;
 
 public sealed class BindingNode
 {

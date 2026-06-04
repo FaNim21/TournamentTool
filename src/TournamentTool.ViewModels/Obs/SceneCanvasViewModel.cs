@@ -3,6 +3,7 @@ using System.Windows.Input;
 using TournamentTool.Core.Common;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Presentation.Obs;
 using TournamentTool.Presentation.Obs.Entities;

@@ -230,7 +230,7 @@ public class LeaderboardEntryEditWindowViewModel : BaseWindowViewModel
         MainChosenMilestone = RunMilestone.None;
         PreviousChosenMilestone = RunMilestone.None;
         
-        FilteredMilestones = new List<RunMilestone>(filtered);
+        FilteredMilestones = [.. filtered];
         OnPropertyChanged(nameof(FilteredMilestones));
     }
     private void SwitchRuleType()
@@ -377,7 +377,6 @@ public class LeaderboardEntryEditWindowViewModel : BaseWindowViewModel
         {
             _originalEntry.AddMilestone(milestone);
         }
-        //TODO: 0 Leaderboard binding update, jako tylko przy zapisywaniu zmian
     }
     private void Rollback()
     {

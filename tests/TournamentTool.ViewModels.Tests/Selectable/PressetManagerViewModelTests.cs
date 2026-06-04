@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using NSubstitute;
+using NSubstitute.ReceivedExtensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Utils;
 using TournamentTool.Domain.Entities;
@@ -190,6 +191,7 @@ public class PresetManagerViewModelTests
         // Assert
         _tournamentState.DidNotReceive().MarkAsModified();
     }
+    
     [Fact]
     public void Clear_ShouldClearAndMarkModified_WhenUserClicksYes()
     {
@@ -201,7 +203,7 @@ public class PresetManagerViewModelTests
         _presetManager.Clear();
 
         // Assert
-        _tournamentState.Received(1).MarkAsModified();
+        _tournamentState.ReceivedWithAnyArgs(1).MarkAsModified();
     }
     
     public class CommandsTests
@@ -371,7 +373,7 @@ public class PresetManagerViewModelTests
             _presetManager.DuplicateCurrentPresetCommand.Execute(item);
             
             //Assert
-            _presetService.Received(2).SavePreset(Arg.Any<IPreset>());
+            _presetService.Received(3).SavePreset(Arg.Any<IPreset>());
             Assert.Equal(expectedName, _presetManager.Presets[^1].Name);
         }
 

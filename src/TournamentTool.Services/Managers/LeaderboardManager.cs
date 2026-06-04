@@ -8,13 +8,6 @@ using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Managers;
 
-public interface ILeaderboardManager
-{
-    event Action<LeaderboardEntry>? OnEntryUpdate;
-
-    void EvaluateData(object? data, LeaderboardRuleType ruleType = LeaderboardRuleType.None);
-}
-
 public class LeaderboardManager : ILeaderboardManager
 {
     private readonly ITournamentState _tournamentState;
@@ -25,7 +18,8 @@ public class LeaderboardManager : ILeaderboardManager
     public event Action<LeaderboardEntry>? OnEntryUpdate;
 
     
-    public LeaderboardManager(ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ILuaScriptsManager luaManager, ILoggingService logger)
+    public LeaderboardManager(ITournamentState tournamentState, ITournamentLeaderboardRepository leaderboardRepository, ILuaScriptsManager luaManager, 
+        ILoggingService logger)
     {
         _tournamentState = tournamentState;
         _leaderboardRepository = leaderboardRepository;
@@ -136,7 +130,6 @@ public class LeaderboardManager : ILeaderboardManager
     
     private void OnEntryRunRegistered(LeaderboardEntry entry)
     {
-        //TODO: 0 Leaderboard binding update
         _leaderboardRepository.RecalculateEntryPosition(entry);
         OnEntryUpdate?.Invoke(entry);
         _tournamentState.MarkAsModified();

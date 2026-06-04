@@ -43,10 +43,8 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_best_time"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_average"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_amount"));
+        //TODO: 0 Uwzglednic wiecej danych z leaderboard'a
         //wiecej od leaderboard bedzie...
-        
-        //TODO: 0 Leaderboard trzeba dobrze rozkminic z zamiana pozycji i tym zeby aktualizowac tylko rzeczywiste zmiany, i to jak ktos wejdze
-        // w dana pozycje to trzeba wszystkich pomiedzy aktualizowac? :/
     }
     
     private void InitializeSubSchemas()

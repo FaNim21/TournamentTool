@@ -1,5 +1,7 @@
 ﻿using ObsWebSocket.Core.Protocol.Common;
+using TournamentTool.Core.Common.OBS;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs.Binding;

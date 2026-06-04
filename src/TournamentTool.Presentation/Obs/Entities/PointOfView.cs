@@ -2,11 +2,11 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Core.Parsers;
 using TournamentTool.Domain.Entities;
+using TournamentTool.Domain.Entities.Obs;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Presentation.Entities;
@@ -14,7 +14,7 @@ using TournamentTool.Services.Logging;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 
-public class PointOfView : BrowserItem, INotifyPropertyChanged
+public class PointOfView : BrowserItem, INotifyPropertyChanged, IPointOfView
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -117,14 +117,6 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         set => SetField(ref _newVolume, value);
     }
 
-    private BindingKey keyHead { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyDisplayName { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyIgn { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyPb { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyTeamName { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyStreamName { get; set; } = BindingKey.CreateEmpty();
-    private BindingKey keyStreamType { get; set; } = BindingKey.CreateEmpty();
-
 
     public PointOfView(ISceneManager sceneManager, ILoggingService logger, SceneType type) : base(sceneManager, logger)
     {
@@ -149,18 +141,6 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         return clonedItem;
     }
 
-    public override void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null, SceneItemConfiguration? configuration = null)
-    {
-        base.Initialize(scene, item, group, configuration);
-        
-        keyHead = BindingKey.CreatePov("head", SourceName);
-        keyDisplayName = BindingKey.CreatePov("display_name", SourceName);
-        keyIgn = BindingKey.CreatePov("ign", SourceName);
-        keyPb = BindingKey.CreatePov("pb", SourceName);
-        keyTeamName = BindingKey.CreatePov("team_name", SourceName);
-        keyStreamName = BindingKey.CreatePov("stream_name", SourceName);
-        keyStreamType = BindingKey.CreatePov("stream_type", SourceName);
-    }
     public override async Task LoadAsync()
     {
         (string? currentName, int volume, StreamType type) data = await GetBrowserURLStreamInfo(SourceUUID);
@@ -294,25 +274,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
 
         UpdateUrl();
         Update();
-        UpdateBindings();
-    }
-
-    public void UpdateBindings()
-    {
-        string headUrl = string.Empty;
-        if (Player != null)
-        {
-            headUrl = SceneManager.GetHeadURL(Player.HeadViewParameter, 180);
-            if (string.IsNullOrEmpty(Player.HeadViewParameter)) headUrl = string.Empty;
-        }
-        
-        SceneManager.Publish(keyHead, headUrl);
-        SceneManager.Publish(keyDisplayName, DisplayedPlayer);
-        SceneManager.Publish(keyIgn, Player?.InGameName ?? string.Empty);
-        SceneManager.Publish(keyPb, Player?.GetPersonalBest ?? string.Empty);
-        SceneManager.Publish(keyTeamName, Player?.TeamName ?? string.Empty);
-        SceneManager.Publish(keyStreamName, Player?.StreamDisplayInfo.Name ?? string.Empty);
-        SceneManager.Publish(keyStreamType, Player == null ? string.Empty : Player.StreamDisplayInfo.Type);
+        SceneManager.Publish(this, SourceName);
     }
 
     public override async Task RefreshAsync()
@@ -351,7 +313,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged
         }
 
         base.Clear(fullClear);
-        UpdateBindings();
+        SceneManager.Publish(this, SourceName);
     }
 
     private void ClearCustomData()

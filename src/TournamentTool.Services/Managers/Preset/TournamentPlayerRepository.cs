@@ -3,27 +3,8 @@ using TournamentTool.Core.Factories;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.Services.Managers.Preset;
-
-public interface ITournamentPlayerRepository
-{
-    ReadOnlyObservableCollection<IPlayerViewModel> Players { get; }
-
-    void AddPlayer(IPlayerViewModel player);
-    void RemovePlayer(IPlayerViewModel player);
-
-    bool ContainsDuplicates(Player findPlayer, Guid? excludeID = null);
-    bool ContainsDuplicatesNoDialog(Player findPlayer, Guid? excludeID = null);
-
-    IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
-    IPlayerViewModel? GetPlayerByUUID(string uuid);
-    IPlayerViewModel? GetPlayerByIGN(string ign);
-
-    void UpdateCategoryForPlayers();
-    void UpdateTeamNamesForPlayers();
-}
 
 public class TournamentPlayerRepository : ITournamentPlayerRepository, IDisposable
 {

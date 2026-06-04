@@ -1,6 +1,7 @@
 ﻿using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Services.Managers.Preset;
 
@@ -8,6 +9,7 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
 {
     private ILoggingService Logger { get; }
     private readonly ITournamentState _state;
+    private readonly ILeaderboardBindingUpdater _leaderboardBindingUpdater;
 
     private Leaderboard Leaderboard => _state.CurrentPreset.Leaderboard;
 
@@ -16,10 +18,11 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
     public IReadOnlyList<LeaderboardRule> Rules => Leaderboard.Rules;
 
 
-    public TournamentLeaderboardRepository(ITournamentState state, ILoggingService logger)
+    public TournamentLeaderboardRepository(ITournamentState state, ILoggingService logger, ILeaderboardBindingUpdater leaderboardBindingUpdater)
     {
         Logger = logger;
         _state = state;
+        _leaderboardBindingUpdater = leaderboardBindingUpdater;
 
         _state.PresetChanged += OnPresetChanged;
     }
@@ -97,11 +100,15 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
         bool wasChanged = false;
         int index = Leaderboard.OrderedEntries.IndexOf(updatedEntry);
         if (index == -1) return;
+
         if (OrderedEntries.Count == 1)
         {
             updatedEntry.Position = 1;
+            _leaderboardBindingUpdater.Publish(updatedEntry);
             return;
         }
+        
+        int startIndex = index;
         
         //Punkty wzrosly
         while (index > 0 && OrderedEntries[index].CompareTo(OrderedEntries[index - 1], Rules[0].ChosenAdvancement) >= 0)
@@ -126,7 +133,9 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
             index++;
             wasChanged = true;
         }
-
+        
+        _leaderboardBindingUpdater.Publish(startIndex, index);
+        
         if (wasChanged) return;
         OrderedEntries[index].Position = index + 1;
     }
@@ -148,7 +157,7 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
 
     public void MoveRule(int oldIndex, int newIndex)
     {
-        var item = Rules[oldIndex];
+        LeaderboardRule item = Rules[oldIndex];
         Leaderboard.Rules.RemoveAt(oldIndex);
         Leaderboard.Rules.Insert(newIndex, item);
     }

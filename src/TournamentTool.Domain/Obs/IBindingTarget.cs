@@ -1,4 +1,4 @@
-﻿namespace TournamentTool.Services.Obs.Binding;
+﻿namespace TournamentTool.Domain.Obs;
 
 public interface IBindingTarget
 {

@@ -4,7 +4,6 @@ using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Services.External;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Logging.Profiling;
 
 namespace TournamentTool.ViewModels.Entities.Player;
 
