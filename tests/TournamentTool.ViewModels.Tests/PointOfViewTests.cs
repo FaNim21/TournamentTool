@@ -5,6 +5,7 @@ using TournamentTool.Domain.Enums;
 using TournamentTool.Presentation.Obs;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs;
 
 namespace TournamentTool.ViewModels.Tests;
 

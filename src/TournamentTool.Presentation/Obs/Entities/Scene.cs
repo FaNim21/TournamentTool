@@ -1,9 +1,11 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using ObsWebSocket.Core.Protocol.Common;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 
@@ -16,6 +18,10 @@ public interface IScene
 
     bool ExistInItems<T>(Func<T, bool> condition) where T : SceneItem;
     T? GetItem<T>(Func<T, bool> condition) where T : SceneItem;
+
+    void RegisterTarget(BindingKey key, IBindingTarget target);
+    void UnregisterTarget(BindingKey key, IBindingTarget target);
+    void PublishAll<T>(string SourceName) where T : BindingKey;
 }
 
 public class Scene : IScene
@@ -23,7 +29,10 @@ public class Scene : IScene
     private readonly ISceneManager _sceneManager;
     private readonly ILoggingService _logger;
     private readonly AppCache _appCache;
+    private readonly IServiceProvider _serviceProvider;
     private readonly Lock _lock = new();
+    
+    private IBindingEngine _bindingEngine => _serviceProvider.GetRequiredService<IBindingEngine>();
     
     protected SceneType Type { get; set; }
 
@@ -42,18 +51,19 @@ public class Scene : IScene
     public event EventHandler<Scene>? SceneRecreated;
 
 
-    public Scene(ISceneManager sceneManager, ILoggingService logger, AppCache appCache, SceneType type)
+    public Scene(ISceneManager sceneManager, ILoggingService logger, AppCache appCache, IServiceProvider serviceProvider, SceneType type)
     {
         _sceneManager = sceneManager;
         _logger = logger;
         _appCache = appCache;
+        _serviceProvider = serviceProvider;
 
         Type = type;
     }
     
     public Scene Clone()
     {
-        Scene clonedScene = new(_sceneManager, _logger, _appCache, Type)
+        Scene clonedScene = new(_sceneManager, _logger, _appCache, _serviceProvider, Type)
         {
             SceneName = SceneName,
             SceneUuid = SceneUuid,
@@ -222,6 +232,14 @@ public class Scene : IScene
         sceneItem.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(configuration.InputKind.ToString());
     }
     
+    public void RegisterTarget(BindingKey key, IBindingTarget target) => _bindingEngine.RegisterTarget(key, target);
+    public void UnregisterTarget(BindingKey key, IBindingTarget target) => _bindingEngine.RemoveTarget(key, target);
+    public void PublishAll<T>(string SourceName) where T : BindingKey
+    {
+        //Fajnie bylo by dac update na source name? jako optymalizacja, to samo w Clear
+        _bindingEngine.PublishAll<T>();
+    }
+
     public void Clear()
     {
         SceneName = string.Empty;

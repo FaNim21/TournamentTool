@@ -21,4 +21,6 @@ public interface ITournamentPlayerRepository
 
     void UpdateCategoryForPlayers();
     void UpdateTeamNamesForPlayers();
+    
+    Func<string>? GetBindingFieldValue(IPlayer? player, string field);
 }

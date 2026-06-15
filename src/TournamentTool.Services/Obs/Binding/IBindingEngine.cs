@@ -1,5 +1,4 @@
-﻿using TournamentTool.Core.Common.OBS;
-using TournamentTool.Domain.Obs;
+﻿using TournamentTool.Domain.Obs;
 
 namespace TournamentTool.Services.Obs.Binding;
 
@@ -16,7 +15,9 @@ public interface IBindingEngine
     void RegisterTarget(BindingKey key, IBindingTarget target);
     void RemoveTarget(BindingKey key, IBindingTarget target);
 
-    void Publish(BindingKey key, object? value);
+    void PublishAll<T>() where T : BindingKey;
+    void PublishAll();
+    void Publish(BindingKey key, string value);
 
     bool BindingExists(BindingKey key);
     

@@ -2,5 +2,8 @@
 
 public interface IBindingTarget
 {
-    void ApplyBindingValue(object? value);
+    string LastAppliedValue { get; }
+    string SourceName { get; }
+    
+    void ApplyBindingValue(string value);
 }

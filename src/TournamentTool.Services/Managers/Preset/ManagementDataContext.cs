@@ -11,7 +11,7 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
 {
     private readonly ITournamentState _state;
     private readonly IBindingEngine _bindingEngine;
-    
+
     private readonly ConcurrentDictionary<string, object> SetterCache = new();
 
     private TManagement ManagementData
@@ -19,11 +19,11 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
         get
         {
             if (_state.CurrentPreset.ManagementData is TManagement management) return management;
-            
+
             return new TManagement();
         }
     }
-    
+
     public ManagementDataContext(ITournamentState state, IBindingEngine bindingEngine)
     {
         _state = state;
@@ -39,12 +39,12 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
 
         string propertyName = memberExpression.Member.Name;
         Action<TManagement, TValue> setter = GetOrCreateSetter<TValue>(propertyName);
-        
+
         setter(ManagementData, value);
 
         if (ManagementData is RankedManagementData)
         {
-            _bindingEngine.Publish(BindingKey.CreateRankedManagement(propertyName), value);
+            _bindingEngine.Publish(BindingKey.CreateRankedManagement(propertyName), value?.ToString() ?? string.Empty);
         }
         else if (ManagementData is PacemanManagementData)
         {
@@ -52,9 +52,9 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
         }
     }
 
-    public TValue Get<TValue>(Func<TManagement, TValue> getter) where TValue : notnull 
+    public TValue Get<TValue>(Func<TManagement, TValue> getter) where TValue : notnull
         => getter(ManagementData);
-    
+
     private Action<TManagement, TValue> GetOrCreateSetter<TValue>(string propertyName)
     {
         string cacheKey = $"{typeof(TManagement).FullName}.{propertyName}";
@@ -62,7 +62,7 @@ public class ManagementDataContext<TManagement> : IManagementDataContext<TManage
 
         ParameterExpression targetExp = Expression.Parameter(typeof(TManagement), "target");
         ParameterExpression valueExp = Expression.Parameter(typeof(TValue), "value");
-        
+
         PropertyInfo property = typeof(TManagement).GetProperty(propertyName)!;
         MemberExpression propertyExp = Expression.Property(targetExp, property);
         BinaryExpression assignExp = Expression.Assign(propertyExp, valueExp);

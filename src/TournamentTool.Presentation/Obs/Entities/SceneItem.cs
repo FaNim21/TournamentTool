@@ -1,14 +1,13 @@
 ﻿using ObsWebSocket.Core.Protocol.Common;
-using TournamentTool.Core.Common.OBS;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Obs.Binding;
+using TournamentTool.Services.Obs;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 
-public abstract class SceneItem : IBindingTarget 
+public abstract class SceneItem : ISceneItem, IBindingTarget 
 {
     protected ILoggingService Logger { get; }
     
@@ -25,6 +24,8 @@ public abstract class SceneItem : IBindingTarget
     public string GroupName { get; protected set; } = string.Empty;
     public string SourceName { get; protected set; } = string.Empty;
     public string SourceUUID { get; private set; } = string.Empty;
+    
+    public string LastAppliedValue { get; private set;} = string.Empty;
 
     protected Dictionary<string, object> Inputs { get; } = [];
     protected SceneItemStub _item = new();
@@ -40,7 +41,7 @@ public abstract class SceneItem : IBindingTarget
     {
         if (Scene.IsReadonly) return;
         
-        SceneManager.UnregisterTarget(BindingKey, this);
+        Scene.UnregisterTarget(BindingKey, this);
     }
     
     public static SceneItem? Create(InputKind inputKind, ISceneManager sceneManager, ILoggingService logger, SceneType sceneType = SceneType.Main)
@@ -54,7 +55,7 @@ public abstract class SceneItem : IBindingTarget
         };
     }
     
-    public abstract SceneItem? Clone(IScene scene);
+    public abstract SceneItem? Clone(Scene scene);
 
     public virtual void Initialize(IScene scene, SceneItemStub item, SceneItemStub? group = null, SceneItemConfiguration? configuration = null)
     {
@@ -78,7 +79,7 @@ public abstract class SceneItem : IBindingTarget
         SetupConfiguration(configuration);
 
         if (Scene.IsReadonly) return;
-        SceneManager.RegisterTarget(BindingKey, this);
+        Scene.RegisterTarget(BindingKey, this);
     }
 
     public virtual Task LoadAsync() => Task.CompletedTask;
@@ -87,7 +88,10 @@ public abstract class SceneItem : IBindingTarget
 
     public virtual Task RefreshAsync() => Task.CompletedTask;
 
-    public virtual void ApplyBindingValue(object? value) { }
+    public virtual void ApplyBindingValue(string value)
+    {
+        LastAppliedValue = value;
+    }
     public virtual void Clear(bool fullClear = false) { }
     
     public void SetupConfiguration(SceneItemConfiguration? configuration)

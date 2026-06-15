@@ -1,15 +1,16 @@
 ﻿using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Ranking;
+using TournamentTool.Domain.Obs;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Services.Managers.Preset;
 
-public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository, IDisposable
+public sealed class TournamentLeaderboardRepository : ITournamentLeaderboardRepository, IDisposable
 {
     private ILoggingService Logger { get; }
     private readonly ITournamentState _state;
-    private readonly ILeaderboardBindingUpdater _leaderboardBindingUpdater;
+    private readonly IBindingEngine _bindingEngine;
 
     private Leaderboard Leaderboard => _state.CurrentPreset.Leaderboard;
 
@@ -18,11 +19,11 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
     public IReadOnlyList<LeaderboardRule> Rules => Leaderboard.Rules;
 
 
-    public TournamentLeaderboardRepository(ITournamentState state, ILoggingService logger, ILeaderboardBindingUpdater leaderboardBindingUpdater)
+    public TournamentLeaderboardRepository(ITournamentState state, ILoggingService logger, IBindingEngine bindingEngine)
     {
         Logger = logger;
         _state = state;
-        _leaderboardBindingUpdater = leaderboardBindingUpdater;
+        _bindingEngine = bindingEngine;
 
         _state.PresetChanged += OnPresetChanged;
     }
@@ -104,11 +105,9 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
         if (OrderedEntries.Count == 1)
         {
             updatedEntry.Position = 1;
-            _leaderboardBindingUpdater.Publish(updatedEntry);
+            _bindingEngine.PublishAll<BindingKeyLeaderboard>();
             return;
         }
-        
-        int startIndex = index;
         
         //Punkty wzrosly
         while (index > 0 && OrderedEntries[index].CompareTo(OrderedEntries[index - 1], Rules[0].ChosenAdvancement) >= 0)
@@ -133,9 +132,9 @@ public class TournamentLeaderboardRepository : ITournamentLeaderboardRepository,
             index++;
             wasChanged = true;
         }
-        
-        _leaderboardBindingUpdater.Publish(startIndex, index);
-        
+
+        _bindingEngine.PublishAll<BindingKeyLeaderboard>();
+
         if (wasChanged) return;
         OrderedEntries[index].Position = index + 1;
     }

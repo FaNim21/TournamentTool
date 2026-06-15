@@ -45,9 +45,12 @@ public static class DependencyInjection
         
         services.AddSingleton<IBindingSchemaInitializer, BindingSchemaInitializer>();
         services.AddSingleton<IBindingEngine, BindingEngine>();
+
+        services.AddSingleton<IBindingDataGetter, BindingDataGetter>();                 //to jest do binding node pod sciaganie aktualnych zmian
         
-        //zrobic jako zwykly add singleton dla web socketu
-        services.TryAddSingleton<JsonMessageSerializer>();
+        services.AddSingleton<IBindingNodeFactory, BindingNodeFactory>();
+        
+        services.AddSingleton<JsonMessageSerializer>();
         services.AddSingleton<IWebSocketMessageSerializer>(sp => sp.GetRequiredService<JsonMessageSerializer>());
     }
     
@@ -72,10 +75,6 @@ public static class DependencyInjection
         services.AddSingleton<ITournamentPresetManager, TournamentPresetManager>();
         services.AddSingleton<ITournamentPlayerRepository, TournamentPlayerRepository>();
         services.AddSingleton<ITournamentLeaderboardRepository, TournamentLeaderboardRepository>();
-        
-        services.AddSingleton<ILeaderboardBindingUpdater, LeaderboardBindingUpdater>();
-        services.AddSingleton<IPointOfViewBindingUpdater, PointOfViewBindingUpdater>();
-        services.AddSingleton<IBindingUpdater, BindingUpdater>();
         
         services.AddSingleton<IManagementDataContextFactory, ManagementDataContextFactory>();
     }

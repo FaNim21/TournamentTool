@@ -4,13 +4,13 @@ using ObsWebSocket.Core.Protocol.Common;
 using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Requests;
 using ObsWebSocket.Core.Protocol.Responses;
-using TournamentTool.Core.Extensions;
 using TournamentTool.Core.Interfaces;
 using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Obs;
 using TournamentTool.Domain.Enums;
 using TournamentTool.Domain.Interfaces;
 using TournamentTool.Domain.Obs;
+using TournamentTool.Presentation.Factories;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
@@ -19,44 +19,13 @@ using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Presentation.Obs;
 
-public interface ISceneManager
+public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
 {
-    event EventHandler? ObsConnected;
-    event EventHandler? ObsDisconnected;
-    event EventHandler<string>? SelectedSceneUpdated; 
-    
-    Scene MainScene { get; }
-    Scene PreviewScene { get; }
-    
-    ReadOnlyObservableCollection<SceneDto> Scenes { get; }
-    
-    Task RefreshScenesPOVSAsync();
-    
-    void QueueUpdate(string sourceUuid, Dictionary<string, object> input);
-    Task SetItemInputSettingsAsync(string sourceUuid, Dictionary<string, object> input);
-    
-    Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid);
-    Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
-
-    void RegisterTarget(BindingKey key, IBindingTarget target);
-    void UnregisterTarget(BindingKey key, IBindingTarget target);
-    void Publish(IPointOfView pointOfView, string sourceName);
-
-    IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
-    string GetHeadURL(string id, int size);
-}
-
-public sealed class SceneManager : ISceneManager, IDisposable
-{
-    private readonly Settings _settings;
-    
     private readonly IObsController _obs;
     private readonly ITournamentPlayerRepository _playerRepository;
-    private readonly IBindingEngine _bindingEngine;
     private readonly ILoggingService _logger;
     private readonly IDispatcherService _dispatcher;
     private readonly IObsUpdateBatcher _obsUpdateBatcher;
-    private readonly IPointOfViewBindingUpdater _pointOfViewBindingUpdater;
 
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
@@ -72,24 +41,19 @@ public sealed class SceneManager : ISceneManager, IDisposable
     public bool BusyWithOBS { get; private set; }
 
 
-    public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
-        ILoggingService logger, IDispatcherService dispatcher, IObsUpdateBatcher obsUpdateBatcher, IPointOfViewBindingUpdater pointOfViewBindingUpdater)
+    public SceneManager(IObsController obs, ITournamentPlayerRepository playerRepository, ISceneFactory sceneFactory, ILoggingService logger,
+        IDispatcherService dispatcher, IObsUpdateBatcher obsUpdateBatcher)
     {
         _obs = obs;
         _playerRepository = playerRepository;
-        _bindingEngine = bindingEngine;
         _logger = logger;
         _dispatcher = dispatcher;
         _obsUpdateBatcher = obsUpdateBatcher;
-        _pointOfViewBindingUpdater = pointOfViewBindingUpdater;
 
         Scenes = new ReadOnlyObservableCollection<SceneDto>(_scenes);
         
-        _settings = settingsProvider.Get<Settings>();
-        AppCache appCache = settingsProvider.Get<AppCache>();
-        
-        MainScene = new Scene(this, _logger, appCache, SceneType.Main);
-        PreviewScene = new Scene(this, _logger, appCache, SceneType.Preview);
+        MainScene = sceneFactory.Create(this, SceneType.Main);
+        PreviewScene = sceneFactory.Create(this, SceneType.Preview);
 
         _obs.SceneItemUpdateRequested += OnSceneUpdateRequested;
         _obs.ConnectionStateChanged += OnConnectionStateChanged;
@@ -302,15 +266,7 @@ public sealed class SceneManager : ISceneManager, IDisposable
     public async Task<GetInputSettingsResponseData?> GetItemInputSettingsAsync(string sourceUuid)
         => await _obs.GetInputSettingsAsync(sourceUuid);
 
-    public void RegisterTarget(BindingKey key, IBindingTarget target)
-        => _bindingEngine.RegisterTarget(key, target);
-    public void UnregisterTarget(BindingKey key, IBindingTarget target)
-        => _bindingEngine.RemoveTarget(key, target);
-    public void Publish(IPointOfView pointOfView, string sourceName)
-        => _pointOfViewBindingUpdater.Publish(pointOfView, sourceName);
-    
-    public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) 
-        => _playerRepository.GetPlayerByStreamName(name, type);
+    public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => _playerRepository.GetPlayerByStreamName(name, type);
     
     public void ClearPlayersFromPovs()
     {
@@ -362,7 +318,15 @@ public sealed class SceneManager : ISceneManager, IDisposable
 
         return items;
     }
-    
-    public string GetHeadURL(string id, int size) 
-        => _settings.HeadAPIType.GetHeadURL(id, size);
+
+    public IPointOfView? GetPointOfView(string sourceName)
+    {
+        foreach (SceneItem sceneItem in MainScene.SceneItems)
+        {
+            if (sceneItem is not PointOfView pov || !pov.SourceName.Equals(sourceName)) continue;
+            return pov;
+        }
+        
+        return null;
+    }
 }

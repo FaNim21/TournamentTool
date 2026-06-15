@@ -161,6 +161,7 @@ public class SceneManagementViewModel : SelectableViewModel
             
             _appCache.SceneItemConfigs[uuid] = editedConfig;
             await SceneEditor.UpdateScenes(uuid);
+            _bindingEngine.PublishAll();
         }
         catch (Exception ex)
         {

@@ -84,8 +84,6 @@ public class ProfileAttribute : Attribute, IAspect<IMethod>, IAspect<INamedType>
             {
                 stopwatch.Stop();
             }
-                
-            ProfilerManager.Report(className, methodName, stopwatch.Elapsed);
         }
     }
 }

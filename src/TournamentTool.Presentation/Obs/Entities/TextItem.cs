@@ -1,5 +1,6 @@
 ﻿using TournamentTool.Domain.Entities;
 using TournamentTool.Services.Logging;
+using TournamentTool.Services.Obs;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 
@@ -12,17 +13,18 @@ public class TextItem : SceneItem
     public TextItem(ISceneManager sceneManager, ILoggingService logger) : 
         base(sceneManager, logger) { }
     
-    public override SceneItem Clone(IScene scene)
+    public override SceneItem Clone(Scene scene)
     {
         TextItem clonedItem = new TextItem(SceneManager, Logger);
         clonedItem.Initialize(scene, _item, _group, new SceneItemConfiguration(InputKind, BindingKey));
         return clonedItem;
     }
     
-    public override void ApplyBindingValue(object? value)
+    public override void ApplyBindingValue(string value)
     {
-        Text = value?.ToString() ?? string.Empty;
+        base.ApplyBindingValue(value);
         
+        Text = value;
         Update();
     }
     

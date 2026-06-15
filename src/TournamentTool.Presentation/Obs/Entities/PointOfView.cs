@@ -134,7 +134,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged, IPointOfView
         StreamDisplayInfo = new StreamDisplayInfo(string.Empty, StreamType.twitch);
     }
 
-    public override SceneItem Clone(IScene scene)
+    public override SceneItem Clone(Scene scene)
     {
         PointOfView clonedItem = new PointOfView(SceneManager, Logger, Type);
         clonedItem.Initialize(scene, _item, _group, new SceneItemConfiguration(InputKind, BindingKey));
@@ -274,7 +274,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged, IPointOfView
 
         UpdateUrl();
         Update();
-        SceneManager.Publish(this, SourceName);
+        Scene.PublishAll<BindingKeyPOV>(SourceName);
     }
 
     public override async Task RefreshAsync()
@@ -313,7 +313,7 @@ public class PointOfView : BrowserItem, INotifyPropertyChanged, IPointOfView
         }
 
         base.Clear(fullClear);
-        SceneManager.Publish(this, SourceName);
+        Scene.PublishAll<BindingKeyPOV>(SourceName);
     }
 
     private void ClearCustomData()
