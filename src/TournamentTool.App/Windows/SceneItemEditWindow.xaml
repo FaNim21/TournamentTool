@@ -89,10 +89,6 @@
         
         <DataTemplate DataType="{x:Type bindings:BindingLeaderboardViewModel}">
             <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Text="Leaderboard support WIP..."
-                           Foreground="White"
-                           Margin="0 5 0 0" />
-                
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             Margin="0 5 0 0">

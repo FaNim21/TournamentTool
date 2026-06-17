@@ -43,7 +43,7 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_best_time"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_average"));
         _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_amount"));
-        //TODO: 0 Uwzglednic wiecej danych z leaderboard'a
+        _bindingEngine.RegisterSchema(BindingSchema.CreateLeaderboard("chosen_milestone_rule_name"));
         //wiecej od leaderboard bedzie...
     }
     

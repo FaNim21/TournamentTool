@@ -5,17 +5,14 @@ using ObsWebSocket.Core.Protocol.Events;
 using ObsWebSocket.Core.Protocol.Requests;
 using ObsWebSocket.Core.Protocol.Responses;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.Domain.Entities;
 using TournamentTool.Domain.Entities.Obs;
 using TournamentTool.Domain.Enums;
-using TournamentTool.Domain.Interfaces;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Presentation.Factories;
 using TournamentTool.Presentation.Obs.Entities;
 using TournamentTool.Services.Logging;
 using TournamentTool.Services.Managers.Preset;
 using TournamentTool.Services.Obs;
-using TournamentTool.Services.Obs.Binding;
 
 namespace TournamentTool.Presentation.Obs;
 
@@ -68,7 +65,13 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
 
     private void OnSceneCreated(object? sender, SceneCreatedPayload e)
     {
-        _scenes.Add(new SceneDto(e.SceneName ?? string.Empty, e.SceneUuid ?? string.Empty));
+        SceneDto newScene = new(e.SceneName ?? string.Empty, e.SceneUuid ?? string.Empty);
+        if (Scenes.Contains(newScene)) return;
+        
+        _dispatcher.Invoke(()=>
+        {
+            _scenes.Add(newScene);
+        });
     }
     private void OnSceneRemoved(object? sender, SceneRemovedPayload e)
     {
@@ -76,7 +79,10 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
         {
             if (!scene.Uuid.Equals(e.SceneUuid)) continue;
             
-            _scenes.Remove(scene);
+            _dispatcher.Invoke(()=>
+            {
+                _scenes.Remove(scene);
+            });
             return;
         }
     }
@@ -215,7 +221,6 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
         _logger.Log($"Program scene: {sceneName}, duplicate: {isDuplicate}");
         if (isDuplicate) return;
 
-        //TODO: 0 To jest powod dlaczego nie aktulizuje sie zmieniona scena z obsa
         await MainScene.SetSceneItemsAsync(sceneName, sceneUuid);
     }
     private async Task CurrentPreviewSceneChanged(string sceneName, string sceneUuid)
@@ -323,7 +328,13 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
     {
         foreach (SceneItem sceneItem in MainScene.SceneItems)
         {
-            if (sceneItem is not PointOfView pov || !pov.SourceName.Equals(sourceName)) continue;
+            if (sceneItem is not PointOfView pov || !pov.SourceName.Equals(sourceName, StringComparison.OrdinalIgnoreCase)) continue;
+            return pov;
+        }
+
+        foreach (SceneItem sceneItem in PreviewScene.SceneItems)
+        {
+            if (sceneItem is not PointOfView pov || !pov.SourceName.Equals(sourceName, StringComparison.OrdinalIgnoreCase)) continue;
             return pov;
         }
         

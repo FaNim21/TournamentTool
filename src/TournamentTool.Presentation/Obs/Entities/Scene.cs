@@ -131,14 +131,6 @@ public class Scene : IScene
             createdSceneItems.Add(sceneItem);
         }
         
-        if (!IsReadonly)
-        {
-            foreach (var item in createdSceneItems)
-            {
-                await item.LoadAsync();
-            }
-        }
-        
         lock (_lock)
         {
             SceneItems.Clear();
@@ -148,6 +140,14 @@ public class Scene : IScene
             {
                 SceneItems.Add(item);
                 ItemAdded?.Invoke(this, item);
+            }
+        }
+        
+        if (!IsReadonly)
+        {
+            foreach (var item in createdSceneItems)
+            {
+                await item.LoadAsync();
             }
         }
     }

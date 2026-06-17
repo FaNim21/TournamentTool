@@ -252,10 +252,17 @@ public class ObsController : IObsController, IDisposable
     
     public async Task DisconnectAsync() => await Client.DisconnectAsync();
 
-    private void OnSceneCreated(object? sender, SceneCreatedEventArgs e) 
-        => SceneCreated?.Invoke(this, new SceneCreatedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
-    private void OnSceneRemoved(object? sender, SceneRemovedEventArgs e) 
-        => SceneRemoved?.Invoke(this, new SceneRemovedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
+    private void OnSceneCreated(object? sender, SceneCreatedEventArgs e)
+    {
+        if (e.EventData.IsGroup) return;
+        SceneCreated?.Invoke(this, new SceneCreatedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
+    }
+
+    private void OnSceneRemoved(object? sender, SceneRemovedEventArgs e)
+    {
+        if (e.EventData.IsGroup) return;
+        SceneRemoved?.Invoke(this, new SceneRemovedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
+    }
 
     private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
     {

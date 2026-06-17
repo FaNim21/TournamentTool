@@ -46,8 +46,8 @@ public sealed class BindingDataGetter : IBindingDataGetter
             ? Preset.Leaderboard.OrderedEntries[leaderboardKey.Position - 1] : null;
         if (entry is null) return string.Empty;
         
-        LeaderboardRule? chosenMilestone = Preset.Leaderboard.Rules.Count > 0 ? Preset.Leaderboard.Rules[0] : null;
-        RunMilestone chosenAdvancement = chosenMilestone?.ChosenAdvancement ?? RunMilestone.None;
+        LeaderboardRule? chosenRule = Preset.Leaderboard.Rules.Count > 0 ? Preset.Leaderboard.Rules[0] : null;
+        RunMilestone chosenAdvancement = chosenRule?.ChosenAdvancement ?? RunMilestone.None;
         
         BestMilestoneData? bestMilestoneData = entry.GetBestMilestone(chosenAdvancement);
 
@@ -58,6 +58,7 @@ public sealed class BindingDataGetter : IBindingDataGetter
             "chosen_milestone_best_time" => bestMilestoneData is { } ? TimeSpan.FromMilliseconds(bestMilestoneData.BestTime).ToFormattedTime() : string.Empty,
             "chosen_milestone_average" => bestMilestoneData is { } ? TimeSpan.FromMilliseconds(bestMilestoneData.Average).ToFormattedTime() : string.Empty,
             "chosen_milestone_amount" => bestMilestoneData is { } ? TimeSpan.FromMilliseconds(bestMilestoneData.Amount) : string.Empty,
+            "chosen_milestone_rule_name" => chosenRule?.Name ?? string.Empty,
             _ => null
         };
 

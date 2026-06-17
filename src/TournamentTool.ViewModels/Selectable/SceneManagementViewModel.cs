@@ -107,6 +107,10 @@ public class SceneManagementViewModel : SelectableViewModel
     ///       w celu wyboru itemu? wtedy z poziomu skryptu ustala sie tym customowej zmiennej miedzy typem scene itemu (enum)
     ///     — zaprojektowac trzeba API LUA, czyli jakie eventy beda dostepne do przechwytywania, jak OnTextChanged dla textfieldo,
     ///       czy OnSidePanelUpdate do przechwycenia informacji z bocznego panelu w celu aktualizacji scene itemu dla ktorego jest zrobiony skrypt
+    ///
+    /// INNE POMYSLY (Automatt):
+    /// 1. tworzenie grupy pova za pomocą 1 przycisku w TT (presety defaultowe oraz własne, wybierasz który chcesz i bang wszystko się samo tworzy, rozmiary pozycje itp itd, grupuje się w obsie i miód malina)
+    /// 2. wybierasz parę źródeł na Scene Configu, klikasz prawym i "add as a preset" i tworzy to nowy preset do rzeczy opisanych na górze
     /// </summary>
     public SceneManagementViewModel(IDispatcherService dispatcher, IBindingEngine bindingEngine, ISettingsProvider settingsProvider,
         ISceneControllerViewModelFactory sceneControllerFactory, IObsController obs, IWindowService windowService, ILoggingService logger,
