@@ -11,8 +11,6 @@ public partial class MainWindow : Window
     private static Mutex? _mutex;
     private const string MutexName = "TournamentTool_mutex";
     
-    private bool _handledCrash = false;
-
 
     public MainWindow()
     {
@@ -33,63 +31,12 @@ public partial class MainWindow : Window
             Left = Settings.Default.MainWindowLeft;
             Top = Settings.Default.MainWindowTop;
         }
-
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
-        };
-
-        Application.Current.DispatcherUnhandledException += (_, e) =>
-        {
-            LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
-            // e.Handled = true; //Problem z tym, ze to blokuje wywalanie aplikacji, a nie wiem czy to sie do czegos ma jak i tak nie ma UI xd
-        };
-
-        Dispatcher.UnhandledException += (_, e) =>
-        {
-            LogUnhandledException(e.Exception, "Dispatcher.UnhandledException");
-            // e.Handled = true;
-        };
-        
-        /*TaskScheduler.UnobservedTaskException += (_, e) =>
-        {
-            // LogUnhandledExceptionAsNotCrashed(e.Exception, "TaskScheduler.UnobservedTaskException");
-            LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
-            e.SetObserved();
-        };*/
     }
     
     private static bool IsSingleInstance()
     {
         _mutex = new Mutex(true, MutexName, out var createdNew);
         return createdNew;
-    }
-
-    private void LogUnhandledExceptionAsNotCrashed(Exception exception, string source)
-    {
-        if (DataContext is not MainViewModel mainViewModel) return;
-        
-        mainViewModel.Logger.Error($"({source}) {exception}");
-    }
-    private void LogUnhandledException(Exception exception, string source)
-    {
-        if (DataContext is MainViewModel mainViewModel)
-        {
-            mainViewModel.SaveAll();
-            try
-            {
-                mainViewModel.ShowUnhandledExceptionLog(exception.Message);
-            }
-            catch
-            {
-                // ignored
-            }
-
-            Task.Run(async () => await mainViewModel.LogStore.SaveToFileAsync());
-        }
-        
-        string output = $"UnhandledException ({source}): {exception}";
-        Helper.SaveLog(output, "crash_log");
     }
 
     private void MinimizeButtonsClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

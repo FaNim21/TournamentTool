@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddPresentation();
         services.AddServices();
         services.AddViewModels();
+        
+        services.AddSingleton<MainWindow>();
     }
     
     private static void AddConfiguration(this IServiceCollection services)
@@ -33,11 +35,6 @@ public static class DependencyInjection
                 client.DefaultRequestHeaders.Add("User-Agent", $"TournamentTool/{Consts.Version}");
                 client.Timeout = TimeSpan.FromSeconds(10);  //globalny timeout
             });
-        }); 
-        
-        services.AddSingleton<MainWindow>(provider => new MainWindow
-        {
-            DataContext = provider.GetRequiredService<MainViewModel>()
         });
     }
     

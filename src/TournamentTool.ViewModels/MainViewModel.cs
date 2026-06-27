@@ -18,7 +18,6 @@ namespace TournamentTool.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    public ILogStore LogStore { get; }
     public ILoggingService Logger { get; }
     public IPresetSaver PresetSaver { get; }
     public ITournamentState TournamentState { get; }
@@ -28,7 +27,6 @@ public class MainViewModel : BaseViewModel
     private readonly IApplicationState _applicationState;
     private readonly IWindowService _windowService;
     private readonly IDialogService _dialogService;
-    private readonly ISettingsSaver _settingsProvider;
 
     public DebugWindowViewModel? DebugWindowViewModel { get; private set; }
     
@@ -80,17 +78,15 @@ public class MainViewModel : BaseViewModel
     public ICommand SelectViewModelCommand { get; private set; }
 
 
-    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, NotificationPanelViewModel notificationPanel,
-        IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker, IApplicationState applicationState, 
-        IWindowService windowService, IDialogService dialogService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel, ILogStore logStore,
-        ISettingsSaver settingsProvider) : base(dispatcher)
+    public MainViewModel(INavigationService navigationService, StatusBarViewModel statusBar, ILoggingService logger, IDialogService dialogService,
+        NotificationPanelViewModel notificationPanel, IPresetSaver presetSaver, IDispatcherService dispatcher, IUpdateCheckerService updateChecker,
+        IApplicationState applicationState, IWindowService windowService, ITournamentState tournamentState, ConsoleViewModel consoleViewModel)
+        : base(dispatcher)
     {
         _updateChecker = updateChecker;
         _applicationState = applicationState;
         _windowService = windowService;
         _dialogService = dialogService;
-        _settingsProvider = settingsProvider;
-        LogStore = logStore;
         NavigationService = navigationService;
         StatusBar = statusBar;
         Logger = logger;
@@ -136,12 +132,6 @@ public class MainViewModel : BaseViewModel
         NavigationService.SelectedView.OnDisable();
     }
     
-    public void SaveAll()
-    {
-        _settingsProvider.Save();
-        PresetSaver.SavePreset();
-    }
-
     public void SelectViewModel(string viewModelName)
     {
         if (NavigationService == null) return;
@@ -179,6 +169,7 @@ public class MainViewModel : BaseViewModel
 
         try
         {
+            //TODO: 1 wtf co to tu robi, nie ma to jak kod z 2024 - powinno to byc w aplicationlifetime
             isNewUpdate = await _updateChecker.CheckForUpdates();
         }
         catch (Exception ex)
@@ -187,11 +178,6 @@ public class MainViewModel : BaseViewModel
         }
 
         NewUpdate = isNewUpdate;
-    }
-
-    public void ShowUnhandledExceptionLog(string exceptionMessage)
-    {
-        _dialogService.Show($"Unhandled exception: {exceptionMessage}", "Application crash", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     public void SwitchDebugWindow()

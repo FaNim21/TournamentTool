@@ -34,8 +34,10 @@ public class LogStore : ILogStore
 
     public async Task SaveToFileAsync()
     {
+        if (Logs.Count == 0) return;
+        
         string fileName = Helper.GetUniqueDateTimeFileName();
-        string logsPath = Path.Combine(Consts.LogsPath, fileName + ".log.gz");
+        string logsPath = Path.Combine(Consts.LogsPath, fileName + ".console.log.gz");
         
         await using var fileStream = File.Create(logsPath);
         await using var gzip = new GZipStream(fileStream, CompressionLevel.Optimal);
