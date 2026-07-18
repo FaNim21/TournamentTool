@@ -88,7 +88,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
     private SceneItemConfiguration? _configuration;
     
     
-    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, SceneViewModel sceneViewModel, IBindingEngine bindingEngine, AppCache appCache, 
+    public SceneItemEditWindowViewModel(SceneItemViewModel sceneItemViewModel, SceneViewModel sceneViewModel, IBindingEngine bindingEngine, ObsConfiguration obsConfig, 
         IDispatcherService dispatcher) : base(dispatcher)
     {
         _sceneViewModel = sceneViewModel;
@@ -100,7 +100,7 @@ public class SceneItemEditWindowViewModel : BaseWindowViewModel
         AllSchemas = bindingEngine.AvailableSchemas;
         Schemas = ["Empty", .. AllSchemas.DistinctBy(s => s.Name).Select(s => s.Name)];
 
-        appCache.SceneItemConfigs.TryGetValue(SceneItemViewModel.SourceUUID, out SceneItemConfiguration? config);
+        obsConfig.SceneItemConfigs.TryGetValue(SceneItemViewModel.SourceUUID, out SceneItemConfiguration? config);
         _configuration = config;
         
         LoadSchemaFromConfig();

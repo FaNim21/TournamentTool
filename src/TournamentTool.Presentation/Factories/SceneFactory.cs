@@ -11,17 +11,17 @@ public sealed class SceneFactory : ISceneFactory
 {
     private readonly ILoggingService _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly AppCache _appCache;
+    private readonly ObsConfiguration _obsConfig;
 
     public SceneFactory(ILoggingService logger, IServiceProvider serviceProvider, ISettingsProvider settingsProvider)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _appCache = settingsProvider.Get<AppCache>();
+        _obsConfig = settingsProvider.Get<ObsConfiguration>();
     }
     
     public Scene Create(ISceneManager sceneManager, SceneType sceneType)
     {
-        return new Scene(sceneManager, _logger, _appCache, _serviceProvider, sceneType);
+        return new Scene(sceneManager, _logger, _obsConfig, _serviceProvider, sceneType);
     }
 }

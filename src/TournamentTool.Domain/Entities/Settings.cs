@@ -8,7 +8,7 @@ public enum HeadAPIType
     mcheads,
 }
 
-public class Settings
+public sealed class Settings
 {
     // General
     public int Port { get; set; } = 4455;
@@ -28,7 +28,7 @@ public class Settings
     public int ConsoleLogsLimit { get; set; } = 200;
 }
 
-public class APIKeys
+public sealed class APIKeys
 {
     public string CustomTwitchClientID { get; set; } = string.Empty;
     public string TwitchAccessToken { get; set; } = string.Empty;
@@ -43,8 +43,6 @@ public sealed class AppCache
     
     public Dictionary<string, PresetOrderData> PresetsOrder { get; init; } = [];
     public bool IsConsoleWindowed { get; set; } = false;
-
-    public Dictionary<string, SceneItemConfiguration> SceneItemConfigs { get; init; } = [];
 }
 
 public sealed class PresetOrderData
@@ -52,4 +50,9 @@ public sealed class PresetOrderData
     public int index { get; set; } = int.MaxValue;
 }
 
-public record SceneItemConfiguration(InputKind InputKind, BindingKey BindingKey);
+public sealed class ObsConfiguration
+{
+    public Dictionary<string, SceneItemConfiguration> SceneItemConfigs { get; init; } = [];
+}
+
+public sealed record SceneItemConfiguration(InputKind InputKind, BindingKey BindingKey);

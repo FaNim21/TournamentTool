@@ -28,7 +28,7 @@ public class Scene : IScene
 {
     private readonly ISceneManager _sceneManager;
     private readonly ILoggingService _logger;
-    private readonly AppCache _appCache;
+    private readonly ObsConfiguration _obsConfig;
     private readonly IServiceProvider _serviceProvider;
     private readonly Lock _lock = new();
     
@@ -51,11 +51,11 @@ public class Scene : IScene
     public event EventHandler<Scene>? SceneRecreated;
 
 
-    public Scene(ISceneManager sceneManager, ILoggingService logger, AppCache appCache, IServiceProvider serviceProvider, SceneType type)
+    public Scene(ISceneManager sceneManager, ILoggingService logger, ObsConfiguration obsConfig, IServiceProvider serviceProvider, SceneType type)
     {
         _sceneManager = sceneManager;
         _logger = logger;
-        _appCache = appCache;
+        _obsConfig = obsConfig;
         _serviceProvider = serviceProvider;
 
         Type = type;
@@ -63,7 +63,7 @@ public class Scene : IScene
     
     public Scene Clone()
     {
-        Scene clonedScene = new(_sceneManager, _logger, _appCache, _serviceProvider, Type)
+        Scene clonedScene = new(_sceneManager, _logger, _obsConfig, _serviceProvider, Type)
         {
             SceneName = SceneName,
             SceneUuid = SceneUuid,
@@ -165,7 +165,7 @@ public class Scene : IScene
     {
         if (item.SceneItemTransform == null) return null;
 
-        _appCache.SceneItemConfigs.TryGetValue(item.SourceUuid ?? string.Empty, out SceneItemConfiguration? config);
+        _obsConfig.SceneItemConfigs.TryGetValue(item.SourceUuid ?? string.Empty, out SceneItemConfiguration? config);
         SetCustomInputKind(item, config);
         
         string inputKindText = item.ExtensionData?[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;

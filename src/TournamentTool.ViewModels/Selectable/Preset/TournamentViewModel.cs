@@ -217,6 +217,23 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             UpdateBackgroundService(ControllerMode.Ranked);
         }
     }
+    
+    public string MaskedRankedApiKey { get; private set; } = string.Empty;
+    private bool _showRankeApiKey;
+    public bool ShowRankeApiKey
+    {
+        get => _showRankeApiKey;
+        set
+        {
+            if (!value)
+            {
+                MaskedRankedApiKey = new string('*', RankedApiKey.Length);
+                OnPropertyChanged(nameof(MaskedRankedApiKey));
+            }
+            _showRankeApiKey = value;
+            OnPropertyChanged();
+        }
+    }
     public string RankedApiKey
     {
         get => _tournamentState.CurrentPreset.RankedApiKey;
@@ -228,6 +245,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
             UpdateBackgroundService(ControllerMode.Ranked);
         }
     }
+    
     public bool AddUnknownRankedPlayersToWhitelist
     {
         get => _tournamentState.CurrentPreset.AddUnknownRankedPlayersToWhitelist;
@@ -265,7 +283,12 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
     {
         _tournamentState.PresetChanged -= OnPresetChanged;
     }
-    
+
+    public override void OnEnable(object? parameter)
+    {
+        ShowRankeApiKey = false;
+    }
+
     private void OnPresetChanged(object? sender, Tournament? tournament)
     {
         if (tournament == null)
@@ -282,6 +305,7 @@ public class TournamentViewModel : BaseViewModel, INotifyDataErrorInfo
         _tournamentState.CurrentPreset.PaceManRefreshRateMiliseconds = time < 3000 ? 3000 : time;
         
         RefreshUI();
+        OnEnable(null);
     }
 
     private void RefreshUI()

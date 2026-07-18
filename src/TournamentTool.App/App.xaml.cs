@@ -16,7 +16,7 @@ namespace TournamentTool.App;
 public partial class App : Application
 {
     private readonly ServiceProvider _serviceProvider;
-    private bool _handledCrash = false;
+    private bool _handledCrash;
     
     
     public App()
@@ -51,7 +51,6 @@ public partial class App : Application
             LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
             e.SetObserved();
         };*/
-        
     }
 
     protected override void OnStartup(StartupEventArgs e)

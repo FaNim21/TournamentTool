@@ -134,7 +134,10 @@ public class PresetManagerViewModel : SelectableViewModel, IPresetNameValidator
     }
 
     public override bool CanEnable() => true;
-    public override void OnEnable(object? parameter) { }
+    public override void OnEnable(object? parameter)
+    {
+        Tournament.OnEnable(parameter);
+    }
     public override bool OnDisable()
     {
         _appCache.PresetsOrder.Clear();

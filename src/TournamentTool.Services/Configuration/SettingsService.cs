@@ -28,7 +28,8 @@ public class SettingsProvider : ISettingsProvider, ISettingsSaver
     {
         Register(new FileStorage<Settings>("settings.json", _serializerOptions));
         Register(new FileStorage<AppCache>("app_cache.json", _serializerOptions));
-        
+        Register(new FileStorage<ObsConfiguration>("obs_config.json", _serializerOptions));
+
         Register(new ProtectedFileStorage<APIKeys>("apikeys.dat", _dataProtect));
     }
     public void Save()
@@ -52,7 +53,7 @@ public class SettingsProvider : ISettingsProvider, ISettingsSaver
         if (_data == null || _data.Count == 0)
         {
             _logger.Error($"Cannot found setting of type {typeof(T)}. This will cause problems with application");
-            return null;
+            return null!;
         }
         
         return (T)_data[typeof(T)];

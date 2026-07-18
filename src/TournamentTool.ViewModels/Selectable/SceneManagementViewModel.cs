@@ -88,7 +88,7 @@ public class SceneManagementViewModel : SelectableViewModel
     
     public ICommand EditSceneItemCommand { get; }
 
-    private AppCache _appCache;
+    private ObsConfiguration _obsConfig;
 
 
     /// <summary>
@@ -122,7 +122,7 @@ public class SceneManagementViewModel : SelectableViewModel
         _logger = logger;
         _settingsSaver = settingsSaver;
 
-        _appCache = settingsProvider.Get<AppCache>();
+        _obsConfig = settingsProvider.Get<ObsConfiguration>();
 
         SceneEditor = sceneControllerFactory.CreateEditor();
         Scenes = SceneEditor.Scenes;
@@ -151,7 +151,7 @@ public class SceneManagementViewModel : SelectableViewModel
 
     private void EditSceneItem(SceneItemViewModel sceneItemViewModel)
     {
-        SceneItemEditWindowViewModel viewModel = new(sceneItemViewModel, SceneEditor.MainSceneViewModel, _bindingEngine, _appCache, Dispatcher);
+        SceneItemEditWindowViewModel viewModel = new(sceneItemViewModel, SceneEditor.MainSceneViewModel, _bindingEngine, _obsConfig, Dispatcher);
         _windowService.ShowCustomDialog(viewModel, OnEditSceneItemClosed, "SceneItemEditWindow");
     }
 
@@ -163,7 +163,7 @@ public class SceneManagementViewModel : SelectableViewModel
             SceneItemConfiguration editedConfig = new(editWindowViewModel.InputKind, key);
             string uuid = editWindowViewModel.SceneItemViewModel.SourceUUID;
             
-            _appCache.SceneItemConfigs[uuid] = editedConfig;
+            _obsConfig.SceneItemConfigs[uuid] = editedConfig;
             await SceneEditor.UpdateScenes(uuid);
             _bindingEngine.PublishAll();
         }

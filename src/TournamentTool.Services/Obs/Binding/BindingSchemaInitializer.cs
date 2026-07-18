@@ -8,13 +8,13 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
 {
     private readonly IBindingEngine _bindingEngine;
 
-    private readonly AppCache _appCache;
+    private readonly ObsConfiguration _obsConfig;
     
     public BindingSchemaInitializer(IBindingEngine bindingEngine, ISettingsProvider settingsProvider)
     {
         _bindingEngine = bindingEngine;
 
-        _appCache = settingsProvider.Get<AppCache>();
+        _obsConfig = settingsProvider.Get<ObsConfiguration>();
     }
     
     public void Initialize()
@@ -67,7 +67,7 @@ public class BindingSchemaInitializer : IBindingSchemaInitializer
     
     private void LoadAppCachedBindings()
     {
-        foreach (KeyValuePair<string, SceneItemConfiguration> config in _appCache.SceneItemConfigs)
+        foreach (KeyValuePair<string, SceneItemConfiguration> config in _obsConfig.SceneItemConfigs)
         {
             _bindingEngine.GetOrCreateNode(config.Value.BindingKey);
         }

@@ -12,6 +12,7 @@
              xmlns:common="clr-namespace:ObsWebSocket.Core.Protocol.Common;assembly=ObsWebSocket.Core"
              xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
              xmlns:domain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
+             xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -80,6 +81,15 @@
                 -->
                 
                 <!-- TUTAJ JAKIES GUZIKI? -->
+                
+                <buttons:ButtonNormal ContentText="Something"
+                                      Width="150"
+                                      Height="40"
+                                      FontSize="25"
+                                      VerticalAlignment="Top"
+                                      HorizontalAlignment="Left"
+                                      OnCommand="{Binding .}"
+                                      Margin="20" />
             </Grid>
         </Grid>
 

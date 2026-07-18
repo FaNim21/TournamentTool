@@ -297,31 +297,47 @@
                                           
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
-                                <TextBox TextWrapping="NoWrap"
-                                         Width="140"
-                                         Height="20"
-                                         Text="{Binding Tournament.RankedApiKey, ValidatesOnNotifyDataErrors=True}"
-                                         ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
-                                         ToolTipService.InitialShowDelay="0"
-                                         Background="#9E9E9E"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top">
-                                </TextBox>
-                                <TextBlock Text="Ranked API key"
-                                           Foreground="White"
-                                           ToolTipService.InitialShowDelay="0"
-                                           ToolTipService.ShowDuration="60000"
-                                           ToolTip="You can get the key from MCSR Ranked in profile -> settings an then button 'Generate &amp; Copy API Private Key'"
-                                           Height="20"
-                                           FontSize="16"
-                                           Padding="0"
-                                           Margin="5 0 0 3" />
+                                <ToggleButton IsChecked="{Binding Tournament.ShowRankeApiKey}"
+                                              VerticalAlignment="Center" />
+
+                                <StackPanel Orientation="Horizontal"
+                                            Height="25">
+                                    <Border Visibility="{Binding Tournament.ShowRankeApiKey, Converter={StaticResource ReverseBoolToVisibilityConverter}}"
+                                            Height="20"
+                                            Width="180"
+                                            BorderBrush="Yellow"
+                                            BorderThickness="0.75">
+                                        <TextBlock Text="{Binding Tournament.MaskedRankedApiKey}"
+                                                   Width="268.5"
+                                                   Height="18.5"
+                                                   Padding="2 1 0 0"
+                                                   FontSize="18"
+                                                   Background="#9E9E9E" />
+                                    </Border>
+
+                                    <TextBox Visibility="{Binding Tournament.ShowRankeApiKey, Converter={StaticResource BoolToVisibilityConverter}}"
+                                             Text="{Binding Tournament.RankedApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                             Width="180"
+                                             Height="20"
+                                             ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
+                                             ToolTipService.InitialShowDelay="0"
+                                             Background="#9E9E9E" />
+
+                                    <TextBlock Text="Ranked API key"
+                                               ToolTipService.InitialShowDelay="0"
+                                               ToolTipService.ShowDuration="60000"
+                                               ToolTip="You can get the key from MCSR Ranked in profile -> settings an then button 'Generate &amp; Copy API Private Key'"
+                                               Foreground="White"
+                                               FontSize="16"
+                                               Padding="0"
+                                               Margin="5 0 0 0" />
+                                </StackPanel>
                             </StackPanel>
                             
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
-                                         Width="140"
+                                         Width="180"
                                          Height="20"
                                          Text="{Binding Tournament.RankedApiPlayerName, ValidatesOnNotifyDataErrors=True}"
                                          ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=(Validation.Errors)[0].ErrorContent}"
@@ -394,7 +410,7 @@
                             <StackPanel Orientation="Horizontal"
                                         Margin="0 0 0 5">
                                 <TextBox TextWrapping="NoWrap"
-                                         Width="120"
+                                         Width="160"
                                          Height="20"
                                          Text="{Binding Tournament.SceneCollection}"
                                          Background="#9E9E9E"

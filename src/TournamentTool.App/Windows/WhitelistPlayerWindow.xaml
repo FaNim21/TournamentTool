@@ -10,7 +10,7 @@
         Title="Player"
         Background="#1E1E1E"
         Height="359"
-        Width="300"
+        Width="350"
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Topmost="True"
@@ -81,7 +81,7 @@
                                    Padding="0"
                                    Margin="5 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.Name, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -97,7 +97,7 @@
                                    Padding="0"
                                    Margin="5 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.InGameName, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -112,7 +112,7 @@
                                    Padding="0"
                                    Margin="5 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.PersonalBest, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -128,7 +128,7 @@
                                    Padding="0"
                                    Margin="0 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.TeamName, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -150,7 +150,7 @@
                                    Padding="0"
                                    Margin="0 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.StreamData.Main, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -166,7 +166,7 @@
                                    Padding="0"
                                    Margin="0 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.StreamData.Alt, Mode=TwoWay}"
                                  Padding="0 2 0 0"
@@ -182,7 +182,7 @@
                                    Padding="0"
                                    Margin="0 0 0 3" />
                         <TextBox TextWrapping="Wrap"
-                                 Width="120"
+                                 Width="160"
                                  Height="20"
                                  Text="{Binding PlayerViewModel.StreamData.Other, Mode=TwoWay}"
                                  Padding="0 2 0 0"
