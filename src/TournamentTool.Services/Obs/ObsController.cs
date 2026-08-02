@@ -54,6 +54,8 @@ public class ObsController : IObsController, IDisposable
     public event EventHandler? StudioModeChanged;
     public event EventHandler<SceneCreatedPayload>? SceneCreated;
     public event EventHandler<SceneRemovedPayload>? SceneRemoved;
+    public event EventHandler<SceneItemCreatedPayload>? SceneItemCreated;
+    public event EventHandler<SceneItemRemovedPayload>? SceneItemRemoved;
 
     public bool IsConnectedToWebSocket { get; private set; }
     public bool StudioMode { get; private set; }
@@ -64,7 +66,8 @@ public class ObsController : IObsController, IDisposable
 
     private bool _startedTransition;
     private bool _tryingToConnect;
-    
+    private CancellationTokenSource? _connectAsyncTokenSource;
+
 
     public ObsController(ITournamentState tournamentState, ISettingsProvider settingsProvider, ILoggingService logger, 
         IWebSocketMessageSerializer webSocketMessageSerializer)
@@ -85,6 +88,10 @@ public class ObsController : IObsController, IDisposable
         _tournamentState.PresetChanged -= PresetChanged;
         
         ClearClient();
+
+        _connectAsyncTokenSource?.Cancel();
+        _connectAsyncTokenSource?.Dispose();
+        _connectAsyncTokenSource = null;
     }
 
     public async void PresetChanged(object? sender, Tournament? tournament)
@@ -135,7 +142,6 @@ public class ObsController : IObsController, IDisposable
         
         Client.Connected += OnConnected;
         Client.Connecting += OnConnecting;
-        Client.ConnectionFailed += OnConnectionFailed;
         Client.Disconnected += OnDisconnected;
         
         Client.StudioModeStateChanged += OnStudioModeStateChanged;
@@ -154,7 +160,6 @@ public class ObsController : IObsController, IDisposable
     {
         Client.Connected -= OnConnected;
         Client.Connecting -= OnConnecting;
-        Client.ConnectionFailed -= OnConnectionFailed;
         Client.Disconnected -= OnDisconnected;
         
         Client.StudioModeStateChanged -= OnStudioModeStateChanged;
@@ -179,7 +184,19 @@ public class ObsController : IObsController, IDisposable
         ClientOptions.ServerUri = new Uri($"ws://localhost:{_settings.Port}/");
         ClientOptions.Password = _settings.Password;
         
-        await Client.ConnectAsync();
+        try
+        {
+            _connectAsyncTokenSource?.Cancel();
+            _connectAsyncTokenSource?.Dispose();
+            _connectAsyncTokenSource = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+        
+        _connectAsyncTokenSource = new CancellationTokenSource();
+        await Client.ConnectAsync(_connectAsyncTokenSource.Token);
     }
     private async void OnConnected(object? sender, EventArgs eventArgs)
     {
@@ -229,20 +246,6 @@ public class ObsController : IObsController, IDisposable
         }
     }
     
-    private async void OnConnectionFailed(object? sender, ConnectionFailedEventArgs e)
-    {
-        try
-        {
-            //TODO: 0 Obczaic sytuacje w ktorych sie to odpala
-            // ChangeConnectionState(ConnectionState.Disconnected);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error: {ex}");
-            await DisconnectAsync();
-        }
-    }
-
     private void ChangeConnectionState(ConnectionState newState)
     {
         ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(State, newState));
@@ -257,53 +260,15 @@ public class ObsController : IObsController, IDisposable
         if (e.EventData.IsGroup) return;
         SceneCreated?.Invoke(this, new SceneCreatedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
     }
-
     private void OnSceneRemoved(object? sender, SceneRemovedEventArgs e)
     {
         if (e.EventData.IsGroup) return;
         SceneRemoved?.Invoke(this, new SceneRemovedPayload(e.EventData.IsGroup, e.EventData.SceneName, e.EventData.SceneUuid));
     }
 
-    private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e)
-    {
-        // nie pamietam sensu tego, ale wydaje mi sie za kompletnie zbedny event w mojej sytuacji
-        //TODO: 7 jezeli przeniose item w scenie to nie resetuje povy graczy z racji tej ich kropki zeby nie duplikowac ich po povach
-        // Task.Run(async ()=> { await UpdateSceneItems(e.SceneName); });
-
-        SceneItemUpdateRequested?.Invoke(this, e.EventData);
-    }
-    private async void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e)
-    {
-        try
-        {
-            GetSceneListResponseData? listResponse = await GetSceneListAsync();
-            if (listResponse == null) return;
-
-            Logger.Log(e.EventData.SceneName + " - " + e.EventData.SourceName);
-            //TODO: 1 Prawdziwy update itemu do stworzenia
-            // SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.SceneName, e.SceneUuid));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
-    }
-    private async void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e)
-    {
-        try
-        {
-            GetSceneListResponseData? listResponse = await GetSceneListAsync();
-            if (listResponse == null) return;
-
-            Logger.Log(e.EventData.SceneName + " - " + e.EventData.SourceName);
-            //TODO: 1 Prawdziwy update itemu do usuniecia
-            // SceneItemUpdateRequested?.Invoke(this, new SceneNameEventArgs(e.EventData.SceneName, e.EventData.SceneUuid));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-        }
-    }
+    private void OnSceneItemListReindexed(object? sender, SceneItemListReindexedEventArgs e) => SceneItemUpdateRequested?.Invoke(this, e.EventData);
+    private void OnSceneItemCreated(object? parametr, SceneItemCreatedEventArgs e) => SceneItemCreated?.Invoke(this, e.EventData);
+    private void OnSceneItemRemoved(object? parametr, SceneItemRemovedEventArgs e) => SceneItemRemoved?.Invoke(this, e.EventData);
 
     private async void OnSceneCollectionChanged(object? sender, CurrentSceneCollectionChangedEventArgs currentSceneCollectionChangedEventArgs)
     {
@@ -368,7 +333,7 @@ public class ObsController : IObsController, IDisposable
     public async Task<GetCurrentProgramSceneResponseData?> GetCurrentProgramSceneAsync() 
         => await Client.GetCurrentProgramSceneAsync();
     public async Task<GetSceneListResponseData?> GetSceneListAsync() 
-        => await Client.GetSceneListAsync();
+        => await Client.GetSceneListAsync(new GetSceneListRequestData(null));
     
     public async Task CallBatchAsync(IEnumerable<BatchRequestItem> requests) 
         => await Client.CallBatchAsync(requests);
@@ -404,13 +369,13 @@ public class ObsController : IObsController, IDisposable
 
     public async Task<List<SceneItemStub>> GetSceneItemListAsync(string? sceneName = null, string? sceneUuid = null)
     {
-        GetSceneItemListResponseData? response = await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(sceneName, sceneUuid));
+        GetSceneItemListResponseData? response = await Client.GetSceneItemListAsync(new GetSceneItemListRequestData(null, sceneName, sceneUuid));
         if (response == null) return [];
         return response.SceneItems ?? [];
     }
-    public async Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string group)
+    public async Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string? sourceName = null, string? sourceUuid = null)
     {
-        GetGroupSceneItemListResponseData? response = await Client.GetGroupSceneItemListAsync(new GetGroupSceneItemListRequestData(group));
+        GetGroupSceneItemListResponseData? response = await Client.GetGroupSceneItemListAsync(new GetGroupSceneItemListRequestData(null, sourceName, sourceUuid));
         if (response == null) return [];
         return response.SceneItems ?? [];
     }

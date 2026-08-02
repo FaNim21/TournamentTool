@@ -126,8 +126,6 @@ public class SceneManagementViewModel : SelectableViewModel
 
         SceneEditor = sceneControllerFactory.CreateEditor();
         Scenes = SceneEditor.Scenes;
-        
-        //TODO: 0 Przechwytywac eventy z OBS'a
 
         EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
         SceneEditor.SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);

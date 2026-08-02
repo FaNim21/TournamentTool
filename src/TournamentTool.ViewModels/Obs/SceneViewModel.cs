@@ -227,10 +227,11 @@ public class SceneViewModel : BaseViewModel
     
     public void RemoveSceneItem(SceneItem itemData)
     {
-        foreach (SceneItemViewModel sceneItemViewModel in SceneItems)
+        for (var index = SceneItems.Count - 1; index >= 0; index--)
         {
+            SceneItemViewModel sceneItemViewModel = SceneItems[index];
             if (!sceneItemViewModel.SceneItem.Equals(itemData)) continue;
-            
+
             RemoveSceneItem(sceneItemViewModel);
             break;
         }

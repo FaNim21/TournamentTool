@@ -27,6 +27,8 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
     public Scene MainScene { get; }
     public Scene PreviewScene { get; }
 
+    public List<Scene> AdditionalScenes { get; } = [];
+
     private readonly ObservableCollection<SceneDto> _scenes = [];
     public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
     
@@ -61,6 +63,22 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
         
         _obs.SceneCreated += OnSceneCreated;
         _obs.SceneRemoved += OnSceneRemoved;
+        _obs.SceneItemCreated += OnSceneItemCreated;
+        _obs.SceneItemRemoved += OnSceneItemRemoved;
+    }
+    public void Dispose()
+    {
+        _obs.SceneItemUpdateRequested -= OnSceneUpdateRequested;
+        _obs.ConnectionStateChanged -= OnConnectionStateChanged;
+        _obs.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
+        _obs.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
+        _obs.SceneTransitionStarted -= OnSceneTransitionStarted;
+        _obs.StudioModeChanged -= OnStudioModeChanged;
+        
+        _obs.SceneCreated -= OnSceneCreated;
+        _obs.SceneRemoved -= OnSceneRemoved;
+        _obs.SceneItemCreated -= OnSceneItemCreated;
+        _obs.SceneItemRemoved -= OnSceneItemRemoved;
     }
 
     private void OnSceneCreated(object? sender, SceneCreatedPayload e)
@@ -86,18 +104,62 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
             return;
         }
     }
-
-    public void Dispose()
+    
+    private async void OnSceneItemCreated(object? sender, SceneItemCreatedPayload e)
     {
-        _obs.SceneItemUpdateRequested -= OnSceneUpdateRequested;
-        _obs.ConnectionStateChanged -= OnConnectionStateChanged;
-        _obs.CurrentProgramSceneChanged -= OnCurrentProgramSceneChanged;
-        _obs.CurrentPreviewSceneChanged -= OnCurrentPreviewSceneChanged;
-        _obs.SceneTransitionStarted -= OnSceneTransitionStarted;
-        _obs.StudioModeChanged -= OnStudioModeChanged;
+        //TODO: 0 Problem tutaj kuzwa jest taki, ze nie ma info o grupie co jest wazne i trzeba sprawdzic czy sceneuuid i name to
+        // tak na prawde group uuid i name jezeli tworzymy scene item w grupie, a jak w scenie to wtedy dane od rzeczywistej sceny
+        // z racji tego ze grupy to i tak sceny w obsie -.-
         
-        _obs.SceneCreated -= OnSceneCreated;
-        _obs.SceneRemoved -= OnSceneRemoved;
+        try
+        {
+            List<SceneItemStub> sceneItems = await _obs.GetSceneItemListAsync(e.SceneName, e.SceneUuid);
+            
+            SceneItemStub? newSceneItem = sceneItems.FirstOrDefault(s => s.SourceUuid is { } && s.SourceUuid.Equals(e.SourceUuid));
+            if (newSceneItem is null) return;
+
+            if (MainScene.SceneUuid.Equals(e.SceneUuid))
+            {
+                await MainScene.AddSceneItemAsync(newSceneItem);
+            }
+            else if (PreviewScene.SceneUuid.Equals(e.SceneUuid))
+            {
+                await PreviewScene.AddSceneItemAsync(newSceneItem);
+            }
+
+            foreach (var additionalScene in AdditionalScenes)
+            {
+                if (!additionalScene.SceneUuid.Equals(e.SceneUuid)) continue;
+                
+                await additionalScene.AddSceneItemAsync(newSceneItem);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex);
+        }
+    }
+    private void OnSceneItemRemoved(object? sender, SceneItemRemovedPayload e)
+    {
+        //TODO: 0 NIE DZIALA TO W SCENE CONFIG Z RACJI DUPLIKATOW, a przydalaby sie logika zdarzen w scene configu, nawet to jest wazniejsze niz jak na zywo usuwac w controllerze,
+        // bo w samym controllerze to da tylko wglad znikania, bo dodajac musisz ustawic i tak w scen config zeby to dzialalo xdd
+        // TAKZE OBIE METODY TRZEBA LAPAC W SCENE CONFIG ZDUPLIKOWANYCH SCENACH JAKOS OPTYMALNIE
+        
+        if (MainScene.SceneUuid.Equals(e.SceneUuid))
+        {
+            MainScene.RemoveSceneItem(e.SourceUuid);
+        }
+        else if (PreviewScene.SceneUuid.Equals(e.SceneUuid))
+        {
+            PreviewScene.RemoveSceneItem(e.SourceUuid);
+        }
+        
+        foreach (var additionalScene in AdditionalScenes)
+        {
+            if (!additionalScene.SceneUuid.Equals(e.SceneUuid)) continue;
+                
+            additionalScene.RemoveSceneItem(e.SourceUuid);
+        }
     }
     
     private async Task InitializeAsync()
@@ -241,13 +303,21 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
     
     private async Task UpdateSceneItems(string sceneName, string sceneUuid)
     {
-        if (sceneName.Equals(MainScene.SceneName))
+        if (sceneUuid.Equals(MainScene.SceneUuid))
         {
             await MainScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
-            return;
         }
-
-        await PreviewScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
+        if (sceneUuid.Equals(PreviewScene.SceneUuid))
+        {
+            await PreviewScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
+        }
+        
+        foreach (var additionalScene in AdditionalScenes)
+        {
+            if (!additionalScene.SceneUuid.Equals(sceneUuid)) continue;
+                
+            await additionalScene.SetSceneItemsAsync(sceneName, sceneUuid, true);
+        }
     }
     
     public async Task RefreshScenesPOVSAsync()
@@ -273,6 +343,9 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
 
     public IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type) => _playerRepository.GetPlayerByStreamName(name, type);
     
+    public void AddAdditionalScene(Scene additionalScene) => AdditionalScenes.Add(additionalScene);
+    public void RemoveAdditionalScene(Scene additionalScene) => AdditionalScenes.Remove(additionalScene);
+
     public void ClearPlayersFromPovs()
     {
         foreach (var player in _playerRepository.Players)
@@ -299,7 +372,7 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
                 string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
                 {
-                    List<SceneItemStub> groupItems = item.IsGroup == true ? await _obs.GetGroupSceneItemListAsync(item.SourceName!) : [];
+                    List<SceneItemStub> groupItems = item.IsGroup == true ? await _obs.GetGroupSceneItemListAsync(item.SourceName, item.SourceUuid) : [];
                     foreach (SceneItemStub groupItem in groupItems)
                     {
                         if (groupItem.ExtensionData == null) continue;

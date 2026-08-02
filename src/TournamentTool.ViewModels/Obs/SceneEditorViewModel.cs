@@ -9,6 +9,7 @@ namespace TournamentTool.ViewModels.Obs;
 
 public class SceneEditorViewModel : SceneCanvasViewModel
 {
+    private readonly ISceneManager _sceneManager;
     private readonly AppCache _appCache;
     
     protected override bool InEditMode => true;
@@ -20,13 +21,26 @@ public class SceneEditorViewModel : SceneCanvasViewModel
         AppCache appCache) 
         : base(obs, logger, dispatcher, sceneManager)
     {
+        _sceneManager = sceneManager;
         _appCache = appCache;
+        
         _editableMainScene = sceneManager.MainScene.Clone();
         _editablePreviewScene = sceneManager.PreviewScene.Clone();
+
+        _sceneManager.AddAdditionalScene(_editableMainScene);
+        _sceneManager.AddAdditionalScene(_editablePreviewScene);
         
         Setup(_editableMainScene, _editablePreviewScene, null, windowService);
     }
-    
+
+    public override bool OnDisable()
+    {
+        _sceneManager.RemoveAdditionalScene(_editableMainScene);
+        _sceneManager.RemoveAdditionalScene(_editablePreviewScene);
+        
+        return base.OnDisable();
+    }
+
     public async Task UpdateScenes(string sourceUuid)
     {
         await _editableMainScene.RefreshAsync();

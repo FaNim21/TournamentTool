@@ -6,7 +6,7 @@ using TournamentTool.Services.Managers.Preset;
 
 namespace TournamentTool.Services.Background;
 
-public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry
+public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceRegistry, IDisposable
 {
     private readonly ITournamentState _tournamentState;
     private readonly IDialogService _dialogService;
@@ -31,7 +31,13 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
         
         _backgroundServiceFactory = new BackgroundServiceFactory(serviceProvider);
     }
-    
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+    }
+
     public void Register(IBackgroundDataReceiver? receiver)
     {
         if (receiver == null || Receivers.Contains(receiver)) return;
@@ -118,7 +124,7 @@ public class BackgroundCoordinator : IBackgroundCoordinator, IBackgroundServiceR
             }
         }
     }
-
+    
     private void ClearService()
     {
         ServiceChanged?.Invoke(this, new ServiceRegistryEventArgs(_tournamentState.CurrentPreset.ControllerMode, false));

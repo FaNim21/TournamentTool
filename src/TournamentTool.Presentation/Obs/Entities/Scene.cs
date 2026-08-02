@@ -181,7 +181,7 @@ public class Scene : IScene
 
         return sceneItem;
     }
-    public async Task AddSceneItem(SceneItemStub item, SceneItemStub? group = null)
+    public async Task AddSceneItemAsync(SceneItemStub item, SceneItemStub? group = null)
     {
         SceneItem? sceneItem = CreateSceneItem(item, group);
         if (sceneItem == null) return;
@@ -195,6 +195,18 @@ public class Scene : IScene
         }
     }
     
+    public void RemoveSceneItem(string? sourceUuid)
+    {
+        if (string.IsNullOrEmpty(sourceUuid)) return;
+
+        for (var index = SceneItems.Count - 1; index >= 0; index--)
+        {
+            var sceneItem = SceneItems[index];
+            if (!sceneItem.SourceUUID.Equals(sourceUuid)) continue;
+
+            RemoveSceneItem(sceneItem);
+        }
+    }
     public void RemoveSceneItem(SceneItem item)
     {
         lock (_lock)

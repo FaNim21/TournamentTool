@@ -28,4 +28,7 @@ public interface ISceneManager
     Task<List<(SceneItemStub, SceneItemStub?)>> GetSceneItemsAsync(string sceneName, string sceneUuid);
 
     IPlayerViewModel? GetPlayerByStreamName(string name, StreamType type);
+
+    void AddAdditionalScene(Scene additionalScene);
+    void RemoveAdditionalScene(Scene additionalScene);
 }

@@ -15,6 +15,8 @@ public interface IObsController
     event EventHandler? StudioModeChanged;
     event EventHandler<SceneCreatedPayload>? SceneCreated;
     event EventHandler<SceneRemovedPayload>? SceneRemoved;
+    event EventHandler<SceneItemCreatedPayload>? SceneItemCreated;
+    event EventHandler<SceneItemRemovedPayload>? SceneItemRemoved;
     
     bool IsConnectedToWebSocket { get; }
     bool StudioMode { get; }
@@ -36,7 +38,7 @@ public interface IObsController
     Task SetCurrentPreviewSceneAsync(string scene);
 
     Task<List<SceneItemStub>> GetSceneItemListAsync(string? sceneName = null, string? sceneUuid = null);
-    Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string group);
+    Task<List<SceneItemStub>> GetGroupSceneItemListAsync(string? sourceName = null, string? sourceUuid = null);
 
     void SetStartedTransition(bool option);
 }
