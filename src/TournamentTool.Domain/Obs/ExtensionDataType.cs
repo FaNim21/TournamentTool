@@ -18,9 +18,11 @@ public enum InputKind
     browser_source,
     text_gdiplus_v2,
     text_gdiplus_v3,
+    image_source,
+    group_source,
     
     // custom
-    tt_point_of_view,
+    tt_point_of_view = 100,
     
 }
 

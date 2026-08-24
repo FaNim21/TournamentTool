@@ -51,6 +51,7 @@ public abstract class SceneItem : ISceneItem, IBindingTarget
             InputKind.tt_point_of_view => new PointOfView(sceneManager, logger, sceneType),
             InputKind.browser_source => new BrowserItem(sceneManager, logger),
             InputKind.text_gdiplus_v2 or InputKind.text_gdiplus_v3 => new TextItem(sceneManager, logger),
+            InputKind.group_source => new GroupItem(sceneManager, logger),
             _ => null
         };
     }

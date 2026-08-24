@@ -1,6 +1,5 @@
 ﻿using TournamentTool.Domain.Entities;
 using TournamentTool.Services.Logging;
-using TournamentTool.Services.Obs;
 
 namespace TournamentTool.Presentation.Obs.Entities;
 

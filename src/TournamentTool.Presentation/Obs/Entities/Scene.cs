@@ -123,9 +123,9 @@ public class Scene : IScene
         
         for (int i = items.Count - 1; i >= 0; i--)
         {
-            (SceneItemStub item, SceneItemStub? group) current = items[i];
+            (SceneItemStub item, SceneItemStub? group) = items[i];
             
-            SceneItem? sceneItem = CreateSceneItem(current.item, current.group);
+            SceneItem? sceneItem = CreateSceneItem(item, group);
             if (sceneItem == null) continue;
             
             createdSceneItems.Add(sceneItem);
@@ -236,7 +236,7 @@ public class Scene : IScene
     public bool ExistInItems<T>(Func<T, bool> condition) where T : SceneItem => SceneItems.OfType<T>().Any(condition);
     public T? GetItem<T>(Func<T, bool> condition) where T : SceneItem => SceneItems.OfType<T>().FirstOrDefault(condition);
 
-    private void SetCustomInputKind(SceneItemStub sceneItem, SceneItemConfiguration? configuration)
+    private static void SetCustomInputKind(SceneItemStub sceneItem, SceneItemConfiguration? configuration)
     {
         if (configuration == null) return;
         if (sceneItem.ExtensionData == null || string.IsNullOrEmpty(sceneItem.SourceUuid)) return;

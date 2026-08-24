@@ -362,16 +362,16 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
         try
         {
             List<SceneItemStub> sceneItems = await _obs.GetSceneItemListAsync(sceneName, sceneUuid);
-
+            
             foreach (SceneItemStub item in sceneItems)
             {
                 if (item.ExtensionData == null) continue;
                 
-                string itemInputKind = item.ExtensionData![nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
-                
                 string sourceType = item.ExtensionData[nameof(ExtensionDataType.sourceType)].ToString() ?? string.Empty;
                 if (sourceType.Equals(nameof(SourceType.OBS_SOURCE_TYPE_SCENE)))
                 {
+                    item.ExtensionData[nameof(ExtensionDataType.inputKind)] = JsonSerializer.SerializeToElement(nameof(InputKind.group_source)); 
+                    
                     List<SceneItemStub> groupItems = item.IsGroup == true ? await _obs.GetGroupSceneItemListAsync(item.SourceName, item.SourceUuid) : [];
                     foreach (SceneItemStub groupItem in groupItems)
                     {
@@ -384,6 +384,7 @@ public sealed class SceneManager : ISceneManager, ISceneItemGetter, IDisposable
                     }
                 }
                 
+                string itemInputKind = item.ExtensionData[nameof(ExtensionDataType.inputKind)].ToString() ?? string.Empty;
                 if (string.IsNullOrEmpty(itemInputKind)) continue;
 
                 items.Add((item, null));

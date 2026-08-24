@@ -13,6 +13,7 @@
              xmlns:items="clr-namespace:TournamentTool.ViewModels.Obs.Items;assembly=TournamentTool.ViewModels"
              xmlns:domain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
              xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
+             xmlns:vm="clr-namespace:TournamentTool.ViewModels.UI;assembly=TournamentTool.ViewModels"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
@@ -161,7 +162,64 @@
                     Background="Transparent">
                 <!-- TUTAJ SCENE ITEMS ZE SCENY -->
 
-                <ListBox Background="Transparent"
+                <!-- SelectedItem="{Binding SelectedSceneItem, Mode=OneWay}" -->
+                <TreeView Background="Transparent"
+                          VerticalAlignment="Top"
+                          HorizontalContentAlignment="Stretch"
+                          BorderThickness="0"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.ScrollUnit="Pixel">
+                    <i:Interaction.Behaviors>
+                        <behaviors:CollectionViewBehavior Source="{Binding TreeItems}"
+                                                          RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
+                    </i:Interaction.Behaviors>
+
+                    <TreeView.Resources>
+                        <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
+                            <Grid>
+                                <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
+                                        Opacity="0.5" />
+                                <TextBlock Text="{Binding SourceName}"
+                                           Foreground="White"
+                                           FontSize="20"
+                                           HorizontalAlignment="Left"
+                                           Padding="5 0 0 2" />
+                            </Grid>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                    
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding SubItems}">
+                            <StackPanel>
+                                <ContentPresenter Content="{Binding Content}" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource SceneItemsContextMenu}" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="Margin"
+                                    Value=" 0 0 0 2" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+
+                <!-- Trzeba zrobic nowa kolekcje zeby uwzglednia grupy takze przy kliknieciu na 
+                scene w view trzeba generowac cale drzewo na bazie grup do nowej kolekcji -->
+                
+                <!--<ListBox Background="Transparent"
                          VerticalAlignment="Top"
                          HorizontalContentAlignment="Stretch"
                          SelectedItem="{Binding SelectedSceneItem, Mode=TwoWay}"
@@ -203,7 +261,7 @@
                                     Value="Stretch" />
                         </Style>
                     </ListBox.ItemContainerStyle>
-                </ListBox>
+                </ListBox>-->
             </Border>
         </Grid>
 

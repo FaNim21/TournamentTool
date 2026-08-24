@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Entities\Data\" />
       <Folder Include="Entities\Menu\" />
     </ItemGroup>
 

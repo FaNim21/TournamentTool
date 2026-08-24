@@ -28,6 +28,7 @@ public static class Consts
     public const string UnFocusedPovColor = "#66b3cc";
     public const string TextSourceColor = "#E6C15A";
     public const string BrowserSourceColor = "#9B7CE6";
+    public const string GroupSourceColor = "#848387";
     
     public const string LiveColor = "#00ff7f";
     public const string OfflineColor = "#c93d3b";

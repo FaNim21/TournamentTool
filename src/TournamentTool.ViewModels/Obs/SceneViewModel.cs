@@ -199,6 +199,7 @@ public class SceneViewModel : BaseViewModel
             PointOfView pov => new PointOfViewViewModel(pov, Dispatcher, Logger),
             BrowserItem browser => new BrowserItemViewModel(browser, Dispatcher, Logger),
             TextItem text => new TextItemViewModel(text, Dispatcher, Logger),
+            GroupItem group => new GroupItemViewModel(group, Dispatcher, Logger),
             _ => null
         };
         

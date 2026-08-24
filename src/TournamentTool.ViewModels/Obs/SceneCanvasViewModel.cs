@@ -157,6 +157,8 @@ public abstract class SceneCanvasViewModel : BaseViewModel
     
     private void UpdateView()
     {
+        if (InEditMode) return;
+        
         MainSceneViewModel.SetStudioMode(StudioMode);
         PreviewSceneViewModel.SetStudioMode(StudioMode);
         

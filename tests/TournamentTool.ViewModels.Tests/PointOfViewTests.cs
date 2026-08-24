@@ -25,13 +25,15 @@ public class PointOfViewViewModelTests
 
     public PointOfView CreatePOV(int id, SceneType type = SceneType.Main, bool useGroup = true)
     {
-        var transform = new SceneItemTransformStub(
-            100, 200, 0, 1, 1, 1920, 1080,
-            null,null,null,null,null,null,
-            null,null,null,null,null);
+        // var transform = new SceneItemTransformStub();
+        /*100, 200, 0, 1, 1, 1920, 1080,
+        null,null,null,null,null,null,
+        null,null,null,null,null);*/
 
-        SceneItemStub item = new( 1, 0, $"Item{id}", "", true, false, transform);
-        SceneItemStub? group = new( 1, 0, $"Group{id}", "", true, false, transform, true);
+        // 1, 0, $"Item{id}", "", true, false, transform 
+        // 1, 0, $"Group{id}", "", true, false, transform, true
+        SceneItemStub item = new();
+        SceneItemStub? group = new();
 
         if (!useGroup)
         {

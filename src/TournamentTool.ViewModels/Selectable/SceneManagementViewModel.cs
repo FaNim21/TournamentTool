@@ -12,6 +12,7 @@ using TournamentTool.ViewModels.Commands;
 using TournamentTool.ViewModels.Factories;
 using TournamentTool.ViewModels.Obs;
 using TournamentTool.ViewModels.Obs.Items;
+using TournamentTool.ViewModels.UI;
 
 namespace TournamentTool.ViewModels.Selectable;
 
@@ -37,19 +38,21 @@ public class SceneManagementViewModel : SelectableViewModel
             OnPropertyChanged();
         }
     }
+
+    public ObservableCollection<TreeItemViewModel<SceneItemViewModel>> TreeItems { get; } = [];
     
-    private SceneItemViewModel? _selectedSceneItem;
-    public SceneItemViewModel? SelectedSceneItem
+    private TreeItemViewModel<SceneItemViewModel>? _selectedSceneItem;
+    public TreeItemViewModel<SceneItemViewModel>? SelectedSceneItem
     {
         get => _selectedSceneItem;
         set
         {
-            _selectedSceneItem?.UnFocus();
+            _selectedSceneItem?.Content.UnFocus();
             
             _selectedSceneItem = value;
             OnPropertyChanged();
             
-            _selectedSceneItem?.Focus();
+            _selectedSceneItem?.Content.Focus();
         }
     }
 
@@ -136,8 +139,8 @@ public class SceneManagementViewModel : SelectableViewModel
 
         if (string.IsNullOrEmpty(SceneEditor.MainSceneViewModel.SceneUuid)) return;
         
-        _selectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneEditor.MainSceneViewModel.SceneUuid));
-        OnPropertyChanged(nameof(SelectedScene));
+        SelectedScene = null;
+        SelectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneEditor.MainSceneViewModel.SceneUuid));
     }
     public override bool OnDisable()
     {
@@ -175,6 +178,49 @@ public class SceneManagementViewModel : SelectableViewModel
     {
         if (selectedScene == null) return;
         
+        TreeItems.Clear();
         await SceneEditor.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
+
+        foreach (var sceneItem in SceneEditor.MainSceneViewModel.SceneItems)
+        {
+            if (sceneItem is not GroupItemViewModel) continue;
+            
+            TreeItems.Add(new TreeItemViewModel<SceneItemViewModel>(Dispatcher, sceneItem)
+            {
+                Header = sceneItem.SourceName
+            });
+        }
+
+        //TODO: 0 Rozkminic jak ja zrobilem to w multiopenerze i przebudowac to pod to, bo jest problem tez z ladowaniem kontentu na starcie, bo niby
+        // selectedScene jest pusta, chociaz nie jest
+        
+        foreach (var sceneItem in SceneEditor.MainSceneViewModel.SceneItems)
+        {
+            bool found = false;
+            
+            foreach (var treeItem in TreeItems)
+            {
+                if (treeItem.Content.SourceUUID.Equals(sceneItem.SourceUUID))
+                {
+                    found = true;
+                }
+                if (!treeItem.Header.Equals(sceneItem.GroupName)) continue;
+                
+                treeItem.SubItems.Add(new TreeItemViewModel<SceneItemViewModel>(Dispatcher, sceneItem)
+                {
+                    Header = sceneItem.SourceName
+                });
+                    
+                found = true;
+                break;
+            }
+            
+            if (found) continue;
+
+            TreeItems.Add(new TreeItemViewModel<SceneItemViewModel>(Dispatcher, sceneItem)
+            {
+                Header = sceneItem.SourceName
+            });
+        }
     }
 }
