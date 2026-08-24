@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
@@ -32,9 +31,9 @@ public class ProfileAttribute : Attribute, IAspect<IMethod>, IAspect<INamedType>
     {
         foreach (var method in builder.Target.Methods)
         {
-            if (method.MethodKind == MethodKind.Default && 
-                !method.Name.StartsWith(".") &&
-                !method.Name.Contains("<"))
+            if (method is { MethodKind: MethodKind.Default, IsImplicitlyDeclared: false } &&
+                !".".StartsWith(method.Name) &&
+                !"<".Contains(method.Name))
             {
                 builder.With(method).Override(nameof(OverrideMethod));
             }

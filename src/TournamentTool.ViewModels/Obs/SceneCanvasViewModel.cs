@@ -23,64 +23,56 @@ public abstract class SceneCanvasViewModel : BaseViewModel
     public SceneViewModel MainSceneViewModel { get; private set; } = SceneViewModel.Empty();
     public SceneViewModel PreviewSceneViewModel { get; private set; } = SceneViewModel.Empty();
 
-    protected abstract bool InEditMode { get; }
+    public bool StudioMode => OBS.StudioMode;
+    public bool Connected => OBS.IsConnectedToWebSocket;
     
     public IPlayer? CurrentChosenPlayer { get; set; }
 
-    private PointOfViewViewModel? _currentChosenPOV;
+    public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
+
     public PointOfViewViewModel? CurrentChosenPOV
     {
-        get => _currentChosenPOV;
+        get;
         set
         {
-            if (value == null) _currentChosenPOV?.UnFocus();
-            
-            _currentChosenPOV = value;
+            if (value == null) field?.UnFocus();
+
+            field = value;
             OnPropertyChanged();
         }
     }
-
-    public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
-    
-    private SceneDto _selectedScene = SceneDto.Empty();
     public SceneDto SelectedScene
     {
-        get => _selectedScene;
+        get;
         set
         {
-            _selectedScene = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
-
-    public bool StudioMode => OBS.StudioMode;
-    public bool Connected => OBS.IsConnectedToWebSocket;
-
-    private float _scenePreviewHeight = 240f;
+    } = SceneDto.Empty();
     public float ScenePreviewHeight
     {
-        get => _scenePreviewHeight;
+        get;
         set
         {
-            _scenePreviewHeight = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
-
-    private float _scenePreviewWidth = 426f;
+    } = 240f;
     public float ScenePreviewWidth
     {
-        get => _scenePreviewWidth;
+        get;
         set
         {
-            _scenePreviewWidth = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
-    
+    } = 426f;
+
     public ICommand SelectedSceneChangedCommand { get; set; } = new RelayCommand(() => {});
     public ICommand OnSceneResizeCommand { get; private set; }
     
+    protected abstract bool InEditMode { get; }
     protected bool _blockSetCurrentPreview;
     
     

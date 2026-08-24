@@ -115,6 +115,7 @@ public class ObsController : IObsController, IDisposable
         
         try
         {
+            //TODO: Czekam na issue do ObsWebSocket - https://github.com/Agash/ObsWebSocket/issues/10
             await Client.SetStudioModeEnabledAsync(new SetStudioModeEnabledRequestData(!StudioMode));
         }
         catch (Exception ex)
