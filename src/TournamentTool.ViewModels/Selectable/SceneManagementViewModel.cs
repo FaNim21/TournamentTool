@@ -27,68 +27,60 @@ public class SceneManagementViewModel : SelectableViewModel
     public SceneEditorViewModel SceneEditor { get; }
 
     public ReadOnlyObservableCollection<SceneDto> Scenes { get; }
+    public ObservableCollection<TreeItemViewModel<SceneItemViewModel>> TreeItems { get; } = [];
 
-    private SceneDto? _selectedScene;
+    private SceneDto? PreviousSelectecScene;
     public SceneDto? SelectedScene
     {
-        get => _selectedScene;
+        get;
         set
         {
-            _selectedScene = value;
+            field = value;
             OnPropertyChanged();
         }
     }
-
-    public ObservableCollection<TreeItemViewModel<SceneItemViewModel>> TreeItems { get; } = [];
-    
-    private TreeItemViewModel<SceneItemViewModel>? _selectedSceneItem;
     public TreeItemViewModel<SceneItemViewModel>? SelectedSceneItem
     {
-        get => _selectedSceneItem;
+        get;
         set
         {
-            _selectedSceneItem?.Content.UnFocus();
-            
-            _selectedSceneItem = value;
+            SceneItemContentAction(field, item => item.UnFocus());
+
+            field = value;
             OnPropertyChanged();
-            
-            _selectedSceneItem?.Content.Focus();
+
+            SceneItemContentAction(field, item => item.Focus());
         }
     }
 
-    private Dimension _sceneDimension = new(-1, -1);
     public Dimension SceneDimension
     {
-        get => _sceneDimension;
+        get;
         set
         {
-            _sceneDimension = value;
+            field = value;
             SceneEditor.ResizeScene(value);
         }
-    }
-
-    private int _sceneRefreshTrigger = 0;
+    } = new(-1, -1);
     public int SceneRefreshTrigger
     {
-        get => _sceneRefreshTrigger;
+        get;
         set
         {
-            _sceneRefreshTrigger = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
-    
-    private int _sceneItemsRefreshTrigger = 0;
+    } = 0;
     public int SceneItemsRefreshTrigger
     {
-        get => _sceneItemsRefreshTrigger;
+        get;
         set
         {
-            _sceneItemsRefreshTrigger = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
-    
+    } = 0;
+
     public ICommand EditSceneItemCommand { get; }
 
     private ObsConfiguration _obsConfig;
@@ -131,7 +123,7 @@ public class SceneManagementViewModel : SelectableViewModel
         Scenes = SceneEditor.Scenes;
 
         EditSceneItemCommand = new RelayCommand<SceneItemViewModel>(EditSceneItem);
-        SceneEditor.SelectedSceneChangedCommand = new AsyncRelayCommand<SceneDto>(OnSelectedSceneChanged);
+        SceneEditor.SelectedSceneChangedCommand = new AsyncRelayCommand(OnSelectedSceneChanged);
     }
     public override void OnEnable(object? parameter)
     {
@@ -139,7 +131,6 @@ public class SceneManagementViewModel : SelectableViewModel
 
         if (string.IsNullOrEmpty(SceneEditor.MainSceneViewModel.SceneUuid)) return;
         
-        SelectedScene = null;
         SelectedScene = Scenes.FirstOrDefault(s => s.Uuid.Equals(SceneEditor.MainSceneViewModel.SceneUuid));
     }
     public override bool OnDisable()
@@ -174,12 +165,14 @@ public class SceneManagementViewModel : SelectableViewModel
         }
     }
     
-    private async Task OnSelectedSceneChanged(SceneDto? selectedScene, CancellationToken token)
+    private async Task OnSelectedSceneChanged(CancellationToken token)
     {
-        if (selectedScene == null) return;
+        if (SelectedScene == null || PreviousSelectecScene == SelectedScene) return;
+        
+        PreviousSelectecScene = SelectedScene;
         
         TreeItems.Clear();
-        await SceneEditor.MainSceneViewModel.NewSceneAsync(selectedScene.Name, selectedScene.Uuid);
+        await SceneEditor.MainSceneViewModel.NewSceneAsync(SelectedScene.Name, SelectedScene.Uuid);
 
         foreach (var sceneItem in SceneEditor.MainSceneViewModel.SceneItems)
         {
@@ -191,8 +184,7 @@ public class SceneManagementViewModel : SelectableViewModel
             });
         }
 
-        //TODO: 0 Rozkminic jak ja zrobilem to w multiopenerze i przebudowac to pod to, bo jest problem tez z ladowaniem kontentu na starcie, bo niby
-        // selectedScene jest pusta, chociaz nie jest
+        SceneEditor.MainSceneViewModel.Refresh();
         
         foreach (var sceneItem in SceneEditor.MainSceneViewModel.SceneItems)
         {
@@ -221,6 +213,23 @@ public class SceneManagementViewModel : SelectableViewModel
             {
                 Header = sceneItem.SourceName
             });
+        }
+    }
+    
+    private static void SceneItemContentAction(TreeItemViewModel<SceneItemViewModel>? treeItem, Action<SceneItemViewModel> contentAction)
+    {
+        if (treeItem is null) return;
+        
+        if (treeItem.Content is GroupItemViewModel)
+        {
+            foreach (var subItem in treeItem.SubItems)
+            {
+                contentAction(subItem.Content);
+            }
+        }
+        else
+        {
+            contentAction(treeItem.Content);
         }
     }
 }

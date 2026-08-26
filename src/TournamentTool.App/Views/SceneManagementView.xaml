@@ -14,18 +14,30 @@
              xmlns:domain="clr-namespace:TournamentTool.Domain.Obs;assembly=TournamentTool.Domain"
              xmlns:buttons="clr-namespace:TournamentTool.App.Components.Buttons"
              xmlns:vm="clr-namespace:TournamentTool.ViewModels.UI;assembly=TournamentTool.ViewModels"
+             xmlns:converters="clr-namespace:TournamentTool.App.Converters"
              d:DataContext="{d:DesignInstance Type=selectable:SceneManagementViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="601"
              d:DesignWidth="1082"
              Background="#1E1E1E">
     <UserControl.Resources>
+        <converters:TypeEqualsConverter x:Key="TypeEqualsConverter" />
+
         <ContextMenu x:Key="SceneItemsContextMenu">
             <MenuItem Header="Edit"
                       Command="{Binding DataContext.EditSceneItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                      CommandParameter="{Binding .}" />
+                      CommandParameter="{Binding Content}" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="GroupItemContextMenu">
+            <!-- FUTURE -->
+            
+            <!--<MenuItem Header="Mass edit"
+                      Command="{Binding ., RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding Content}" />-->
         </ContextMenu>
     </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -80,9 +92,9 @@
                                  IsChecked="{Binding Tournament.DisplayedNameType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:DisplayedNameType.WhiteList}}" />
                 </StackPanel>
                 -->
-                
+
                 <!-- TUTAJ JAKIES GUZIKI? -->
-                
+
                 <buttons:ButtonNormal ContentText="Something"
                                       Width="150"
                                       Height="40"
@@ -125,16 +137,15 @@
                              VirtualizingStackPanel.ScrollUnit="Pixel">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
-                                <i:InvokeCommandAction Command="{Binding SceneEditor.SelectedSceneChangedCommand}"
-                                                       CommandParameter="{Binding SelectedScene}" />
+                                <i:InvokeCommandAction Command="{Binding SceneEditor.SelectedSceneChangedCommand}" />
                             </i:EventTrigger>
-                        </i:Interaction.Triggers> 
-                        
+                        </i:Interaction.Triggers>
+
                         <i:Interaction.Behaviors>
                             <behaviors:CollectionViewBehavior Source="{Binding Scenes}"
                                                               RefreshTrigger="{Binding SceneRefreshTrigger}" />
                         </i:Interaction.Behaviors>
-                        
+
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type domain:SceneDto}">
                                 <Border BorderBrush="Transparent"
@@ -162,11 +173,11 @@
                     Background="Transparent">
                 <!-- TUTAJ SCENE ITEMS ZE SCENY -->
 
-                <!-- SelectedItem="{Binding SelectedSceneItem, Mode=OneWay}" -->
                 <TreeView Background="Transparent"
                           VerticalAlignment="Top"
-                          HorizontalContentAlignment="Stretch"
                           BorderThickness="0"
+                          HorizontalContentAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -176,49 +187,102 @@
                     <i:Interaction.Behaviors>
                         <behaviors:CollectionViewBehavior Source="{Binding TreeItems}"
                                                           RefreshTrigger="{Binding SceneItemsRefreshTrigger}" />
+                        <behaviors:TreeViewSelectionBehavior SelectedItem="{Binding SelectedSceneItem, Mode=TwoWay}" />
                     </i:Interaction.Behaviors>
 
                     <TreeView.Resources>
-                        <DataTemplate DataType="{x:Type items:SceneItemViewModel}">
+                        <HierarchicalDataTemplate DataType="{x:Type items:SceneItemViewModel}">
                             <Grid>
                                 <Border Background="{Binding BackgroundColor, Converter={StaticResource StringToBrushConverter}, Mode=OneWay}"
                                         Opacity="0.5" />
                                 <TextBlock Text="{Binding SourceName}"
                                            Foreground="White"
                                            FontSize="20"
+                                           MinWidth="200"
                                            HorizontalAlignment="Left"
-                                           Padding="5 0 0 2" />
+                                           Padding="5 0 5 2" />
                             </Grid>
-                        </DataTemplate>
+                        </HierarchicalDataTemplate>
+                        
+                        <HierarchicalDataTemplate DataType="{x:Type items:GroupItemViewModel}">
+                            <Grid Margin="0 0 0 2">
+                                <Border Background="Transparent" />
+                                <TextBlock Text="{Binding SourceName}"
+                                           Foreground="White"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           TextAlignment="Justify"
+                                           Padding="5 0 5 2" />
+                            </Grid>
+                        </HierarchicalDataTemplate>
                     </TreeView.Resources>
-                    
+
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding SubItems}">
-                            <StackPanel>
-                                <ContentPresenter Content="{Binding Content}" />
-                            </StackPanel>
+                            <ContentPresenter Content="{Binding Content}"
+                                              HorizontalAlignment="Stretch" />
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
-                    
+
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
                             <Setter Property="ContextMenu"
                                     Value="{StaticResource SceneItemsContextMenu}" />
                             <Setter Property="Padding"
                                     Value="0" />
-                            <Setter Property="Margin"
-                                    Value=" 0 0 0 2" />
                             <Setter Property="BorderThickness"
                                     Value="0" />
                             <Setter Property="HorizontalContentAlignment"
                                     Value="Stretch" />
+
+                            <Style.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                                                 Color="#99e0ff"
+                                                 Opacity="0.5" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                                                 Color="Black" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                                                 Color="#99e0ff"
+                                                 Opacity="0.5"/>
+                            </Style.Resources>
+                            
+                            <Style.Triggers>
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <Binding Path="Content"
+                                                 Converter="{StaticResource TypeEqualsConverter}">
+                                            <Binding.ConverterParameter>
+                                                <x:Type TypeName="items:SceneItemViewModel" />
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </DataTrigger.Binding>
+
+                                    <Setter Property="ContextMenu"
+                                            Value="{StaticResource SceneItemsContextMenu}" />
+                                </DataTrigger>
+
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <Binding Path="Content"
+                                                 Converter="{StaticResource TypeEqualsConverter}">
+                                            <Binding.ConverterParameter>
+                                                <x:Type TypeName="items:GroupItemViewModel" />
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </DataTrigger.Binding>
+
+                                    <Setter Property="ContextMenu"
+                                            Value="{StaticResource GroupItemContextMenu}" />
+                                </DataTrigger>
+
+                            </Style.Triggers>
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
 
                 <!-- Trzeba zrobic nowa kolekcje zeby uwzglednia grupy takze przy kliknieciu na 
                 scene w view trzeba generowac cale drzewo na bazie grup do nowej kolekcji -->
-                
+
                 <!--<ListBox Background="Transparent"
                          VerticalAlignment="Top"
                          HorizontalContentAlignment="Stretch"

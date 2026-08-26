@@ -1,6 +1,5 @@
 ﻿using System.Windows.Input;
 using TournamentTool.Core.Interfaces;
-using TournamentTool.Domain.Interfaces;
 using TournamentTool.Domain.Obs;
 using TournamentTool.Presentation.Obs;
 using TournamentTool.Services.Logging;

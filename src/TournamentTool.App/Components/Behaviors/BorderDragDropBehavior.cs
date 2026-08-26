@@ -5,7 +5,6 @@ using TournamentTool.Domain.Entities;
 
 namespace TournamentTool.App.Components.Behaviors;
 
-
 public class BorderDragDropBehavior : BehaviorBase<FrameworkElement>
 {
     public static readonly DependencyProperty OnCommandProperty = DependencyProperty.Register(nameof(OnCommand), typeof(ICommand), typeof(BorderDragDropBehavior));

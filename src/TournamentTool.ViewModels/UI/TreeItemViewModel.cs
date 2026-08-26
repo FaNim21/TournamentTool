@@ -6,16 +6,15 @@ namespace TournamentTool.ViewModels.UI;
 
 public class TreeItemViewModel<T> : BaseViewModel where T : class
 {
-    private string _header = string.Empty;
     public string Header
     {
-        get => _header;
+        get;
         set
         {
-            _header = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     public T Content { get; }
     

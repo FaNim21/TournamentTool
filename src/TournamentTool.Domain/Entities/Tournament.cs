@@ -4,14 +4,6 @@ using TournamentTool.Domain.Enums;
 
 namespace TournamentTool.Domain.Entities;
 
-public enum DisplayedNameType
-{
-    None,
-    Twitch,
-    IGN,
-    WhiteList
-}
-
 public interface IPreset
 {
     string Name { get; set; }

@@ -177,7 +177,6 @@ public class SceneViewModel : BaseViewModel
         if (SceneUuid.Equals(sceneUuid)) return;
         
         await _scene.SetSceneItemsAsync(sceneName, sceneUuid, force);
-        Refresh();
     }
     
     public void Refresh()
